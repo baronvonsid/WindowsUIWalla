@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{64562DAE-B4FC-46E2-BFF5-323AB77B0157}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TestManageWalla</RootNamespace>
+    <AssemblyName>TestManageWalla</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Icons\add-item.gif" />
+    <Resource Include="Icons\addressbook.gif" />
+    <Resource Include="Icons\agent.gif" />
+    <Resource Include="Icons\apple.gif" />
+    <Resource Include="Icons\arrow-round.gif" />
+    <Resource Include="Icons\badge.gif" />
+    <Resource Include="Icons\bar-chart-02.gif" />
+    <Resource Include="Icons\bar-chart.gif" />
+    <Resource Include="Icons\battery-full.gif" />
+    <Resource Include="Icons\bird.gif" />
+    <Resource Include="Icons\boat.gif" />
+    <Resource Include="Icons\bookmark.gif" />
+    <Resource Include="Icons\briefcase.gif" />
+    <Resource Include="Icons\calculator.gif" />
+    <Resource Include="Icons\calendar.gif" />
+    <Resource Include="Icons\cassette.gif" />
+    <Resource Include="Icons\chain.gif" />
+    <Resource Include="Icons\chat-.gif" />
+    <Resource Include="Icons\chat-02.gif" />
+    <Resource Include="Icons\cloud-filled.gif" />
+    <Resource Include="Icons\cloud-outline.gif" />
+    <Resource Include="Icons\computer.gif" />
+    <Resource Include="Icons\configuration.gif" />
+    <Resource Include="Icons\configuration02.gif" />
+    <Resource Include="Icons\connected.gif" />
+    <Resource Include="Icons\connections.gif" />
+    <Resource Include="Icons\container.gif" />
+    <Resource Include="Icons\copy-item.gif" />
+    <Resource Include="Icons\database.gif" />
+    <Resource Include="Icons\delete-item.gif" />
+    <Resource Include="Icons\disc.gif" />
+    <Resource Include="Icons\dollar.gif" />
+    <Resource Include="Icons\download.gif" />
+    <Resource Include="Icons\edit.gif" />
+    <Resource Include="Icons\email.gif" />
+    <Resource Include="Icons\fan.gif" />
+    <Resource Include="Icons\fancy-globe.gif" />
+    <Resource Include="Icons\female-user.gif" />
+    <Resource Include="Icons\fire.gif" />
+    <Resource Include="Icons\first-aid.gif" />
+    <Resource Include="Icons\flag.gif" />
+    <Resource Include="Icons\flower.gif" />
+    <Resource Include="Icons\full-screen.gif" />
+    <Resource Include="Icons\glasses.gif" />
+    <Resource Include="Icons\globe.gif" />
+    <Resource Include="Icons\happy-face.gif" />
+    <Resource Include="Icons\headphone.gif" />
+    <Resource Include="Icons\heart.gif" />
+    <Resource Include="Icons\home.gif" />
+    <Resource Include="Icons\ID.gif" />
+    <Resource Include="Icons\ipod.gif" />
+    <Resource Include="Icons\lab.gif" />
+    <Resource Include="Icons\lady.gif" />
+    <Resource Include="Icons\lamp.gif" />
+    <Resource Include="Icons\leaves.gif" />
+    <Resource Include="Icons\light.gif" />
+    <Resource Include="Icons\line-globe.gif" />
+    <Resource Include="Icons\lock.gif" />
+    <Resource Include="Icons\lookup.gif" />
+    <Resource Include="Icons\male-user.gif" />
+    <Resource Include="Icons\microphone.gif" />
+    <Resource Include="Icons\mobile.gif" />
+    <Resource Include="Icons\mobile2.gif" />
+    <Resource Include="Icons\mouse.gif" />
+    <Resource Include="Icons\multi-agents.gif" />
+    <Resource Include="Icons\music-node.gif" />
+    <Resource Include="Icons\network-pc.gif" />
+    <Resource Include="Icons\network.gif" />
+    <Resource Include="Icons\next-item.gif" />
+    <Resource Include="Icons\phone.gif" />
+    <Resource Include="Icons\pie-chart.gif" />
+    <Resource Include="Icons\pin.gif" />
+    <Resource Include="Icons\plane.gif" />
+    <Resource Include="Icons\print.gif" />
+    <Resource Include="Icons\processing-02.gif" />
+    <Resource Include="Icons\processing.gif" />
+    <Resource Include="Icons\push-pin.gif" />
+    <Resource Include="Icons\recycle-empty.gif" />
+    <Resource Include="Icons\recycle-full.gif" />
+    <Resource Include="Icons\reload.gif" />
+    <Resource Include="Icons\rss.gif" />
+    <Resource Include="Icons\satellite.gif" />
+    <Resource Include="Icons\save.gif" />
+    <Resource Include="Icons\scale.gif" />
+    <Resource Include="Icons\Scissors.gif" />
+    <Resource Include="Icons\screen.gif" />
+    <Resource Include="Icons\search.gif" />
+    <Resource Include="Icons\server.gif" />
+    <Resource Include="Icons\shield.gif" />
+    <Resource Include="Icons\shut-down.gif" />
+    <Resource Include="Icons\star.gif" />
+    <Resource Include="Icons\tag.gif" />
+    <Resource Include="Icons\tap.gif" />
+    <Resource Include="Icons\tree.gif" />
+    <Resource Include="Icons\umbrella.gif" />
+    <Resource Include="Icons\unlock.gif" />
+    <Resource Include="Icons\usb.gif" />
+    <Resource Include="Icons\van.gif" />
+    <Resource Include="Icons\wifi.gif" />
+    <Resource Include="Icons\world.gif" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
