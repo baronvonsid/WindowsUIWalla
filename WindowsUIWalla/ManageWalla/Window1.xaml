@@ -1,0 +1,28 @@
+﻿<Window x:Name="MainWindow" x:Class="TestManageWalla.Window1"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Window1" Height="679" Width="855">
+    <Grid Margin="0">
+
+
+        <StackPanel x:Name="LeftStack" Margin="0,0,0,10" Width="300" HorizontalAlignment="Left">
+            <StackPanel.Triggers>
+                <EventTrigger RoutedEvent="Expander.Expanded" SourceName="expander">
+                    <EventTrigger.Actions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation From="0" To="1" Duration="0:0:0.25" Storyboard.TargetName="listBox" Storyboard.TargetProperty="(FrameworkElement.LayoutTransform).(ScaleTransform.ScaleY)"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger.Actions>
+                </EventTrigger>
+            </StackPanel.Triggers>
+            <Expander x:Name="expander" Header="Category" Height="203" Background="#FFFFF697"/>
+            <Expander x:Name="expander_Copy" Header="Tags" Height="203" Background="#FF76DBE0"/>
+            <Expander x:Name="expander_Copy1" Header="Settings" Height="235" Background="#FFCB7FE8"/>
+        </StackPanel>
+        <StackPanel Height="649" Margin="305,0,-51,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+
+
+    </Grid>
+</Window>
