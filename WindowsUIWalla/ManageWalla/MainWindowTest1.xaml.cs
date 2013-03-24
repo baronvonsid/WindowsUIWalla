@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace TestManageWalla
+namespace ManageWalla
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindowTest1 : Window
     {
-        public MainWindow()
+        public MainWindowTest1()
         {
             InitializeComponent();
         }
