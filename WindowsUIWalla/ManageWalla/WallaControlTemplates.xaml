@@ -1,0 +1,39 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ControlTemplate x:Key="templateButton" TargetType="{x:Type Button}">
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Rectangle x:Name="outerRectangle" StrokeThickness="1">
+                
+                <Rectangle.Stroke>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
+                </Rectangle.Stroke>
+                
+                <Rectangle.Fill>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Background.Color}" />
+                </Rectangle.Fill>
+                
+            </Rectangle>
+
+            <ContentPresenter Margin="{TemplateBinding Padding}" />
+     
+        </Grid>
+        <ControlTemplate.Triggers>
+            
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="outerRectangle" Property="StrokeThickness" Value="1.5" />
+            </Trigger>
+
+            <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="outerRectangle" Property="StrokeThickness" Value="1.5" />
+                <Setter TargetName="outerRectangle" Property="RenderTransformOrigin" Value="0.5,0.5" />
+                <Setter TargetName="outerRectangle" Property="RenderTransform">
+                    <Setter.Value>
+                        <ScaleTransform ScaleX=".96" ScaleY=".98" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+</ResourceDictionary>

@@ -101,6 +101,10 @@
       <DependentUpon>MainWindowTest2.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="WallaControlTemplates.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WindowTest3.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

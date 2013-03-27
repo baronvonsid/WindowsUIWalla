@@ -1,10 +1,40 @@
 ﻿<Window x:Name="mainWindow" x:Class="ManageWalla.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Main" Height="768" Width="1024" Loaded="MainWindow_Loaded">
+        Title="Main" Height="768" Width="1024" Loaded="MainWindow_Loaded" FontFamily="Tahoma" FontWeight="Light">
+
     <Window.Resources>
-        <AlternationConverter x:Key="AlternationConverter"/>
+        <ResourceDictionary Source="WallaControlTemplates.xaml" />
     </Window.Resources>
+    <!--        
+
+            <Style x:Key="CustomLinkButton" TargetType="Button">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <TextBlock TextDecorations="Underline">
+                    <ContentPresenter />
+                            </TextBlock>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                
+                <Setter Property="Foreground" Value="Blue" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="true">
+                        <Setter Property="Foreground" Value="Red" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="{x:Type TreeViewItem}">
+                <Setter Property="Foreground" Value="Blue"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="Bold" />
+            </Style>
+-->
+    
     <Grid x:Name="grid" >
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -16,42 +46,190 @@
 
         
         <StackPanel MinWidth="200" MaxWidth="300" ScrollViewer.VerticalScrollBarVisibility="Disabled" Grid.Column="0" Grid.Row="0" >
-            <StackPanel Background="#FFFF5B5B" Orientation="Vertical">
-                <ToggleButton x:Name="cmdCategory" MinHeight="25" Background="#FFFF5B5B" Content="Category" Checked="cmdCategory_Checked" />
-                <Rectangle x:Name="rectangleCategoryBusy" Width="300" Height="500" Visibility="Collapsed" />
-                
-                <!--
+            <StackPanel Background="#FFB5F3A7" Orientation="Vertical">
+                <ToggleButton x:Name="cmdCategory" MinHeight="25" Background="#FFB5F3A7" Content="Category" Checked="cmdCategory_Checked" />
 
-                        <Grid>
+                <StackPanel x:Name="stackCategory" Style="{StaticResource styleStackCategory}" Visibility="Visible">
+                    
+                    <Grid x:Name="gridCategoryView" ShowGridLines="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="34" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
+                            <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
 
+                        <TreeView x:Name="treeCategoryView" VerticalContentAlignment="Stretch" Background="{x:Null}" >
+                            <TreeViewItem Header="Barons Photo Album">
+                                <TreeViewItem>
+                                    <TreeViewItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="icons\star.gif" Height="18"></Image>
+                                            <TextBlock Text="Holidays (30)"></TextBlock>
+                                        </StackPanel>
+                                    </TreeViewItem.Header>
+
+                                    <TreeViewItem>
+                                        <TreeViewItem.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="icons\star.gif" Height="18"></Image>
+                                                <TextBlock Text="Albania (30)"></TextBlock>
+                                            </StackPanel>
+                                        </TreeViewItem.Header>
+                                    </TreeViewItem>
+                                    <TreeViewItem>
+                                        <TreeViewItem.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="icons\star.gif" Height="18"></Image>
+                                                <TextBlock Text="Uzbekki (40)"></TextBlock>
+                                            </StackPanel>
+                                        </TreeViewItem.Header>
+                                    </TreeViewItem>
+                                    <TreeViewItem>
+                                        <TreeViewItem.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="icons\star.gif" Height="18"></Image>
+                                                <TextBlock Text="USA (200)"></TextBlock>
+                                            </StackPanel>
+                                        </TreeViewItem.Header>
+                                    </TreeViewItem>
+                                    <TreeViewItem>
+                                        <TreeViewItem.Header>
+                                            <CheckBox>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Source="icons\star.gif" Height="18"></Image>
+                                                    <TextBlock Text="China (5)"></TextBlock>
+                                                </StackPanel>
+                                            </CheckBox>
+                                        </TreeViewItem.Header>
+                                    </TreeViewItem>
+                                </TreeViewItem>
+                                <TreeViewItem>
+                                    <TreeViewItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="icons\star.gif" Height="18"></Image>
+                                            <TextBlock Text="London life (400)"></TextBlock>
+                                        </StackPanel>
+                                    </TreeViewItem.Header>
+
+                                    <TreeViewItem>
+                                        <TreeViewItem.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="icons\star.gif" Height="18"></Image>
+                                                <TextBlock Text="Around town (30)"></TextBlock>
+                                            </StackPanel>
+                                        </TreeViewItem.Header>
+                                    </TreeViewItem>
+                                    <TreeViewItem>
+                                        <TreeViewItem.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="icons\star.gif" Height="18"></Image>
+                                                <TextBlock Text="Out and about (40)"></TextBlock>
+                                            </StackPanel>
+                                        </TreeViewItem.Header>
+                                    </TreeViewItem>
+                                    <TreeViewItem>
+                                        <TreeViewItem.Header>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="icons\star.gif" Height="18"></Image>
+                                                <TextBlock Text="In and around (60)"></TextBlock>
+                                            </StackPanel>
+                                        </TreeViewItem.Header>
+                                    </TreeViewItem>
+
+                                </TreeViewItem>
+
+                            </TreeViewItem>
+                        </TreeView >
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
+                            <Button x:Name="cmdAddCategory" Content="Add New" Click="cmdAddCategory_Click" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                            <Button x:Name="cmdEditCategory" Content="Edit Existing" Click="cmdEditCategory_Click" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" SnapsToDevicePixels="True" />
+                        </StackPanel>
+                    </Grid>
+                    
+                    <Grid x:Name="gridCatgeoryAddEdit" >
                         <Grid.RowDefinitions>
-                            <RowDefinition />
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="75" />
+                            <RowDefinition Height="34" />
                         </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                        <Rectangle Grid.Column="0" Grid.Row="0" Fill="Red" />
-                    </Grid>            
-                
-                    <Viewbox Stretch="Fill">
-                        <Rectangle x:Name="rectangleCategoryDummy"  Width="300" Height="{Binding ActualHeight, ElementName=grid, Mode=OneWay}" />
-                    </Viewbox>
-                -->
+                        <Label Grid.Column="0" Grid.Row="0">Name </Label>
+                        <TextBox x:Name="txtCategoryAddName" Grid.Column="1" Grid.Row="0"></TextBox>
+                        <Label Grid.Column="0" Grid.Row="1">Description </Label>
+                        <TextBox x:Name="txtCategoryAddDescription" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto"></TextBox>
 
-                <StackPanel x:Name="stackCategory" Visibility="Visible" >
+                        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                            <Button x:Name="cmdAddEditCategorySave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                            <Button x:Name="cmdAddEditCategoryCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditCategoryCancel_Click" />
+                            <Button x:Name="cmdAddEditCategoryDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                            <Button x:Name="cmdAddEditCategoryMove" Content="Move" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                        </StackPanel>
 
-                    <Viewbox Stretch="Fill">
-                        <Rectangle x:Name="rectangleCategoryDummy"  Width="300" Height="500" />
-                    </Viewbox>
-        </StackPanel>
+                    </Grid>
+                    
+                </StackPanel>
 
         </StackPanel>
             <StackPanel Orientation="Vertical" Background="#FFFFFF5B">
                 <ToggleButton x:Name="cmdTag" MinHeight="25" Background="#FFFFFF5B" Content="Tag" Checked="cmdTag_Checked" />
                 <Rectangle x:Name="rectangleTagBusy" Width="300" Height="500" Visibility="Collapsed" />
-                <StackPanel x:Name="stackTag" Orientation="Vertical" Visibility="Collapsed" >
-                    <Rectangle x:Name="rectangleTagDummy" Width="300" Height="500" />
+                <StackPanel x:Name="stackTag" Orientation="Vertical" Visibility="Visible" >
+
+                    <Grid x:Name="gridTagView">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="34"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
+                            <TextBlock><Run Text="my first tag"/></TextBlock>
+                            <TextBlock><Run Text="my second tag"/></TextBlock>
+                            <TextBlock><Run Text="my third tag"/></TextBlock>
+                            <TextBlock><Run Text="my fourth tag"/></TextBlock>
+                            <TextBlock><Run Text="my fifth tag"/></TextBlock>
+                            <TextBlock><Run Text="my sixth tag"/></TextBlock>
+                            <TextBlock><Run Text="my seventh tag"/></TextBlock>
+                        </WrapPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
+                            <Button x:Name="cmdAddTag" Content="Add Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddTag_Click"  />
+                            <Button x:Name="cmdEditEdit" Content="Edit Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdEditEdit_Click" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid x:Name="gridTagAddEdit" ShowGridLines="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="75" />
+                            <RowDefinition Height="34" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Column="0" Grid.Row="0">Name</Label>
+                        <TextBox x:Name="txtTagAddEditName" Grid.Column="1" Grid.Row="0"></TextBox>
+                        <Label Grid.Column="0" Grid.Row="1">Description</Label>
+                        <TextBox x:Name="txtTagAddEditDescription" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto"></TextBox>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                            <Button x:Name="cmdAddEditTagSave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                            <Button x:Name="cmdAddEditTagCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagCancel_Click" />
+                            <Button x:Name="cmdAddEditTagDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                        </StackPanel>
+
+                    </Grid>
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Vertical" Background="#FF5BFF79">
@@ -81,7 +259,7 @@
                     <Grid x:Name="gridView" ShowGridLines="True">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="25" MaxHeight="25" MinHeight="25"/>
+                            <RowDefinition Height="34" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
@@ -109,17 +287,17 @@
                         </WrapPanel>
 
                         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                            <Button x:Name="cmdEditView" Content="Edit" Click="cmdEditView_Click" />
-                            <Button x:Name="cmdAddNewView" Content="Add new" Click="cmdAddNewView_Click" />
-                            <Button x:Name="cmdShowViewUrl" Content="Show Url" />
-                            <Button x:Name="cmdLaunchInViewWalla" Content="Launch in View Walla" />
+                            <Button x:Name="cmdEditView" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdEditView_Click" />
+                            <Button x:Name="cmdAddNewView" Content="Add new" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddNewView_Click" />
+                            <Button x:Name="cmdShowViewUrl" Content="Show Url" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                            <Button x:Name="cmdLaunchInViewWalla" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Content="Launch in View Walla" />
                         </StackPanel>
                     </Grid>
 
                     <Grid x:Name="gridViewAddEdit" ShowGridLines="True">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="25" MaxHeight="25" MinHeight="25"/>
+                            <RowDefinition Height="34" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
@@ -192,10 +370,10 @@
 
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                            <Button x:Name="cmdAddEditViewSave" Content="Save Changes" />
-                            <Button x:Name="cmdAddEditViewCancel" Content="Cancel Edit" Click="cmdAddEditViewCancel_Click" />
-                            <Button x:Name="cmdAddEditViewDelete" Content="Delete View" />
-                            <Button x:Name="cmdAddEditViewPreview" Content="Preview View" />
+                            <Button x:Name="cmdAddEditViewSave" Content="Save Changes" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                            <Button x:Name="cmdAddEditViewCancel" Content="Cancel Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditViewCancel_Click" />
+                            <Button x:Name="cmdAddEditViewDelete" Content="Delete View" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                            <Button x:Name="cmdAddEditViewPreview" Content="Preview View" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>

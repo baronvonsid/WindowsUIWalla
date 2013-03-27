@@ -35,7 +35,7 @@ namespace ManageWalla
             Settings = 11
         }
 
-
+        private PaneMode currentPane;
 
 
         private MainController controller = null;
@@ -70,13 +70,21 @@ namespace ManageWalla
 
             //Kick off asyncronous data syncronising.
             //This will update all UI Elements eventually
-            controller = new MainController();
+            controller = new MainController(this);
             controller.RetrieveGeneralUserConfig();
+
+            
 
             HideAllContent();
             HideBusyPanes();
 
+            currentPane = PaneMode.CategoryView;
             this.cmdCategory.IsChecked = true;
+        }
+
+        public void RefreshCategoryTreeView()
+        {
+
         }
 
         private void SetPanePositions(PaneMode mode)
@@ -91,10 +99,28 @@ namespace ManageWalla
                     cmdUpload.IsChecked = false;
 
                     HideAllContent();
+
+                    treeCategoryView.IsEnabled = true;
+                    gridCatgeoryAddEdit.Visibility = Visibility.Collapsed;
                     stackCategory.Visibility = Visibility.Visible;
 
                     break;
+                case PaneMode.CategoryAdd:
+                    treeCategoryView.IsEnabled = false;
+
+                    gridCatgeoryAddEdit.Visibility = Visibility.Visible;
+                    cmdAddEditCategoryMove.Visibility = Visibility.Collapsed;
+                    cmdAddEditCategorySave.Content = "Save New";
+                    cmdAddEditCategoryDelete.Visibility = Visibility.Collapsed;
+
+                    break;
                 case PaneMode.CategoryEdit:
+                    treeCategoryView.IsEnabled = false;
+
+                    gridCatgeoryAddEdit.Visibility = Visibility.Visible;
+                    cmdAddEditCategoryMove.Visibility = Visibility.Visible;
+                    cmdAddEditCategorySave.Content = "Save Edit";
+                    cmdAddEditCategoryDelete.Visibility = Visibility.Visible;
 
                     break;
                 case PaneMode.TagView:
@@ -104,10 +130,20 @@ namespace ManageWalla
                     cmdUpload.IsChecked = false;
 
                     HideAllContent();
+
+                    gridTagAddEdit.Visibility = Visibility.Collapsed;
                     stackTag.Visibility = Visibility.Visible;
 
                     break;
+                case PaneMode.TagAdd:
+
+
+                    gridTagAddEdit.Visibility = Visibility.Visible;
+
+                    break;
                 case PaneMode.TagEdit:
+
+                    gridTagAddEdit.Visibility = Visibility.Visible;
 
                     break;
                 case PaneMode.ViewView:
@@ -167,7 +203,7 @@ namespace ManageWalla
 
                     break;
             }
-
+            currentPane = mode;
         }
 
         private void HideAllContent()
@@ -177,24 +213,18 @@ namespace ManageWalla
             stackSettings.Visibility = Visibility.Collapsed;
             stackView.Visibility = Visibility.Collapsed;
             stackUpload.Visibility = Visibility.Collapsed;
+
+
         }
 
         private void ShowBusyPanes()
         {
-            rectangleCategoryBusy.Visibility = Visibility.Visible;
-            rectangleTagBusy.Visibility = Visibility.Visible;
-            rectangleSettingsBusy.Visibility = Visibility.Visible;
-            rectangleViewBusy.Visibility = Visibility.Visible;
-            rectangleUploadBusy.Visibility = Visibility.Visible;
+
         }
 
         private void HideBusyPanes()
         {
-            rectangleCategoryBusy.Visibility = Visibility.Collapsed;
-            rectangleTagBusy.Visibility = Visibility.Collapsed;
-            rectangleSettingsBusy.Visibility = Visibility.Collapsed;
-            rectangleViewBusy.Visibility = Visibility.Collapsed;
-            rectangleUploadBusy.Visibility = Visibility.Collapsed;
+
         }
 
         private void cmdCategory_Checked(object sender, RoutedEventArgs e)
@@ -220,6 +250,36 @@ namespace ManageWalla
         private void cmdSettings_Checked(object sender, RoutedEventArgs e)
         {
             SetPanePositions(PaneMode.Settings);
+        }
+
+        private void cmdAddCategory_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.CategoryAdd);
+        }
+
+        private void cmdAddEditCategoryCancel_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.CategoryView);
+        }
+
+        private void cmdEditCategory_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.CategoryEdit);
+        }
+
+        private void cmdAddTag_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.TagAdd);
+        }
+
+        private void cmdEditEdit_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.TagEdit);
+        }
+
+        private void cmdAddEditTagCancel_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.TagView);
         }
 
 
