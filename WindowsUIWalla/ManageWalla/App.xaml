@@ -5,9 +5,7 @@
     <Application.Resources>
 
         <Style x:Key="styleButton" TargetType="{x:Type Button}">
-            <Setter Property="BorderThickness" Value="0.5" />
             <Setter Property="Background" Value="#FFE6D4D4" />
-            <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
             <Setter Property="Margin" Value="6" />
             <Setter Property="Padding" Value="4" />
             <Setter Property="BorderBrush" Value="#FF616161" />
@@ -20,11 +18,26 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="styleStackCategory" TargetType="{x:Type StackPanel}">
-            <Setter Property="Background" Value="#FFB5F3A7"/>
-            <Setter Property="Height" Value="600" />
-            <Setter Property="Margin" Value="3" />
+
+        <Style x:Key="styleToggleButton" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="#FFE6D4D4" />
+            <Setter Property="Margin" Value="6" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="BorderBrush" Value="#FF616161" />
+            <Setter Property="Foreground" Value="#FFB82F5A" />
+            <Setter Property="TextBlock.FontSize" Value="16" />
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="true">
+                    <Setter Property="Foreground" Value="#FF8D2042" />
+                    <Setter Property="Background" Value="#FFF3ECEC" />
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Foreground" Value="#FF8D2042" />
+                    <Setter Property="Background" Value="#FFF3ECEC" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
+
         
         
     </Application.Resources>

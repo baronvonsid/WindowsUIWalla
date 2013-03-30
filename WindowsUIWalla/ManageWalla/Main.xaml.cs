@@ -76,7 +76,7 @@ namespace ManageWalla
             
 
             HideAllContent();
-            HideBusyPanes();
+
 
             currentPane = PaneMode.CategoryView;
             this.cmdCategory.IsChecked = true;
@@ -87,11 +87,58 @@ namespace ManageWalla
 
         }
 
+        private void SetWindowHeights(PaneMode mode)
+        {
+            const double headingHeight = 46.0;
+            double windowAdjustHeight = mainWindow.Height - 36.0;
+
+            switch (mode)
+            {
+                case PaneMode.CategoryView:
+                case PaneMode.CategoryAdd:
+                case PaneMode.CategoryEdit:
+                    wrapImages.Height = windowAdjustHeight - (headingHeight * 2.0);
+                    stackCategory.Height = windowAdjustHeight - (headingHeight * 3.0);
+
+                    break;
+                case PaneMode.TagView:
+                case PaneMode.TagAdd:
+                case PaneMode.TagEdit:
+                    wrapImages.Height = windowAdjustHeight - (headingHeight * 2.0);
+                    stackTag.Height = windowAdjustHeight - (headingHeight * 3.0);
+                    break;
+                case PaneMode.ViewView:
+                case PaneMode.ViewEdit:
+                case PaneMode.ViewAdd:
+                    wrapImages.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0) + headingHeight;
+                    stackView.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
+                    stackTag.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
+                    stackCategory.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
+
+                    break;
+                case PaneMode.ImageViewFull:
+                    wrapImages.Height = windowAdjustHeight;
+                    break;
+                case PaneMode.Settings:
+                    stackSettings.Height = windowAdjustHeight - (headingHeight * 3.0);
+
+                    break;
+
+                case PaneMode.Upload:
+                    stackUpload.Height = windowAdjustHeight - (headingHeight * 2.0);
+                    wrapImages.Height = 0.0;
+                    break;
+            }
+        }
+
         private void SetPanePositions(PaneMode mode)
         {
             switch (mode)
             {
                 case PaneMode.CategoryView:
+
+                    ///
+                    /// wrapImages.Height = mainWindow.Height - 90.0;
 
                     cmdTag.IsChecked = false;
                     cmdView.IsChecked = false;
@@ -100,13 +147,13 @@ namespace ManageWalla
 
                     HideAllContent();
 
-                    treeCategoryView.IsEnabled = true;
+                    //treeCategoryView.IsEnabled = true;
                     gridCatgeoryAddEdit.Visibility = Visibility.Collapsed;
                     stackCategory.Visibility = Visibility.Visible;
 
                     break;
                 case PaneMode.CategoryAdd:
-                    treeCategoryView.IsEnabled = false;
+                    //treeCategoryView.IsEnabled = false;
 
                     gridCatgeoryAddEdit.Visibility = Visibility.Visible;
                     cmdAddEditCategoryMove.Visibility = Visibility.Collapsed;
@@ -115,7 +162,7 @@ namespace ManageWalla
 
                     break;
                 case PaneMode.CategoryEdit:
-                    treeCategoryView.IsEnabled = false;
+                    //treeCategoryView.IsEnabled = false;
 
                     gridCatgeoryAddEdit.Visibility = Visibility.Visible;
                     cmdAddEditCategoryMove.Visibility = Visibility.Visible;
@@ -154,12 +201,14 @@ namespace ManageWalla
 
                     HideAllContent();
                     stackView.Visibility = Visibility.Visible;
-                
+                    stackTag.Visibility = Visibility.Visible;
+                    stackCategory.Visibility = Visibility.Visible;
+
                     gridView.Visibility = System.Windows.Visibility.Visible;
                     gridViewAddEdit.Visibility = System.Windows.Visibility.Collapsed;
-
                     break;
                 case PaneMode.ViewEdit:
+
 
                     gridView.Visibility = System.Windows.Visibility.Collapsed;
                     gridViewAddEdit.Visibility = System.Windows.Visibility.Visible;
@@ -203,6 +252,7 @@ namespace ManageWalla
 
                     break;
             }
+            SetWindowHeights(mode);
             currentPane = mode;
         }
 
@@ -213,17 +263,7 @@ namespace ManageWalla
             stackSettings.Visibility = Visibility.Collapsed;
             stackView.Visibility = Visibility.Collapsed;
             stackUpload.Visibility = Visibility.Collapsed;
-
-
-        }
-
-        private void ShowBusyPanes()
-        {
-
-        }
-
-        private void HideBusyPanes()
-        {
+            
 
         }
 
