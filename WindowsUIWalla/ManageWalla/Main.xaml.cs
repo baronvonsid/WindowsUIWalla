@@ -36,7 +36,7 @@ namespace ManageWalla
         }
 
         private PaneMode currentPane;
-
+        private Tag currentTag = null;
 
         private MainController controller = null;
 
@@ -184,12 +184,12 @@ namespace ManageWalla
                     break;
                 case PaneMode.TagAdd:
 
-
+                    this.cmdAddEditTagSave.Content = "Save New";
                     gridTagAddEdit.Visibility = Visibility.Visible;
 
                     break;
                 case PaneMode.TagEdit:
-
+                    this.cmdAddEditTagSave.Content = "Save Edit";
                     gridTagAddEdit.Visibility = Visibility.Visible;
 
                     break;
@@ -267,6 +267,32 @@ namespace ManageWalla
 
         }
 
+        private void RefreshTagsList()
+        {
+            wrapMyTags.Children.Clear();
+
+            TagList tagList = controller.GetTagsAvailable();
+            foreach (TagListTagRef tag in tagList.TagRef)
+            {
+                RadioButton newRadioButton = new RadioButton();
+                
+                newRadioButton.Content = tag.name + " (" + tag.count + ")";
+                newRadioButton.Style = (Style)FindResource("styleRadioButton");
+                newRadioButton.GroupName = "GroupTag";
+                newRadioButton.Tag = tag;
+                wrapMyTags.Children.Add(newRadioButton);
+            }
+        }
+
+        private void PopulateTagData()
+        {
+            RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            Tag tag = controller.GetTagMeta((TagListTagRef)checkedButton.Tag);
+            txtTagAddEditName.Text = tag.Name;
+            txtTagAddEditDescription.Text = tag.Desc;
+            currentTag = tag;
+        }
+
         private void cmdCategory_Checked(object sender, RoutedEventArgs e)
         {
             SetPanePositions(PaneMode.CategoryView);
@@ -312,15 +338,59 @@ namespace ManageWalla
             SetPanePositions(PaneMode.TagAdd);
         }
 
-        private void cmdEditEdit_Click(object sender, RoutedEventArgs e)
+        private void cmdEditTag_Click(object sender, RoutedEventArgs e)
         {
+           
             SetPanePositions(PaneMode.TagEdit);
+            PopulateTagData();
         }
 
         private void cmdAddEditTagCancel_Click(object sender, RoutedEventArgs e)
         {
             SetPanePositions(PaneMode.TagView);
         }
+
+        private void cmdRefreshTagList_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshTagsList();
+        }
+
+        private void cmdAddEditTagSave_Click(object sender, RoutedEventArgs e)
+        {
+            string response = null;
+
+            //Check tag name is unique
+
+            if (currentPane == PaneMode.TagAdd)
+            {
+                Tag tag = new Tag();
+                tag.Name = txtTagAddEditName.Text;
+                tag.Desc = txtTagAddEditDescription.Text;
+
+                //Add Images selected
+
+                response = controller.SaveNewTag(tag);
+            }
+            else
+            {
+                string oldTagName = currentTag.Name;
+                currentTag.Name = txtTagAddEditName.Text;
+                currentTag.Desc = txtTagAddEditDescription.Text;
+
+                response = controller.UpdateTag(currentTag, oldTagName);
+            }
+
+
+            if (response.Length > 0)
+            {
+                MessageBox.Show(response);
+                return;
+            }
+
+            SetPanePositions(PaneMode.TagView);
+            RefreshTagsList();
+        }
+
 
 
     }

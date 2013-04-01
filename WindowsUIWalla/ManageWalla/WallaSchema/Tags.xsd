@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://www.example.org/Tag"
+	xmlns:tns="http://www.example.org/Tag"
+	elementFormDefault="qualified">
+
+  <element name="Tag">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="0">
+        <element type="string" name="Name"/>
+        <element type="string" name="Desc"/>
+        <element type="dateTime" name="LastChanged"/>
+        <element name="Images">
+          <complexType>
+            <sequence>
+              <element name="ImageRef" maxOccurs="unbounded" minOccurs="0">
+                <complexType>
+                  <attribute type="int" name="id" />
+                  <attribute type="string" name="op" />
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+      <attribute type="long" name="id"/>
+      <attribute type="int" name="version"/>
+    </complexType>
+  </element>
+</schema>

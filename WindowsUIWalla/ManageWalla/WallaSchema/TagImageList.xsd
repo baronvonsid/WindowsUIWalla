@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.example.org/TagImageList"
+	xmlns:tns="http://www.example.org/TagImageList" 
+	elementFormDefault="qualified">
+
+  <element name="TagImageList">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="1">
+        <element type="string" name="Name"/>
+        <element type="string" name="Desc"/>
+        <element type="dateTime" name="LastChanged"/>
+        <element name="Images">
+          <complexType>
+            <sequence>
+              <element name="ImageRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+                      <attribute type="int" name="id" />
+                      <attribute type="string" name="name" />
+                      <attribute type="string" name="desc" />
+                      <attribute type="date" name="uploadDate" />
+                      <attribute type="date" name="takenDate" />
+                      </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+      <attribute type="long" name="id"/>
+      <attribute type="int" name="version"/>
+      <attribute type="int" name="imageCursor"/>
+      <attribute type="int" name="imageCount"/>
+      <attribute type="int" name="totalImageCount"/>
+    </complexType>
+  </element>
+</schema>

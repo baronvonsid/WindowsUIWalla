@@ -167,12 +167,13 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-
+                        
                         <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
-                            <TextBlock><Run Text="my first tag"/></TextBlock>
+                            <RadioButton Style="{StaticResource styleRadioButton}" GroupName="GroupTag" Content="RadioButton" />
+
+                            <TextBlock Style="{StaticResource styleTagBlock}" ><Run Text="my first tag"/></TextBlock>
                             <TextBlock><Run Text="my second tag"/></TextBlock>
                             <TextBlock><Run Text="my third tag"/></TextBlock>
-                            <TextBlock><Run Text="my fourth tag"/></TextBlock>
                             <TextBlock><Run Text="my fifth tag"/></TextBlock>
                             <TextBlock><Run Text="my sixth tag"/></TextBlock>
                             <TextBlock><Run Text="my seventh tag"/></TextBlock>
@@ -180,11 +181,12 @@
 
                         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
                             <Button x:Name="cmdAddTag" Content="Add Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddTag_Click"  />
-                            <Button x:Name="cmdEditEdit" Content="Edit Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdEditEdit_Click" />
+                            <Button x:Name="cmdEditEdit" Content="Edit Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdEditTag_Click" />
+                            <Button x:Name="cmdRefreshTagList" Content="Refresh" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdRefreshTagList_Click" />
                         </StackPanel>
                     </Grid>
 
-                    <Grid x:Name="gridTagAddEdit" ShowGridLines="True">
+                    <Grid x:Name="gridTagAddEdit">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="25" />
                             <RowDefinition Height="75" />
@@ -201,7 +203,7 @@
                         <TextBox x:Name="txtTagAddEditDescription" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto"/>
 
                         <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
-                            <Button x:Name="cmdAddEditTagSave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                            <Button x:Name="cmdAddEditTagSave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagSave_Click" />
                             <Button x:Name="cmdAddEditTagCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagCancel_Click" />
                             <Button x:Name="cmdAddEditTagDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
                         </StackPanel>
