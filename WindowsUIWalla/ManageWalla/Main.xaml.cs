@@ -44,6 +44,8 @@ namespace ManageWalla
         public MainWindow()
         {
             InitializeComponent();
+
+
         }
 
 
@@ -178,6 +180,7 @@ namespace ManageWalla
 
                     HideAllContent();
 
+                    gridTagView.IsEnabled = true;
                     gridTagAddEdit.Visibility = Visibility.Collapsed;
                     stackTag.Visibility = Visibility.Visible;
 
@@ -186,11 +189,13 @@ namespace ManageWalla
 
                     this.cmdAddEditTagSave.Content = "Save New";
                     gridTagAddEdit.Visibility = Visibility.Visible;
+                    gridTagView.IsEnabled = false;
 
                     break;
                 case PaneMode.TagEdit:
                     this.cmdAddEditTagSave.Content = "Save Edit";
                     gridTagAddEdit.Visibility = Visibility.Visible;
+                    gridTagView.IsEnabled = false;
 
                     break;
                 case PaneMode.ViewView:
@@ -272,25 +277,38 @@ namespace ManageWalla
             wrapMyTags.Children.Clear();
 
             TagList tagList = controller.GetTagsAvailable();
-            foreach (TagListTagRef tag in tagList.TagRef)
+            if (tagList != null)
             {
-                RadioButton newRadioButton = new RadioButton();
-                
-                newRadioButton.Content = tag.name + " (" + tag.count + ")";
-                newRadioButton.Style = (Style)FindResource("styleRadioButton");
-                newRadioButton.GroupName = "GroupTag";
-                newRadioButton.Tag = tag;
-                wrapMyTags.Children.Add(newRadioButton);
+                foreach (TagListTagRef tag in tagList.TagRef)
+                {
+                    RadioButton newRadioButton = new RadioButton();
+
+                    newRadioButton.Content = tag.name + " (" + tag.count + ")";
+                    newRadioButton.Style = (Style)FindResource("styleRadioButton");
+                    newRadioButton.Template = (ControlTemplate)FindResource("templateRadioButton");
+                    newRadioButton.GroupName = "GroupTag";
+                    newRadioButton.Tag = tag;
+                    wrapMyTags.Children.Add(newRadioButton);
+                }
+            }
+            else
+            {
+                MessageBox.Show("There was an error trying to retreive the tags from the server.");
             }
         }
 
         private void PopulateTagData()
         {
             RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            Tag tag = controller.GetTagMeta((TagListTagRef)checkedButton.Tag);
-            txtTagAddEditName.Text = tag.Name;
-            txtTagAddEditDescription.Text = tag.Desc;
-            currentTag = tag;
+
+            if (checkedButton != null)
+            {
+                TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
+                Tag tag = controller.GetTagMeta((TagListTagRef)checkedButton.Tag);
+                txtTagAddEditName.Text = tag.Name;
+                txtTagAddEditDescription.Text = tag.Desc;
+                currentTag = tag;
+            }
         }
 
         private void cmdCategory_Checked(object sender, RoutedEventArgs e)
@@ -335,14 +353,15 @@ namespace ManageWalla
 
         private void cmdAddTag_Click(object sender, RoutedEventArgs e)
         {
+            txtTagAddEditName.Text = "";
+            txtTagAddEditDescription.Text = "";
             SetPanePositions(PaneMode.TagAdd);
         }
 
         private void cmdEditTag_Click(object sender, RoutedEventArgs e)
         {
-           
-            SetPanePositions(PaneMode.TagEdit);
             PopulateTagData();
+            SetPanePositions(PaneMode.TagEdit);
         }
 
         private void cmdAddEditTagCancel_Click(object sender, RoutedEventArgs e)
@@ -391,6 +410,36 @@ namespace ManageWalla
             RefreshTagsList();
         }
 
+        private void txtTagAddEditName_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+
+          // Filter out non-digit text input
+          foreach (char c in e.Text) 
+            if (!Char.IsLetterOrDigit(c)) 
+            {
+              e.Handled = true;
+              break;
+            }
+        }
+
+        private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            controller.Dispose();
+        }
+
+        private void cmdAddEditTagDelete_Click(object sender, RoutedEventArgs e)
+        {
+            string response = controller.DeleteTag(currentTag);
+
+            if (response.Length > 0)
+            {
+                MessageBox.Show(response);
+                return;
+            }
+
+            SetPanePositions(PaneMode.TagView);
+            RefreshTagsList();
+        }
 
 
     }

@@ -18,20 +18,22 @@ using System.Net.Mime;
 
 namespace ManageWalla
 {
-    public class MainController
+    public class MainController : IDisposable
     {
-
+        private const string userName = "simo1n";
         private const String baseUri = "http://localhost:8081/WallaWS/v1/user/simo1n/";
         private HttpClient http = null;
         private MainWindow currentMain;
+        private GlobalState state = null;
 
         public MainController(MainWindow currentMainParam)
         {
             currentMain = currentMainParam;
             http = new HttpClient();
             http.BaseAddress = new Uri(baseUri);
-            
 
+            state = new GlobalState();
+            state = GlobalState.GetState(userName);
 
         }
 
@@ -78,18 +80,39 @@ namespace ManageWalla
 
         public TagList GetTagsAvailable()
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tags");
-            request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-            //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
-   
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tags");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+                //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
-            HttpResponseMessage response = http.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
+                if (state.tagList != null)
+                {
+                    request.Headers.IfModifiedSince = new DateTimeOffset(state.tagList.LastChanged);
+                }
 
-            XmlSerializer serialKiller = new XmlSerializer(typeof(TagList));
-            TagList tagList = (TagList)serialKiller.Deserialize(response.Content.ReadAsStreamAsync().Result);
+                HttpResponseMessage response = http.SendAsync(request).Result;
+                if (response.StatusCode == HttpStatusCode.NotModified)
+                {
+                    return state.tagList;
+                }
 
-            return tagList;
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(TagList));
+                    TagList tagList = (TagList)serialKiller.Deserialize(response.Content.ReadAsStreamAsync().Result);
+                    state.tagList = tagList;
+                    return tagList;
+                }
+
+                throw new Exception("/Tags web service returned an error code: " + response.StatusCode.ToString());
+            }
+            catch (Exception ex)
+            {
+                //TODO Log failure.
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
 
         public string UpdateTag(Tag newTag, string oldTagName)
@@ -158,6 +181,23 @@ namespace ManageWalla
             return tag;
         }
 
+        public string DeleteTag(Tag tag)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "tag/" + Uri.EscapeUriString(tag.Name));
+            request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+            xmlFormatter.UseXmlSerializer = true;
+            HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
+            request.Content = content;
+            HttpResponseMessage response = http.SendAsync(request).Result;
+            response.EnsureSuccessStatusCode();
+
+            state.tagList = null;
+
+            return "";
+        }
+
         private void GetCategoryTree()
         {
             currentMain.RefreshCategoryTreeView();
@@ -170,5 +210,10 @@ namespace ManageWalla
             return (T)serializer.ReadObject(content.ReadAsStreamAsync().Result);
         }
         */
+
+        public void Dispose()
+        {
+            state.SaveState();
+        }
     }
 }

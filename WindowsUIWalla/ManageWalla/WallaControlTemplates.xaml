@@ -40,7 +40,7 @@
     <ControlTemplate x:Key="templateToggleButton" TargetType="{x:Type ToggleButton}">
         
         <Grid>
-            <Border BorderThickness="1">
+            <Border BorderThickness="0.5">
                 <Border.BorderBrush>
                     <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
                 </Border.BorderBrush>
@@ -55,8 +55,51 @@
 
             <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
+        <ControlTemplate.Triggers>
 
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="outerRectangle" Property="Stroke">
+                    <Setter.Value>
+                        <SolidColorBrush Color="Black" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </ControlTemplate.Triggers>
     </ControlTemplate>
+
+    <ControlTemplate x:Key="templateRadioButton" TargetType="{x:Type RadioButton}">
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Rectangle x:Name="outerRectangle" StrokeThickness="0.5">
+
+                <Rectangle.Stroke>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
+                </Rectangle.Stroke>
+
+                <Rectangle.Fill>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Background.Color}" />
+                </Rectangle.Fill>
+
+            </Rectangle>
+
+            <ContentPresenter Margin="{TemplateBinding Padding}" />
+
+        </Grid>
+        <ControlTemplate.Triggers>
+            
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="outerRectangle" Property="Stroke">
+                    <Setter.Value>
+                        <SolidColorBrush Color="Black" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="IsChecked" Value="True" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
 
     <local:HeightCalculator x:Key="customHeightCalculator" />
 
