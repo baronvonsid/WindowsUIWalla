@@ -6,11 +6,7 @@
 
 
     <Window.Resources>
-        <ResourceDictionary Source="WallaControlTemplates.xaml" >
-
-            
-
-        </ResourceDictionary>
+        <ResourceDictionary Source="WallaControlTemplates.xaml" />
 
     </Window.Resources>
 
@@ -167,7 +163,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
                             <RadioButton Style="{StaticResource styleRadioButton}" Template="{StaticResource templateRadioButton}" GroupName="GroupTag" Content="RadioButton" />
 
@@ -211,6 +207,7 @@
                     </Grid>
                 </StackPanel>
             </StackPanel>
+
             <StackPanel Orientation="Vertical" Background="#FFBAFFD9" >
                 <ToggleButton x:Name="cmdSettings" Height="34" Content="Settings" Checked="cmdSettings_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}"/>
 
@@ -225,7 +222,10 @@
 
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0">
 
-            <WrapPanel x:Name="wrapImages" Background="White" />
+            <WrapPanel x:Name="wrapImages" Background="White" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Image Source="C:\Users\Public\Pictures\Lakedistrict.jpg" Stretch="None" Width="200" Height="200" />
+                
+            </WrapPanel>
 
             <StackPanel Orientation="Vertical"  Background="#FFABAEFF">
                 <ToggleButton  x:Name="cmdView" Height="34" Content="View" Checked="cmdView_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}"/>
@@ -355,11 +355,48 @@
 
             <StackPanel Orientation="Vertical" Background="#FFFFABC2">
                 <ToggleButton x:Name="cmdUpload" Height="34" Content="Upload" Checked="cmdUpload_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
-                <StackPanel x:Name="stackUpload" Orientation="Vertical" Visibility="Collapsed" Height="200">
-                    <Viewbox>
-                        <Rectangle x:Name="rectangleUploadDummy" />
-                    </Viewbox>
+                <StackPanel x:Name="stackUpload" Orientation="Vertical" Visibility="Visible" Height="200">
+
+                    <Grid x:Name="gridUploadView">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="75" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="34" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Column="0" Grid.Row="0" Content="Use Defaults"/>
+                        <CheckBox x:Name="chkImageUseDefaults" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Margin="3"/>
+                        <Label Grid.Column="0" Grid.Row="1" Content="Name"/>
+                        <TextBox x:Name="txtUploadImageName" Margin="3" Grid.Column="1" Grid.Row="1" MaxLines="1" MaxLength="20" CharacterCasing="Upper" Cursor="IBeam" Text="12345678901234567890"/>
+                        <Label Grid.Column="0" Grid.Row="2" Content="File name"/>
+                        <Label x:Name="lblUploadImageFileName" Margin="3" Grid.Column="1" Grid.Row="2" Content="12345678901234567890.jpg" />
+                        <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+                        <TextBox x:Name="txtUploadImageDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" Text="W234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789X" MaxLines="1" MaxLength="100"/>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3">
+                            <Button x:Name="cmdUploadSingle" Content="Upload Image" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
+                            <Button x:Name="cmdUploadMulti" Content="Upload All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
+                            <Button x:Name="cmdUploadClear" Content="Clear All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
+                            <Button x:Name="cmdUploadImportFolder" Content="Import from Folder" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFolder_Click" />
+                            <Button x:Name="cmdUploadImportFiles" Content="Import Images" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFiles_Click" />
+                        </StackPanel>
+
+                        <WrapPanel x:Name="wrapUploadImages" Background="White" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="2" Grid.Row="0" Grid.RowSpan="6">
+
+                        </WrapPanel>
+
+                    </Grid>
                 </StackPanel>
+
+
             </StackPanel>
         </StackPanel>
 

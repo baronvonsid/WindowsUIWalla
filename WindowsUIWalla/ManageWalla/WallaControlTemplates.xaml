@@ -97,10 +97,11 @@
             <Trigger Property="IsPressed" Value="True">
                 <Setter Property="IsChecked" Value="True" />
             </Trigger>
+            
+            
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
 
-    <local:HeightCalculator x:Key="customHeightCalculator" />
 
 </ResourceDictionary>

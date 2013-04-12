@@ -8,10 +8,15 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Runtime.Serialization;
+using System.Windows.Media.Imaging;
 
 namespace ManageWalla
 {
-    class GlobalState
+    using System.Xml.Serialization;
+
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/GlobalState", IsNullable = false)]
+    public class GlobalState
     {
         //Infra Properties
         static GlobalState state = null;
@@ -21,6 +26,7 @@ namespace ManageWalla
 
         //Business Objects
         public TagList tagList { get; set; }
+
 
         #region InfraCodes
         public GlobalState() { }
@@ -44,7 +50,7 @@ namespace ManageWalla
 
             DESCryptoServiceProvider des = new DESCryptoServiceProvider();
 
-            if (!File.Exists(fileName))
+            if (File.Exists(fileName))
             {
                 using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
                 {

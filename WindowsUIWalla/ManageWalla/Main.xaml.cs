@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.IO;
+using System.Windows.Interop;
 
 namespace ManageWalla
 {
@@ -44,11 +46,7 @@ namespace ManageWalla
         public MainWindow()
         {
             InitializeComponent();
-
-
         }
-
-
 
         private void cmdEditView_Click(object sender, RoutedEventArgs e)
         {
@@ -75,9 +73,8 @@ namespace ManageWalla
             controller = new MainController(this);
             controller.RetrieveGeneralUserConfig();
 
-            
-
             HideAllContent();
+
 
 
             currentPane = PaneMode.CategoryView;
@@ -272,6 +269,73 @@ namespace ManageWalla
 
         }
 
+        public Image GetImageControl(string filePath)
+        {
+            BitmapImage myBitmapImage = new BitmapImage();
+            myBitmapImage.BeginInit();
+            myBitmapImage.DecodePixelWidth = 100;
+            myBitmapImage.UriSource = new Uri(filePath);
+            myBitmapImage.EndInit();
+            myBitmapImage.Freeze();
+
+            Image myImage = new Image();
+            myImage.Source = myBitmapImage;
+            myImage.Style = (Style)FindResource("styleImageThumb");
+            return myImage;
+        }
+
+        private void LoadImagesFromArray(String[] fileNames)
+        {
+            for (int i = 0; i < fileNames.Length; i++)
+            {
+                this.wrapUploadImages.Children.Add(GetImageControl(fileNames[i]));
+            }
+        }
+
+        public void LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive)
+        {
+            if (recursive)
+            {
+                foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
+                {
+                    LoadImagesFromFolder(folder, recursive);
+                }
+            }
+
+            foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
+            {
+                this.wrapUploadImages.Children.Add(GetImageControl(file.FullName));
+
+                //System.Windows.Media.Imaging.JpegBitmapDecoder newJpeg = new System.Windows.Media.Imaging.JpegBitmapDecoder(file.OpenRead(), System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.None);
+                //System.Windows.Media.Imaging.BitmapImage image = new System.Windows.Media.Imaging.BitmapImage();
+                //image.StreamSource = file.OpenRead();
+
+                //System.Windows.Media.Imaging.BitmapImage image = new System.Windows.Media.Imaging.BitmapImage();
+            }
+
+            /*
+            public Window()
+            {
+                InitializeComponent();
+
+                ThreadPool.QueueUserWorkItem(LoadImage,
+                     "http://z.about.com/d/animatedtv/1/0/1/m/simpf.jpg");
+            }
+
+            public void LoadImage(object uri)
+            {
+                var decoder = new JpegBitmapDecoder(new Uri(uri.ToString()), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                decoder.Frames[0].Freeze();
+                this.Dispatcher.Invoke(DispatcherPriority.Send, new Action<ImageSource>(SetImage), decoder.Frames[0]);
+            }
+
+            public void SetImage(ImageSource source)
+            {
+                this.BackgroundImage.Source = source;
+            } 
+            */
+        }
+
         private void RefreshTagsList()
         {
             wrapMyTags.Children.Clear();
@@ -440,6 +504,46 @@ namespace ManageWalla
             SetPanePositions(PaneMode.TagView);
             RefreshTagsList();
         }
+
+        private void cmdUploadImportFolder_Click(object sender, RoutedEventArgs e)
+        {
+
+            var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
+            if (folderDialog.SelectedPath.Length > 0)
+            {
+                DirectoryInfo folder = new DirectoryInfo(folderDialog.SelectedPath);
+
+                if (MessageBox.Show("Do you want to add all images in sub folders too ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    LoadImagesFromFolder(folder, true);
+                }
+                else
+                {
+                    LoadImagesFromFolder(folder, false);
+                }
+            }
+        }
+
+        private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
+        {
+            wrapUploadImages.Children.Clear();
+        }
+
+        private void cmdUploadImportFiles_Click(object sender, RoutedEventArgs e)
+        {
+
+            var openDialog = new System.Windows.Forms.OpenFileDialog();
+            openDialog.DefaultExt = @"*.JPG;*.BMP";
+            openDialog.Multiselect = true;
+            System.Windows.Forms.DialogResult result = openDialog.ShowDialog();
+            if (openDialog.FileNames.Length > 0)
+            {
+                LoadImagesFromArray(openDialog.FileNames);
+            }
+        }
+
+
 
 
     }
