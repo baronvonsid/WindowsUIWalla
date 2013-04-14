@@ -223,13 +223,13 @@
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0">
 
             <WrapPanel x:Name="wrapImages" Background="White" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <Image Source="C:\Users\Public\Pictures\Lakedistrict.jpg" Stretch="None" Width="200" Height="200" />
+                <Image Source="C:\Users\Public\Pictures\Lakedistrict.jpg" Stretch="None" Width="200" Height="0" />
                 
             </WrapPanel>
 
             <StackPanel Orientation="Vertical"  Background="#FFABAEFF">
                 <ToggleButton  x:Name="cmdView" Height="34" Content="View" Checked="cmdView_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}"/>
-                <StackPanel x:Name="stackView" Orientation="Vertical" Visibility="Visible" Height="200">
+                <StackPanel x:Name="stackView" Orientation="Vertical" Visibility="Visible" Height="0">
                     <Grid x:Name="gridView" ShowGridLines="True">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -353,46 +353,174 @@
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel Orientation="Vertical" Background="#FFFFABC2">
+            <StackPanel Orientation="Vertical" Background="#FF6C8DD0">
                 <ToggleButton x:Name="cmdUpload" Height="34" Content="Upload" Checked="cmdUpload_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
-                <StackPanel x:Name="stackUpload" Orientation="Vertical" Visibility="Visible" Height="200">
+                <StackPanel x:Name="stackUpload" Orientation="Vertical" Visibility="Visible">
 
                     <Grid x:Name="gridUploadView">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="25" />
-                            <RowDefinition Height="25" />
-                            <RowDefinition Height="25" />
-                            <RowDefinition Height="75" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="34" />
+                            <RowDefinition Height="600" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="300"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Grid.Row="0" Content="Use Defaults"/>
-                        <CheckBox x:Name="chkImageUseDefaults" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Margin="3"/>
-                        <Label Grid.Column="0" Grid.Row="1" Content="Name"/>
-                        <TextBox x:Name="txtUploadImageName" Margin="3" Grid.Column="1" Grid.Row="1" MaxLines="1" MaxLength="20" CharacterCasing="Upper" Cursor="IBeam" Text="12345678901234567890"/>
-                        <Label Grid.Column="0" Grid.Row="2" Content="File name"/>
-                        <Label x:Name="lblUploadImageFileName" Margin="3" Grid.Column="1" Grid.Row="2" Content="12345678901234567890.jpg" />
-                        <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
-                        <TextBox x:Name="txtUploadImageDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" Text="W234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789X" MaxLines="1" MaxLength="100"/>
+                        <TabControl Grid.Column="0" Grid.Row="0">
+                            <TabItem Header="Settings">
+                                <StackPanel Orientation="Vertical">
+                                    <Label x:Name="lblUploadProposedImageCount" Margin="3" Content="# images ready for upload" />
+                                    <Label x:Name="lblRootCalegory" Margin="3" Content="Root\Holidays\Barcelona" />
 
-                        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3">
-                            <Button x:Name="cmdUploadSingle" Content="Upload Image" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
-                            <Button x:Name="cmdUploadMulti" Content="Upload All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
-                            <Button x:Name="cmdUploadClear" Content="Clear All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
-                            <Button x:Name="cmdUploadImportFolder" Content="Import from Folder" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFolder_Click" />
-                            <Button x:Name="cmdUploadImportFiles" Content="Import Images" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFiles_Click" />
-                        </StackPanel>
+                                    <RadioButton x:Name="radUploadUseSelectedCat" Content="Upload to root category" />
+                                    <RadioButton x:Name="radUploadAddToNewCat" Content="Upload to new category" />
+                                    <TextBox x:Name="txtUploadCatName" Margin="3" Grid.Column="1" Grid.Row="1" MaxLines="1" MaxLength="20" CharacterCasing="Upper" Cursor="IBeam" Text="12345678901234567890"/>
+                                    <TextBox x:Name="txtUploadCatDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" Text="W234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789X" MaxLines="1" MaxLength="100"/>
+                                    <CheckBox x:Name="chkUploadMaintainFolders" Content="Auto add images to sub categorys" />
 
-                        <WrapPanel x:Name="wrapUploadImages" Background="White" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="2" Grid.Row="0" Grid.RowSpan="6">
+                                    
+                                    <Button x:Name="cmdUploadMulti" Content="Upload All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
+                                    <Button x:Name="cmdUploadClear" Content="Clear All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Image Info">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="80" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="34" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="20"/>
+                                    </Grid.ColumnDefinitions>
 
-                        </WrapPanel>
+                                    <Label Grid.Column="0" Grid.Row="0" Content="Category"/>
+                                    <Label x:Name="lblUploadTargetCat"  Grid.Column="1" Grid.Row="0" Content="../SubCat1/SubCat2"/>
+                                    
+                                    <Label Grid.Column="0" Grid.Row="1" Content="File name" />
+                                    <Label x:Name="lblUploadImageFileName" Grid.Column="1" Grid.Row="1" Content="12345678901234567890.jpg" />
 
+                                    <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
+                                    <TextBox x:Name="txtUploadImageName" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+
+                                    <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+                                    <TextBox x:Name="txtUploadImageDescription" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="80"  Text="W234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789X" MaxLines="1" MaxLength="100"/>
+
+                                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3">
+                                        <Label Content="Format:"/>
+                                        <Label x:Name="lblUploadFormat" Content="JPEG" TextElement.FontWeight="Bold"/>
+                                        <Label Content="Size:"/>
+                                        <Label x:Name="lblUploadSize" Content="4056" TextElement.FontWeight="Bold"/>
+                                        <Label Content="KB"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
+                                        <Label Content="Width:"/>
+                                        <Label x:Name="lblUploadWidth" Content="800" TextElement.FontWeight="Bold"/>
+                                        <Label Content="Height:"/>
+                                        <Label x:Name="lblUploadHeight" Content="600" TextElement.FontWeight="Bold"/>
+                                    </StackPanel>
+
+                                    <CheckBox x:Name="chkImageUseDefaults" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center"/>
+
+
+                                    <Label Grid.Column="0" Grid.Row="6" Content="Camera"/>
+                                    <TextBox x:Name="txtUploadCamera" Grid.Column="1" Grid.Row="6" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                    <CheckBox x:Name="chkUploadCameraAll" Grid.Column="2" Grid.Row="6" />
+
+                                    <Label x:Name="lblUdfChar1" Grid.Column="0" Grid.Row="7" Content="User Field 1"/>
+                                    <TextBox x:Name="txtUdfChar1" Grid.Column="1" Grid.Row="7" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                    <CheckBox x:Name="chkUdfChar1All" Grid.Column="2" Grid.Row="7" />
+
+                                    <Label x:Name="lblUdfChar2" Grid.Column="0" Grid.Row="8" Content="User Field 2"/>
+                                    <TextBox x:Name="txtUdfChar2" Grid.Column="1" Grid.Row="8" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                    <CheckBox x:Name="chkUdfChar2All" Grid.Column="2" Grid.Row="8" />
+
+                                    <Label x:Name="lblUdfChar3" Grid.Column="0" Grid.Row="9" Content="User Field 3"/>
+                                    <TextBox x:Name="txtUdfChar3" Grid.Column="1" Grid.Row="9" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                    <CheckBox x:Name="chkUdfChar3All" Grid.Column="2" Grid.Row="9" />
+
+                                    <Label x:Name="lblUdfText1" Grid.Column="0" Grid.Row="10" Content="User Text"/>
+                                    <TextBox x:Name="txtUdfText1" Grid.Column="1" Grid.Row="10" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="500" TextWrapping="Wrap" Height="80" Text="12345678901234567890"/>
+                                    <CheckBox x:Name="chkUdfText1All" Grid.Column="2" Grid.Row="10" />
+
+                                    <Label x:Name="lblUdfNum1" Grid.Column="0" Grid.Row="11" Content="User Num 1"/>
+                                    <TextBox x:Name="txtUdfNum1" Grid.Column="1" Grid.Row="11" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                    <CheckBox x:Name="chkUdfNum1All" Grid.Column="2" Grid.Row="11" />
+
+                                    <Label x:Name="lblUdfNum2" Grid.Column="0" Grid.Row="12" Content="User Num 2"/>
+                                    <TextBox x:Name="txtUdfNum2" Grid.Column="1" Grid.Row="12" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                    <CheckBox x:Name="chkUdfNum2All" Grid.Column="2" Grid.Row="12" />
+
+                                    <Label x:Name="lblUdfNum3" Grid.Column="0" Grid.Row="13" Content="User Num 3"/>
+                                    <TextBox x:Name="txtUdfNum3" Grid.Column="1" Grid.Row="13" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                    <CheckBox x:Name="chkUdfNum3All" Grid.Column="2" Grid.Row="13" />
+
+                                    <Label x:Name="lblUdfDate1" Grid.Column="0" Grid.Row="14" Content="User Date 1"/>
+                                    <Calendar x:Name="calUdfDate1" Grid.Column="1" Grid.Row="14" />
+                                    <CheckBox x:Name="chkUdfDate1All" Grid.Column="2" Grid.Row="14" />
+
+                                    <Label x:Name="lblUdfDate2" Grid.Column="0" Grid.Row="15" Content="User Date 2"/>
+                                    <Calendar x:Name="calUdfDate2" Grid.Column="1" Grid.Row="15" />
+                                    <CheckBox x:Name="chkUdfDate2All" Grid.Column="2" Grid.Row="15" />
+
+                                    <Label x:Name="lblUdfDate3" Grid.Column="0" Grid.Row="16" Content="User Date 3"/>
+                                    <Calendar x:Name="calUdfDate3" Grid.Column="1" Grid.Row="16" />
+                                    <CheckBox x:Name="chkUdfDate3All" Grid.Column="2" Grid.Row="16" />
+
+                                    <Label x:Name="lblTakenDate" Grid.Column="0" Grid.Row="17" Content="Date Taken"/>
+                                    <Calendar x:Name="calTakenDate" Grid.Column="1" Grid.Row="17" />
+                                    <CheckBox x:Name="chkTakenDateAll" Grid.Column="2" Grid.Row="17" />
+
+                                    <StackPanel Orientation="Horizontal" Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="3">
+                                        <Button x:Name="cmdUploadResetMeta" Content="Reset Info" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
+                                        
+
+                                    </StackPanel>
+                                </Grid>
+                            </TabItem>
+                            <TabItem Header="Upload Status">
+                                <Grid Background="#FFE5E5E5"/>
+                            </TabItem>
+                        </TabControl>
+
+                        <Grid Grid.Column="1" Grid.Row="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="34" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <WrapPanel x:Name="wrapUploadImages" ScrollViewer.VerticalScrollBarVisibility="Visible" Background="White" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="0" Grid.Row="0">
+
+                            </WrapPanel>
+                            
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1">
+                                <Button x:Name="cmdUploadImportFolder" Content="Import Folder"  Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFolder_Click" />
+                                <Button x:Name="cmdUploadImportFiles" Content="Import Images" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFiles_Click" />
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                 </StackPanel>
 

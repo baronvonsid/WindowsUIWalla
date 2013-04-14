@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/UploadStatusList"
+	xmlns:tns="http://www.example.org/UploadStatusList" elementFormDefault="qualified">
+
+	<element name="UploadStatusList">
+		<complexType>
+			<sequence>
+				<element name="ImageUploadRef" maxOccurs="unbounded"
+					minOccurs="0">
+					<complexType>
+						<attribute type="long" name="imageId" />
+						<attribute type="int" name="imageStatus" />
+						<attribute type="string" name="errorMessage" />
+						<attribute type="dateTime" name="lastUpdated" />
+					</complexType>
+				</element>
+			</sequence>
+		</complexType>
+	</element>
+</schema>
+
+

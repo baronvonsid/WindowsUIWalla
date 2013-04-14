@@ -92,9 +92,11 @@
       <DependentUpon>Main.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainController.cs" />
+    <Compile Include="WallaDataType\ImageMeta.cs" />
     <Compile Include="WallaDataType\TagImageList.cs" />
     <Compile Include="WallaDataType\TagList.cs" />
     <Compile Include="WallaDataType\Tags.cs" />
+    <Compile Include="WallaDataType\UploadStatusList.cs" />
     <Page Include="Main.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -132,9 +134,11 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <None Include="WallaSchema\ImageMeta.xsd" />
     <None Include="WallaSchema\TagImageList.xsd" />
     <None Include="WallaSchema\TagList.xsd" />
     <None Include="WallaSchema\Tags.xsd" />
+    <None Include="WallaSchema\UploadStatusList.xsd" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
