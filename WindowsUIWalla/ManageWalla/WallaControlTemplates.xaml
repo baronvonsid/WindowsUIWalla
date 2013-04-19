@@ -1,6 +1,15 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:ManageWalla">
+                    xmlns:local="clr-namespace:ManageWalla"
+                    xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary">
+
+    <local:UploadImageFileList x:Key="uploadImagefileListKey" />
+
+    <!---   x:Key="uploadImageDataTemplate"  -->
+    <DataTemplate DataType="{x:Type local:UploadImage}">
+            <Image Source="{Binding Image}" />
+    </DataTemplate>
+
 
     <ControlTemplate x:Key="templateButton" TargetType="{x:Type Button}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -102,6 +111,101 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
+
+    <Style x:Key="PhotoListStyle" TargetType="{x:Type ListBox}">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListBox}">
+                        <ScrollViewer 
+								VerticalScrollBarVisibility="Auto" 
+								HorizontalScrollBarVisibility="Disabled">
+                            <WrapPanel 
+									IsItemsHost="True" 
+									Orientation="Horizontal" />
+                        </ScrollViewer>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PhotoListItem" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="MaxHeight" Value="100" />
+        <Setter Property="MinHeight" Value="100" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="BorderBrush" Value="#FF6C8DD0" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Margin" Value="3" />
+        <Setter Property="Padding" Value="0" />
+
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="true">
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <ShaderEffectLibrary:BloomEffect BaseIntensity="1" BaseSaturation="1" BloomIntensity="1" BloomSaturation="1" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            
+            <Trigger Property="IsSelected" Value="true">
+                <Setter Property="BorderBrush" Value="Black" />
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <ShaderEffectLibrary:BloomEffect BaseIntensity="1" BaseSaturation="1" BloomIntensity="1" BloomSaturation="1" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <ShaderEffectLibrary:ContrastAdjustEffect Contrast="0.5"  />
+                    </Setter.Value>
+                </Setter>             
+            </Trigger>
+
+
+
+            <!--
+                <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                    
+                    <EventTrigger.Actions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation 
+									Duration="0:0:0.2" 
+									Storyboard.TargetProperty="MaxHeight" 
+									To="85" />
+                                <DoubleAnimation 
+									Duration="0:0:0.2" 
+									Storyboard.TargetProperty="Opacity"
+									To="1.0" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger.Actions>
+                </EventTrigger>
+                
+                <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                    <EventTrigger.Actions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation 
+									Duration="0:0:1" 
+									Storyboard.TargetProperty="MaxHeight" />
+                                <DoubleAnimation 
+									Duration="0:0:0.2" 
+									Storyboard.TargetProperty="Opacity" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger.Actions>
+                </EventTrigger>
+            
+                                
+                -->
+        </Style.Triggers>
+    </Style>
 
 
 </ResourceDictionary>

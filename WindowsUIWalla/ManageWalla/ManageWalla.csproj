@@ -55,6 +55,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="ShaderEffectLibrary">
+      <HintPath>..\..\..\..\Johan\Walla\effectslib\effectslib\ShaderEffectLibrary\ShaderEffectLibrary\bin\Release\ShaderEffectLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -96,6 +99,8 @@
     <Compile Include="WallaDataType\TagImageList.cs" />
     <Compile Include="WallaDataType\TagList.cs" />
     <Compile Include="WallaDataType\Tags.cs" />
+    <Compile Include="WallaDataType\UploadImage.cs" />
+    <Compile Include="WallaDataType\UploadImageFileList.cs" />
     <Compile Include="WallaDataType\UploadStatusList.cs" />
     <Page Include="Main.xaml">
       <Generator>MSBuild:Compile</Generator>

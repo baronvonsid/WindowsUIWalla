@@ -23,6 +23,7 @@ namespace ManageWalla
         public string userName {get; set;}
         private static byte[] key = { 1, 2, 3, 4, 5, 6, 7, 8 };
         private static byte[] iv = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        //public UploadImageFileList uploadImageFileList {get; set;}
 
         //Business Objects
         public TagList tagList { get; set; }
@@ -34,7 +35,7 @@ namespace ManageWalla
         public static GlobalState GetState(string userNameParam)
         {
             // Try to load from File
-            state = RetreiveFromFile(userNameParam);
+            state = null; // RetreiveFromFile(userNameParam);
             if (state == null)
             {
                 state = new GlobalState();
@@ -70,6 +71,8 @@ namespace ManageWalla
 
         public void SaveState()
         {
+            return;
+
             string fileName = Path.Combine(Application.UserAppDataPath, "Walla-" + userName + ".config");
             DESCryptoServiceProvider des = new DESCryptoServiceProvider();
 

@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.IO;
 using System.Windows.Interop;
 
+
 namespace ManageWalla
 {
     /// <summary>
@@ -41,7 +42,7 @@ namespace ManageWalla
         private Tag currentTag = null;
 
         private MainController controller = null;
-
+        //private UploadImageFileList meFots = new UploadImageFileList();
 
         public MainWindow()
         {
@@ -75,7 +76,7 @@ namespace ManageWalla
 
             HideAllContent();
 
-
+            //meFots = new UploadImageFileList();
 
             currentPane = PaneMode.CategoryView;
             this.cmdCategory.IsChecked = true;
@@ -265,8 +266,6 @@ namespace ManageWalla
             stackSettings.Visibility = Visibility.Collapsed;
             stackView.Visibility = Visibility.Collapsed;
             stackUpload.Visibility = Visibility.Collapsed;
-            
-
         }
 
         public Image GetImageControl(string filePath)
@@ -286,10 +285,15 @@ namespace ManageWalla
 
         private void LoadImagesFromArray(String[] fileNames)
         {
+            UploadImageFileList meFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
             for (int i = 0; i < fileNames.Length; i++)
             {
-                this.wrapUploadImages.Children.Add(GetImageControl(fileNames[i]));
+                
+                meFots.Add(new UploadImage(fileNames[i]));
+
+                //this.wrapUploadImages.Children.Add(GetImageControl(fileNames[i]));
             }
+
         }
 
         public void LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive)
@@ -302,9 +306,12 @@ namespace ManageWalla
                 }
             }
 
+            UploadImageFileList meFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
+
             foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
             {
-                this.wrapUploadImages.Children.Add(GetImageControl(file.FullName));
+                meFots.Add(new UploadImage(file.FullName));
+                //this.wrapUploadImages.Children.Add(GetImageControl(file.FullName));
 
                 //System.Windows.Media.Imaging.JpegBitmapDecoder newJpeg = new System.Windows.Media.Imaging.JpegBitmapDecoder(file.OpenRead(), System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.None);
                 //System.Windows.Media.Imaging.BitmapImage image = new System.Windows.Media.Imaging.BitmapImage();
@@ -527,7 +534,7 @@ namespace ManageWalla
 
         private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
         {
-            wrapUploadImages.Children.Clear();
+            //wrapUploadImages.Children.Clear();
         }
 
         private void cmdUploadImportFiles_Click(object sender, RoutedEventArgs e)
@@ -541,6 +548,13 @@ namespace ManageWalla
             {
                 LoadImagesFromArray(openDialog.FileNames);
             }
+        }
+
+        private void cmdUploadMulti_Click(object sender, RoutedEventArgs e)
+        {
+
+            //Temp code to disable first item.
+
         }
 
 

@@ -1,14 +1,22 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:ManageWalla" x:Name="mainWindow" x:Class="ManageWalla.MainWindow"
+        xmlns:local="clr-namespace:ManageWalla"
+        xmlns:walla="clr-namespace:ManageWalla"
+        x:Name="mainWindow" x:Class="ManageWalla.MainWindow"
         Title="Main" Height="768" Width="1024" Loaded="MainWindow_Loaded" FontFamily="Tahoma" FontWeight="Light" Closing="mainWindow_Closing">
+
+
 
 
     <Window.Resources>
         <ResourceDictionary Source="WallaControlTemplates.xaml" />
 
     </Window.Resources>
+
+    <!-- <Viewbox VerticalAlignment="Top" Stretch="Uniform"> -->
+
+
 
     <Grid x:Name="grid" >
         <Grid.RowDefinitions>
@@ -26,7 +34,7 @@
 
                 <StackPanel x:Name="stackCategory"  Visibility="Visible">
 
-                                        <Grid x:Name="gridCategoryView">
+                    <Grid x:Name="gridCategoryView">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="34" />
@@ -40,32 +48,32 @@
                                 <TreeViewItem>
                                     <TreeViewItem.Header>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="icons\star.gif" Height="18"></Image>
-                                            <TextBlock Text="Holidays (30)"></TextBlock>
+                                            <Image Source="icons\star.gif" Height="18"/>
+                                            <TextBlock Text="Holidays (30)"/>
                                         </StackPanel>
                                     </TreeViewItem.Header>
 
                                     <TreeViewItem>
                                         <TreeViewItem.Header>
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="icons\star.gif" Height="18"></Image>
-                                                <TextBlock Text="Albania (30)"></TextBlock>
+                                                <Image Source="icons\star.gif" Height="18"/>
+                                                <TextBlock Text="Albania (30)"/>
                                             </StackPanel>
                                         </TreeViewItem.Header>
                                     </TreeViewItem>
                                     <TreeViewItem>
                                         <TreeViewItem.Header>
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="icons\star.gif" Height="18"></Image>
-                                                <TextBlock Text="Uzbekki (40)"></TextBlock>
+                                                <Image Source="icons\star.gif" Height="18"/>
+                                                <TextBlock Text="Uzbekki (40)"/>
                                             </StackPanel>
                                         </TreeViewItem.Header>
                                     </TreeViewItem>
                                     <TreeViewItem>
                                         <TreeViewItem.Header>
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="icons\star.gif" Height="18"></Image>
-                                                <TextBlock Text="USA (200)"></TextBlock>
+                                                <Image Source="icons\star.gif" Height="18"/>
+                                                <TextBlock Text="USA (200)"/>
                                             </StackPanel>
                                         </TreeViewItem.Header>
                                     </TreeViewItem>
@@ -73,8 +81,8 @@
                                         <TreeViewItem.Header>
                                             <CheckBox>
                                                 <StackPanel Orientation="Horizontal">
-                                                    <Image Source="icons\star.gif" Height="18"></Image>
-                                                    <TextBlock Text="China (5)"></TextBlock>
+                                                    <Image Source="icons\star.gif" Height="18"/>
+                                                    <TextBlock Text="China (5)"/>
                                                 </StackPanel>
                                             </CheckBox>
                                         </TreeViewItem.Header>
@@ -83,32 +91,32 @@
                                 <TreeViewItem>
                                     <TreeViewItem.Header>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="icons\star.gif" Height="18"></Image>
-                                            <TextBlock Text="London life (400)"></TextBlock>
+                                            <Image Source="icons\star.gif" Height="18"/>
+                                            <TextBlock Text="London life (400)"/>
                                         </StackPanel>
                                     </TreeViewItem.Header>
 
                                     <TreeViewItem>
                                         <TreeViewItem.Header>
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="icons\star.gif" Height="18"></Image>
-                                                <TextBlock Text="Around town (30)"></TextBlock>
+                                                <Image Source="icons\star.gif" Height="18"/>
+                                                <TextBlock Text="Around town (30)"/>
                                             </StackPanel>
                                         </TreeViewItem.Header>
                                     </TreeViewItem>
                                     <TreeViewItem>
                                         <TreeViewItem.Header>
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="icons\star.gif" Height="18"></Image>
-                                                <TextBlock Text="Out and about (40)"></TextBlock>
+                                                <Image Source="icons\star.gif" Height="18"/>
+                                                <TextBlock Text="Out and about (40)"/>
                                             </StackPanel>
                                         </TreeViewItem.Header>
                                     </TreeViewItem>
                                     <TreeViewItem>
                                         <TreeViewItem.Header>
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="icons\star.gif" Height="18"></Image>
-                                                <TextBlock Text="In and around (60)"></TextBlock>
+                                                <Image Source="icons\star.gif" Height="18"/>
+                                                <TextBlock Text="In and around (60)"/>
                                             </StackPanel>
                                         </TreeViewItem.Header>
                                     </TreeViewItem>
@@ -116,7 +124,7 @@
                                 </TreeViewItem>
 
                             </TreeViewItem>
-                        </TreeView >
+                        </TreeView>
 
                         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
                             <Button x:Name="cmdAddCategory" Content="Add New" Click="cmdAddCategory_Click" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
@@ -224,7 +232,7 @@
 
             <WrapPanel x:Name="wrapImages" Background="White" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <Image Source="C:\Users\Public\Pictures\Lakedistrict.jpg" Stretch="None" Width="200" Height="0" />
-                
+
             </WrapPanel>
 
             <StackPanel Orientation="Vertical"  Background="#FFABAEFF">
@@ -378,8 +386,8 @@
                                     <TextBox x:Name="txtUploadCatDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" Text="W234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789X" MaxLines="1" MaxLength="100"/>
                                     <CheckBox x:Name="chkUploadMaintainFolders" Content="Auto add images to sub categorys" />
 
-                                    
-                                    <Button x:Name="cmdUploadMulti" Content="Upload All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
+
+                                    <Button x:Name="cmdUploadMulti" Content="Upload All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadMulti_Click"  />
                                     <Button x:Name="cmdUploadClear" Content="Clear All" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
                                 </StackPanel>
                             </TabItem>
@@ -390,18 +398,6 @@
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="80" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
-                                        <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="25" />
                                         <RowDefinition Height="*" />
@@ -415,10 +411,12 @@
 
                                     <Label Grid.Column="0" Grid.Row="0" Content="Category"/>
                                     <Label x:Name="lblUploadTargetCat"  Grid.Column="1" Grid.Row="0" Content="../SubCat1/SubCat2"/>
-                                    
-                                    <Label Grid.Column="0" Grid.Row="1" Content="File name" />
-                                    <Label x:Name="lblUploadImageFileName" Grid.Column="1" Grid.Row="1" Content="12345678901234567890.jpg" />
 
+                                    <Label Grid.Column="0" Grid.Row="1" Content="File name" />
+                                    <Label x:Name="lblUploadImageFileName" Grid.Column="1" Grid.Row="1" DataContext="{Binding Mode=OneWay, Source={StaticResource uploadImagefileListKey}}" Content="{Binding Path=Meta.OriginalFileName}" />
+
+                                    
+                                    
                                     <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
                                     <TextBox x:Name="txtUploadImageName" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
 
@@ -440,67 +438,100 @@
                                         <Label x:Name="lblUploadHeight" Content="600" TextElement.FontWeight="Bold"/>
                                     </StackPanel>
 
-                                    <CheckBox x:Name="chkImageUseDefaults" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3">
+                                        <Expander Header="Additional Details">
 
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
+                                                    <RowDefinition Height="25" />
 
-                                    <Label Grid.Column="0" Grid.Row="6" Content="Camera"/>
-                                    <TextBox x:Name="txtUploadCamera" Grid.Column="1" Grid.Row="6" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
-                                    <CheckBox x:Name="chkUploadCameraAll" Grid.Column="2" Grid.Row="6" />
+                                                    <RowDefinition Height="34" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="80"/>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="20"/>
+                                                </Grid.ColumnDefinitions>
 
-                                    <Label x:Name="lblUdfChar1" Grid.Column="0" Grid.Row="7" Content="User Field 1"/>
-                                    <TextBox x:Name="txtUdfChar1" Grid.Column="1" Grid.Row="7" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
-                                    <CheckBox x:Name="chkUdfChar1All" Grid.Column="2" Grid.Row="7" />
+                                                <!--<CheckBox x:Name="chkImageUseDefaults" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center"/>-->
 
-                                    <Label x:Name="lblUdfChar2" Grid.Column="0" Grid.Row="8" Content="User Field 2"/>
-                                    <TextBox x:Name="txtUdfChar2" Grid.Column="1" Grid.Row="8" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
-                                    <CheckBox x:Name="chkUdfChar2All" Grid.Column="2" Grid.Row="8" />
+                                                <Label Grid.Column="0" Grid.Row="0" Content="Camera"/>
+                                                <TextBox x:Name="txtUploadCamera" Grid.Column="1" Grid.Row="0" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                                <CheckBox x:Name="chkUploadCameraAll" Grid.Column="2" Grid.Row="0" />
 
-                                    <Label x:Name="lblUdfChar3" Grid.Column="0" Grid.Row="9" Content="User Field 3"/>
-                                    <TextBox x:Name="txtUdfChar3" Grid.Column="1" Grid.Row="9" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
-                                    <CheckBox x:Name="chkUdfChar3All" Grid.Column="2" Grid.Row="9" />
+                                                <Label x:Name="lblUdfChar1" Grid.Column="0" Grid.Row="1" Content="User Field 1"/>
+                                                <TextBox x:Name="txtUdfChar1" Grid.Column="1" Grid.Row="1" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                                <CheckBox x:Name="chkUdfChar1All" Grid.Column="2" Grid.Row="1" />
 
-                                    <Label x:Name="lblUdfText1" Grid.Column="0" Grid.Row="10" Content="User Text"/>
-                                    <TextBox x:Name="txtUdfText1" Grid.Column="1" Grid.Row="10" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="500" TextWrapping="Wrap" Height="80" Text="12345678901234567890"/>
-                                    <CheckBox x:Name="chkUdfText1All" Grid.Column="2" Grid.Row="10" />
+                                                <Label x:Name="lblUdfChar2" Grid.Column="0" Grid.Row="2" Content="User Field 2"/>
+                                                <TextBox x:Name="txtUdfChar2" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                                <CheckBox x:Name="chkUdfChar2All" Grid.Column="2" Grid.Row="2" />
 
-                                    <Label x:Name="lblUdfNum1" Grid.Column="0" Grid.Row="11" Content="User Num 1"/>
-                                    <TextBox x:Name="txtUdfNum1" Grid.Column="1" Grid.Row="11" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
-                                    <CheckBox x:Name="chkUdfNum1All" Grid.Column="2" Grid.Row="11" />
+                                                <Label x:Name="lblUdfChar3" Grid.Column="0" Grid.Row="3" Content="User Field 3"/>
+                                                <TextBox x:Name="txtUdfChar3" Grid.Column="1" Grid.Row="3" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                                <CheckBox x:Name="chkUdfChar3All" Grid.Column="2" Grid.Row="3" />
 
-                                    <Label x:Name="lblUdfNum2" Grid.Column="0" Grid.Row="12" Content="User Num 2"/>
-                                    <TextBox x:Name="txtUdfNum2" Grid.Column="1" Grid.Row="12" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
-                                    <CheckBox x:Name="chkUdfNum2All" Grid.Column="2" Grid.Row="12" />
+                                                <Label x:Name="lblUdfText1" Grid.Column="0" Grid.Row="4" Content="User Text"/>
+                                                <TextBox x:Name="txtUdfText1" Grid.Column="1" Grid.Row="4" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="500" TextWrapping="Wrap" Height="80" Text="12345678901234567890"/>
+                                                <CheckBox x:Name="chkUdfText1All" Grid.Column="2" Grid.Row="4" />
 
-                                    <Label x:Name="lblUdfNum3" Grid.Column="0" Grid.Row="13" Content="User Num 3"/>
-                                    <TextBox x:Name="txtUdfNum3" Grid.Column="1" Grid.Row="13" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
-                                    <CheckBox x:Name="chkUdfNum3All" Grid.Column="2" Grid.Row="13" />
+                                                <Label x:Name="lblUdfNum1" Grid.Column="0" Grid.Row="5" Content="User Num 1"/>
+                                                <TextBox x:Name="txtUdfNum1" Grid.Column="1" Grid.Row="5" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                                <CheckBox x:Name="chkUdfNum1All" Grid.Column="2" Grid.Row="5" />
 
-                                    <Label x:Name="lblUdfDate1" Grid.Column="0" Grid.Row="14" Content="User Date 1"/>
-                                    <Calendar x:Name="calUdfDate1" Grid.Column="1" Grid.Row="14" />
-                                    <CheckBox x:Name="chkUdfDate1All" Grid.Column="2" Grid.Row="14" />
+                                                <Label x:Name="lblUdfNum2" Grid.Column="0" Grid.Row="6" Content="User Num 2"/>
+                                                <TextBox x:Name="txtUdfNum2" Grid.Column="1" Grid.Row="6" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                                <CheckBox x:Name="chkUdfNum2All" Grid.Column="2" Grid.Row="6" />
 
-                                    <Label x:Name="lblUdfDate2" Grid.Column="0" Grid.Row="15" Content="User Date 2"/>
-                                    <Calendar x:Name="calUdfDate2" Grid.Column="1" Grid.Row="15" />
-                                    <CheckBox x:Name="chkUdfDate2All" Grid.Column="2" Grid.Row="15" />
+                                                <Label x:Name="lblUdfNum3" Grid.Column="0" Grid.Row="7" Content="User Num 3"/>
+                                                <TextBox x:Name="txtUdfNum3" Grid.Column="1" Grid.Row="7" MaxLines="1" MaxLength="20" Text="12345678901234567890"/>
+                                                <CheckBox x:Name="chkUdfNum3All" Grid.Column="2" Grid.Row="7" />
 
-                                    <Label x:Name="lblUdfDate3" Grid.Column="0" Grid.Row="16" Content="User Date 3"/>
-                                    <Calendar x:Name="calUdfDate3" Grid.Column="1" Grid.Row="16" />
-                                    <CheckBox x:Name="chkUdfDate3All" Grid.Column="2" Grid.Row="16" />
+                                                <Label x:Name="lblUdfDate1" Grid.Column="0" Grid.Row="8" Content="User Date 1"/>
+                                                <Calendar x:Name="calUdfDate1" Grid.Column="1" Grid.Row="8" />
+                                                <CheckBox x:Name="chkUdfDate1All" Grid.Column="2" Grid.Row="8" />
 
-                                    <Label x:Name="lblTakenDate" Grid.Column="0" Grid.Row="17" Content="Date Taken"/>
-                                    <Calendar x:Name="calTakenDate" Grid.Column="1" Grid.Row="17" />
-                                    <CheckBox x:Name="chkTakenDateAll" Grid.Column="2" Grid.Row="17" />
+                                                <Label x:Name="lblUdfDate2" Grid.Column="0" Grid.Row="9" Content="User Date 2"/>
+                                                <Calendar x:Name="calUdfDate2" Grid.Column="1" Grid.Row="9" />
+                                                <CheckBox x:Name="chkUdfDate2All" Grid.Column="2" Grid.Row="9" />
 
-                                    <StackPanel Orientation="Horizontal" Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="3">
+                                                <Label x:Name="lblUdfDate3" Grid.Column="0" Grid.Row="10" Content="User Date 3"/>
+                                                <Calendar x:Name="calUdfDate3" Grid.Column="1" Grid.Row="10" />
+                                                <CheckBox x:Name="chkUdfDate3All" Grid.Column="2" Grid.Row="10" />
+
+                                                <Label x:Name="lblTakenDate" Grid.Column="0" Grid.Row="11" Content="Date Taken"/>
+                                                <Calendar x:Name="calTakenDate" Grid.Column="1" Grid.Row="11" />
+                                                <CheckBox x:Name="chkTakenDateAll" Grid.Column="2" Grid.Row="11" />
+                                            </Grid>
+
+                                        </Expander>
+
+                                        <Expander Header="Associated Tags">
+
+                                        </Expander>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3">
                                         <Button x:Name="cmdUploadResetMeta" Content="Reset Info" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
-                                        
-
                                     </StackPanel>
                                 </Grid>
+
                             </TabItem>
                             <TabItem Header="Upload Status">
                                 <Grid Background="#FFE5E5E5"/>
                             </TabItem>
+
                         </TabControl>
 
                         <Grid Grid.Column="1" Grid.Row="0">
@@ -512,16 +543,24 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <WrapPanel x:Name="wrapUploadImages" ScrollViewer.VerticalScrollBarVisibility="Visible" Background="White" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="0" Grid.Row="0">
+                            <ListBox Style="{DynamicResource PhotoListStyle}" 
+                            		x:Name ="lstUploadImageFileList" 
+                            		DataContext="{Binding Mode=OneWay, Source={StaticResource uploadImagefileListKey}}" 
+                            		ItemsSource="{Binding }" 
+                            		ItemContainerStyle="{DynamicResource PhotoListItem}" 
+                            		SelectedIndex="0"
+                            		ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Column="0" Grid.Row="0" />
 
-                            </WrapPanel>
+                            <!--ItemTemplate="uploadImageDataTemplate"-->
                             
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1">
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" >
                                 <Button x:Name="cmdUploadImportFolder" Content="Import Folder"  Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFolder_Click" />
                                 <Button x:Name="cmdUploadImportFiles" Content="Import Images" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFiles_Click" />
                             </StackPanel>
                         </Grid>
                     </Grid>
+
+
                 </StackPanel>
 
 
@@ -529,4 +568,5 @@
         </StackPanel>
 
     </Grid>
+
 </Window>
