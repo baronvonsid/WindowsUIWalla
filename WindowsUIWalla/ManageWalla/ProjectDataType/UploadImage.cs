@@ -17,23 +17,32 @@ namespace ManageWalla
         public UploadImage(string value)
         {
             filePath = value;
-            FileInfo fileInfo = new FileInfo(filePath);
+
             
+            image = LoadBitmap(filePath);
+            SetupMeta();
+            FolderPath = Path.GetDirectoryName(filePath);
+
+        }
+
+        private void SetupMeta()
+        {
             string format = GetFormat(filePath);
             if (format == null)
             { return; }
 
-            image = LoadBitmap(filePath);
-
+            FileInfo fileInfo = new FileInfo(filePath);
             meta = new ImageMeta();
-            meta.OriginalFileName = Path.GetFileName(value);
-            meta.Name = Path.GetFileNameWithoutExtension(value);
+            meta.OriginalFileName = Path.GetFileName(filePath);
+            meta.Name = Path.GetFileNameWithoutExtension(filePath);
             meta.Format = format;
             meta.Width = image.PixelWidth;
             meta.Height = image.PixelHeight;
             meta.Size = (long)(fileInfo.Length / 1000);
+            
             //meta.TakenDate = ;
             //meta.Camera = ;
+
         }
 
         private string GetFormat(string fileName)
@@ -62,12 +71,19 @@ namespace ManageWalla
             return myBitmapImage;
         }
 
+        public void ResetMeta()
+        {
+            SetupMeta();
+        }
 
+        public ImageMeta Meta
+        {
+            get {return meta;}
+        }
 
-        public ImageMeta Meta { get; set; }
         public String FilePath { get { return filePath; } }
         public BitmapImage Image { get { return image; } }
-
+        public string FolderPath { get; set; }
 
     }
 }

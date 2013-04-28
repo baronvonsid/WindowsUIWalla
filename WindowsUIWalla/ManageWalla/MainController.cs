@@ -17,28 +17,71 @@ using System.Net.Mime;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 
-
 namespace ManageWalla
 {
     public class MainController : IDisposable
     {
-        private const string userName = "simo1n";
-        private const String baseUri = "http://localhost:8081/WallaWS/v1/user/simo1n/";
-        private HttpClient http = null;
         private MainWindow currentMain;
         private GlobalState state = null;
+        private ServerHelper serverHelper = null;
+        private const string userName = "simo1n";
 
         public MainController(MainWindow currentMainParam)
         {
             currentMain = currentMainParam;
-            http = new HttpClient();
-            http.BaseAddress = new Uri(baseUri);
 
             state = new GlobalState();
             state = GlobalState.GetState(userName);
+
+            serverHelper = new ServerHelper(state);
         }
 
+        public void LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots)
+        {
+            for (int i = 0; i < fileNames.Length; i++)
+            {
+                meFots.Add(new UploadImage(fileNames[i]));
+            }
 
+        }
+
+        public void LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots)
+        {
+            if (recursive)
+            {
+                foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
+                {
+                    LoadImagesFromFolder(folder, recursive, meFots);
+                }
+            }
+
+            foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
+            {
+                meFots.Add(new UploadImage(file.FullName));
+            }
+
+            /*
+            public Window()
+            {
+                InitializeComponent();
+
+                ThreadPool.QueueUserWorkItem(LoadImage,
+                     "http://z.about.com/d/animatedtv/1/0/1/m/simpf.jpg");
+            }
+
+            public void LoadImage(object uri)
+            {
+                var decoder = new JpegBitmapDecoder(new Uri(uri.ToString()), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                decoder.Frames[0].Freeze();
+                this.Dispatcher.Invoke(DispatcherPriority.Send, new Action<ImageSource>(SetImage), decoder.Frames[0]);
+            }
+
+            public void SetImage(ImageSource source)
+            {
+                this.BackgroundImage.Source = source;
+            } 
+            */
+        }
         /// <summary>
         /// For each entity - Category, Tag, View List, Account Settings
         /// Check local cache for entries and check Walla Hub for updates
@@ -46,144 +89,98 @@ namespace ManageWalla
         /// </summary>
         public void RetrieveGeneralUserConfig()
         {
-
-
-            GetCategoryTree();
+            //GetCategoryTree();
         }
 
+        public void CreateCategoryFromFolder(DirectoryInfo currentFolder, UploadImageFileList meFots, long parentCategoryId)
+        {
+            long categoryId = serverHelper.CreateCategory(currentFolder.Name, "", parentCategoryId);
+            foreach (UploadImage currentImage in meFots.OfType<UploadImage>().Where(r => r.FolderPath == currentFolder.FullName))
+            {
+                currentImage.Meta.categoryId = categoryId;
+            }
+
+            foreach (DirectoryInfo subFolder in currentFolder.GetDirectories())
+            {
+                CreateCategoryFromFolder(subFolder, meFots, categoryId);
+            }
+        }
+
+        public void DoUpload(UploadImageFileList meFots, UploadUIState uploadState)
+        {
+            long rootCategoryId = 0;
+            if (uploadState.UploadToNewCategory)
+            {
+                rootCategoryId = serverHelper.CreateCategory(uploadState.CategoryName, uploadState.CategoryDesc, uploadState.CategoryId);
+            }
+            else
+            {
+                rootCategoryId = uploadState.CategoryId;
+            }
+
+            if (uploadState.MapToSubFolders)
+            {
+                if (uploadState.UploadToNewCategory)
+                {
+                    //Assumption being that all sub categories will now need to be created.
+                    DirectoryInfo rootFolder = new DirectoryInfo(uploadState.RootFolder);
+                    CreateCategoryFromFolder(rootFolder, meFots, rootCategoryId);
+                }
+                else
+                {
+                    //Check local category xml for matches or create new.
+
+                    
+                }
+            }
+            else
+            {
+                foreach (UploadImage currentImage in meFots)
+                {
+                    currentImage.Meta.categoryId = rootCategoryId;
+                }
+
+                //Check for each chkAll box set to true, then replace respective values.
+            }
+
+            foreach (UploadImage currentImage in meFots)
+            {
+                serverHelper.UploadImage(currentImage.Meta, currentImage.FilePath);
+            }
+        }
+
+        public void ResetMeFotsMeta(UploadImageFileList metFots)
+        {
+            foreach (UploadImage currentImage in metFots)
+            {
+                currentImage.ResetMeta();
+            }
+        }
 
         public TagList GetTagsAvailable()
         {
-            try
-            {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tags");
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-                //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
-
-                if (state.tagList != null)
-                {
-                    request.Headers.IfModifiedSince = new DateTimeOffset(state.tagList.LastChanged);
-                }
-
-                HttpResponseMessage response = http.SendAsync(request).Result;
-                if (response.StatusCode == HttpStatusCode.NotModified)
-                {
-                    return state.tagList;
-                }
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(TagList));
-                    TagList tagList = (TagList)serialKiller.Deserialize(response.Content.ReadAsStreamAsync().Result);
-                    state.tagList = tagList;
-                    return tagList;
-                }
-
-                throw new Exception("/Tags web service returned an error code: " + response.StatusCode.ToString());
-            }
-            catch (Exception ex)
-            {
-                //TODO Log failure.
-                Console.WriteLine(ex.Message);
-                return null;
-            }
+            return serverHelper.GetTagsAvailable();
         }
 
         public string UpdateTag(Tag newTag, string oldTagName)
         {
-            try
-            {
-
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "tag/" + Uri.EscapeUriString(oldTagName));
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-                //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
-
-
-                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-                xmlFormatter.UseXmlSerializer = true;
-                HttpContent content = new ObjectContent<Tag>(newTag, xmlFormatter);
-                request.Content = content;
-                HttpResponseMessage response = http.SendAsync(request).Result;
-                response.EnsureSuccessStatusCode();
-
-                return "";
-            }
-            catch (Exception ex)
-            {
-                //TODO Log failure.
-                return "Tag could not be updated, there was an error on the server:" + ex.Message;
-            }
+            return serverHelper.UpdateTag(newTag, oldTagName);
         }
 
         public string SaveNewTag(Tag tag)
         {
-            try
-            {
-
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "tag/" + Uri.EscapeUriString(tag.Name));
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-                //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
-
-
-                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-                xmlFormatter.UseXmlSerializer = true;
-                HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
-                request.Content = content;
-                HttpResponseMessage response = http.SendAsync(request).Result;
-                response.EnsureSuccessStatusCode();
-
-                return "";
-            }
-            catch (Exception ex)
-            {
-                //TODO Log failure.
-                return "The new tag could not be saved, there was an error on the server:" + ex.Message;
-            }
+            return serverHelper.SaveNewTag(tag);
         }
 
         public Tag GetTagMeta(TagListTagRef tagRef)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tag/" + Uri.EscapeUriString(tagRef.name));
-            request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-            HttpResponseMessage response = http.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-
-            XmlSerializer serialKiller = new XmlSerializer(typeof(Tag));
-            Tag tag = (Tag)serialKiller.Deserialize(response.Content.ReadAsStreamAsync().Result);
-
-            return tag;
+            return serverHelper.GetTagMeta(tagRef);
         }
 
         public string DeleteTag(Tag tag)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "tag/" + Uri.EscapeUriString(tag.Name));
-            request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-            xmlFormatter.UseXmlSerializer = true;
-            HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
-            request.Content = content;
-            HttpResponseMessage response = http.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-
-            state.tagList = null;
-
-            return "";
+            return serverHelper.DeleteTag(tag);
         }
-
-        private void GetCategoryTree()
-        {
-            currentMain.RefreshCategoryTreeView();
-        }
-
-        /*
-        public static T ReadAsDataContract<T>(HttpContent content)
-        {
-            DataContractSerializer serializer = new DataContractSerializer(typeof(T));
-            return (T)serializer.ReadObject(content.ReadAsStreamAsync().Result);
-        }
-        */
 
         public void Dispose()
         {

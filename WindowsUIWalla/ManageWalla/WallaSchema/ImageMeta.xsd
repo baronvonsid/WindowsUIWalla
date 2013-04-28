@@ -32,8 +32,9 @@ targetNamespace="http://www.example.org/ImageMeta"
 		
 		<element name="TagRef" maxOccurs="unbounded" minOccurs="0">
 			<complexType>
-				<attribute type="long" name="tagId" />
+				<attribute type="long" name="id" />
 				<attribute type="string" name="op" />
+        <attribute type="string" name="name" />
 			</complexType>
 		</element>
 		

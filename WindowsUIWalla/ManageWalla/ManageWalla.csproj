@@ -95,12 +95,14 @@
       <DependentUpon>Main.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainController.cs" />
+    <Compile Include="ProjectDataType\UploadUIState.cs" />
+    <Compile Include="ServerHelper.cs" />
     <Compile Include="WallaDataType\ImageMeta.cs" />
     <Compile Include="WallaDataType\TagImageList.cs" />
     <Compile Include="WallaDataType\TagList.cs" />
     <Compile Include="WallaDataType\Tags.cs" />
-    <Compile Include="WallaDataType\UploadImage.cs" />
-    <Compile Include="WallaDataType\UploadImageFileList.cs" />
+    <Compile Include="ProjectDataType\UploadImage.cs" />
+    <Compile Include="ProjectDataType\UploadImageFileList.cs" />
     <Compile Include="WallaDataType\UploadStatusList.cs" />
     <Page Include="Main.xaml">
       <Generator>MSBuild:Compile</Generator>

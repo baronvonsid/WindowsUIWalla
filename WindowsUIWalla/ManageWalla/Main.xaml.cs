@@ -42,11 +42,17 @@ namespace ManageWalla
         private Tag currentTag = null;
 
         private MainController controller = null;
+        public UploadUIState uploadUIState = null;
+        public UploadImageFileList meFots = null;
+
         //private UploadImageFileList meFots = new UploadImageFileList();
 
         public MainWindow()
         {
             InitializeComponent();
+
+            meFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
+            uploadUIState = (UploadUIState)FindResource("uploadUIStateKey");
         }
 
         private void cmdEditView_Click(object sender, RoutedEventArgs e)
@@ -76,7 +82,12 @@ namespace ManageWalla
 
             HideAllContent();
 
-            //meFots = new UploadImageFileList();
+            
+            //uploadUIState = new UploadUIState();
+
+            //UploadImageFileList meFots = new UploadImageFileList();
+
+            
 
             currentPane = PaneMode.CategoryView;
             this.cmdCategory.IsChecked = true;
@@ -126,6 +137,8 @@ namespace ManageWalla
 
                 case PaneMode.Upload:
                     stackUpload.Height = windowAdjustHeight - (headingHeight * 2.0);
+                    stackTag.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
+                    stackCategory.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
                     wrapImages.Height = 0.0;
                     break;
             }
@@ -136,10 +149,6 @@ namespace ManageWalla
             switch (mode)
             {
                 case PaneMode.CategoryView:
-
-                    ///
-                    /// wrapImages.Height = mainWindow.Height - 90.0;
-
                     cmdTag.IsChecked = false;
                     cmdView.IsChecked = false;
                     cmdSettings.IsChecked = false;
@@ -181,6 +190,10 @@ namespace ManageWalla
                     gridTagView.IsEnabled = true;
                     gridTagAddEdit.Visibility = Visibility.Collapsed;
                     stackTag.Visibility = Visibility.Visible;
+
+                    cmdAssociateTag.Visibility = Visibility.Collapsed;
+                    cmdAddTag.Visibility = Visibility.Visible;
+                    cmdEditEdit.Visibility = Visibility.Visible;
 
                     break;
                 case PaneMode.TagAdd:
@@ -232,12 +245,90 @@ namespace ManageWalla
                     break;
 
                 case PaneMode.Upload:
+
                     cmdCategory.IsChecked = false;
                     cmdTag.IsChecked = false;
                     cmdSettings.IsChecked = false;
                     cmdView.IsChecked = false;
 
                     HideAllContent();
+
+                    cmdAssociateTag.Visibility = Visibility.Visible;
+                    cmdAddTag.Visibility = Visibility.Collapsed;
+                    cmdEditEdit.Visibility = Visibility.Collapsed;
+
+
+                    if (uploadUIState.Mode == UploadUIState.UploadMode.Images || uploadUIState.Mode == UploadUIState.UploadMode.Folder)
+                    {
+                        //Common
+                        grdUploadSettings.RowDefinitions[3].MaxHeight = 25; //Upload to new category
+                        tabUploadImageDetails.IsEnabled = true;
+                        if (uploadUIState.UploadToNewCategory)
+                        {
+                            grdUploadSettings.RowDefinitions[4].MaxHeight = 25; //Category Name
+                            grdUploadSettings.RowDefinitions[5].MaxHeight = 80; //Category Description
+                        }
+                        else
+                        {
+                            grdUploadSettings.RowDefinitions[4].MaxHeight = 0;
+                            grdUploadSettings.RowDefinitions[5].MaxHeight = 0;
+                        }
+                        
+                        cmdUploadAll.IsEnabled = true;
+                        cmdUploadClear.IsEnabled = true;
+
+                        if (uploadUIState.Mode == UploadUIState.UploadMode.Images)
+                        {
+                            grdUploadImageDetails.RowDefinitions[0].MaxHeight = 0; //Sub category marker
+                            grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
+                            cmdUploadImportFolder.Visibility = Visibility.Hidden;
+                        }
+                        else if (uploadUIState.Mode == UploadUIState.UploadMode.Folder)
+                        {
+                            if (uploadUIState.MapToSubFolders)
+                            {
+                                grdUploadImageDetails.RowDefinitions[0].MaxHeight = 25; //Sub category marker
+                                grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
+                            }
+                            else
+                            {
+                                grdUploadImageDetails.RowDefinitions[0].MaxHeight = 0; //Sub category marker
+                                grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
+                            }
+                            cmdUploadImportFiles.Visibility = Visibility.Hidden;
+                        }
+
+                    }
+                    else
+                    {
+
+
+
+                        //Check if there are outstanding upload items then just allow progress or cancel.
+                        if (lstUploadImageFileList.Items.Count > 0)
+                        {
+                            cmdUploadImportFolder.IsEnabled = false;
+                            cmdUploadImportFiles.IsEnabled = false;
+                            cmdUploadResetMeta.IsEnabled = false;
+                            cmdUploadClear.IsEnabled = true;
+                            cmdUploadClear.Content = "Cancel Uploads";
+                        }
+                        else
+                        {
+                            //New Upload
+                            cmdUploadImportFolder.Visibility = Visibility.Visible;
+                            cmdUploadImportFiles.Visibility = Visibility.Visible;
+                            cmdUploadClear.Content = "Clear";
+                            cmdUploadClear.IsEnabled = false;
+                            grdUploadSettings.RowDefinitions[2].MaxHeight = 0;
+                            grdUploadSettings.RowDefinitions[3].MaxHeight = 0;
+                            grdUploadSettings.RowDefinitions[4].MaxHeight = 0;
+                            grdUploadSettings.RowDefinitions[5].MaxHeight = 0;
+                        }
+                        cmdUploadAll.IsEnabled = false;
+                        tabUploadImageDetails.IsEnabled = false;
+                    }
+                    
                     stackUpload.Visibility = Visibility.Visible;
 
                     break;
@@ -268,6 +359,7 @@ namespace ManageWalla
             stackUpload.Visibility = Visibility.Collapsed;
         }
 
+        /*
         public Image GetImageControl(string filePath)
         {
             BitmapImage myBitmapImage = new BitmapImage();
@@ -282,66 +374,11 @@ namespace ManageWalla
             myImage.Style = (Style)FindResource("styleImageThumb");
             return myImage;
         }
+        */
 
-        private void LoadImagesFromArray(String[] fileNames)
-        {
-            UploadImageFileList meFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
-            for (int i = 0; i < fileNames.Length; i++)
-            {
-                
-                meFots.Add(new UploadImage(fileNames[i]));
 
-                //this.wrapUploadImages.Children.Add(GetImageControl(fileNames[i]));
-            }
 
-        }
 
-        public void LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive)
-        {
-            if (recursive)
-            {
-                foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
-                {
-                    LoadImagesFromFolder(folder, recursive);
-                }
-            }
-
-            UploadImageFileList meFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
-
-            foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
-            {
-                meFots.Add(new UploadImage(file.FullName));
-                //this.wrapUploadImages.Children.Add(GetImageControl(file.FullName));
-
-                //System.Windows.Media.Imaging.JpegBitmapDecoder newJpeg = new System.Windows.Media.Imaging.JpegBitmapDecoder(file.OpenRead(), System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.None);
-                //System.Windows.Media.Imaging.BitmapImage image = new System.Windows.Media.Imaging.BitmapImage();
-                //image.StreamSource = file.OpenRead();
-
-                //System.Windows.Media.Imaging.BitmapImage image = new System.Windows.Media.Imaging.BitmapImage();
-            }
-
-            /*
-            public Window()
-            {
-                InitializeComponent();
-
-                ThreadPool.QueueUserWorkItem(LoadImage,
-                     "http://z.about.com/d/animatedtv/1/0/1/m/simpf.jpg");
-            }
-
-            public void LoadImage(object uri)
-            {
-                var decoder = new JpegBitmapDecoder(new Uri(uri.ToString()), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-                decoder.Frames[0].Freeze();
-                this.Dispatcher.Invoke(DispatcherPriority.Send, new Action<ImageSource>(SetImage), decoder.Frames[0]);
-            }
-
-            public void SetImage(ImageSource source)
-            {
-                this.BackgroundImage.Source = source;
-            } 
-            */
-        }
 
         private void RefreshTagsList()
         {
@@ -481,6 +518,15 @@ namespace ManageWalla
             RefreshTagsList();
         }
 
+        private void CheckForUploadComplete(object sender, TextCompositionEventArgs e)
+        {
+            if (meFots.Count == 0)
+            {
+                //Upload Complete.
+                SetPanePositions(PaneMode.Upload);
+            }
+        }
+
         private void txtTagAddEditName_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
 
@@ -514,47 +560,146 @@ namespace ManageWalla
 
         private void cmdUploadImportFolder_Click(object sender, RoutedEventArgs e)
         {
-
             var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
             System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
             if (folderDialog.SelectedPath.Length > 0)
             {
+                uploadUIState.MapToSubFolders = false; ;
                 DirectoryInfo folder = new DirectoryInfo(folderDialog.SelectedPath);
-
-                if (MessageBox.Show("Do you want to add all images in sub folders too ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (folder.GetDirectories().Length > 0)
                 {
-                    LoadImagesFromFolder(folder, true);
+                    uploadUIState.GotSubFolders = true;
+
+                    if (MessageBox.Show("Do you want to add images from the sub folders too ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    {
+                        controller.LoadImagesFromFolder(folder, true, meFots);
+                        uploadUIState.MapToSubFolders = true;
+                    }
+                    else
+                    {
+                        controller.LoadImagesFromFolder(folder, false, meFots);
+                    }
                 }
                 else
                 {
-                    LoadImagesFromFolder(folder, false);
+                    controller.LoadImagesFromFolder(folder, false, meFots);
                 }
+
+                uploadUIState.Mode = UploadUIState.UploadMode.Folder;
+                SetPanePositions(PaneMode.Upload);
             }
         }
 
         private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
         {
-            //wrapUploadImages.Children.Clear();
+            meFots.Clear();
+            ResetUploadState(true);
+            SetPanePositions(PaneMode.Upload);
+        }
+
+        private void ResetUploadState(bool fullReset)
+        {
+            if (fullReset)
+            {
+                uploadUIState.GotSubFolders = false;
+                uploadUIState.CategoryName = "";
+                uploadUIState.CategoryDesc = "";
+                uploadUIState.MapToSubFolders = false;
+                uploadUIState.UploadToNewCategory = false;
+
+                uploadUIState.Mode = UploadUIState.UploadMode.None;
+            }
+
+            //TODO = get list of all controls with a name starts chkUpload% and finishes %All
+            //Loop through and set checked to false
+
+            chkUploadCameraAll.IsChecked = false;
+            //Plus all the others.
         }
 
         private void cmdUploadImportFiles_Click(object sender, RoutedEventArgs e)
         {
-
             var openDialog = new System.Windows.Forms.OpenFileDialog();
             openDialog.DefaultExt = @"*.JPG;*.BMP";
             openDialog.Multiselect = true;
             System.Windows.Forms.DialogResult result = openDialog.ShowDialog();
             if (openDialog.FileNames.Length > 0)
             {
-                LoadImagesFromArray(openDialog.FileNames);
+                controller.LoadImagesFromArray(openDialog.FileNames, meFots);
+                uploadUIState.GotSubFolders = false;
+                uploadUIState.Mode = UploadUIState.UploadMode.Images;
+                SetPanePositions(PaneMode.Upload);
             }
         }
 
         private void cmdUploadMulti_Click(object sender, RoutedEventArgs e)
         {
+            //TODO Begin async, upload process.
 
-            //Temp code to disable first item.
+            SetPanePositions(PaneMode.Upload);
+        }
 
+        private void cmdUploadResetMeta_Click(object sender, RoutedEventArgs e)
+        {
+            ResetUploadState(false);
+            controller.ResetMeFotsMeta(meFots);
+            SetPanePositions(PaneMode.Upload);
+        }
+
+        private void chkUploadToNewCategory_Checked(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(currentPane);
+        }
+
+        private void chkUploadToNewCategory_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(currentPane);
+        }
+
+        private void chkUploadCameraAll_Checked(object sender, RoutedEventArgs e)
+        {
+            Binding simon = BindingOperations.GetBinding(txtUploadCamera, TextBlock.TextProperty);
+            BindingOperations.ClearBinding(txtUploadCamera, TextBlock.TextProperty);
+        }
+
+        private void chkUploadCameraAll_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Binding binding = new Binding("Count");
+            //binding.Source = meFots;
+            //binding.Path = new PropertyPath("Count");
+            binding.Mode = BindingMode.OneWay;
+
+            BindingOperations.SetBinding(txtUploadCamera, TextBlock.TextProperty, binding);
+            //txtUploadCamera.SetBinding(TextBlock.TextProperty, binding);
+            BindingExpression simon = BindingOperations.GetBindingExpression(txtUploadCamera, TextBlock.TextProperty);
+        }
+
+        private void cmdAssociateTag_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentPane == PaneMode.Upload)
+            {
+                
+                RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+
+                if (checkedTagButton != null)
+                {
+                    TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedTagButton.Tag;
+
+
+                    ImageMetaTagRef newTagRef = new ImageMetaTagRef();
+                    newTagRef.tagId = tagListTagRefTemp.id;
+                    newTagRef.op = "C";
+                    //newTagRef.Name = tagListTagRefTemp.name;
+
+                    UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                    ImageMetaTagRef[] newTagRefArray = new ImageMetaTagRef[current.Meta.TagRef.Length + 1];
+
+                    current.Meta.TagRef.CopyTo(newTagRefArray, 0);
+                    newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
+
+                    current.Meta.TagRef = newTagRefArray;
+                }
+            }
         }
 
 

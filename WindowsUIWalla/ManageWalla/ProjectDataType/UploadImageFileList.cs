@@ -14,10 +14,5 @@ namespace ManageWalla
     public class UploadImageFileList : ObservableCollection<UploadImage>
     {
         public UploadImageFileList() { }
-
-        //public void Add(UploadImage uploadImage)
-        //{
-        //    Add(uploadImage);
-        //}
     }
 }

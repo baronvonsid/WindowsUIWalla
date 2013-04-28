@@ -4,11 +4,8 @@
                     xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary">
 
     <local:UploadImageFileList x:Key="uploadImagefileListKey" />
+    <local:UploadUIState x:Key="uploadUIStateKey"  />
 
-    <!---   x:Key="uploadImageDataTemplate"  -->
-    <DataTemplate DataType="{x:Type local:UploadImage}">
-            <Image Source="{Binding Image}" />
-    </DataTemplate>
 
 
     <ControlTemplate x:Key="templateButton" TargetType="{x:Type Button}">
@@ -111,6 +108,36 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
+    <!--  -->
+
+    <Style x:Key="TagListStyle" TargetType="{x:Type ListBox}">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListBox}">
+                    <ScrollViewer 
+								VerticalScrollBarVisibility="Auto" 
+								HorizontalScrollBarVisibility="Disabled">
+                        <WrapPanel 
+									IsItemsHost="True" 
+									Orientation="Horizontal" />
+                    </ScrollViewer>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TagListItem" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="MaxHeight" Value="60" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="BorderBrush" Value="#FF6C8DD0" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Margin" Value="3" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
 
     <Style x:Key="PhotoListStyle" TargetType="{x:Type ListBox}">
         <Setter Property="Padding" Value="0" />
