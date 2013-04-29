@@ -17,6 +17,8 @@ namespace ManageWalla
         private bool uploadToNewCategory = false;
         private string categoryName = null;
         private string categoryDesc = null;
+        private bool tagsAll = false;
+
         public enum UploadMode
         {
             None = 0,
@@ -25,7 +27,6 @@ namespace ManageWalla
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
 
         public bool MapToSubFolders {
             get { return mapToSubFolders; }
@@ -99,6 +100,16 @@ namespace ManageWalla
         public UploadMode Mode { get; set; }
 
         public string RootFolder { get; set; }
+
+        public bool TagsAll
+        {
+            get { return tagsAll; }
+            set
+            {
+                tagsAll = value;
+                OnPropertyChanged("TagsAll");
+            }
+        } 
 
         protected void OnPropertyChanged(string name)
         {

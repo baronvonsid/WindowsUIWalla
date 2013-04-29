@@ -383,31 +383,33 @@ namespace ManageWalla {
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageMeta")]
     public partial class ImageMetaTagRef {
         
-        private long tagIdField;
+        private long idField;
         
-        private bool tagIdFieldSpecified;
+        private bool idFieldSpecified;
         
         private string opField;
         
+        private string nameField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public long tagId {
+        public long id {
             get {
-                return this.tagIdField;
+                return this.idField;
             }
             set {
-                this.tagIdField = value;
+                this.idField = value;
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool tagIdSpecified {
+        public bool idSpecified {
             get {
-                return this.tagIdFieldSpecified;
+                return this.idFieldSpecified;
             }
             set {
-                this.tagIdFieldSpecified = value;
+                this.idFieldSpecified = value;
             }
         }
         
@@ -419,6 +421,17 @@ namespace ManageWalla {
             }
             set {
                 this.opField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string name {
+            get {
+                return this.nameField;
+            }
+            set {
+                this.nameField = value;
             }
         }
     }

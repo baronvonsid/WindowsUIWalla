@@ -82,13 +82,6 @@ namespace ManageWalla
 
             HideAllContent();
 
-            
-            //uploadUIState = new UploadUIState();
-
-            //UploadImageFileList meFots = new UploadImageFileList();
-
-            
-
             currentPane = PaneMode.CategoryView;
             this.cmdCategory.IsChecked = true;
         }
@@ -253,14 +246,20 @@ namespace ManageWalla
 
                     HideAllContent();
 
+                    //Sort out Tag view options////
                     cmdAssociateTag.Visibility = Visibility.Visible;
                     cmdAddTag.Visibility = Visibility.Collapsed;
                     cmdEditEdit.Visibility = Visibility.Collapsed;
+                    gridTagAddEdit.Visibility = Visibility.Collapsed;
+                    stackTag.Visibility = Visibility.Visible;
 
+                    //Do Category view options.
+                    stackCategory.Visibility = Visibility.Visible;
 
                     if (uploadUIState.Mode == UploadUIState.UploadMode.Images || uploadUIState.Mode == UploadUIState.UploadMode.Folder)
                     {
                         //Common
+                        grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
                         grdUploadSettings.RowDefinitions[3].MaxHeight = 25; //Upload to new category
                         tabUploadImageDetails.IsEnabled = true;
                         if (uploadUIState.UploadToNewCategory)
@@ -280,20 +279,25 @@ namespace ManageWalla
                         if (uploadUIState.Mode == UploadUIState.UploadMode.Images)
                         {
                             grdUploadImageDetails.RowDefinitions[0].MaxHeight = 0; //Sub category marker
-                            grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
+                            //grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
+                            chkUploadMapToSubFolders.IsEnabled = false;
+
                             cmdUploadImportFolder.Visibility = Visibility.Hidden;
                         }
                         else if (uploadUIState.Mode == UploadUIState.UploadMode.Folder)
                         {
-                            if (uploadUIState.MapToSubFolders)
+                           
+                            if (uploadUIState.GotSubFolders)
                             {
                                 grdUploadImageDetails.RowDefinitions[0].MaxHeight = 25; //Sub category marker
-                                grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
+                                //grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
+                                chkUploadMapToSubFolders.IsEnabled = true;
                             }
                             else
                             {
                                 grdUploadImageDetails.RowDefinitions[0].MaxHeight = 0; //Sub category marker
-                                grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
+                                //grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
+                                chkUploadMapToSubFolders.IsEnabled = false;
                             }
                             cmdUploadImportFiles.Visibility = Visibility.Hidden;
                         }
@@ -301,7 +305,6 @@ namespace ManageWalla
                     }
                     else
                     {
-
 
 
                         //Check if there are outstanding upload items then just allow progress or cancel.
@@ -358,26 +361,6 @@ namespace ManageWalla
             stackView.Visibility = Visibility.Collapsed;
             stackUpload.Visibility = Visibility.Collapsed;
         }
-
-        /*
-        public Image GetImageControl(string filePath)
-        {
-            BitmapImage myBitmapImage = new BitmapImage();
-            myBitmapImage.BeginInit();
-            myBitmapImage.DecodePixelWidth = 100;
-            myBitmapImage.UriSource = new Uri(filePath);
-            myBitmapImage.EndInit();
-            myBitmapImage.Freeze();
-
-            Image myImage = new Image();
-            myImage.Source = myBitmapImage;
-            myImage.Style = (Style)FindResource("styleImageThumb");
-            return myImage;
-        }
-        */
-
-
-
 
 
         private void RefreshTagsList()
@@ -635,6 +618,10 @@ namespace ManageWalla
         private void cmdUploadMulti_Click(object sender, RoutedEventArgs e)
         {
             //TODO Begin async, upload process.
+            foreach (ListBoxItem imageToUpload in lstUploadImageFileList.Items)
+            {
+                imageToUpload.IsEnabled = false;
+            }
 
             SetPanePositions(PaneMode.Upload);
         }
@@ -678,32 +665,117 @@ namespace ManageWalla
         {
             if (currentPane == PaneMode.Upload)
             {
-                
                 RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
 
                 if (checkedTagButton != null)
                 {
                     TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedTagButton.Tag;
 
-
                     ImageMetaTagRef newTagRef = new ImageMetaTagRef();
-                    newTagRef.tagId = tagListTagRefTemp.id;
+                    newTagRef.id = tagListTagRefTemp.id;
                     newTagRef.op = "C";
-                    //newTagRef.Name = tagListTagRefTemp.name;
+                    newTagRef.name = tagListTagRefTemp.name;
 
                     UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-                    ImageMetaTagRef[] newTagRefArray = new ImageMetaTagRef[current.Meta.TagRef.Length + 1];
+                    ImageMetaTagRef[] newTagRefArray;
 
-                    current.Meta.TagRef.CopyTo(newTagRefArray, 0);
-                    newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
+                    if (current.Meta.TagRef == null)
+                    {
+                        newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
+                    }
+                    else
+                    {
+                        newTagRefArray = new ImageMetaTagRef[current.Meta.TagRef.Length + 1];
+                        current.Meta.TagRef.CopyTo(newTagRefArray, 0);
+                        newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
+                    }
 
                     current.Meta.TagRef = newTagRefArray;
+
+                    UploadEnableDisableTags(current);
+                    checkedTagButton.IsChecked = false;
+                    BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
                 }
             }
         }
 
+        private void UploadEnableDisableTags(UploadImage current)
+        {
 
+            foreach (RadioButton button in wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsEnabled == false))
+            {
+                bool exists = false;
+                if (current.Meta.TagRef != null)
+                {
+                    foreach (ImageMetaTagRef tagRef in current.Meta.TagRef)
+                    {
+                        TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
+                        if (tagRef.id == existingTagRef.id)
+                        {
+                            exists = true;
+                        }
+                    }
+                }
 
+                if (!exists)
+                {
+                    button.IsEnabled = true;
+                }
+                exists = false;
+            }
 
+            if (current.Meta.TagRef != null)
+            {
+                foreach (ImageMetaTagRef tagRef in current.Meta.TagRef)
+                {
+                    foreach (RadioButton button in wrapMyTags.Children)
+                    {
+                        TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
+                        if (tagRef.id == existingTagRef.id)
+                        {
+                            button.IsEnabled = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void cmdUploadRemoveTag_Click(object sender, RoutedEventArgs e)
+        {
+            ImageMetaTagRef currentTag = (ImageMetaTagRef)lstUploadTagList.SelectedItem;
+
+            if (currentTag != null)
+            {
+                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                ImageMetaTagRef[] newTagListTagRef = current.Meta.TagRef.Where(r => r.id != currentTag.id).ToArray();
+                current.Meta.TagRef = newTagListTagRef;
+
+                BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
+
+                UploadEnableDisableTags(current);
+                lstUploadTagList.Items.Refresh();
+            }
+        }
+
+        private void lstUploadImageFileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (expUploadAssociateTags.Visibility == Visibility.Visible)
+            {
+                BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
+            }
+
+            if (!uploadUIState.TagsAll)
+            {
+                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                UploadEnableDisableTags(current);
+            }
+        }
+
+        private void cmdTest_Click(object sender, RoutedEventArgs e)
+        {
+            ImageMetaTagRef currentTag = (ImageMetaTagRef)lstUploadTagList.SelectedItem;
+
+            MessageBox.Show(currentTag.name);
+        }
     }
 }

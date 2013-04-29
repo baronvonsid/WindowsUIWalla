@@ -5,8 +5,6 @@
              StartupUri="Main.xaml">
     <Application.Resources>
 
-        <!-- <ObjectDataProvider x:Name="uploadImagefileListName" x:Key="uploadImagefileListKey" ObjectType="{x:Type walla:UploadImageFileList}" /> -->
-        
         <Style x:Key="styleButton" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#FFE6D4D4" />
             <Setter Property="Margin" Value="4" />
@@ -53,6 +51,10 @@
                 <Trigger Property="IsChecked" Value="true">
                     <Setter Property="Foreground" Value="Black" />
                     <Setter Property="Background" Value="#FFF3ECEC" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="Background" Value="White" />
                 </Trigger>
             </Style.Triggers>
         </Style>
