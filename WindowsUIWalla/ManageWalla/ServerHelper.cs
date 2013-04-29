@@ -105,7 +105,6 @@ namespace ManageWalla
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
-
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
@@ -118,7 +117,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 //TODO Log failure.
-                return "The new tag could not be saved, there was an error on the server:" + ex.Message;
+                return ex.Message;
             }
         }
 

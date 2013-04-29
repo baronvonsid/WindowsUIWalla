@@ -14,14 +14,11 @@ using System.Windows.Shapes;
 using System.IO;
 using System.Windows.Interop;
 
-
 namespace ManageWalla
 {
-    /// <summary>
-    /// Interaction logic for Main.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        #region Variables
         private enum PaneMode
         {
             CategoryView = 0,
@@ -44,9 +41,9 @@ namespace ManageWalla
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
         public UploadImageFileList meFots = null;
+        #endregion
 
-        //private UploadImageFileList meFots = new UploadImageFileList();
-
+        #region Init Close Window
         public MainWindow()
         {
             InitializeComponent();
@@ -55,25 +52,9 @@ namespace ManageWalla
             uploadUIState = (UploadUIState)FindResource("uploadUIStateKey");
         }
 
-        private void cmdEditView_Click(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(PaneMode.ViewEdit);
-        }
-
-        private void cmdAddNewView_Click(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(PaneMode.ViewAdd);
-        }
-
-        private void cmdAddEditViewCancel_Click(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(PaneMode.ViewView);
-        }
-
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //Apply busy panes overlay
-
 
             //Kick off asyncronous data syncronising.
             //This will update all UI Elements eventually
@@ -86,11 +67,13 @@ namespace ManageWalla
             this.cmdCategory.IsChecked = true;
         }
 
-        public void RefreshCategoryTreeView()
+        private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
+            controller.Dispose();
         }
+        #endregion
 
+        #region Controls control logic based on Pane
         private void SetWindowHeights(PaneMode mode)
         {
             const double headingHeight = 46.0;
@@ -361,8 +344,48 @@ namespace ManageWalla
             stackView.Visibility = Visibility.Collapsed;
             stackUpload.Visibility = Visibility.Collapsed;
         }
+        #endregion
 
+        #region View UI Control
+        private void cmdEditView_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.ViewEdit);
+        }
 
+        private void cmdAddNewView_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.ViewAdd);
+        }
+
+        private void cmdAddEditViewCancel_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.ViewView);
+        }
+        #endregion
+
+        #region Category UI Control
+        private void cmdAddCategory_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.CategoryAdd);
+        }
+
+        private void cmdAddEditCategoryCancel_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.CategoryView);
+        }
+
+        private void cmdEditCategory_Click(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.CategoryEdit);
+        }
+
+        public void RefreshCategoryTreeView()
+        {
+
+        }
+        #endregion
+
+        #region Tag UI Control
         private void RefreshTagsList()
         {
             wrapMyTags.Children.Clear();
@@ -402,44 +425,29 @@ namespace ManageWalla
             }
         }
 
-        private void cmdCategory_Checked(object sender, RoutedEventArgs e)
+        private void txtTagAddEditName_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            SetPanePositions(PaneMode.CategoryView);
+            // Filter out non-digit text input
+            foreach (char c in e.Text)
+                if (!Char.IsLetterOrDigit(c))
+                {
+                    e.Handled = true;
+                    break;
+                }
         }
 
-        private void cmdUpload_Checked(object sender, RoutedEventArgs e)
+        private void cmdAddEditTagDelete_Click(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.Upload);
-        }
+            string response = controller.DeleteTag(currentTag);
 
-        private void cmdView_Checked(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(PaneMode.ViewView);
-        }
+            if (response.Length > 0)
+            {
+                MessageBox.Show(response);
+                return;
+            }
 
-        private void cmdTag_Checked(object sender, RoutedEventArgs e)
-        {
             SetPanePositions(PaneMode.TagView);
-        }
-
-        private void cmdSettings_Checked(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(PaneMode.Settings);
-        }
-
-        private void cmdAddCategory_Click(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(PaneMode.CategoryAdd);
-        }
-
-        private void cmdAddEditCategoryCancel_Click(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(PaneMode.CategoryView);
-        }
-
-        private void cmdEditCategory_Click(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(PaneMode.CategoryEdit);
+            RefreshTagsList();
         }
 
         private void cmdAddTag_Click(object sender, RoutedEventArgs e)
@@ -500,47 +508,9 @@ namespace ManageWalla
             SetPanePositions(PaneMode.TagView);
             RefreshTagsList();
         }
+        #endregion
 
-        private void CheckForUploadComplete(object sender, TextCompositionEventArgs e)
-        {
-            if (meFots.Count == 0)
-            {
-                //Upload Complete.
-                SetPanePositions(PaneMode.Upload);
-            }
-        }
-
-        private void txtTagAddEditName_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-
-          // Filter out non-digit text input
-          foreach (char c in e.Text) 
-            if (!Char.IsLetterOrDigit(c)) 
-            {
-              e.Handled = true;
-              break;
-            }
-        }
-
-        private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            controller.Dispose();
-        }
-
-        private void cmdAddEditTagDelete_Click(object sender, RoutedEventArgs e)
-        {
-            string response = controller.DeleteTag(currentTag);
-
-            if (response.Length > 0)
-            {
-                MessageBox.Show(response);
-                return;
-            }
-
-            SetPanePositions(PaneMode.TagView);
-            RefreshTagsList();
-        }
-
+        #region Upload UI Control
         private void cmdUploadImportFolder_Click(object sender, RoutedEventArgs e)
         {
             var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
@@ -633,32 +603,18 @@ namespace ManageWalla
             SetPanePositions(PaneMode.Upload);
         }
 
-        private void chkUploadToNewCategory_Checked(object sender, RoutedEventArgs e)
+        private void lstUploadImageFileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SetPanePositions(currentPane);
-        }
+            if (expUploadAssociateTags.Visibility == Visibility.Visible)
+            {
+                BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
+            }
 
-        private void chkUploadToNewCategory_Unchecked(object sender, RoutedEventArgs e)
-        {
-            SetPanePositions(currentPane);
-        }
-
-        private void chkUploadCameraAll_Checked(object sender, RoutedEventArgs e)
-        {
-            Binding simon = BindingOperations.GetBinding(txtUploadCamera, TextBlock.TextProperty);
-            BindingOperations.ClearBinding(txtUploadCamera, TextBlock.TextProperty);
-        }
-
-        private void chkUploadCameraAll_Unchecked(object sender, RoutedEventArgs e)
-        {
-            Binding binding = new Binding("Count");
-            //binding.Source = meFots;
-            //binding.Path = new PropertyPath("Count");
-            binding.Mode = BindingMode.OneWay;
-
-            BindingOperations.SetBinding(txtUploadCamera, TextBlock.TextProperty, binding);
-            //txtUploadCamera.SetBinding(TextBlock.TextProperty, binding);
-            BindingExpression simon = BindingOperations.GetBindingExpression(txtUploadCamera, TextBlock.TextProperty);
+            if (!uploadUIState.MetaTagRefAll)
+            {
+                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                UploadEnableDisableTags(current);
+            }
         }
 
         private void cmdAssociateTag_Click(object sender, RoutedEventArgs e)
@@ -701,7 +657,6 @@ namespace ManageWalla
 
         private void UploadEnableDisableTags(UploadImage current)
         {
-
             foreach (RadioButton button in wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsEnabled == false))
             {
                 bool exists = false;
@@ -757,25 +712,294 @@ namespace ManageWalla
             }
         }
 
-        private void lstUploadImageFileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void chkUploadToNewCategory_Checked(object sender, RoutedEventArgs e)
         {
-            if (expUploadAssociateTags.Visibility == Visibility.Visible)
-            {
-                BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
-            }
-
-            if (!uploadUIState.TagsAll)
-            {
-                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-                UploadEnableDisableTags(current);
-            }
+            SetPanePositions(currentPane);
         }
 
-        private void cmdTest_Click(object sender, RoutedEventArgs e)
+        private void chkUploadToNewCategory_Unchecked(object sender, RoutedEventArgs e)
         {
-            ImageMetaTagRef currentTag = (ImageMetaTagRef)lstUploadTagList.SelectedItem;
-
-            MessageBox.Show(currentTag.name);
+            SetPanePositions(currentPane);
         }
+
+        private void CheckForUploadComplete(object sender, TextCompositionEventArgs e)
+        {
+            if (meFots.Count == 0)
+            {
+                //Upload Complete.
+                SetPanePositions(PaneMode.Upload);
+            }
+        }
+        #endregion
+
+        #region Binding re-wire for Upload All Events
+        private void chkUploadCameraAll_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaCamera = current.Meta.Camera;
+
+            BindingOperations.ClearBinding(txtUploadCamera, TextBox.TextProperty);
+            Binding binding = new Binding("MetaCamera");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(txtUploadCamera, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadCameraAll_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(txtUploadCamera, TextBox.TextProperty);
+            Binding binding = new Binding("/Meta.Camera");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(txtUploadCamera, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfChar1All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfChar1 = current.Meta.UdfChar1;
+            
+            BindingOperations.ClearBinding(txtUploadUdfChar1, TextBox.TextProperty);
+            Binding binding = new Binding("MetaUdfChar1");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(txtUploadUdfChar1, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfChar1All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(txtUploadUdfChar1, TextBox.TextProperty);
+            Binding binding = new Binding("/Meta.UdfChar1");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(txtUploadUdfChar1, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfChar2All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfChar2 = current.Meta.UdfChar2;
+
+            BindingOperations.ClearBinding(txtUploadUdfChar2, TextBox.TextProperty);
+            Binding binding = new Binding("MetaUdfChar2");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(txtUploadUdfChar2, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfChar2All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(txtUploadUdfChar2, TextBox.TextProperty);
+            Binding binding = new Binding("/Meta.UdfChar2");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(txtUploadUdfChar2, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfChar3All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfChar3 = current.Meta.UdfChar3;
+
+            BindingOperations.ClearBinding(txtUploadUdfChar3, TextBox.TextProperty);
+            Binding binding = new Binding("MetaUdfChar3");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(txtUploadUdfChar3, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfChar3All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(txtUploadUdfChar1, TextBox.TextProperty);
+            Binding binding = new Binding("/Meta.UdfChar3");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(txtUploadUdfChar3, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfText1All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfText1 = current.Meta.UdfText1;
+
+            BindingOperations.ClearBinding(txtUploadUdfText1, TextBox.TextProperty);
+            Binding binding = new Binding("MetaUdfText1");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(txtUploadUdfText1, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfText1All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(txtUploadUdfChar1, TextBox.TextProperty);
+            Binding binding = new Binding("/Meta.UdfText1");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(txtUploadUdfText1, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfNum1All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfNum1 = current.Meta.UdfNum1;
+
+            BindingOperations.ClearBinding(txtUploadUdfNum1, TextBox.TextProperty);
+            Binding binding = new Binding("MetaUdfNum1");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(txtUploadUdfNum1, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfNum1All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(txtUploadUdfNum1, TextBox.TextProperty);
+            Binding binding = new Binding("/Meta.UdfNum1");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(txtUploadUdfNum1, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfNum2All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfNum2 = current.Meta.UdfNum2;
+
+            BindingOperations.ClearBinding(txtUploadUdfNum2, TextBox.TextProperty);
+            Binding binding = new Binding("MetaUdfNum2");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(txtUploadUdfNum2, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfNum2All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(txtUploadUdfNum2, TextBox.TextProperty);
+            Binding binding = new Binding("/Meta.UdfNum2");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(txtUploadUdfNum2, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfNum3All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfNum3 = current.Meta.UdfNum3;
+
+            BindingOperations.ClearBinding(txtUploadUdfNum3, TextBox.TextProperty);
+            Binding binding = new Binding("MetaUdfNum3");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(txtUploadUdfNum3, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfNum3All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(txtUploadUdfNum1, TextBox.TextProperty);
+            Binding binding = new Binding("/Meta.UdfNum3");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(txtUploadUdfNum3, TextBox.TextProperty, binding);
+        }
+
+        private void chkUploadUdfDate1All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfDate1 = current.Meta.UdfDate1;
+
+            BindingOperations.ClearBinding(datUploadUdfDate1, DatePicker.SelectedDateProperty);
+            Binding binding = new Binding("MetaUdfDate1");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(datUploadUdfDate1, DatePicker.SelectedDateProperty, binding);
+        }
+
+        private void chkUploadUdfDate1All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(datUploadUdfDate1, DatePicker.SelectedDateProperty);
+            Binding binding = new Binding("/Meta.UdfDate1");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(datUploadUdfDate1, DatePicker.SelectedDateProperty, binding);
+        }
+
+        private void chkUploadUdfDate2All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfDate2 = current.Meta.UdfDate2;
+
+            BindingOperations.ClearBinding(datUploadUdfDate2, DatePicker.SelectedDateProperty);
+            Binding binding = new Binding("MetaUdfDate2");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(datUploadUdfDate2, DatePicker.SelectedDateProperty, binding);
+        }
+
+        private void chkUploadUdfDate2All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(datUploadUdfDate2, DatePicker.SelectedDateProperty);
+            Binding binding = new Binding("/Meta.UdfDate2");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(datUploadUdfDate2, DatePicker.SelectedDateProperty, binding);
+        }
+
+        private void chkUploadUdfDate3All_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaUdfDate3 = current.Meta.UdfDate3;
+
+            BindingOperations.ClearBinding(datUploadUdfDate3, DatePicker.SelectedDateProperty);
+            Binding binding = new Binding("MetaUdfDate3");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(datUploadUdfDate3, DatePicker.SelectedDateProperty, binding);
+        }
+
+        private void chkUploadUdfDate3All_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(datUploadUdfDate3, DatePicker.SelectedDateProperty);
+            Binding binding = new Binding("/Meta.UdfDate3");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(datUploadUdfDate3, DatePicker.SelectedDateProperty, binding);
+        }
+
+        private void chkUploadTakenDateAll_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaTakenDate = current.Meta.TakenDate;
+
+            BindingOperations.ClearBinding(datUploadTakenDate, DatePicker.SelectedDateProperty);
+            Binding binding = new Binding("MetaTakenDate");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(datUploadTakenDate, DatePicker.SelectedDateProperty, binding);
+        }
+
+        private void chkUploadTakenDateAll_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(datUploadTakenDate, DatePicker.SelectedDateProperty);
+            Binding binding = new Binding("/Meta.TakenDate");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(datUploadTakenDate, DatePicker.SelectedDateProperty, binding);
+        }
+        #endregion
+
+        #region Pane Control Events
+        private void cmdCategory_Checked(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.CategoryView);
+        }
+
+        private void cmdUpload_Checked(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.Upload);
+        }
+
+        private void cmdView_Checked(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.ViewView);
+        }
+
+        private void cmdTag_Checked(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.TagView);
+        }
+
+        private void cmdSettings_Checked(object sender, RoutedEventArgs e)
+        {
+            SetPanePositions(PaneMode.Settings);
+        }
+        #endregion
+
     }
 }

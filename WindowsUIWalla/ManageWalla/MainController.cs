@@ -129,7 +129,7 @@ namespace ManageWalla
                 else
                 {
                     //Check local category xml for matches or create new.
-
+                    //TODO after categories have been developed.
                     
                 }
             }
