@@ -16,6 +16,10 @@ using System.Net;
 using System.Net.Mime;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
+using log4net;
+using log4net.Config;
+using System.Configuration;
+
 
 namespace ManageWalla
 {
@@ -24,15 +28,15 @@ namespace ManageWalla
         private MainWindow currentMain;
         private GlobalState state = null;
         private ServerHelper serverHelper = null;
-        private const string userName = "simo1n";
+        private string userName = ConfigurationManager.AppSettings["UserName"];
+        private static readonly ILog logger = LogManager.GetLogger(typeof(MainController));
 
         public MainController(MainWindow currentMainParam)
         {
             currentMain = currentMainParam;
 
             state = new GlobalState();
-            state = GlobalState.GetState(userName);
-
+            state = GlobalState.GetState(userName);                
             serverHelper = new ServerHelper(state);
         }
 
