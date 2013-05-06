@@ -35,33 +35,36 @@ namespace ManageWalla
         {
             currentMain = currentMainParam;
 
-            state = new GlobalState();
             state = GlobalState.GetState(userName);                
             serverHelper = new ServerHelper(state);
         }
 
-        public void LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots)
+        async public Task LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots)
         {
             for (int i = 0; i < fileNames.Length; i++)
             {
-                meFots.Add(new UploadImage(fileNames[i]));
+                UploadImage newImage = new UploadImage();
+                await newImage.Setup(fileNames[i]);
+                meFots.Add(newImage);
             }
 
         }
 
-        public void LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots)
+        async public Task LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots)
         {
             if (recursive)
             {
                 foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
                 {
-                    LoadImagesFromFolder(folder, recursive, meFots);
+                    await LoadImagesFromFolder(folder, recursive, meFots);
                 }
             }
 
             foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
             {
-                meFots.Add(new UploadImage(file.FullName));
+                UploadImage newImage = new UploadImage();
+                await newImage.Setup(file.FullName);
+                meFots.Add(newImage);
             }
 
             /*
@@ -110,9 +113,9 @@ namespace ManageWalla
             }
         }
 
-        public void DoUpload(UploadImageFileList meFots, UploadUIState uploadState)
+        async public Task<string> DoUpload(UploadImageFileList meFots, UploadUIState uploadState)
         {
-            long rootCategoryId = 0;
+            long rootCategoryId = 1;
             if (uploadState.UploadToNewCategory)
             {
                 rootCategoryId = serverHelper.CreateCategory(uploadState.CategoryName, uploadState.CategoryDesc, uploadState.CategoryId);
@@ -147,23 +150,54 @@ namespace ManageWalla
                 //Check for each chkAll box set to true, then replace respective values.
             }
 
-            foreach (UploadImage currentImage in meFots)
+            while (meFots.Count > 0)
             {
-                serverHelper.UploadImage(currentImage.Meta, currentImage.FilePath);
+                string response = await serverHelper.UploadImageAsync(meFots[0], meFots[0].FilePath);
+                if (response == null)
+                {
+                    meFots.Remove(meFots[0]);
+                }
+                else
+                {
+                    return response;
+                }
+            }
+            return null;
+        }
+
+        async public Task<UploadStatusList> GetUploadStatusList()
+        {
+            try
+            {
+                return await serverHelper.GetUploadStatusList();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
             }
         }
 
-        public void ResetMeFotsMeta(UploadImageFileList metFots)
+        async public Task ResetMeFotsMeta(UploadImageFileList metFots)
         {
             foreach (UploadImage currentImage in metFots)
             {
-                currentImage.ResetMeta();
+                await currentImage.ResetMeta();
             }
         }
 
-        public TagList GetTagsAvailable()
+        async public Task<TagList> GetTagsAvailable()
         {
-            return serverHelper.GetTagsAvailable();
+            try
+            {
+                TagList tagList = await serverHelper.GetTagsAvailable();
+                return tagList;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         public string UpdateTag(Tag newTag, string oldTagName)

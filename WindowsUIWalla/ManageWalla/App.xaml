@@ -77,11 +77,103 @@
             </Setter>
         </Style>
 
+        <!--
+            <ControlTemplate x:Key="templateRadioButton" TargetType="{x:Type RadioButton}">
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Rectangle x:Name="outerRectangle" StrokeThickness="0.5">
+
+                <Rectangle.Stroke>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
+                </Rectangle.Stroke>
+
+                <Rectangle.Fill>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Background.Color}" />
+                </Rectangle.Fill>
+
+            </Rectangle>
+
+            <ContentPresenter Margin="{TemplateBinding Padding}" />
+
+        </Grid>
+        <ControlTemplate.Triggers>
+            
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="outerRectangle" Property="Stroke">
+                    <Setter.Value>
+                        <SolidColorBrush Color="Black" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+
+
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+        
+        
+                        <Border Name="Border" BorderThickness="1" SnapsToDevicePixels="true">
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
+                            </Border.BorderBrush>
+                            
+                            <ContentPresenter />
+                            
+                        </Border>
+        
+        
+
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="Black"/>
+                            </Trigger>
+        -->
+        
         <Style x:Key="TagListItem" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Background" Value="#FFE6D4D4" />
             <Setter Property="Margin" Value="4" />
             <Setter Property="Padding" Value="4" />
             <Setter Property="Foreground" Value="#FFB82F5A" />
+            <!--<Setter Property="BorderThickness" Value="1" />-->
+            <Setter Property="BorderBrush" Value="#FF616161" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Rectangle x:Name="outerRectangle" StrokeThickness="0.5">
+
+                                <Rectangle.Stroke>
+                                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
+                                </Rectangle.Stroke>
+
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Background.Color}" />
+                                </Rectangle.Fill>
+
+                            </Rectangle>
+
+                            <ContentPresenter Margin="{TemplateBinding Padding}" SnapsToDevicePixels="true" />
+
+                        </Grid>
+
+                        <!-- Margin="{TemplateBinding Padding}"
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="outerRectangle" Property="Stroke">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="Black" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="outerRectangle" Property="Fill">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="Black" />
+                                    </Setter.Value>
+                                </Setter>                                
+                            </Trigger>                            
+                        </ControlTemplate.Triggers>
+                        -->
+                    </ControlTemplate>
+                        
+                </Setter.Value>
+            </Setter>            
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="true">
                     <Setter Property="Foreground" Value="Black" />
@@ -93,6 +185,10 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!--<Setter Property="FocusVisualStyle" Value="{x:Null}" /> -->
+
+
 
         <Style x:Key="styleImageThumb" TargetType="{x:Type Image}" >
             <Setter Property="Margin" Value="4" />

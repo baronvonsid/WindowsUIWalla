@@ -10,7 +10,8 @@
 					<complexType>
 						<attribute type="long" name="imageId" />
 						<attribute type="int" name="imageStatus" />
-						<attribute type="string" name="errorMessage" />
+            <attribute type="string" name="name" />
+            <attribute type="string" name="errorMessage" />
 						<attribute type="dateTime" name="lastUpdated" />
 					</complexType>
 				</element>
@@ -18,5 +19,4 @@
 		</complexType>
 	</element>
 </schema>
-
 

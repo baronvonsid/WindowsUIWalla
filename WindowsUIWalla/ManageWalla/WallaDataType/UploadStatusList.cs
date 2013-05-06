@@ -54,6 +54,8 @@ namespace ManageWalla {
         
         private bool imageStatusFieldSpecified;
         
+        private string nameField;
+        
         private string errorMessageField;
         
         private System.DateTime lastUpdatedField;
@@ -101,6 +103,17 @@ namespace ManageWalla {
             }
             set {
                 this.imageStatusFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string name {
+            get {
+                return this.nameField;
+            }
+            set {
+                this.nameField = value;
             }
         }
         

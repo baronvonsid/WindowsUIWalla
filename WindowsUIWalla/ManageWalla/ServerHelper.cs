@@ -16,6 +16,7 @@ using System.Net;
 using System.Net.Mime;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
+using log4net;
 
 namespace ManageWalla
 {
@@ -25,6 +26,7 @@ namespace ManageWalla
         private const String baseUri = "http://localhost:8081/WallaWS/v1/user/simo1n/";
         private HttpClient http = null;
         private GlobalState state = null;
+        private static readonly ILog logger = LogManager.GetLogger(typeof(ServerHelper));
 
         public ServerHelper(GlobalState value)
         {
@@ -33,7 +35,7 @@ namespace ManageWalla
             http.BaseAddress = new Uri(baseUri);
         }
 
-        public TagList GetTagsAvailable()
+        async public Task<TagList> GetTagsAvailable()
         {
             try
             {
@@ -46,27 +48,21 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(state.tagList.LastChanged);
                 }
 
-                HttpResponseMessage response = http.SendAsync(request).Result;
-                if (response.StatusCode == HttpStatusCode.NotModified)
-                {
-                    return state.tagList;
-                }
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     XmlSerializer serialKiller = new XmlSerializer(typeof(TagList));
-                    TagList tagList = (TagList)serialKiller.Deserialize(response.Content.ReadAsStreamAsync().Result);
+                    TagList tagList = (TagList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
                     state.tagList = tagList;
-                    return tagList;
                 }
-
-                throw new Exception("/Tags web service returned an error code: " + response.StatusCode.ToString());
+                return state.tagList;
             }
             catch (Exception ex)
             {
-                //TODO Log failure.
-                Console.WriteLine(ex.Message);
-                return null;
+                logger.Error(ex);
+                throw ex;
             }
         }
 
@@ -152,14 +148,99 @@ namespace ManageWalla
             return "";
         }
 
-        public void UploadImage(ImageMeta image, string fullPath)
+        async public Task<string> UploadImageAsync(UploadImage image, string fullPath)
         {
-            //Assert file to server, get Id
+            try
+            {
+                //Preparing + image.Meta.Name
 
+                //Initial Request setup
+                HttpRequestMessage requestImage = new HttpRequestMessage(HttpMethod.Post, "image");
+                requestImage.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-            //Send Image Meta to server with new Id.
+                //Associate file to upload.
+                FileStream fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+                
+                StreamContent streamContent = new StreamContent(fileStream);
+                requestImage.Content = streamContent;
+                streamContent.Headers.ContentLength = fileStream.Length;
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue(image.HttpFormat);
 
+                //Upload file + image.Meta.Name
+                
+                //Upload file asynchronously and check response.
+                HttpResponseMessage response = await http.SendAsync(requestImage);
+                response.EnsureSuccessStatusCode();
 
+                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                reader.MoveToContent();
+                long imageId = reader.ReadElementContentAsLong();
+                image.Meta.id = imageId;
+
+                HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, "image/" + imageId.ToString() + "/meta");
+                requestMeta.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+
+                //Upload info + image.Meta.Name
+
+                HttpContent content = new ObjectContent<ImageMeta>(image.Meta, xmlFormatter);
+                requestMeta.Content = content;
+                HttpResponseMessage responseMeta = await http.SendAsync(requestMeta);
+                responseMeta.EnsureSuccessStatusCode();
+
+                System.Threading.Thread.Sleep(1000);
+
+                //Uploaded + image.Meta.Name
+                return null;
+            }
+            catch (HttpRequestException httpEx)
+            {
+                logger.Error(httpEx);
+                return httpEx.Message;
+            }
+            catch (TaskCanceledException)
+            {
+                //rootPage.NotifyUser("Request canceled.", NotifyType.ErrorMessage);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
+        }
+
+        async public Task<UploadStatusList> GetUploadStatusList()
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "image/uploadstatus");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                XmlSerializer serialKiller = new XmlSerializer(typeof(UploadStatusList));
+                UploadStatusList uploadStatusList = (UploadStatusList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+
+                return uploadStatusList;
+            }
+            catch (HttpRequestException httpEx)
+            {
+                logger.Error(httpEx);
+                throw httpEx;
+            }
+            catch (TaskCanceledException)
+            {
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         public long CreateCategory(string categoryName, string categoryDesc, long parentCategoryId)

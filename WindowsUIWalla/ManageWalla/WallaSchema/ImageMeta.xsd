@@ -12,36 +12,39 @@ targetNamespace="http://www.example.org/ImageMeta"
         <element type="string" name="OriginalFileName"/>
         <element type="string" name="Format"/>
         <element type="int" name="Status" default="0"/>
-		
-		<element type="long" name="Width" default="0"/>
-		<element type="long" name="Height" default="0"/>
-		<element type="long" name="Size" default="0"/>
-		<element type="string" name="Camera"/>
-		<element type="string" name="UdfChar1"/>
-		<element type="string" name="UdfChar2"/>
-		<element type="string" name="UdfChar3"/>
-		<element type="string" name="UdfText1"/>
-		<element type="decimal" name="UdfNum1"/>
-		<element type="decimal" name="UdfNum2"/>
-		<element type="decimal" name="UdfNum3"/>
-		<element type="dateTime" name="UdfDate1"/>
-		<element type="dateTime" name="UdfDate2"/>
-		<element type="dateTime" name="UdfDate3"/>
-		<element type="dateTime" name="UploadDate"/>
-		<element type="dateTime" name="TakenDate"/>
-		
-		<element name="TagRef" maxOccurs="unbounded" minOccurs="0">
-			<complexType>
-				<attribute type="long" name="id" />
-				<attribute type="string" name="op" />
-        <attribute type="string" name="name" />
-			</complexType>
-		</element>
-		
+		    <element type="long" name="Width" default="0"/>
+		    <element type="long" name="Height" default="0"/>
+		    <element type="long" name="Size" default="0"/>
+		    <element type="string" name="Camera"/>
+		    <element type="string" name="UdfChar1"/>
+		    <element type="string" name="UdfChar2"/>
+		    <element type="string" name="UdfChar3"/>
+		    <element type="string" name="UdfText1"/>
+		    <element type="decimal" name="UdfNum1"/>
+		    <element type="decimal" name="UdfNum2"/>
+		    <element type="decimal" name="UdfNum3"/>
+		    <element type="dateTime" name="UdfDate1"/>
+		    <element type="dateTime" name="UdfDate2"/>
+		    <element type="dateTime" name="UdfDate3"/>
+		    <element type="dateTime" name="UploadDate"/>
+		    <element type="dateTime" name="TakenDate"/>
+        <element name="Tags">
+          <complexType>
+            <sequence>
+              <element name="TagRef" maxOccurs="unbounded" minOccurs="0">
+                <complexType>
+                  <attribute type="long" name="id" default="0" />
+                  <attribute type="string" name="op" />
+                  <attribute type="string" name="name" />
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
       </sequence>
-		<attribute type="long" name="id"/>
-		<attribute type="int" name="version"/>
-		<attribute type="long" name="categoryId"/>
+		<attribute type="long" name="id" default="0" />
+		<attribute type="int" name="version" default="0"/>
+		<attribute type="long" name="categoryId" default="0" />
     </complexType>
   </element>
 </schema>

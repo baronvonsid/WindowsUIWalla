@@ -40,7 +40,9 @@ namespace ManageWalla
 
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
-        public UploadImageFileList meFots = null;
+        public UploadImageFileList uploadFots = null;
+        public GlobalState state = null;
+
         #endregion
 
         #region Init Close Window
@@ -48,8 +50,9 @@ namespace ManageWalla
         {
             InitializeComponent();
 
-            meFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
+            uploadFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
             uploadUIState = (UploadUIState)FindResource("uploadUIStateKey");
+            
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -76,6 +79,10 @@ namespace ManageWalla
         #region Controls control logic based on Pane
         private void SetWindowHeights(PaneMode mode)
         {
+            return;
+
+
+
             const double headingHeight = 46.0;
             double windowAdjustHeight = mainWindow.Height - 36.0;
 
@@ -229,7 +236,7 @@ namespace ManageWalla
 
                     HideAllContent();
 
-                    //Sort out Tag view options////
+                    //Sort out Tag view options
                     cmdAssociateTag.Visibility = Visibility.Visible;
                     cmdAddTag.Visibility = Visibility.Collapsed;
                     cmdEditEdit.Visibility = Visibility.Collapsed;
@@ -239,9 +246,11 @@ namespace ManageWalla
                     //Do Category view options.
                     stackCategory.Visibility = Visibility.Visible;
 
-                    if (uploadUIState.Mode == UploadUIState.UploadMode.Images || uploadUIState.Mode == UploadUIState.UploadMode.Folder)
+                    if (!uploadUIState.Uploading && (uploadUIState.Mode == UploadUIState.UploadMode.Images || uploadUIState.Mode == UploadUIState.UploadMode.Folder))
                     {
                         //Common
+                        lstUploadImageFileList.IsEnabled = true;
+                        tabUploadImageDetails.IsEnabled = true;
                         grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
                         grdUploadSettings.RowDefinitions[3].MaxHeight = 25; //Upload to new category
                         tabUploadImageDetails.IsEnabled = true;
@@ -258,6 +267,13 @@ namespace ManageWalla
                         
                         cmdUploadAll.IsEnabled = true;
                         cmdUploadClear.IsEnabled = true;
+
+                        //Enable Tags
+                        wrapMyTags.IsEnabled = true;
+                        cmdAssociateTag.IsEnabled = true;
+
+                        //Enable Category
+                        //TODO
 
                         if (uploadUIState.Mode == UploadUIState.UploadMode.Images)
                         {
@@ -284,24 +300,23 @@ namespace ManageWalla
                             }
                             cmdUploadImportFiles.Visibility = Visibility.Hidden;
                         }
-
                     }
                     else
                     {
-
-
                         //Check if there are outstanding upload items then just allow progress or cancel.
-                        if (lstUploadImageFileList.Items.Count > 0)
+                        if (uploadUIState.Uploading)
                         {
-                            cmdUploadImportFolder.IsEnabled = false;
-                            cmdUploadImportFiles.IsEnabled = false;
-                            cmdUploadResetMeta.IsEnabled = false;
+                            lstUploadImageFileList.IsEnabled = false;
+                            cmdUploadImportFiles.Visibility = Visibility.Hidden;
+                            cmdUploadImportFolder.Visibility = Visibility.Hidden;
                             cmdUploadClear.IsEnabled = true;
                             cmdUploadClear.Content = "Cancel Uploads";
                         }
                         else
                         {
                             //New Upload
+                            lstUploadImageFileList.IsEnabled = false;
+
                             cmdUploadImportFolder.Visibility = Visibility.Visible;
                             cmdUploadImportFiles.Visibility = Visibility.Visible;
                             cmdUploadClear.Content = "Clear";
@@ -313,9 +328,19 @@ namespace ManageWalla
                         }
                         cmdUploadAll.IsEnabled = false;
                         tabUploadImageDetails.IsEnabled = false;
+
+                        //Disable Tags
+                        wrapMyTags.IsEnabled = false;
+                        cmdAssociateTag.IsEnabled = false;
+
+                        //Disable Category
                     }
                     
                     stackUpload.Visibility = Visibility.Visible;
+
+
+
+
 
                     break;
                 case PaneMode.ImageViewFull:
@@ -386,28 +411,37 @@ namespace ManageWalla
         #endregion
 
         #region Tag UI Control
-        private void RefreshTagsList()
+        async private void RefreshTagsList()
         {
             wrapMyTags.Children.Clear();
-
-            TagList tagList = controller.GetTagsAvailable();
-            if (tagList != null)
+            TagList tagList = null;
+            try
             {
-                foreach (TagListTagRef tag in tagList.TagRef)
+                tagList = await controller.GetTagsAvailable();
+            }
+            catch (Exception ex)
+            {
+                if (tagList == null)
                 {
-                    RadioButton newRadioButton = new RadioButton();
-
-                    newRadioButton.Content = tag.name + " (" + tag.count + ")";
-                    newRadioButton.Style = (Style)FindResource("styleRadioButton");
-                    newRadioButton.Template = (ControlTemplate)FindResource("templateRadioButton");
-                    newRadioButton.GroupName = "GroupTag";
-                    newRadioButton.Tag = tag;
-                    wrapMyTags.Children.Add(newRadioButton);
+                    MessageBox.Show("There was an error retrieving the tags from the server.  Message: " + ex.Message);
+                    return;
+                }
+                else
+                {
+                    MessageBox.Show("Displaying previous tag list.  An error was encountered, message: " + ex.Message);
                 }
             }
-            else
+
+            foreach (TagListTagRef tag in tagList.TagRef)
             {
-                MessageBox.Show("There was an error trying to retreive the tags from the server.");
+                RadioButton newRadioButton = new RadioButton();
+
+                newRadioButton.Content = tag.name + " (" + tag.count + ")";
+                newRadioButton.Style = (Style)FindResource("styleRadioButton");
+                newRadioButton.Template = (ControlTemplate)FindResource("templateRadioButton");
+                newRadioButton.GroupName = "GroupTag";
+                newRadioButton.Tag = tag;
+                wrapMyTags.Children.Add(newRadioButton);
             }
         }
 
@@ -511,7 +545,7 @@ namespace ManageWalla
         #endregion
 
         #region Upload UI Control
-        private void cmdUploadImportFolder_Click(object sender, RoutedEventArgs e)
+        async private void cmdUploadImportFolder_Click(object sender, RoutedEventArgs e)
         {
             var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
             System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
@@ -525,17 +559,17 @@ namespace ManageWalla
 
                     if (MessageBox.Show("Do you want to add images from the sub folders too ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
-                        controller.LoadImagesFromFolder(folder, true, meFots);
+                        await controller.LoadImagesFromFolder(folder, true, uploadFots);
                         uploadUIState.MapToSubFolders = true;
                     }
                     else
                     {
-                        controller.LoadImagesFromFolder(folder, false, meFots);
+                        await controller.LoadImagesFromFolder(folder, false, uploadFots);
                     }
                 }
                 else
                 {
-                    controller.LoadImagesFromFolder(folder, false, meFots);
+                    await controller.LoadImagesFromFolder(folder, false, uploadFots);
                 }
 
                 uploadUIState.Mode = UploadUIState.UploadMode.Folder;
@@ -545,7 +579,7 @@ namespace ManageWalla
 
         private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
         {
-            meFots.Clear();
+            uploadFots.Clear();
             ResetUploadState(true);
             SetPanePositions(PaneMode.Upload);
         }
@@ -554,6 +588,7 @@ namespace ManageWalla
         {
             if (fullReset)
             {
+                /*
                 uploadUIState.GotSubFolders = false;
                 uploadUIState.CategoryName = "";
                 uploadUIState.CategoryDesc = "";
@@ -561,16 +596,21 @@ namespace ManageWalla
                 uploadUIState.UploadToNewCategory = false;
 
                 uploadUIState.Mode = UploadUIState.UploadMode.None;
+                 */
+                uploadUIState = new UploadUIState();
             }
-
+            else
+            {
+                chkUploadCameraAll.IsChecked = false;
+                //Plus all the others.
+            }
             //TODO = get list of all controls with a name starts chkUpload% and finishes %All
             //Loop through and set checked to false
 
-            chkUploadCameraAll.IsChecked = false;
-            //Plus all the others.
+
         }
 
-        private void cmdUploadImportFiles_Click(object sender, RoutedEventArgs e)
+        async private void cmdUploadImportFiles_Click(object sender, RoutedEventArgs e)
         {
             var openDialog = new System.Windows.Forms.OpenFileDialog();
             openDialog.DefaultExt = @"*.JPG;*.BMP";
@@ -578,28 +618,17 @@ namespace ManageWalla
             System.Windows.Forms.DialogResult result = openDialog.ShowDialog();
             if (openDialog.FileNames.Length > 0)
             {
-                controller.LoadImagesFromArray(openDialog.FileNames, meFots);
+                await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots);
                 uploadUIState.GotSubFolders = false;
                 uploadUIState.Mode = UploadUIState.UploadMode.Images;
                 SetPanePositions(PaneMode.Upload);
             }
         }
 
-        private void cmdUploadMulti_Click(object sender, RoutedEventArgs e)
-        {
-            //TODO Begin async, upload process.
-            foreach (ListBoxItem imageToUpload in lstUploadImageFileList.Items)
-            {
-                imageToUpload.IsEnabled = false;
-            }
-
-            SetPanePositions(PaneMode.Upload);
-        }
-
-        private void cmdUploadResetMeta_Click(object sender, RoutedEventArgs e)
+        async private void cmdUploadResetMeta_Click(object sender, RoutedEventArgs e)
         {
             ResetUploadState(false);
-            controller.ResetMeFotsMeta(meFots);
+            await controller.ResetMeFotsMeta(uploadFots);
             SetPanePositions(PaneMode.Upload);
         }
 
@@ -635,18 +664,18 @@ namespace ManageWalla
                     UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
                     ImageMetaTagRef[] newTagRefArray;
 
-                    if (current.Meta.TagRef == null)
+                    if (current.Meta.Tags == null)
                     {
                         newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
                     }
                     else
                     {
-                        newTagRefArray = new ImageMetaTagRef[current.Meta.TagRef.Length + 1];
-                        current.Meta.TagRef.CopyTo(newTagRefArray, 0);
+                        newTagRefArray = new ImageMetaTagRef[current.Meta.Tags.Length + 1];
+                        current.Meta.Tags.CopyTo(newTagRefArray, 0);
                         newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
                     }
 
-                    current.Meta.TagRef = newTagRefArray;
+                    current.Meta.Tags = newTagRefArray;
 
                     UploadEnableDisableTags(current);
                     checkedTagButton.IsChecked = false;
@@ -660,9 +689,9 @@ namespace ManageWalla
             foreach (RadioButton button in wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsEnabled == false))
             {
                 bool exists = false;
-                if (current.Meta.TagRef != null)
+                if (current.Meta.Tags != null)
                 {
-                    foreach (ImageMetaTagRef tagRef in current.Meta.TagRef)
+                    foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
                     {
                         TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
                         if (tagRef.id == existingTagRef.id)
@@ -679,16 +708,19 @@ namespace ManageWalla
                 exists = false;
             }
 
-            if (current.Meta.TagRef != null)
+            if (current != null)
             {
-                foreach (ImageMetaTagRef tagRef in current.Meta.TagRef)
+                if (current.Meta.Tags != null)
                 {
-                    foreach (RadioButton button in wrapMyTags.Children)
+                    foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
                     {
-                        TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
-                        if (tagRef.id == existingTagRef.id)
+                        foreach (RadioButton button in wrapMyTags.Children)
                         {
-                            button.IsEnabled = false;
+                            TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
+                            if (tagRef.id == existingTagRef.id)
+                            {
+                                button.IsEnabled = false;
+                            }
                         }
                     }
                 }
@@ -702,8 +734,8 @@ namespace ManageWalla
             if (currentTag != null)
             {
                 UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-                ImageMetaTagRef[] newTagListTagRef = current.Meta.TagRef.Where(r => r.id != currentTag.id).ToArray();
-                current.Meta.TagRef = newTagListTagRef;
+                ImageMetaTagRef[] newTagListTagRef = current.Meta.Tags.Where(r => r.id != currentTag.id).ToArray();
+                current.Meta.Tags = newTagListTagRef;
 
                 BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
 
@@ -722,6 +754,7 @@ namespace ManageWalla
             SetPanePositions(currentPane);
         }
 
+        /*
         private void CheckForUploadComplete(object sender, TextCompositionEventArgs e)
         {
             if (meFots.Count == 0)
@@ -729,6 +762,30 @@ namespace ManageWalla
                 //Upload Complete.
                 SetPanePositions(PaneMode.Upload);
             }
+        }
+        */
+
+        async private void cmdUploadAll_Click(object sender, RoutedEventArgs e)
+        {
+            uploadUIState.Uploading = true;
+            SetPanePositions(PaneMode.Upload);
+
+            string response = await controller.DoUpload(uploadFots, uploadUIState);
+            if (response != null)
+            {
+                MessageBox.Show("The upload encountered an error.  Message: " + response);
+            }
+
+            if (lstUploadImageFileList.Items.Count == 0)
+            {
+                ResetUploadState(true);
+            }
+            else
+            {
+                uploadUIState.Uploading = false;
+            }
+
+            SetPanePositions(PaneMode.Upload);
         }
         #endregion
 
@@ -1000,6 +1057,18 @@ namespace ManageWalla
             SetPanePositions(PaneMode.Settings);
         }
         #endregion
+
+
+        private void lblUploadProposedImageCount_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var simon = this.lstUploadImageFileList;
+        }
+
+        async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            UploadStatusList uploadStatusList = await controller.GetUploadStatusList();
+        }
+
 
     }
 }

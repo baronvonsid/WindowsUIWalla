@@ -13,7 +13,8 @@ namespace ManageWalla
         #region Variables
         private bool mapToSubFolders = false;
         private bool gotSubFolders = false;
-        private long categoryId = 0;
+        private bool uploading = false;
+        private long categoryId = 1;
         private string categoryPath = null;
         private bool uploadToNewCategory = false;
         private string categoryName = null;
@@ -130,6 +131,12 @@ namespace ManageWalla
         public UploadMode Mode { get; set; }
 
         public string RootFolder { get; set; }
+
+        public bool Uploading {
+            get { return uploading; }
+            set { uploading = value; }
+        }
+
         #endregion
 
         #region Meta attributes

@@ -133,6 +133,7 @@ namespace ManageWalla {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/Tag")]
+    [System.ServiceModel.XmlSerializerFormat]
     public partial class TagImageRef {
         
         private int idField;

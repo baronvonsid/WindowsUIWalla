@@ -22,6 +22,7 @@ namespace ManageWalla {
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageMeta")]
     [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/ImageMeta", IsNullable=false)]
+    [System.ServiceModel.XmlSerializerFormat]
     public partial class ImageMeta {
         
         private string nameField;
@@ -66,25 +67,22 @@ namespace ManageWalla {
         
         private System.DateTime takenDateField;
         
-        private ImageMetaTagRef[] tagRefField;
+        private ImageMetaTagRef[] tagsField;
         
         private long idField;
         
-        private bool idFieldSpecified;
-        
         private int versionField;
         
-        private bool versionFieldSpecified;
-        
         private long categoryIdField;
-        
-        private bool categoryIdFieldSpecified;
         
         public ImageMeta() {
             this.statusField = 0;
             this.widthField = ((long)(0));
             this.heightField = ((long)(0));
             this.sizeField = ((long)(0));
+            this.idField = ((long)(0));
+            this.versionField = 0;
+            this.categoryIdField = ((long)(0));
         }
         
         /// <remarks/>
@@ -298,18 +296,19 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("TagRef")]
-        public ImageMetaTagRef[] TagRef {
+        [System.Xml.Serialization.XmlArrayItemAttribute("TagRef", IsNullable=false)]
+        public ImageMetaTagRef[] Tags {
             get {
-                return this.tagRefField;
+                return this.tagsField;
             }
             set {
-                this.tagRefField = value;
+                this.tagsField = value;
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.ComponentModel.DefaultValueAttribute(typeof(long), "0")]
         public long id {
             get {
                 return this.idField;
@@ -320,18 +319,8 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool idSpecified {
-            get {
-                return this.idFieldSpecified;
-            }
-            set {
-                this.idFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.ComponentModel.DefaultValueAttribute(0)]
         public int version {
             get {
                 return this.versionField;
@@ -342,35 +331,14 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool versionSpecified {
-            get {
-                return this.versionFieldSpecified;
-            }
-            set {
-                this.versionFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.ComponentModel.DefaultValueAttribute(typeof(long), "0")]
         public long categoryId {
             get {
                 return this.categoryIdField;
             }
             set {
                 this.categoryIdField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool categoryIdSpecified {
-            get {
-                return this.categoryIdFieldSpecified;
-            }
-            set {
-                this.categoryIdFieldSpecified = value;
             }
         }
     }
@@ -381,35 +349,29 @@ namespace ManageWalla {
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageMeta")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/ImageMeta", IsNullable = false)]
+    [System.ServiceModel.XmlSerializerFormat]
     public partial class ImageMetaTagRef {
         
         private long idField;
-        
-        private bool idFieldSpecified;
         
         private string opField;
         
         private string nameField;
         
+        public ImageMetaTagRef() {
+            this.idField = ((long)(0));
+        }
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.ComponentModel.DefaultValueAttribute(typeof(long), "0")]
         public long id {
             get {
                 return this.idField;
             }
             set {
                 this.idField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool idSpecified {
-            get {
-                return this.idFieldSpecified;
-            }
-            set {
-                this.idFieldSpecified = value;
             }
         }
         
