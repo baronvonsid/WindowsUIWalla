@@ -16,6 +16,13 @@ namespace ManageWalla
         private BitmapImage image;
         private ImageMeta meta;
 
+        public enum UploadState
+        {
+            None = 0,
+            Success = 1,
+            Error = 2
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public UploadImage()
@@ -25,6 +32,8 @@ namespace ManageWalla
 
         async public Task Setup(string value)
         {
+            State = UploadImage.UploadState.None;
+            UploadError = "";
             filePath = value;
             FolderPath = Path.GetDirectoryName(filePath);
 
@@ -165,6 +174,8 @@ namespace ManageWalla
         public String FilePath { get { return filePath; } }
         public BitmapImage Image { get { return image; } }
         public string FolderPath { get; set; }
+        public UploadState State { get; set; }
+        public String UploadError { get; set; }
 
         public string HttpFormat
         {

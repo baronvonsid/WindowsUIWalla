@@ -5,7 +5,8 @@
 
     <local:UploadImageFileList x:Key="uploadImagefileListKey" />
     <local:UploadUIState x:Key="uploadUIStateKey"  />
-
+    <local:UploadStatusList x:Key="uploadStatusListKey"  />
+    
     <ControlTemplate x:Key="templateButton" TargetType="{x:Type Button}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <Rectangle x:Name="outerRectangle" StrokeThickness="1">
@@ -44,18 +45,13 @@
     <ControlTemplate x:Key="templateToggleButton" TargetType="{x:Type ToggleButton}">
         
         <Grid>
-            <Border BorderThickness="0.5">
-                <Border.BorderBrush>
-                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
-                </Border.BorderBrush>
-
                 <Rectangle x:Name="outerRectangle">
                     <Rectangle.Fill>
                         <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Background.Color}" />
                             
                         </Rectangle.Fill>
                 </Rectangle>
-            </Border>
+           
 
             <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
@@ -104,8 +100,6 @@
 
         </ControlTemplate.Triggers>
     </ControlTemplate>
-
-
 
     <Style x:Key="PhotoListStyle" TargetType="{x:Type ListBox}">
         <Setter Property="Padding" Value="0" />
@@ -203,6 +197,5 @@
                 -->
         </Style.Triggers>
     </Style>
-
 
 </ResourceDictionary>

@@ -148,7 +148,7 @@ namespace ManageWalla
             return "";
         }
 
-        async public Task<string> UploadImageAsync(UploadImage image, string fullPath)
+        async public Task<string> UploadImageAsync(UploadImage image)
         {
             try
             {
@@ -159,7 +159,7 @@ namespace ManageWalla
                 requestImage.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 //Associate file to upload.
-                FileStream fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+                FileStream fileStream = new FileStream(image.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
                 
                 StreamContent streamContent = new StreamContent(fileStream);
                 requestImage.Content = streamContent;

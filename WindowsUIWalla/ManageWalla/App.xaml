@@ -21,8 +21,8 @@
 
         <Style x:Key="styleToggleButton" TargetType="{x:Type ToggleButton}">
             <Setter Property="Background" Value="#FFE6D4D4" />
-            <Setter Property="Margin" Value="4" />
-            <Setter Property="Padding" Value="4" />
+            
+            <!--<Setter Property="Padding" Value="2" />-->
             <Setter Property="BorderBrush" Value="#FF616161" />
             <Setter Property="Foreground" Value="#FFB82F5A" />
             <Setter Property="TextBlock.FontSize" Value="16" />

@@ -16,6 +16,8 @@ using System.Net;
 using System.Net.Mime;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
+using System.Windows;
+using System.Windows.Threading;
 using log4net;
 using log4net.Config;
 using System.Configuration;
@@ -113,7 +115,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> DoUpload(UploadImageFileList meFots, UploadUIState uploadState)
+        async public Task<string> DoUploadAsync(UploadImageFileList meFots, UploadUIState uploadState)
         {
             long rootCategoryId = 1;
             if (uploadState.UploadToNewCategory)
@@ -152,14 +154,29 @@ namespace ManageWalla
 
             while (meFots.Count > 0)
             {
-                string response = await serverHelper.UploadImageAsync(meFots[0], meFots[0].FilePath);
+                string response = await serverHelper.UploadImageAsync(meFots[0]);
                 if (response == null)
                 {
-                    meFots.Remove(meFots[0]);
+                    //meFots.RemoveAt(0);
+                        //Dispatcher.Invoke(DispatcherPriority.Send,
+
+                    //theLabel.Invoke(new Action(() => theLabel.Text = "hello world from worker thread!"));
+
+                    currentMain.uploadFots.Remove(meFots[0]);
+
+                    /*
+                    Action UpdateFotsAction = delegate()
+                    {
+                        currentMain.uploadFots.RemoveAt(0);
+                    };
+                    
+                    Application.Current.MainWindow.Dispatcher.Invoke(DispatcherPriority.Send, UpdateFotsAction);
+                    */
                 }
                 else
                 {
-                    return response;
+                    currentMain.uploadFots[0].State = UploadImage.UploadState.Error;
+                    currentMain.uploadFots[0].UploadError = response;
                 }
             }
             return null;

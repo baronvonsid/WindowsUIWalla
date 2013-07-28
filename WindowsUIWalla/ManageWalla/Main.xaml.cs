@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.IO;
 using System.Windows.Interop;
+using System.Windows.Media.Animation;
 
 namespace ManageWalla
 {
@@ -41,6 +42,7 @@ namespace ManageWalla
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
         public UploadImageFileList uploadFots = null;
+        public UploadStatusList uploadStatusList = null;
         public GlobalState state = null;
 
         #endregion
@@ -52,7 +54,7 @@ namespace ManageWalla
 
             uploadFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
             uploadUIState = (UploadUIState)FindResource("uploadUIStateKey");
-            
+            uploadStatusList = (UploadStatusList)FindResource("uploadStatusListKey");
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -79,50 +81,105 @@ namespace ManageWalla
         #region Controls control logic based on Pane
         private void SetWindowHeights(PaneMode mode)
         {
-            return;
-
-
-
-            const double headingHeight = 46.0;
-            double windowAdjustHeight = mainWindow.Height - 36.0;
 
             switch (mode)
             {
                 case PaneMode.CategoryView:
                 case PaneMode.CategoryAdd:
                 case PaneMode.CategoryEdit:
-                    wrapImages.Height = windowAdjustHeight - (headingHeight * 2.0);
-                    stackCategory.Height = windowAdjustHeight - (headingHeight * 3.0);
+
+                    /*
+                    if (gridLeft.RowDefinitions[3].ActualHeight > 0)
+                    {
+                        //gridLeft.RowDefinitions[3].MaxHeight = gridLeft.RowDefinitions[3].ActualHeight;
+
+                        DoubleAnimation anim = new DoubleAnimation();
+                        anim.From = gridLeft.RowDefinitions[3].ActualHeight;
+                        anim.To = 0;
+                        anim.FillBehavior = FillBehavior.Stop;
+                        anim.Duration = new Duration(TimeSpan.Parse("0:0:5"));
+
+                        gridLeft.RowDefinitions[3].BeginAnimation(RowDefinition.MaxHeightProperty, anim);
+                        //gridLeft.RowDefinitions[3].Height = new GridLength(0);
+                    }
+                    */
+
+                    /*
+                    DoubleAnimation catAnim = new DoubleAnimation();
+                    catAnim.From = gridLeft.RowDefinitions[1].ActualHeight;
+                    catAnim.To = mainWindow.ActualHeight - 68;
+                    catAnim.Duration = new Duration(TimeSpan.Parse("0:0:5"));
+
+                    gridLeft.RowDefinitions[1].BeginAnimation(RowDefinition.MaxHeightProperty, catAnim);
+                    */
+
+                    //gridLeft.RowDefinitions[1].ClearValue(RowDefinition.MaxHeightProperty);
+                    //gridLeft.RowDefinitions[1].MaxHeight = 10000;
+                    //gridLeft.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
+                    //gridLeft.RowDefinitions[5].Height = new GridLength(0);
+
+
+                    gridLeft.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
+                    gridLeft.RowDefinitions[3].Height = new GridLength(0);
+                    gridLeft.RowDefinitions[5].Height = new GridLength(0);
 
                     break;
                 case PaneMode.TagView:
                 case PaneMode.TagAdd:
                 case PaneMode.TagEdit:
-                    wrapImages.Height = windowAdjustHeight - (headingHeight * 2.0);
-                    stackTag.Height = windowAdjustHeight - (headingHeight * 3.0);
+
+                    /*
+                    if (gridLeft.RowDefinitions[1].ActualHeight > 0)
+                    {
+                        //gridLeft.RowDefinitions[3].MaxHeight = gridLeft.RowDefinitions[3].ActualHeight;
+
+                        DoubleAnimation anim = new DoubleAnimation();
+                        anim.From = gridLeft.RowDefinitions[1].ActualHeight;
+                        anim.To = 0;
+                        anim.Duration = new Duration(TimeSpan.Parse("0:0:5"));
+                        anim.FillBehavior = FillBehavior.Stop;
+                        gridLeft.RowDefinitions[1].BeginAnimation(RowDefinition.MaxHeightProperty, anim);
+                        //gridLeft.RowDefinitions[3].Height = new GridLength(0);
+                    }
+                    */
+
+                    //gridLeft.RowDefinitions[3].ClearValue(RowDefinition.MaxHeightProperty);
+                    //gridLeft.RowDefinitions[3].MaxHeight = 10000;
+                    //gridLeft.RowDefinitions[3].Height = new GridLength(1, GridUnitType.Star);
+                    /*
+                    DoubleAnimation tagAnim = new DoubleAnimation();
+                    tagAnim.From = gridLeft.RowDefinitions[3].ActualHeight;
+                    tagAnim.To = mainWindow.ActualHeight - 68;
+                    tagAnim.Duration = new Duration(TimeSpan.Parse("0:0:5"));
+
+                    gridLeft.RowDefinitions[3].BeginAnimation(RowDefinition.MaxHeightProperty, tagAnim);
+                    */
+
+                        
+                    //gridLeft.RowDefinitions[3].Height = new GridLength(1, GridUnitType.Star);
+                    gridLeft.RowDefinitions[1].Height = new GridLength(0);
+                    gridLeft.RowDefinitions[3].Height = new GridLength(1, GridUnitType.Star);
+                    gridLeft.RowDefinitions[5].Height = new GridLength(0);
+
+                    break;
+                case PaneMode.Settings:
+                    gridLeft.RowDefinitions[1].Height = new GridLength(0);
+                    gridLeft.RowDefinitions[3].Height = new GridLength(0);
+                    gridLeft.RowDefinitions[5].Height = new GridLength(1,GridUnitType.Star);
                     break;
                 case PaneMode.ViewView:
                 case PaneMode.ViewEdit:
                 case PaneMode.ViewAdd:
-                    wrapImages.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0) + headingHeight;
-                    stackView.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
-                    stackTag.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
-                    stackCategory.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
-
+                    gridLeft.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
+                    gridLeft.RowDefinitions[3].Height = new GridLength(2, GridUnitType.Star);
+                    gridLeft.RowDefinitions[5].Height = new GridLength(0);
                     break;
                 case PaneMode.ImageViewFull:
-                    wrapImages.Height = windowAdjustHeight;
                     break;
-                case PaneMode.Settings:
-                    stackSettings.Height = windowAdjustHeight - (headingHeight * 3.0);
-
-                    break;
-
                 case PaneMode.Upload:
-                    stackUpload.Height = windowAdjustHeight - (headingHeight * 2.0);
-                    stackTag.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
-                    stackCategory.Height = ((windowAdjustHeight - (headingHeight * 3.0)) / 2.0);
-                    wrapImages.Height = 0.0;
+                    gridLeft.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
+                    gridLeft.RowDefinitions[3].Height = new GridLength(2, GridUnitType.Star);
+                    gridLeft.RowDefinitions[5].Height = new GridLength(0);
                     break;
             }
         }
@@ -139,15 +196,27 @@ namespace ManageWalla
 
                     HideAllContent();
 
+                    gridCategory.RowDefinitions[1].MaxHeight = 34;
+                    gridCategory.RowDefinitions[2].MaxHeight = 0;
+                    gridCategory.RowDefinitions[3].MaxHeight = 0;
+                    gridCategory.RowDefinitions[4].MaxHeight = 0;
+
                     //treeCategoryView.IsEnabled = true;
-                    gridCatgeoryAddEdit.Visibility = Visibility.Collapsed;
-                    stackCategory.Visibility = Visibility.Visible;
+                    gridCategory.Visibility = Visibility.Visible;
+
+
+
+                    //gridCatgeoryAddEdit gridCategoryView
 
                     break;
                 case PaneMode.CategoryAdd:
                     //treeCategoryView.IsEnabled = false;
 
-                    gridCatgeoryAddEdit.Visibility = Visibility.Visible;
+                    gridCategory.RowDefinitions[1].MaxHeight = 0;
+                    gridCategory.RowDefinitions[2].MaxHeight = 25;
+                    gridCategory.RowDefinitions[3].MaxHeight = 75;
+                    gridCategory.RowDefinitions[4].MaxHeight = 34;
+
                     cmdAddEditCategoryMove.Visibility = Visibility.Collapsed;
                     cmdAddEditCategorySave.Content = "Save New";
                     cmdAddEditCategoryDelete.Visibility = Visibility.Collapsed;
@@ -156,7 +225,10 @@ namespace ManageWalla
                 case PaneMode.CategoryEdit:
                     //treeCategoryView.IsEnabled = false;
 
-                    gridCatgeoryAddEdit.Visibility = Visibility.Visible;
+                    gridCategory.RowDefinitions[1].MaxHeight = 0;
+                    gridCategory.RowDefinitions[2].MaxHeight = 25;
+                    gridCategory.RowDefinitions[3].MaxHeight = 75;
+                    gridCategory.RowDefinitions[4].MaxHeight = 34;
                     cmdAddEditCategoryMove.Visibility = Visibility.Visible;
                     cmdAddEditCategorySave.Content = "Save Edit";
                     cmdAddEditCategoryDelete.Visibility = Visibility.Visible;
@@ -170,26 +242,33 @@ namespace ManageWalla
 
                     HideAllContent();
 
-                    gridTagView.IsEnabled = true;
-                    gridTagAddEdit.Visibility = Visibility.Collapsed;
-                    stackTag.Visibility = Visibility.Visible;
+                    gridTag.RowDefinitions[1].MaxHeight = 34;
+                    gridTag.RowDefinitions[2].MaxHeight = 0;
+                    gridTag.RowDefinitions[3].MaxHeight = 0;
+                    gridTag.RowDefinitions[4].MaxHeight = 0;
+
+                    gridTag.Visibility = Visibility.Visible;
 
                     cmdAssociateTag.Visibility = Visibility.Collapsed;
                     cmdAddTag.Visibility = Visibility.Visible;
-                    cmdEditEdit.Visibility = Visibility.Visible;
+                    cmdEditTag.Visibility = Visibility.Visible;
 
                     break;
                 case PaneMode.TagAdd:
 
                     this.cmdAddEditTagSave.Content = "Save New";
-                    gridTagAddEdit.Visibility = Visibility.Visible;
-                    gridTagView.IsEnabled = false;
+                    gridTag.RowDefinitions[1].MaxHeight = 0;
+                    gridTag.RowDefinitions[2].MaxHeight = 25;
+                    gridTag.RowDefinitions[3].MaxHeight = 75;
+                    gridTag.RowDefinitions[4].MaxHeight = 34;
 
                     break;
                 case PaneMode.TagEdit:
                     this.cmdAddEditTagSave.Content = "Save Edit";
-                    gridTagAddEdit.Visibility = Visibility.Visible;
-                    gridTagView.IsEnabled = false;
+                    gridTag.RowDefinitions[1].MaxHeight = 0;
+                    gridTag.RowDefinitions[2].MaxHeight = 25;
+                    gridTag.RowDefinitions[3].MaxHeight = 75;
+                    gridTag.RowDefinitions[4].MaxHeight = 34;
 
                     break;
                 case PaneMode.ViewView:
@@ -200,8 +279,8 @@ namespace ManageWalla
 
                     HideAllContent();
                     stackView.Visibility = Visibility.Visible;
-                    stackTag.Visibility = Visibility.Visible;
-                    stackCategory.Visibility = Visibility.Visible;
+                    //stackTag.Visibility = Visibility.Visible;
+                    //stackCategory.Visibility = Visibility.Visible;
 
                     gridView.Visibility = System.Windows.Visibility.Visible;
                     gridViewAddEdit.Visibility = System.Windows.Visibility.Collapsed;
@@ -239,12 +318,11 @@ namespace ManageWalla
                     //Sort out Tag view options
                     cmdAssociateTag.Visibility = Visibility.Visible;
                     cmdAddTag.Visibility = Visibility.Collapsed;
-                    cmdEditEdit.Visibility = Visibility.Collapsed;
-                    gridTagAddEdit.Visibility = Visibility.Collapsed;
-                    stackTag.Visibility = Visibility.Visible;
-
-                    //Do Category view options.
-                    stackCategory.Visibility = Visibility.Visible;
+                    cmdEditTag.Visibility = Visibility.Collapsed;
+                    //gridTagAddEdit.Visibility = Visibility.Collapsed;
+                    
+                    //gridCategory.Visibility = Visibility.Visible;
+                    gridTag.Visibility = Visibility.Visible;
 
                     if (!uploadUIState.Uploading && (uploadUIState.Mode == UploadUIState.UploadMode.Images || uploadUIState.Mode == UploadUIState.UploadMode.Folder))
                     {
@@ -338,10 +416,6 @@ namespace ManageWalla
                     
                     stackUpload.Visibility = Visibility.Visible;
 
-
-
-
-
                     break;
                 case PaneMode.ImageViewFull:
 
@@ -353,7 +427,7 @@ namespace ManageWalla
                     cmdView.IsChecked = false;
 
                     HideAllContent();
-                    stackSettings.Visibility = Visibility.Visible;
+                    gridSettings.Visibility = Visibility.Visible;
 
                     break;
             }
@@ -363,9 +437,10 @@ namespace ManageWalla
 
         private void HideAllContent()
         {
-            stackCategory.Visibility = Visibility.Collapsed;
-            stackTag.Visibility = Visibility.Collapsed;
-            stackSettings.Visibility = Visibility.Collapsed;
+            gridCategory.Visibility = Visibility.Collapsed;
+            //stackCategory.Visibility = Visibility.Collapsed;
+            gridTag.Visibility = Visibility.Collapsed;
+            gridSettings.Visibility = Visibility.Collapsed;
             stackView.Visibility = Visibility.Collapsed;
             stackUpload.Visibility = Visibility.Collapsed;
         }
@@ -664,18 +739,35 @@ namespace ManageWalla
                     UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
                     ImageMetaTagRef[] newTagRefArray;
 
-                    if (current.Meta.Tags == null)
+                    if (chkUploadTagsAll.IsChecked == true)
                     {
-                        newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
+                        if (uploadUIState.MetaTagRef == null)
+                        {
+                            newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
+                        }
+                        else
+                        {
+                            newTagRefArray = new ImageMetaTagRef[uploadUIState.MetaTagRef.Length + 1];
+                            uploadUIState.MetaTagRef.CopyTo(newTagRefArray, 0);
+                            newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
+                        }
+                        uploadUIState.MetaTagRef = newTagRefArray;
                     }
                     else
                     {
-                        newTagRefArray = new ImageMetaTagRef[current.Meta.Tags.Length + 1];
-                        current.Meta.Tags.CopyTo(newTagRefArray, 0);
-                        newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
+                        if (current.Meta.Tags == null)
+                        {
+                            newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
+                        }
+                        else
+                        {
+                            newTagRefArray = new ImageMetaTagRef[current.Meta.Tags.Length + 1];
+                            current.Meta.Tags.CopyTo(newTagRefArray, 0);
+                            newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
+                        }
+                        current.Meta.Tags = newTagRefArray;
                     }
-
-                    current.Meta.Tags = newTagRefArray;
+                    
 
                     UploadEnableDisableTags(current);
                     checkedTagButton.IsChecked = false;
@@ -686,12 +778,32 @@ namespace ManageWalla
 
         private void UploadEnableDisableTags(UploadImage current)
         {
+
+            //Either check the gloabl tags collection or the image specific collection.
+            ImageMetaTagRef[] tagToCheck = null;
+            try
+            {
+                if (chkUploadTagsAll.IsChecked == true)
+                {
+                    tagToCheck = uploadUIState.MetaTagRef;
+                }
+                else
+                {
+                    tagToCheck = current.Meta.Tags;
+                }
+            }
+            catch (NullReferenceException ex)
+            {
+                //Can be ignored, just leave the method
+            }
+
+            //Loop to enable buttons if they are not currently in the selected list.
             foreach (RadioButton button in wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsEnabled == false))
             {
                 bool exists = false;
-                if (current.Meta.Tags != null)
+                if (tagToCheck != null)
                 {
-                    foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
+                    foreach (ImageMetaTagRef tagRef in tagToCheck)
                     {
                         TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
                         if (tagRef.id == existingTagRef.id)
@@ -708,11 +820,12 @@ namespace ManageWalla
                 exists = false;
             }
 
+            //Update tags, so ones in use are disabled.
             if (current != null)
             {
-                if (current.Meta.Tags != null)
+                if (tagToCheck != null)
                 {
-                    foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
+                    foreach (ImageMetaTagRef tagRef in tagToCheck)
                     {
                         foreach (RadioButton button in wrapMyTags.Children)
                         {
@@ -730,15 +843,23 @@ namespace ManageWalla
         private void cmdUploadRemoveTag_Click(object sender, RoutedEventArgs e)
         {
             ImageMetaTagRef currentTag = (ImageMetaTagRef)lstUploadTagList.SelectedItem;
-
             if (currentTag != null)
             {
                 UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-                ImageMetaTagRef[] newTagListTagRef = current.Meta.Tags.Where(r => r.id != currentTag.id).ToArray();
-                current.Meta.Tags = newTagListTagRef;
+
+                if (chkUploadTagsAll.IsChecked == true)
+                {
+                    ImageMetaTagRef[] newTagListTagRef = uploadUIState.MetaTagRef.Where(r => r.id != currentTag.id).ToArray();
+                    uploadUIState.MetaTagRef = newTagListTagRef;
+                }
+                else
+                {
+                    current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                    ImageMetaTagRef[] newTagListTagRef = current.Meta.Tags.Where(r => r.id != currentTag.id).ToArray();
+                    current.Meta.Tags = newTagListTagRef;
+                }
 
                 BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
-
                 UploadEnableDisableTags(current);
                 lstUploadTagList.Items.Refresh();
             }
@@ -770,20 +891,27 @@ namespace ManageWalla
             uploadUIState.Uploading = true;
             SetPanePositions(PaneMode.Upload);
 
-            string response = await controller.DoUpload(uploadFots, uploadUIState);
+            string response = await controller.DoUploadAsync(uploadFots, uploadUIState);
             if (response != null)
             {
                 MessageBox.Show("The upload encountered an error.  Message: " + response);
             }
 
+            //TODO - Remove Images which were successfully uploaded.
+            uploadUIState.Uploading = false;
+            //lstUploadImageFileList.Items.Clear();
+            ResetUploadState(true);
+
+            /*
             if (lstUploadImageFileList.Items.Count == 0)
             {
-                ResetUploadState(true);
+                
             }
             else
             {
-                uploadUIState.Uploading = false;
+                
             }
+            */
 
             SetPanePositions(PaneMode.Upload);
         }
@@ -1058,7 +1186,6 @@ namespace ManageWalla
         }
         #endregion
 
-
         private void lblUploadProposedImageCount_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var simon = this.lstUploadImageFileList;
@@ -1066,7 +1193,52 @@ namespace ManageWalla
 
         async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
         {
-            UploadStatusList uploadStatusList = await controller.GetUploadStatusList();
+            uploadStatusList = await controller.GetUploadStatusList();
+
+            //ImageUploadRef
+            lstUploadStatusList.GetBindingExpression(ListBox.ItemsSourceProperty).UpdateTarget();
+            lstUploadStatusItem.GetBindingExpression(ListBoxItem.ContentProperty).UpdateTarget();
+
+            /*
+            lstUploadStatusList.DisplayMemberPath = "name";
+            Binding binding = new Binding("ImageUploadRef");
+            binding.Mode = BindingMode.OneWay;
+            binding.Source = uploadStatusList;
+
+            BindingOperations.SetBinding(lstUploadStatusList, ListBox.ItemsSourceProperty, binding);
+            */
+
+
+
+
+            //lstUploadStatusList.GetBindingExpression(ListBoxItem.ContentProperty).UpdateTarget();
+
+            //
+            //lstUploadStatusList.GetBindingExpression(ListBox.DisplayMemberPathProperty).UpdateTarget();
+
+            //BindingOperations.GetBindingExpressionBase(lstUploadStatusList, ListBox.ItemsSourceProperty).UpdateTarget();
+
+            
+        }
+
+        private void chkUploadTagsAll_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaTagRef = current.Meta.Tags;
+
+            BindingOperations.ClearBinding(lstUploadTagList, ListBox.ItemsSourceProperty);
+            Binding binding = new Binding("MetaTagRef");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(lstUploadTagList, ListBox.ItemsSourceProperty, binding);
+        }
+
+        private void chkUploadTagsAll_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(lstUploadTagList, ListBox.ItemsSourceProperty);
+            Binding binding = new Binding("/Meta.Tags");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(lstUploadTagList, ListBox.ItemsSourceProperty, binding);
         }
 
 
