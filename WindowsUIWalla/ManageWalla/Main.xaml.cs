@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using System.IO;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
+using System.Xml;
+
 
 namespace ManageWalla
 {
@@ -42,7 +44,7 @@ namespace ManageWalla
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
         public UploadImageFileList uploadFots = null;
-        public UploadStatusList uploadStatusList = null;
+        //public UploadStatusList uploadStatusList = null;
         public GlobalState state = null;
 
         #endregion
@@ -54,7 +56,7 @@ namespace ManageWalla
 
             uploadFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
             uploadUIState = (UploadUIState)FindResource("uploadUIStateKey");
-            uploadStatusList = (UploadStatusList)FindResource("uploadStatusListKey");
+            //uploadStatusList = (UploadStatusList)FindResource("uploadStatusListKey");
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -64,12 +66,13 @@ namespace ManageWalla
             //Kick off asyncronous data syncronising.
             //This will update all UI Elements eventually
             controller = new MainController(this);
-            controller.RetrieveGeneralUserConfig();
 
-            HideAllContent();
-
-            currentPane = PaneMode.CategoryView;
+            state = controller.GetState();
+            currentPane = PaneMode.CategoryView;            
             this.cmdCategory.IsChecked = true;
+
+            //Asyncronously check\update local cache information for Categories\Tags\Views.
+            //Task.Run(controller.RetrieveGeneralUserConfigAsync());
         }
 
         private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -79,122 +82,284 @@ namespace ManageWalla
         #endregion
 
         #region Controls control logic based on Pane
-        private void SetWindowHeights(PaneMode mode)
-        {
 
-            switch (mode)
+        //TODO add working icons.
+        private void RefreshPanesLoadingState(PaneMode updatedPane, string message, bool updateControlsFromState)
+        {
+            switch (updatedPane)
             {
                 case PaneMode.CategoryView:
                 case PaneMode.CategoryAdd:
                 case PaneMode.CategoryEdit:
-
-                    /*
-                    if (gridLeft.RowDefinitions[3].ActualHeight > 0)
+                    switch (currentPane)
                     {
-                        //gridLeft.RowDefinitions[3].MaxHeight = gridLeft.RowDefinitions[3].ActualHeight;
-
-                        DoubleAnimation anim = new DoubleAnimation();
-                        anim.From = gridLeft.RowDefinitions[3].ActualHeight;
-                        anim.To = 0;
-                        anim.FillBehavior = FillBehavior.Stop;
-                        anim.Duration = new Duration(TimeSpan.Parse("0:0:5"));
-
-                        gridLeft.RowDefinitions[3].BeginAnimation(RowDefinition.MaxHeightProperty, anim);
-                        //gridLeft.RowDefinitions[3].Height = new GridLength(0);
+                        //All of these display the category pane.
+                        case PaneMode.CategoryView:
+                        case PaneMode.CategoryAdd:
+                        case PaneMode.CategoryEdit:
+                        case PaneMode.ViewView:
+                        case PaneMode.ViewEdit:
+                        case PaneMode.ViewAdd:
+                        case PaneMode.Upload:
+                            switch (state.categoryLoadState) 
+                            {
+                                case GlobalState.DataLoadState.Loaded:
+                                    //if (updateControlsFromState) {TagListReloadFromState();}
+                                    panCategoryWorking.Visibility = System.Windows.Visibility.Collapsed;
+                                    gridCategory.Visibility = Visibility.Visible;
+                                    break;
+                                case GlobalState.DataLoadState.Pending:
+                                    //TODO Just update loading icon
+                                    txtCategoryWorkingMessage.Text = "Category information is loading...";
+                                    break;
+                                case GlobalState.DataLoadState.LocalCache:
+                                    //if (updateControlsFromState) {TagListReloadFromState();}
+                                    panCategoryWorking.Visibility = System.Windows.Visibility.Collapsed;
+                                    gridCategory.Visibility = Visibility.Visible;
+                                    break;
+                                case GlobalState.DataLoadState.Unavailable:
+                                    panCategoryWorking.Visibility = System.Windows.Visibility.Visible;
+                                    gridCategory.Visibility = Visibility.Collapsed;
+                                    txtCategoryWorkingMessage.Text = "Category information is unavailable.  " + message ?? "";
+                                    break;
+                                case GlobalState.DataLoadState.No:
+                                    //TagListReloadFromState();
+                                    break;
+                            }
+                            break;
+                        //Category pane is currently hidden.  So just update icon and text message.
+                        default:
+                            switch (state.categoryLoadState) 
+                            {
+                                case GlobalState.DataLoadState.Loaded:
+                                    //if (updateControlsFromState) {TagListReloadFromState();}
+                                    break;
+                                case GlobalState.DataLoadState.Pending:
+                                    //TODO Just update loading icon
+                                    txtCategoryWorkingMessage.Text = "Category information is loading...";
+                                    break;
+                                case GlobalState.DataLoadState.LocalCache:
+                                    //if (updateControlsFromState) {TagListReloadFromState();}
+                                    break;
+                                case GlobalState.DataLoadState.Unavailable:
+                                    txtCategoryWorkingMessage.Text = "Category information is unavailable.  " + message ?? "";
+                                    break;
+                            }
+                            break;
                     }
-                    */
+                    break;
+                case PaneMode.TagView:
+                case PaneMode.TagAdd:
+                case PaneMode.TagEdit:
+                    switch (currentPane)
+                    {
+                        //All of these display the tag pane.
+                        case PaneMode.TagView:
+                        case PaneMode.TagAdd:
+                        case PaneMode.TagEdit:
+                        case PaneMode.ViewView:
+                        case PaneMode.ViewEdit:
+                        case PaneMode.ViewAdd:
+                        case PaneMode.Upload:
+                            switch (state.tagLoadState) 
+                            {
+                                case GlobalState.DataLoadState.Loaded:
+                                    if (updateControlsFromState) { TagListReloadFromState(); }
+                                    panTagWorking.Visibility = System.Windows.Visibility.Collapsed;
+                                    gridTag.Visibility = Visibility.Visible;
+                                    break;
+                                case GlobalState.DataLoadState.Pending:
+                                    //TODO Just update loading icon
+                                    txtTagWorkingMessage.Text = "Tag information is loading...";
+                                    break;
+                                case GlobalState.DataLoadState.LocalCache:
+                                    if (updateControlsFromState) { TagListReloadFromState(); }
+                                    panTagWorking.Visibility = System.Windows.Visibility.Collapsed;
+                                    gridTag.Visibility = Visibility.Visible;
+                                    break;
+                                case GlobalState.DataLoadState.Unavailable:
+                                    panTagWorking.Visibility = System.Windows.Visibility.Visible;
+                                    gridTag.Visibility = Visibility.Collapsed;
+                                    txtTagWorkingMessage.Text = "Tag information is unavailable.  " + message ?? "";
+                                    break;
+                            }
+                            break;
+                        //Category pane is currently hidden.  So only update icon, message and data.
+                        default:
+                            switch (state.tagLoadState) 
+                            {
+                                case GlobalState.DataLoadState.Loaded:
+                                    if (updateControlsFromState) { TagListReloadFromState(); }
+                                    break;
+                                case GlobalState.DataLoadState.Pending:
+                                    //TODO Just update loading icon
+                                    txtCategoryWorkingMessage.Text = "Tag information is loading...";
+                                    break;
+                                case GlobalState.DataLoadState.LocalCache:
+                                    if (updateControlsFromState) { TagListReloadFromState(); }
+                                    break;
+                                case GlobalState.DataLoadState.Unavailable:
+                                    txtCategoryWorkingMessage.Text = "Tag information is unavailable.  " + message ?? "";
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case PaneMode.ViewView:
+                case PaneMode.ViewEdit:
+                case PaneMode.ViewAdd:
 
-                    /*
-                    DoubleAnimation catAnim = new DoubleAnimation();
-                    catAnim.From = gridLeft.RowDefinitions[1].ActualHeight;
-                    catAnim.To = mainWindow.ActualHeight - 68;
-                    catAnim.Duration = new Duration(TimeSpan.Parse("0:0:5"));
+                    switch (currentPane)
+                    {
+                        //All of these display the view pane.
+                        case PaneMode.ViewView:
+                        case PaneMode.ViewEdit:
+                        case PaneMode.ViewAdd:
+                            switch (state.viewLoadState) 
+                            {
+                                case GlobalState.DataLoadState.Loaded:
+                                    //ViewListReloadFromState();
+                                    panViewWorking.Visibility = System.Windows.Visibility.Collapsed;
+                                    //gridView.Visibility = Visibility.Visible;
+                                    break;
+                                case GlobalState.DataLoadState.Pending:
+                                    //TODO Just update loading icon
+                                    txtViewWorkingMessage.Text = "View information is loading...";
+                                    break;
+                                case GlobalState.DataLoadState.LocalCache:
+                                    //ViewListReloadFromState();
+                                    panViewWorking.Visibility = System.Windows.Visibility.Collapsed;
+                                    //gridView.Visibility = Visibility.Visible;
+                                    break;
+                                case GlobalState.DataLoadState.Unavailable:
+                                    panViewWorking.Visibility = System.Windows.Visibility.Visible;
+                                    //gridView.Visibility = Visibility.Collapsed;
+                                    txtViewWorkingMessage.Text = "View information is unavailable.  " + message ?? "";
+                                    break;
+                                case GlobalState.DataLoadState.No:
+                                    //RefreshTagsList();
+                                    break;
+                            }
+                            break;
+                        //View pane is currently hidden.  So only update icon and message.
+                        default:
+                            switch (state.viewLoadState) 
+                            {
+                                case GlobalState.DataLoadState.Loaded:
+                                    //TODO
+                                    break;
+                                case GlobalState.DataLoadState.Pending:
+                                    //TODO Just update loading icon
+                                    txtViewWorkingMessage.Text = "View information is loading...";
+                                    break;
+                                case GlobalState.DataLoadState.LocalCache:
+                                    //TODO
+                                    break;
+                                case GlobalState.DataLoadState.Unavailable:
+                                    txtViewWorkingMessage.Text = "View information is unavailable.  " + message ?? "";
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+            }
+        }
 
-                    gridLeft.RowDefinitions[1].BeginAnimation(RowDefinition.MaxHeightProperty, catAnim);
-                    */
-
-                    //gridLeft.RowDefinitions[1].ClearValue(RowDefinition.MaxHeightProperty);
-                    //gridLeft.RowDefinitions[1].MaxHeight = 10000;
-                    //gridLeft.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
-                    //gridLeft.RowDefinitions[5].Height = new GridLength(0);
-
+        private void RefreshOverallPanesStructure()
+        {
+            switch (currentPane)
+            {
+                case PaneMode.CategoryView:
+                case PaneMode.CategoryAdd:
+                case PaneMode.CategoryEdit:
+                    gridTag.Visibility = Visibility.Collapsed;
+                    gridSettings.Visibility = Visibility.Collapsed;
+                    stackView.Visibility = Visibility.Collapsed;
+                    stackUpload.Visibility = Visibility.Collapsed;
 
                     gridLeft.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
                     gridLeft.RowDefinitions[3].Height = new GridLength(0);
                     gridLeft.RowDefinitions[5].Height = new GridLength(0);
 
+                    gridRight.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
+                    gridRight.RowDefinitions[2].Height = new GridLength(0);
+                    gridRight.RowDefinitions[4].Height = new GridLength(0);
                     break;
                 case PaneMode.TagView:
                 case PaneMode.TagAdd:
                 case PaneMode.TagEdit:
+                    gridCategory.Visibility = Visibility.Collapsed;
+                    gridSettings.Visibility = Visibility.Collapsed;
+                    stackView.Visibility = Visibility.Collapsed;
+                    stackUpload.Visibility = Visibility.Collapsed;
 
-                    /*
-                    if (gridLeft.RowDefinitions[1].ActualHeight > 0)
-                    {
-                        //gridLeft.RowDefinitions[3].MaxHeight = gridLeft.RowDefinitions[3].ActualHeight;
-
-                        DoubleAnimation anim = new DoubleAnimation();
-                        anim.From = gridLeft.RowDefinitions[1].ActualHeight;
-                        anim.To = 0;
-                        anim.Duration = new Duration(TimeSpan.Parse("0:0:5"));
-                        anim.FillBehavior = FillBehavior.Stop;
-                        gridLeft.RowDefinitions[1].BeginAnimation(RowDefinition.MaxHeightProperty, anim);
-                        //gridLeft.RowDefinitions[3].Height = new GridLength(0);
-                    }
-                    */
-
-                    //gridLeft.RowDefinitions[3].ClearValue(RowDefinition.MaxHeightProperty);
-                    //gridLeft.RowDefinitions[3].MaxHeight = 10000;
-                    //gridLeft.RowDefinitions[3].Height = new GridLength(1, GridUnitType.Star);
-                    /*
-                    DoubleAnimation tagAnim = new DoubleAnimation();
-                    tagAnim.From = gridLeft.RowDefinitions[3].ActualHeight;
-                    tagAnim.To = mainWindow.ActualHeight - 68;
-                    tagAnim.Duration = new Duration(TimeSpan.Parse("0:0:5"));
-
-                    gridLeft.RowDefinitions[3].BeginAnimation(RowDefinition.MaxHeightProperty, tagAnim);
-                    */
-
-                        
-                    //gridLeft.RowDefinitions[3].Height = new GridLength(1, GridUnitType.Star);
                     gridLeft.RowDefinitions[1].Height = new GridLength(0);
                     gridLeft.RowDefinitions[3].Height = new GridLength(1, GridUnitType.Star);
                     gridLeft.RowDefinitions[5].Height = new GridLength(0);
 
+                    gridRight.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
+                    gridRight.RowDefinitions[2].Height = new GridLength(0);
+                    gridRight.RowDefinitions[4].Height = new GridLength(0);
+
+                    cmdCategory.IsChecked = false;
+                    cmdSettings.IsChecked = false;
+                    cmdUpload.IsChecked = false;
+                    cmdView.IsChecked = false;
                     break;
                 case PaneMode.Settings:
                     gridLeft.RowDefinitions[1].Height = new GridLength(0);
                     gridLeft.RowDefinitions[3].Height = new GridLength(0);
                     gridLeft.RowDefinitions[5].Height = new GridLength(1,GridUnitType.Star);
+
+                    gridRight.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
+                    gridRight.RowDefinitions[2].Height = new GridLength(0);
+                    gridRight.RowDefinitions[4].Height = new GridLength(0);
+
+                    cmdCategory.IsChecked = false;
+                    cmdTag.IsChecked = false;
+                    cmdUpload.IsChecked = false;
+                    cmdView.IsChecked = false;
                     break;
                 case PaneMode.ViewView:
                 case PaneMode.ViewEdit:
                 case PaneMode.ViewAdd:
+                    gridCategory.Visibility = Visibility.Collapsed;
+                    gridSettings.Visibility = Visibility.Collapsed;
+                    stackView.Visibility = Visibility.Collapsed;
+                    stackUpload.Visibility = Visibility.Collapsed;
+
                     gridLeft.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
                     gridLeft.RowDefinitions[3].Height = new GridLength(2, GridUnitType.Star);
                     gridLeft.RowDefinitions[5].Height = new GridLength(0);
+
+                    gridRight.RowDefinitions[0].Height = new GridLength(0);
+                    gridRight.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Star);
+                    gridRight.RowDefinitions[4].Height = new GridLength(0);
                     break;
                 case PaneMode.ImageViewFull:
                     break;
                 case PaneMode.Upload:
+
+                    gridCategory.Visibility = Visibility.Visible;
+                    gridTag.Visibility = Visibility.Visible;
+                    stackUpload.Visibility = Visibility.Visible;
+
                     gridLeft.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
                     gridLeft.RowDefinitions[3].Height = new GridLength(2, GridUnitType.Star);
                     gridLeft.RowDefinitions[5].Height = new GridLength(0);
+
+                    gridRight.RowDefinitions[0].Height = new GridLength(0);
+                    gridRight.RowDefinitions[2].Height = new GridLength(0);
+                    gridRight.RowDefinitions[4].Height = new GridLength(1, GridUnitType.Star);
                     break;
             }
         }
 
-        private void SetPanePositions(PaneMode mode)
+        private void RefreshPanesAllControls(PaneMode mode)
         {
             switch (mode)
             {
                 case PaneMode.CategoryView:
-                    cmdTag.IsChecked = false;
-                    cmdView.IsChecked = false;
-                    cmdSettings.IsChecked = false;
-                    cmdUpload.IsChecked = false;
-
-                    HideAllContent();
 
                     gridCategory.RowDefinitions[1].MaxHeight = 34;
                     gridCategory.RowDefinitions[2].MaxHeight = 0;
@@ -202,12 +367,7 @@ namespace ManageWalla
                     gridCategory.RowDefinitions[4].MaxHeight = 0;
 
                     //treeCategoryView.IsEnabled = true;
-                    gridCategory.Visibility = Visibility.Visible;
-
-
-
                     //gridCatgeoryAddEdit gridCategoryView
-
                     break;
                 case PaneMode.CategoryAdd:
                     //treeCategoryView.IsEnabled = false;
@@ -235,24 +395,15 @@ namespace ManageWalla
 
                     break;
                 case PaneMode.TagView:
-                    cmdCategory.IsChecked = false;
-                    cmdView.IsChecked = false;
-                    cmdSettings.IsChecked = false;
-                    cmdUpload.IsChecked = false;
-
-                    HideAllContent();
-
                     gridTag.RowDefinitions[1].MaxHeight = 34;
                     gridTag.RowDefinitions[2].MaxHeight = 0;
                     gridTag.RowDefinitions[3].MaxHeight = 0;
                     gridTag.RowDefinitions[4].MaxHeight = 0;
 
-                    gridTag.Visibility = Visibility.Visible;
-
                     cmdAssociateTag.Visibility = Visibility.Collapsed;
                     cmdAddTag.Visibility = Visibility.Visible;
                     cmdEditTag.Visibility = Visibility.Visible;
-
+                    wrapMyTags.IsEnabled = true;
                     break;
                 case PaneMode.TagAdd:
 
@@ -272,58 +423,39 @@ namespace ManageWalla
 
                     break;
                 case PaneMode.ViewView:
-                    cmdCategory.IsChecked = false;
-                    cmdTag.IsChecked = false;
-                    cmdSettings.IsChecked = false;
-                    cmdUpload.IsChecked = false;
 
-                    HideAllContent();
-                    stackView.Visibility = Visibility.Visible;
-                    //stackTag.Visibility = Visibility.Visible;
-                    //stackCategory.Visibility = Visibility.Visible;
-
-                    gridView.Visibility = System.Windows.Visibility.Visible;
-                    gridViewAddEdit.Visibility = System.Windows.Visibility.Collapsed;
                     break;
                 case PaneMode.ViewEdit:
-
+                    /*
 
                     gridView.Visibility = System.Windows.Visibility.Collapsed;
                     gridViewAddEdit.Visibility = System.Windows.Visibility.Visible;
 
                     cmdAddEditViewDelete.Visibility = System.Windows.Visibility.Visible;
                     cmdAddEditViewSave.Content = "Save Update";
+                    */
 
                     break;
 
                 case PaneMode.ViewAdd:
 
+                    /*
                     gridView.Visibility = System.Windows.Visibility.Collapsed;
                     gridViewAddEdit.Visibility = System.Windows.Visibility.Visible;
 
                     cmdAddEditViewDelete.Visibility = System.Windows.Visibility.Collapsed;
                     cmdAddEditViewSave.Content = "Save New View";
 
+                     */ 
                     break;
 
                 case PaneMode.Upload:
-
-                    cmdCategory.IsChecked = false;
-                    cmdTag.IsChecked = false;
-                    cmdSettings.IsChecked = false;
-                    cmdView.IsChecked = false;
-
-                    HideAllContent();
-
                     //Sort out Tag view options
                     cmdAssociateTag.Visibility = Visibility.Visible;
                     cmdAddTag.Visibility = Visibility.Collapsed;
                     cmdEditTag.Visibility = Visibility.Collapsed;
                     //gridTagAddEdit.Visibility = Visibility.Collapsed;
                     
-                    //gridCategory.Visibility = Visibility.Visible;
-                    gridTag.Visibility = Visibility.Visible;
-
                     if (!uploadUIState.Uploading && (uploadUIState.Mode == UploadUIState.UploadMode.Images || uploadUIState.Mode == UploadUIState.UploadMode.Folder))
                     {
                         //Common
@@ -413,70 +545,64 @@ namespace ManageWalla
 
                         //Disable Category
                     }
-                    
-                    stackUpload.Visibility = Visibility.Visible;
 
                     break;
                 case PaneMode.ImageViewFull:
 
                     break;
                 case PaneMode.Settings:
-                    cmdCategory.IsChecked = false;
-                    cmdTag.IsChecked = false;
-                    cmdUpload.IsChecked = false;
-                    cmdView.IsChecked = false;
-
-                    HideAllContent();
-                    gridSettings.Visibility = Visibility.Visible;
 
                     break;
             }
-            SetWindowHeights(mode);
-            currentPane = mode;
-        }
 
-        private void HideAllContent()
-        {
-            gridCategory.Visibility = Visibility.Collapsed;
-            //stackCategory.Visibility = Visibility.Collapsed;
-            gridTag.Visibility = Visibility.Collapsed;
-            gridSettings.Visibility = Visibility.Collapsed;
-            stackView.Visibility = Visibility.Collapsed;
-            stackUpload.Visibility = Visibility.Collapsed;
+            currentPane = mode;
+            switch (currentPane)
+            {
+                //These actions indicate a change has occured which requires a window re-jig.
+                case PaneMode.CategoryView:
+                case PaneMode.TagView:
+                case PaneMode.ViewView:
+                case PaneMode.Upload:
+                case PaneMode.ImageViewFull:
+                case PaneMode.Settings:
+                    RefreshPanesLoadingState(mode, null, false);
+                    RefreshOverallPanesStructure();
+                    break;
+            }
         }
         #endregion
 
         #region View UI Control
         private void cmdEditView_Click(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.ViewEdit);
+            RefreshPanesAllControls(PaneMode.ViewEdit);
         }
 
         private void cmdAddNewView_Click(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.ViewAdd);
+            RefreshPanesAllControls(PaneMode.ViewAdd);
         }
 
         private void cmdAddEditViewCancel_Click(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.ViewView);
+            RefreshPanesAllControls(PaneMode.ViewView);
         }
         #endregion
 
         #region Category UI Control
         private void cmdAddCategory_Click(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.CategoryAdd);
+            RefreshPanesAllControls(PaneMode.CategoryAdd);
         }
 
         private void cmdAddEditCategoryCancel_Click(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.CategoryView);
+            RefreshPanesAllControls(PaneMode.CategoryView);
         }
 
         private void cmdEditCategory_Click(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.CategoryEdit);
+            RefreshPanesAllControls(PaneMode.CategoryEdit);
         }
 
         public void RefreshCategoryTreeView()
@@ -486,28 +612,24 @@ namespace ManageWalla
         #endregion
 
         #region Tag UI Control
+
+        //Force refresh of the Tags List
         async private void RefreshTagsList()
         {
-            wrapMyTags.Children.Clear();
-            TagList tagList = null;
-            try
-            {
-                tagList = await controller.GetTagsAvailable();
-            }
-            catch (Exception ex)
-            {
-                if (tagList == null)
-                {
-                    MessageBox.Show("There was an error retrieving the tags from the server.  Message: " + ex.Message);
-                    return;
-                }
-                else
-                {
-                    MessageBox.Show("Displaying previous tag list.  An error was encountered, message: " + ex.Message);
-                }
-            }
+            state.tagLoadState = GlobalState.DataLoadState.Pending;
+            RefreshPanesLoadingState(PaneMode.TagView, null, false);
+            string response = await controller.RefreshTagsListAsync();
+            RefreshPanesLoadingState(PaneMode.TagView, response, true);
+        }
 
-            foreach (TagListTagRef tag in tagList.TagRef)
+
+
+        //TODO - needs to be called on dispatcher thread!!!!!
+        public void TagListReloadFromState()
+        {
+            wrapMyTags.Children.Clear();
+
+            foreach (TagListTagRef tag in state.tagList.TagRef)
             {
                 RadioButton newRadioButton = new RadioButton();
 
@@ -555,7 +677,7 @@ namespace ManageWalla
                 return;
             }
 
-            SetPanePositions(PaneMode.TagView);
+            RefreshPanesAllControls(PaneMode.TagView);
             RefreshTagsList();
         }
 
@@ -563,18 +685,18 @@ namespace ManageWalla
         {
             txtTagAddEditName.Text = "";
             txtTagAddEditDescription.Text = "";
-            SetPanePositions(PaneMode.TagAdd);
+            RefreshPanesAllControls(PaneMode.TagAdd);
         }
 
         private void cmdEditTag_Click(object sender, RoutedEventArgs e)
         {
             PopulateTagData();
-            SetPanePositions(PaneMode.TagEdit);
+            RefreshPanesAllControls(PaneMode.TagEdit);
         }
 
         private void cmdAddEditTagCancel_Click(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.TagView);
+            RefreshPanesAllControls(PaneMode.TagView);
         }
 
         private void cmdRefreshTagList_Click(object sender, RoutedEventArgs e)
@@ -614,7 +736,7 @@ namespace ManageWalla
                 return;
             }
 
-            SetPanePositions(PaneMode.TagView);
+            RefreshPanesAllControls(PaneMode.TagView);
             RefreshTagsList();
         }
         #endregion
@@ -648,7 +770,7 @@ namespace ManageWalla
                 }
 
                 uploadUIState.Mode = UploadUIState.UploadMode.Folder;
-                SetPanePositions(PaneMode.Upload);
+                RefreshPanesAllControls(PaneMode.Upload);
             }
         }
 
@@ -656,7 +778,7 @@ namespace ManageWalla
         {
             uploadFots.Clear();
             ResetUploadState(true);
-            SetPanePositions(PaneMode.Upload);
+            RefreshPanesAllControls(PaneMode.Upload);
         }
 
         private void ResetUploadState(bool fullReset)
@@ -685,6 +807,26 @@ namespace ManageWalla
 
         }
 
+        private void chkUploadTagsAll_Checked(object sender, RoutedEventArgs e)
+        {
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            uploadUIState.MetaTagRef = current.Meta.Tags;
+
+            BindingOperations.ClearBinding(lstUploadTagList, ListBox.ItemsSourceProperty);
+            Binding binding = new Binding("MetaTagRef");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = uploadUIState;
+            BindingOperations.SetBinding(lstUploadTagList, ListBox.ItemsSourceProperty, binding);
+        }
+
+        private void chkUploadTagsAll_Unchecked(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(lstUploadTagList, ListBox.ItemsSourceProperty);
+            Binding binding = new Binding("/Meta.Tags");
+            binding.Mode = BindingMode.TwoWay;
+            BindingOperations.SetBinding(lstUploadTagList, ListBox.ItemsSourceProperty, binding);
+        }
+
         async private void cmdUploadImportFiles_Click(object sender, RoutedEventArgs e)
         {
             var openDialog = new System.Windows.Forms.OpenFileDialog();
@@ -696,7 +838,7 @@ namespace ManageWalla
                 await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots);
                 uploadUIState.GotSubFolders = false;
                 uploadUIState.Mode = UploadUIState.UploadMode.Images;
-                SetPanePositions(PaneMode.Upload);
+                RefreshPanesAllControls(PaneMode.Upload);
             }
         }
 
@@ -704,7 +846,7 @@ namespace ManageWalla
         {
             ResetUploadState(false);
             await controller.ResetMeFotsMeta(uploadFots);
-            SetPanePositions(PaneMode.Upload);
+            RefreshPanesAllControls(PaneMode.Upload);
         }
 
         private void lstUploadImageFileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -867,29 +1009,18 @@ namespace ManageWalla
 
         private void chkUploadToNewCategory_Checked(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(currentPane);
+            RefreshPanesAllControls(currentPane);
         }
 
         private void chkUploadToNewCategory_Unchecked(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(currentPane);
+            RefreshPanesAllControls(currentPane);
         }
-
-        /*
-        private void CheckForUploadComplete(object sender, TextCompositionEventArgs e)
-        {
-            if (meFots.Count == 0)
-            {
-                //Upload Complete.
-                SetPanePositions(PaneMode.Upload);
-            }
-        }
-        */
 
         async private void cmdUploadAll_Click(object sender, RoutedEventArgs e)
         {
             uploadUIState.Uploading = true;
-            SetPanePositions(PaneMode.Upload);
+            RefreshPanesAllControls(PaneMode.Upload);
 
             string response = await controller.DoUploadAsync(uploadFots, uploadUIState);
             if (response != null)
@@ -913,7 +1044,7 @@ namespace ManageWalla
             }
             */
 
-            SetPanePositions(PaneMode.Upload);
+            RefreshPanesAllControls(PaneMode.Upload);
         }
         #endregion
 
@@ -1162,84 +1293,129 @@ namespace ManageWalla
         #region Pane Control Events
         private void cmdCategory_Checked(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.CategoryView);
+            cmdSettings.IsChecked = false;
+            cmdTag.IsChecked = false;
+            cmdUpload.IsChecked = false;
+            cmdView.IsChecked = false;
+
+            RefreshPanesAllControls(PaneMode.CategoryView);
         }
 
         private void cmdUpload_Checked(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.Upload);
+            cmdSettings.IsChecked = false;
+            cmdTag.IsChecked = false;
+            cmdCategory.IsChecked = false;
+            cmdView.IsChecked = false;
+
+            RefreshPanesAllControls(PaneMode.Upload);
         }
 
         private void cmdView_Checked(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.ViewView);
+            cmdSettings.IsChecked = false;
+            cmdTag.IsChecked = false;
+            cmdUpload.IsChecked = false;
+            cmdCategory.IsChecked = false;
+
+            RefreshPanesAllControls(PaneMode.ViewView);
         }
 
         private void cmdTag_Checked(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.TagView);
+            bool tagLoadFirstTime = false;
+            cmdSettings.IsChecked = false;
+            cmdCategory.IsChecked = false;
+            cmdUpload.IsChecked = false;
+            cmdView.IsChecked = false;
+
+            //One off load from cache if available.
+            if (state.tagLoadState == GlobalState.DataLoadState.No)
+            {
+                if (state.tagList != null)
+                {
+                    state.tagLoadState = GlobalState.DataLoadState.LocalCache;
+                    RefreshPanesLoadingState(PaneMode.TagView, null, true);
+                }
+                tagLoadFirstTime = true;
+            }
+
+            RefreshPanesAllControls(PaneMode.TagView);
+
+            if (tagLoadFirstTime)
+            {
+                RefreshTagsList();
+            }
         }
 
         private void cmdSettings_Checked(object sender, RoutedEventArgs e)
         {
-            SetPanePositions(PaneMode.Settings);
+            cmdCategory.IsChecked = false;
+            cmdTag.IsChecked = false;
+            cmdUpload.IsChecked = false;
+            cmdView.IsChecked = false;
+
+            RefreshPanesAllControls(PaneMode.Settings);
         }
         #endregion
 
-        private void lblUploadProposedImageCount_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var simon = this.lstUploadImageFileList;
-        }
-
         async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
         {
-            uploadStatusList = await controller.GetUploadStatusList();
-
-            //ImageUploadRef
-            lstUploadStatusList.GetBindingExpression(ListBox.ItemsSourceProperty).UpdateTarget();
-            lstUploadStatusItem.GetBindingExpression(ListBoxItem.ContentProperty).UpdateTarget();
-
-            /*
-            lstUploadStatusList.DisplayMemberPath = "name";
-            Binding binding = new Binding("ImageUploadRef");
-            binding.Mode = BindingMode.OneWay;
-            binding.Source = uploadStatusList;
-
-            BindingOperations.SetBinding(lstUploadStatusList, ListBox.ItemsSourceProperty, binding);
-            */
-
-
-
-
-            //lstUploadStatusList.GetBindingExpression(ListBoxItem.ContentProperty).UpdateTarget();
-
-            //
-            //lstUploadStatusList.GetBindingExpression(ListBox.DisplayMemberPathProperty).UpdateTarget();
-
-            //BindingOperations.GetBindingExpressionBase(lstUploadStatusList, ListBox.ItemsSourceProperty).UpdateTarget();
-
-            
+            await RefreshUploadStatusStateAsync();
         }
 
-        private void chkUploadTagsAll_Checked(object sender, RoutedEventArgs e)
+        //Force refresh of the Upload control from state.
+        private void RefreshUploadStatusFromStateList(string message)
         {
-            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-            uploadUIState.MetaTagRef = current.Meta.Tags;
+            if (state.uploadStatusListXml != null)
+            {
+                XmlDataProvider uploadStatusListXml = (XmlDataProvider)FindResource("uploadStatusListXmlKey");
+                XmlDocument uploadstatusXmldoc = new XmlDocument();
+                uploadstatusXmldoc.LoadXml(state.uploadStatusListXml);
+                uploadStatusListXml.Document = uploadstatusXmldoc;
 
-            BindingOperations.ClearBinding(lstUploadTagList, ListBox.ItemsSourceProperty);
-            Binding binding = new Binding("MetaTagRef");
-            binding.Mode = BindingMode.TwoWay;
-            binding.Source = uploadUIState;
-            BindingOperations.SetBinding(lstUploadTagList, ListBox.ItemsSourceProperty, binding);
+                //force binding update - TODO get it working.
+                datUploadStatusList.GetBindingExpression(DataGrid.ItemsSourceProperty).UpdateTarget();
+            }
+
+            //Refresh message + icon.
         }
 
-        private void chkUploadTagsAll_Unchecked(object sender, RoutedEventArgs e)
+        //Force refresh of the Upload status List
+        async private Task RefreshUploadStatusStateAsync()
         {
-            BindingOperations.ClearBinding(lstUploadTagList, ListBox.ItemsSourceProperty);
-            Binding binding = new Binding("/Meta.Tags");
-            binding.Mode = BindingMode.TwoWay;
-            BindingOperations.SetBinding(lstUploadTagList, ListBox.ItemsSourceProperty, binding);
+            state.uploadStatusListState = GlobalState.DataLoadState.Pending;
+            string response = await controller.RefreshUploadStatusListXmlAsync();
+            RefreshUploadStatusFromStateList(response);
         }
+
+        private void cmdRefreshCategoryList_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void cmdRefreshViewList_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        async private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (tabUpload.SelectedIndex == 2)
+            {
+                if (state.uploadStatusListState == GlobalState.DataLoadState.No)
+                {
+                    if (state.uploadStatusListXml != null)
+                    {
+                        state.uploadStatusListState = GlobalState.DataLoadState.LocalCache;
+                        RefreshUploadStatusFromStateList(null);
+                    }
+                    await RefreshUploadStatusStateAsync();
+                }
+            }
+        }
+
+
 
 
     }

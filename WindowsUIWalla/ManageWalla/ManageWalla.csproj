@@ -73,8 +73,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
-    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="log4net">
       <HintPath>..\..\..\WindowsUIWalla-Dependencies\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
@@ -82,8 +81,7 @@
     </Reference>
     <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="ReachFramework" />
-    <Reference Include="ShaderEffectLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ShaderEffectLibrary">
       <HintPath>..\..\..\WindowsUIWalla-Dependencies\ShaderEffectLibrary.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -319,7 +317,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="ExampleXml\UploadStatusList.xml" />
+    <Resource Include="ExampleXml\UploadStatusList.xml">
+      <SubType>Designer</SubType>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

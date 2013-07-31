@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Runtime.Serialization;
 using System.Windows.Media.Imaging;
+using System.Xml;
 
 namespace ManageWalla
 {
@@ -27,7 +28,22 @@ namespace ManageWalla
 
         //Business Objects
         public TagList tagList { get; set; }
+        public String categoryXml { get; set; }
+        public String uploadStatusListXml { get; set; }
 
+        public DataLoadState categoryLoadState { get; set; }
+        public DataLoadState tagLoadState { get; set; }
+        public DataLoadState viewLoadState { get; set; }
+        public DataLoadState uploadStatusListState { get; set; }
+
+        public enum DataLoadState
+        {
+            No = 0,
+            Pending = 1,
+            LocalCache = 2,
+            Loaded = 3,
+            Unavailable = 4
+        }
 
         #region InfraCodes
         public GlobalState() { }
@@ -35,12 +51,13 @@ namespace ManageWalla
         public static GlobalState GetState(string userNameParam)
         {
             // Try to load from File
-            state = null; // RetreiveFromFile(userNameParam);
+            state = RetreiveFromFile(userNameParam);
             if (state == null)
             {
                 state = new GlobalState();
                 state.userName = userNameParam;
             }
+
             return state;
         }
 
@@ -71,7 +88,6 @@ namespace ManageWalla
 
         public void SaveState()
         {
-            return;
 
             string fileName = Path.Combine(Application.UserAppDataPath, "Walla-" + userName + ".config");
             DESCryptoServiceProvider des = new DESCryptoServiceProvider();
@@ -86,6 +102,9 @@ namespace ManageWalla
                 cryptoStream.FlushFinalBlock();
             }
         }
+
+
+
         #endregion
 
         /*

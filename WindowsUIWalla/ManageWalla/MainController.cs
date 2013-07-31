@@ -37,8 +37,19 @@ namespace ManageWalla
         {
             currentMain = currentMainParam;
 
-            state = GlobalState.GetState(userName);                
+            state = GlobalState.GetState(userName);
+
+            state.categoryLoadState = GlobalState.DataLoadState.No;
+            state.tagLoadState = GlobalState.DataLoadState.No;
+            state.viewLoadState = GlobalState.DataLoadState.No;
+            state.uploadStatusListState = GlobalState.DataLoadState.No;
+
             serverHelper = new ServerHelper(state);
+        }
+
+        public GlobalState GetState()
+        {
+            return state;
         }
 
         async public Task LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots)
@@ -91,14 +102,30 @@ namespace ManageWalla
             } 
             */
         }
+
         /// <summary>
-        /// For each entity - Category, Tag, View List, Account Settings
+        /// For each entity - Category, Tag, View List
         /// Check local cache for entries and check Walla Hub for updates
         /// Then refresh local data caches.
         /// </summary>
-        public void RetrieveGeneralUserConfig()
+        public async Task RetrieveGeneralUserConfigAsync()
         {
-            //GetCategoryTree();
+            Task<string> tagListLoadedTask = RefreshTagsListAsync();
+
+            string tagListLoadedOK = await tagListLoadedTask;
+            if (tagListLoadedOK == "OK")
+            {
+                //Call dispatcher thread to run method TagListReloadFromState();
+            }
+            else
+            {
+                //Call dispatcher thread to run method TagListUpdateWorkingPane();
+            }
+
+            
+
+            //TODO - Categotry and Views.
+
         }
 
         public void CreateCategoryFromFolder(DirectoryInfo currentFolder, UploadImageFileList meFots, long parentCategoryId)
@@ -182,16 +209,26 @@ namespace ManageWalla
             return null;
         }
 
-        async public Task<UploadStatusList> GetUploadStatusList()
+        async public Task<string> RefreshUploadStatusListXmlAsync()
         {
             try
             {
-                return await serverHelper.GetUploadStatusList();
+                string uploadStatusListXml = await serverHelper.GetUploadStatusListAsync();
+                state.uploadStatusListXml = uploadStatusListXml;
+                state.uploadStatusListState = GlobalState.DataLoadState.Loaded;
+                return "OK";
             }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                throw ex;
+                if (state.tagList != null)
+                {
+                    state.uploadStatusListState = GlobalState.DataLoadState.LocalCache;
+                }
+                else
+                {
+                    state.uploadStatusListState = GlobalState.DataLoadState.Unavailable;
+                }
+                return ex.Message;
             }
         }
 
@@ -203,17 +240,26 @@ namespace ManageWalla
             }
         }
 
-        async public Task<TagList> GetTagsAvailable()
+        async public Task<string> RefreshTagsListAsync()
         {
             try
             {
-                TagList tagList = await serverHelper.GetTagsAvailable();
-                return tagList;
+                TagList tagList = await serverHelper.GetTagsAvailableAsync();
+                state.tagList = tagList;
+                state.tagLoadState = GlobalState.DataLoadState.Loaded;
+                return "OK";
             }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                throw ex;
+                if (state.tagList != null)
+                {
+                    state.tagLoadState = GlobalState.DataLoadState.LocalCache;
+                }
+                else
+                {
+                    state.tagLoadState = GlobalState.DataLoadState.Unavailable;
+                }
+                return ex.Message;
             }
         }
 

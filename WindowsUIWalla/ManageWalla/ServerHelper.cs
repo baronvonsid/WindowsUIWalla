@@ -22,8 +22,8 @@ namespace ManageWalla
 {
     public class ServerHelper
     {
-        
-        private const String baseUri = "http://localhost:8081/WallaWS/v1/user/simo1n/";
+        private const String baseUri = "http://192.168.0.4:8080/WallaWS/v1/user/simo1n/";
+        //private const String baseUri = "http://localhost:8081/WallaWS/v1/user/simo1n/";
         private HttpClient http = null;
         private GlobalState state = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(ServerHelper));
@@ -35,7 +35,7 @@ namespace ManageWalla
             http.BaseAddress = new Uri(baseUri);
         }
 
-        async public Task<TagList> GetTagsAvailable()
+        async public Task<TagList> GetTagsAvailableAsync()
         {
             try
             {
@@ -55,9 +55,9 @@ namespace ManageWalla
                 {
                     XmlSerializer serialKiller = new XmlSerializer(typeof(TagList));
                     TagList tagList = (TagList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    state.tagList = tagList;
+                    return tagList;
                 }
-                return state.tagList;
+                return null;
             }
             catch (Exception ex)
             {
@@ -212,7 +212,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<UploadStatusList> GetUploadStatusList()
+        async public Task<string> GetUploadStatusListAsync()
         {
             try
             {
@@ -222,10 +222,13 @@ namespace ManageWalla
                 HttpResponseMessage response = await http.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
+                return await response.Content.ReadAsStringAsync();
+
+                /*
                 XmlSerializer serialKiller = new XmlSerializer(typeof(UploadStatusList));
                 UploadStatusList uploadStatusList = (UploadStatusList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
                 return uploadStatusList;
+                 */ 
             }
             catch (HttpRequestException httpEx)
             {

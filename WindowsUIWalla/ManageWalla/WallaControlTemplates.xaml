@@ -6,6 +6,14 @@
     <local:UploadImageFileList x:Key="uploadImagefileListKey" />
     <local:UploadUIState x:Key="uploadUIStateKey"  />
     <local:UploadStatusList x:Key="uploadStatusListKey"  />
+
+    <XmlNamespaceMappingCollection x:Key="wallaNamespaceMappingKey">
+        <XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
+    </XmlNamespaceMappingCollection>
+
+
+
+    <XmlDataProvider x:Key="uploadStatusListXmlKey"  XmlNamespaceManager="{StaticResource wallaNamespaceMappingKey}" />
     
     <ControlTemplate x:Key="templateButton" TargetType="{x:Type Button}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -55,6 +63,7 @@
 
             <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
+        <!--
         <ControlTemplate.Triggers>
 
             <Trigger Property="IsChecked" Value="True">
@@ -65,6 +74,7 @@
                 </Setter>
             </Trigger>
         </ControlTemplate.Triggers>
+        -->
     </ControlTemplate>
 
     <ControlTemplate x:Key="templateRadioButton" TargetType="{x:Type RadioButton}">

@@ -8,14 +8,15 @@
 
     <Window.Resources>
         <ResourceDictionary Source="WallaControlTemplates.xaml" />
+
     </Window.Resources>
 
-    <Grid x:Name="gridLeft">
+    <Grid x:Name="gridLeft" Margin="0,2,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="40" />
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="0"/>
             <RowDefinition Height="40" />
             <RowDefinition Height="0"/>
         </Grid.RowDefinitions>
@@ -24,8 +25,16 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <ToggleButton x:Name="cmdCategory" Grid.Column="0" Grid.Row="0" Content="Category" Margin="4,4,2,2" Checked="cmdCategory_Checked" Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
-        <Grid x:Name="gridCategory" Grid.Column="0" Grid.Row="1" Background="#FF6FD1FF" Margin="4,2,2,2">
+        <ToggleButton x:Name="cmdCategory" Grid.Column="0" Grid.Row="0" Content="Category" Margin="4,2,2,2" Checked="cmdCategory_Checked" Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
+
+        <DockPanel x:Name="panCategoryWorking" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock x:Name="txtCategoryWorkingMessage" MinWidth="200" MaxWidth="250" TextWrapping="Wrap" Text="Category information loading..." HorizontalAlignment="Center" TextAlignment="Center" />
+                <Button x:Name="cmdRefreshCategoryList" Content="Refresh" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdRefreshCategoryList_Click" />
+            </StackPanel>
+        </DockPanel>
+
+        <Grid x:Name="gridCategory" Grid.Column="0" Grid.Row="1" Background="#FF6FD1FF" Margin="4,2,2,2" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="34" />
@@ -170,7 +179,14 @@
 
         <ToggleButton x:Name="cmdTag" Grid.Column="0" Grid.Row="2" Content="Tag" Margin="4,2,2,2" Checked="cmdTag_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
 
-        <Grid x:Name="gridTag" Background="#FFFFFFDE" Grid.Column="0" Grid.Row="3" Margin="4,2,2,2">
+        <DockPanel x:Name="panTagWorking" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock x:Name="txtTagWorkingMessage" MinWidth="200" MaxWidth="250" TextWrapping="Wrap" Text="Tag information loading..." HorizontalAlignment="Center" TextAlignment="Center" />
+                <Button x:Name="cmdRefreshTagList" Content="Refresh" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdRefreshTagList_Click" />
+            </StackPanel>
+        </DockPanel>
+
+        <Grid x:Name="gridTag" Background="#FFFFFFDE" Grid.Column="0" Grid.Row="3" Margin="4,2,2,2" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="34" />
@@ -192,7 +208,7 @@
             <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button x:Name="cmdAddTag" Content="Add Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddTag_Click"  />
                 <Button x:Name="cmdEditTag" Content="Edit Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdEditTag_Click" />
-                <Button x:Name="cmdRefreshTagList" Content="Refresh" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdRefreshTagList_Click" />
+                <Button x:Name="cmdRefreshTagList_todel" Content="Refresh" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdRefreshTagList_Click" />
                 <Button x:Name="cmdAssociateTag" Content="Associate Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAssociateTag_Click" />
             </StackPanel>
 
@@ -227,14 +243,32 @@
             </StackPanel>
         </Grid>
 
-        <DockPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="6">
+        <Grid x:Name="gridRight" Grid.Column="1" Grid.Row="0" Grid.RowSpan="6">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0"/>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="0"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <WrapPanel x:Name="wrapImages" Background="White" DockPanel.Dock="Top">
-            </WrapPanel>
+            <WrapPanel x:Name="wrapImages" Grid.Column="0" Grid.Row="0" />
+            <ToggleButton x:Name="cmdView" Grid.Column="0" Grid.Row="1" Content="View" Margin="2,2,4,2" Checked="cmdView_Checked" Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
 
-            <ToggleButton x:Name="cmdView" DockPanel.Dock="Top" Height="34" Content="View" Margin="2,4,4,2" Checked="cmdView_Checked" Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
-            <DockPanel x:Name="stackView" Visibility="Visible" DockPanel.Dock="Top" Background="#FFC3E3FF" Margin="2,2,4,2">
-                <Grid x:Name="gridView" DockPanel.Dock="Top">
+            <DockPanel x:Name="panViewWorking" Grid.Column="0" Grid.Row="2">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock x:Name="txtViewWorkingMessage" MinWidth="200" MaxWidth="250" TextWrapping="Wrap" Text="View information loading..." HorizontalAlignment="Center" TextAlignment="Center" />
+                    <Button x:Name="cmdRefreshViewList" Content="Refresh" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdRefreshViewList_Click" />
+                </StackPanel>
+            </DockPanel>
+
+            <DockPanel x:Name="stackView" Grid.Column="0" Grid.Row="2" Visibility="Collapsed" DockPanel.Dock="Top" Background="#FFC3E3FF" Margin="2,2,4,2">
+
+                <!--
+                <Grid x:Name="gridView" DockPanel.Dock="Top" Visibility="Collapsed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="34" />
@@ -272,7 +306,7 @@
                     </StackPanel>
                 </Grid>
 
-                <Grid x:Name="gridViewAddEdit" DockPanel.Dock="Top">
+                <Grid x:Name="gridViewAddEdit" DockPanel.Dock="Top" Visibility="Collapsed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="34" />
@@ -347,12 +381,12 @@
                         <Button x:Name="cmdAddEditViewPreview" Content="Preview View" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
                     </StackPanel>
                 </Grid>
+                -->
             </DockPanel>
 
-
             <!--<DockPanel Background="#FF6C8DD0" LastChildFill="True">-->
-            <ToggleButton x:Name="cmdUpload" Height="34" Content="Upload" Margin="2,2,4,2" Checked="cmdUpload_Checked" DockPanel.Dock="Top"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
-            <DockPanel x:Name="stackUpload" Visibility="Visible" DockPanel.Dock="Top" Margin="2,2,4,4" Background="#FF448FDA">
+            <ToggleButton x:Name="cmdUpload" Grid.Column="0" Grid.Row="3" Content="Upload" Margin="2,2,4,4" Checked="cmdUpload_Checked" DockPanel.Dock="Top"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" />
+            <DockPanel x:Name="stackUpload" DockPanel.Dock="Top" Grid.Column="0" Grid.Row="4" Margin="2,0,4,4" Background="#FF448FDA">
                 <Grid x:Name="gridUploadView">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
@@ -362,7 +396,7 @@
                         <ColumnDefinition Width="2*" MinWidth="300"/>
                     </Grid.ColumnDefinitions>
 
-                    <TabControl Grid.Column="1" Grid.Row="0" Margin="4">
+                    <TabControl x:Name="tabUpload" Grid.Column="1" Grid.Row="0" Margin="4" SelectionChanged="TabControl_SelectionChanged">
                         <TabItem Header="Settings">
                             <Grid x:Name="grdUploadSettings" DataContext="{StaticResource uploadUIStateKey}" >
                                 <Grid.RowDefinitions>
@@ -380,7 +414,7 @@
                                     <ColumnDefinition Width="180"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Label x:Name="lblUploadProposedImageCount" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" MouseDown="lblUploadProposedImageCount_MouseDown">
+                                <Label x:Name="lblUploadProposedImageCount" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3">
                                     <Label.Content>
                                         <TextBlock>
                                             <TextBlock.Text>
@@ -415,6 +449,7 @@
 
                             </Grid>
                         </TabItem>
+                        
                         <TabItem Header="Image Info" x:Name="tabUploadImageDetails">
                             <Grid x:Name="grdUploadImageDetails" DataContext="{StaticResource uploadImagefileListKey}">
                                 <Grid.RowDefinitions>
@@ -578,7 +613,7 @@
                             </Grid>
 
                         </TabItem>
-                        <TabItem x:Name="tabUploadStatusList" Header="Upload Status">
+                        <TabItem x:Name="tabUploadStatusList" Header="Upload Status" >
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
@@ -598,19 +633,49 @@
                                             <ListBoxItem x:Name="lstUploadStatusItem" Content="{Binding Path=name, Mode=OneWay}"></ListBoxItem>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
-
-
                                 -->
+                                <DataGrid x:Name="datUploadStatusList" AutoGenerateColumns="False" SelectionUnit="FullRow" SelectionMode="Single" CanUserResizeColumns="True" MinColumnWidth="40" CanUserSortColumns="False">
+                                    <DataGrid.ItemsSource>
+                                        <Binding Source="{StaticResource uploadStatusListXmlKey}"  XPath="s:UploadStatusList/s:ImageUploadRef" />
+                                    </DataGrid.ItemsSource>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Name" Binding="{Binding XPath=@name}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True" />
+                                        <DataGridTextColumn Header="Status" Binding="{Binding StringFormat=\{0:G\}, XPath=@lastUpdated}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True"/>
+                                        <DataGridTextColumn Header="Last Updated"  Binding="{Binding XPath=@lastUpdated, StringFormat=D}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True" />
 
-                                <ListBox 
-                                        Grid.Column="0" Grid.Row="0"
-                            		    x:Name ="lstUploadStatusList" 
-                            		    ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                        ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadStatusListKey}, Path=ImageUploadRef}">
+                                        <!--
+                                        <DataGridTemplateColumn Header="Last Updated" Width="3*" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock>
 
-                                    <ListBoxItem x:Name="lstUploadStatusItem" Content="{Binding Path=name, Mode=OneWay}"></ListBoxItem>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+-->
+                                    </DataGrid.Columns>
 
-                                </ListBox>
+                                </DataGrid>
+
+
+
+
+
+
+
+
+                                <!--
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock FontSize="12" Foreground="Red">
+                                                <TextBlock.Text>
+                                                    <Binding XPath="@name"/>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+-->
 
                                 <Button x:Name="cmdUploadStatusRefresh" Content="Refresh" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadStatusRefresh_Click" />
                             </Grid>
@@ -654,7 +719,7 @@
                     </Grid>
                 </Grid>
             </DockPanel>
-        </DockPanel>
+        </Grid>
 
         <!--<GridSplitter Width="2" Grid.Column="1" Grid.RowSpan="6" HorizontalAlignment="Left" />-->
     </Grid>
