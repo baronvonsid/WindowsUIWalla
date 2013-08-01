@@ -6,12 +6,13 @@
     <local:UploadImageFileList x:Key="uploadImagefileListKey" />
     <local:UploadUIState x:Key="uploadUIStateKey"  />
     <local:UploadStatusList x:Key="uploadStatusListKey"  />
+    <local:WallaDateConverter x:Key="wallaDateConverterKey"  />
+    <local:WallaUploadStatusConverter x:Key="wallaUploadStatusConverterKey"  />
+    
 
     <XmlNamespaceMappingCollection x:Key="wallaNamespaceMappingKey">
         <XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
     </XmlNamespaceMappingCollection>
-
-
 
     <XmlDataProvider x:Key="uploadStatusListXmlKey"  XmlNamespaceManager="{StaticResource wallaNamespaceMappingKey}" />
     

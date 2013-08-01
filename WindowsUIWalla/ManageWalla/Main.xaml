@@ -640,20 +640,21 @@
                                     </DataGrid.ItemsSource>
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Name" Binding="{Binding XPath=@name}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True" />
-                                        <DataGridTextColumn Header="Status" Binding="{Binding StringFormat=\{0:G\}, XPath=@lastUpdated}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True"/>
-                                        <DataGridTextColumn Header="Last Updated"  Binding="{Binding XPath=@lastUpdated, StringFormat=D}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True" />
+                                        <DataGridTextColumn Header="Status" Binding="{Binding XPath=@imageStatus, Converter={StaticResource wallaUploadStatusConverterKey}}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True"/>
+                                        <!--<DataGridTextColumn Header="Last Updated"  Binding="{Binding XPath=@lastUpdated, StringFormat=D}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True" />-->
 
-                                        <!--
-                                        <DataGridTemplateColumn Header="Last Updated" Width="3*" IsReadOnly="True">
+                                        
+                                        
+                                        <DataGridTemplateColumn Header="Last Updated" MinWidth="40" Width="3*" IsReadOnly="True">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock>
+                                                    <TextBlock Text="{Binding XPath=@lastUpdated, Converter={StaticResource wallaDateConverterKey}, ConverterParameter=\{0:g\}}">
 
                                                     </TextBlock>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
--->
+
                                     </DataGrid.Columns>
 
                                 </DataGrid>

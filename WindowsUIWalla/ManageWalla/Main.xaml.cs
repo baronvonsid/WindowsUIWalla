@@ -1372,6 +1372,47 @@ namespace ManageWalla
                 XmlDataProvider uploadStatusListXml = (XmlDataProvider)FindResource("uploadStatusListXmlKey");
                 XmlDocument uploadstatusXmldoc = new XmlDocument();
                 uploadstatusXmldoc.LoadXml(state.uploadStatusListXml);
+
+                //Add new nodes for upload images in error.
+                //imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
+
+                //foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.Error))
+                foreach (UploadImage currentUploadImage in uploadFots)
+                {
+                    //<XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
+                    //s:UploadStatusList/s:ImageUploadRef
+
+                    XmlNameTable nameTable = uploadstatusXmldoc.NameTable;
+                    XmlNamespaceManager namespaceManager = new XmlNamespaceManager(nameTable);
+                    namespaceManager.AddNamespace("s", "http://www.example.org/UploadStatusList");
+
+                    XmlNode rootNode = uploadstatusXmldoc.SelectSingleNode("/s:UploadStatusList", namespaceManager);
+                    
+                    //Create new entries for local uploads which have failed.
+                    //<ImageUploadRef imageId="100310" imageStatus="1" name="051" lastUpdated="2013-07-27T10:45:59.333+01:00" />
+                    XmlNode newNode = uploadstatusXmldoc.CreateNode(XmlNodeType.Element, "ImageUploadRef", "http://www.example.org/UploadStatusList");
+                    XmlAttribute idAttribute = uploadstatusXmldoc.CreateAttribute("imageId");
+                    idAttribute.Value = "-1";
+                    newNode.Attributes.Append(idAttribute);
+
+                    XmlAttribute statusAttribute = uploadstatusXmldoc.CreateAttribute("imageStatus");
+                    statusAttribute.Value = "-1";
+                    newNode.Attributes.Append(statusAttribute);
+
+                    XmlAttribute nameAttribute = uploadstatusXmldoc.CreateAttribute("name");
+                    nameAttribute.Value = currentUploadImage.Meta.Name;
+                    newNode.Attributes.Append(nameAttribute);
+
+                    XmlAttribute lastUpdatedAttribute = uploadstatusXmldoc.CreateAttribute("lastUpdated");
+                    lastUpdatedAttribute.Value = "";
+                    newNode.Attributes.Append(lastUpdatedAttribute);
+
+                    XmlAttribute errorMessageAttribute = uploadstatusXmldoc.CreateAttribute("errorMessage");
+                    errorMessageAttribute.Value = currentUploadImage.UploadError;
+                    newNode.Attributes.Append(errorMessageAttribute);                    
+                    rootNode.AppendChild(newNode);
+                }
+
                 uploadStatusListXml.Document = uploadstatusXmldoc;
 
                 //force binding update - TODO get it working.
