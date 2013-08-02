@@ -209,12 +209,12 @@ namespace ManageWalla
             return null;
         }
 
-        async public Task<string> RefreshUploadStatusListXmlAsync()
+        async public Task<string> RefreshUploadStatusListAsync()
         {
             try
             {
-                string uploadStatusListXml = await serverHelper.GetUploadStatusListAsync();
-                state.uploadStatusListXml = uploadStatusListXml;
+                UploadStatusList uploadStatusList = await serverHelper.GetUploadStatusListAsync();
+                state.uploadStatusList = uploadStatusList;
                 state.uploadStatusListState = GlobalState.DataLoadState.Loaded;
                 return "OK";
             }

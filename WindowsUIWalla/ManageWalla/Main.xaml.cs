@@ -44,7 +44,7 @@ namespace ManageWalla
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
         public UploadImageFileList uploadFots = null;
-        //public UploadStatusList uploadStatusList = null;
+        public UploadStatusListBind uploadStatusListBind = null;
         public GlobalState state = null;
 
         #endregion
@@ -56,7 +56,7 @@ namespace ManageWalla
 
             uploadFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
             uploadUIState = (UploadUIState)FindResource("uploadUIStateKey");
-            //uploadStatusList = (UploadStatusList)FindResource("uploadStatusListKey");
+            uploadStatusListBind = (UploadStatusListBind)FindResource("uploadStatusListBindKey");
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -1365,16 +1365,68 @@ namespace ManageWalla
         }
 
         //Force refresh of the Upload control from state.
+
+
         private void RefreshUploadStatusFromStateList(string message)
         {
+            /* Clear list and add local image load errors */
+            uploadStatusListBind.Clear();
+
+            //foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.Error))
+            foreach (UploadImage currentUploadImage in uploadFots)
+            {
+                UploadStatusListImageUploadRef newImageRef = new UploadStatusListImageUploadRef();
+                newImageRef.imageStatus = -1;
+                newImageRef.name = currentUploadImage.Meta.Name;
+                newImageRef.lastUpdated = DateTime.Now;
+                newImageRef.errorMessage = currentUploadImage.UploadError;
+
+                uploadStatusListBind.Add(newImageRef);
+            }
+
+            /* Load in existing upload entries */
+            //ForceCursor (int i = 0; int < state.uploadStatusList.ImageUploadRef
+
+            if (state.uploadStatusList != null)
+            {
+                foreach (UploadStatusListImageUploadRef currentImageUploadRef in state.uploadStatusList.ImageUploadRef)
+                {
+                    uploadStatusListBind.Add(currentImageUploadRef);
+                }
+            }
+
+            /* Refresh message and icon */
+
+            datUploadStatusList.GetBindingExpression(DataGrid.ItemsSourceProperty).UpdateTarget();
+        }
+
+        /*
+        private void RefreshUploadStatusFromStateListOld(string message)
+        {
+
+            XmlDataProvider uploadStatusListXml = (XmlDataProvider)FindResource("uploadStatusListXmlKey");
+            XmlDocument uploadstatusXmldoc = new XmlDocument();
+            uploadstatusXmldoc.LoadXml(state.uploadStatusListXml);
+
+
+
+
+            XmlDocument newStatusList = new XmlDocument();
+            XmlNamespaceManager nsManager = new XmlNamespaceManager(newStatusList.NameTable);
+            nsManager.AddNamespace("s", "http://www.example.org/UploadStatusList");
+
+            XmlElement documentRootNode = newStatusList.CreateElement("UploadStatusList", "http://www.example.org/UploadStatusList");
+            newStatusList.AppendChild(documentRootNode);
+
+
+
+
+
             if (state.uploadStatusListXml != null)
             {
-                XmlDataProvider uploadStatusListXml = (XmlDataProvider)FindResource("uploadStatusListXmlKey");
-                XmlDocument uploadstatusXmldoc = new XmlDocument();
-                uploadstatusXmldoc.LoadXml(state.uploadStatusListXml);
 
-                //Add new nodes for upload images in error.
-                //imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
+
+
 
                 //foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.Error))
                 foreach (UploadImage currentUploadImage in uploadFots)
@@ -1390,7 +1442,12 @@ namespace ManageWalla
                     
                     //Create new entries for local uploads which have failed.
                     //<ImageUploadRef imageId="100310" imageStatus="1" name="051" lastUpdated="2013-07-27T10:45:59.333+01:00" />
-                    XmlNode newNode = uploadstatusXmldoc.CreateNode(XmlNodeType.Element, "ImageUploadRef", "http://www.example.org/UploadStatusList");
+
+
+
+
+
+                    XmlElement newNode = uploadstatusXmldoc.CreateElement("ImageUploadRef", "http://www.example.org/UploadStatusList");
                     XmlAttribute idAttribute = uploadstatusXmldoc.CreateAttribute("imageId");
                     idAttribute.Value = "-1";
                     newNode.Attributes.Append(idAttribute);
@@ -1409,8 +1466,10 @@ namespace ManageWalla
 
                     XmlAttribute errorMessageAttribute = uploadstatusXmldoc.CreateAttribute("errorMessage");
                     errorMessageAttribute.Value = currentUploadImage.UploadError;
-                    newNode.Attributes.Append(errorMessageAttribute);                    
+                    newNode.Attributes.Append(errorMessageAttribute);
                     rootNode.AppendChild(newNode);
+
+
                 }
 
                 uploadStatusListXml.Document = uploadstatusXmldoc;
@@ -1421,12 +1480,13 @@ namespace ManageWalla
 
             //Refresh message + icon.
         }
-
+        
+         */ 
         //Force refresh of the Upload status List
         async private Task RefreshUploadStatusStateAsync()
         {
             state.uploadStatusListState = GlobalState.DataLoadState.Pending;
-            string response = await controller.RefreshUploadStatusListXmlAsync();
+            string response = await controller.RefreshUploadStatusListAsync();
             RefreshUploadStatusFromStateList(response);
         }
 
@@ -1446,7 +1506,7 @@ namespace ManageWalla
             {
                 if (state.uploadStatusListState == GlobalState.DataLoadState.No)
                 {
-                    if (state.uploadStatusListXml != null)
+                    if (state.uploadStatusList != null)
                     {
                         state.uploadStatusListState = GlobalState.DataLoadState.LocalCache;
                         RefreshUploadStatusFromStateList(null);

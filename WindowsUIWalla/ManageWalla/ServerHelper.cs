@@ -212,7 +212,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> GetUploadStatusListAsync()
+        async public Task<UploadStatusList> GetUploadStatusListAsync()
         {
             try
             {
@@ -222,13 +222,11 @@ namespace ManageWalla
                 HttpResponseMessage response = await http.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadAsStringAsync();
+                //return await response.Content.ReadAsStringAsync();
 
-                /*
                 XmlSerializer serialKiller = new XmlSerializer(typeof(UploadStatusList));
                 UploadStatusList uploadStatusList = (UploadStatusList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
                 return uploadStatusList;
-                 */ 
             }
             catch (HttpRequestException httpEx)
             {

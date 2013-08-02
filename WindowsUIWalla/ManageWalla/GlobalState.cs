@@ -29,7 +29,7 @@ namespace ManageWalla
         //Business Objects
         public TagList tagList { get; set; }
         public String categoryXml { get; set; }
-        public String uploadStatusListXml { get; set; }
+        public UploadStatusList uploadStatusList { get; set; }
 
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }

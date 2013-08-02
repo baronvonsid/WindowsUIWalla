@@ -121,6 +121,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="GlobalState.cs" />
+    <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="WallaDateConverter.cs" />
     <Compile Include="Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>

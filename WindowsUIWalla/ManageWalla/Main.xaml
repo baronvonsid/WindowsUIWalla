@@ -634,17 +634,17 @@
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 -->
-                                <DataGrid x:Name="datUploadStatusList" AutoGenerateColumns="False" SelectionUnit="FullRow" SelectionMode="Single" CanUserResizeColumns="True" MinColumnWidth="40" CanUserSortColumns="False">
+                                <DataGrid x:Name="datUploadStatusList" AutoGenerateColumns="False" SelectionUnit="FullRow" SelectionMode="Single" CanUserResizeColumns="True" MinColumnWidth="40" CanUserSortColumns="True">
                                     <DataGrid.ItemsSource>
-                                        <Binding Source="{StaticResource uploadStatusListXmlKey}"  XPath="s:UploadStatusList/s:ImageUploadRef" />
+                                        <!--<Binding Source="{StaticResource uploadStatusListXmlKey}"  XPath="s:UploadStatusList/s:ImageUploadRef" />-->
+                                        <Binding Source="{StaticResource uploadStatusListBindKey}" />
                                     </DataGrid.ItemsSource>
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Name" Binding="{Binding XPath=@name}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True" />
-                                        <DataGridTextColumn Header="Status" Binding="{Binding XPath=@imageStatus, Converter={StaticResource wallaUploadStatusConverterKey}}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True"/>
-                                        <!--<DataGridTextColumn Header="Last Updated"  Binding="{Binding XPath=@lastUpdated, StringFormat=D}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True" />-->
+                                        <DataGridTextColumn Header="Name" Binding="{Binding imageStatus}" MinWidth="40" Width="*" IsReadOnly="True" CanUserSort="True" />
 
-                                        
-                                        
+                                        <!--<DataGridTextColumn Header="Status" Binding="{Binding XPath=@imageStatus, Converter={StaticResource wallaUploadStatusConverterKey}}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True"/>-->
+                                        <!--<DataGridTextColumn Header="Last Updated"  Binding="{Binding XPath=@lastUpdated, StringFormat=D}" MinWidth="40" Width="3*" IsReadOnly="True" CanUserSort="True" />-->
+<!--
                                         <DataGridTemplateColumn Header="Last Updated" MinWidth="40" Width="3*" IsReadOnly="True">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
@@ -654,7 +654,7 @@
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-
+-->
                                     </DataGrid.Columns>
 
                                 </DataGrid>
