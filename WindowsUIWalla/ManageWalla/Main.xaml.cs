@@ -38,6 +38,14 @@ namespace ManageWalla
             Settings = 11
         }
 
+        private enum FetchDirection
+        {
+            Start = 0,
+            End = 1,
+            Next = 2,
+            Previous = 3
+        }
+
         private PaneMode currentPane;
         private Tag currentTag = null;
 
@@ -45,7 +53,13 @@ namespace ManageWalla
         public UploadUIState uploadUIState = null;
         public UploadImageFileList uploadFots = null;
         public UploadStatusListBind uploadStatusListBind = null;
+        public ImageMainViewerList imageMainViewerList = null;
+
+
         public GlobalState state = null;
+
+        public TagImageList currentTagImageList = null;
+
 
         #endregion
 
@@ -57,6 +71,7 @@ namespace ManageWalla
             uploadFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
             uploadUIState = (UploadUIState)FindResource("uploadUIStateKey");
             uploadStatusListBind = (UploadStatusListBind)FindResource("uploadStatusListBindKey");
+            imageMainViewerList = (ImageMainViewerList)FindResource("imageMainViewerListKey");
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -88,6 +103,7 @@ namespace ManageWalla
         {
             switch (updatedPane)
             {
+                #region Category
                 case PaneMode.CategoryView:
                 case PaneMode.CategoryAdd:
                 case PaneMode.CategoryEdit:
@@ -148,6 +164,9 @@ namespace ManageWalla
                             break;
                     }
                     break;
+                #endregion
+
+                #region Tag
                 case PaneMode.TagView:
                 case PaneMode.TagAdd:
                 case PaneMode.TagEdit:
@@ -205,6 +224,9 @@ namespace ManageWalla
                             break;
                     }
                     break;
+                #endregion
+
+                #region View
                 case PaneMode.ViewView:
                 case PaneMode.ViewEdit:
                 case PaneMode.ViewAdd:
@@ -262,6 +284,8 @@ namespace ManageWalla
                             break;
                     }
                     break;
+                #endregion
+
             }
         }
 
@@ -359,6 +383,7 @@ namespace ManageWalla
         {
             switch (mode)
             {
+                #region Category
                 case PaneMode.CategoryView:
 
                     gridCategory.RowDefinitions[1].MaxHeight = 34;
@@ -394,6 +419,9 @@ namespace ManageWalla
                     cmdAddEditCategoryDelete.Visibility = Visibility.Visible;
 
                     break;
+                #endregion
+
+                #region Tag
                 case PaneMode.TagView:
                     gridTag.RowDefinitions[1].MaxHeight = 34;
                     gridTag.RowDefinitions[2].MaxHeight = 0;
@@ -422,6 +450,9 @@ namespace ManageWalla
                     gridTag.RowDefinitions[4].MaxHeight = 34;
 
                     break;
+                #endregion
+
+                #region View
                 case PaneMode.ViewView:
 
                     break;
@@ -448,13 +479,22 @@ namespace ManageWalla
 
                      */ 
                     break;
+                #endregion
 
+                #region Upload
                 case PaneMode.Upload:
+
                     //Sort out Tag view options
+                    gridTag.RowDefinitions[1].MaxHeight = 34;
+                    gridTag.RowDefinitions[2].MaxHeight = 0;
+                    gridTag.RowDefinitions[3].MaxHeight = 0;
+                    gridTag.RowDefinitions[4].MaxHeight = 0;
+
                     cmdAssociateTag.Visibility = Visibility.Visible;
                     cmdAddTag.Visibility = Visibility.Collapsed;
                     cmdEditTag.Visibility = Visibility.Collapsed;
-                    //gridTagAddEdit.Visibility = Visibility.Collapsed;
+                    wrapMyTags.IsEnabled = false;
+                    cmdAssociateTag.IsEnabled = false;
                     
                     if (!uploadUIState.Uploading && (uploadUIState.Mode == UploadUIState.UploadMode.Images || uploadUIState.Mode == UploadUIState.UploadMode.Folder))
                     {
@@ -545,8 +585,9 @@ namespace ManageWalla
 
                         //Disable Category
                     }
-
                     break;
+                #endregion
+
                 case PaneMode.ImageViewFull:
 
                     break;
@@ -612,7 +653,6 @@ namespace ManageWalla
         #endregion
 
         #region Tag UI Control
-
         //Force refresh of the Tags List
         async private void RefreshTagsList()
         {
@@ -622,9 +662,6 @@ namespace ManageWalla
             RefreshPanesLoadingState(PaneMode.TagView, response, true);
         }
 
-
-
-        //TODO - needs to be called on dispatcher thread!!!!!
         public void TagListReloadFromState()
         {
             wrapMyTags.Children.Clear();
@@ -638,11 +675,90 @@ namespace ManageWalla
                 newRadioButton.Template = (ControlTemplate)FindResource("templateRadioButton");
                 newRadioButton.GroupName = "GroupTag";
                 newRadioButton.Tag = tag;
+                newRadioButton.Checked += new RoutedEventHandler(FetchTagImagesFirstAsync);
                 wrapMyTags.Children.Add(newRadioButton);
             }
         }
 
-        private void PopulateTagData()
+        //TODO - ensure that this is called when a search is applied.
+        async private void FetchTagImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            /* Get current tag */
+            RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            
+            /* Refresh tag image state */
+            if (checkedButton != null)
+            {
+                TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
+                currentTagImageList = await controller.GetTagImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetTagSearchQueryString());
+            }
+
+            /* Populate tag image list from state */
+            TagImageListUpdateControls();
+        }
+
+        async private void FetchMoreTagImagesAsync(FetchDirection direction)
+        {
+            if (currentTagImageList == null)
+                return;
+
+            /* Update current tag image list */
+            int cursor = 0;
+            switch (direction)
+            {
+                case FetchDirection.Start:
+                    cursor = 0;
+                    break;
+                case FetchDirection.Next:
+                    if ((currentTagImageList.imageCursor + state.imageFetchSize) <= currentTagImageList.totalImageCount)
+                        cursor = currentTagImageList.imageCursor + state.imageFetchSize;
+                    break;
+                case FetchDirection.Previous:
+                    cursor = Math.Max(cursor - state.imageFetchSize, 0);
+                    break;
+                case FetchDirection.End:
+                    cursor = Math.Abs(currentTagImageList.totalImageCount / state.imageFetchSize);
+                    break;
+            }
+
+            currentTagImageList = await controller.GetTagImagesAsync(currentTagImageList.id, currentTagImageList.Name, cursor, GetTagSearchQueryString());
+
+            /* Populate tag image list from state */
+            TagImageListUpdateControls();
+        }
+
+        //TODO add functionality + server side.
+        private string GetTagSearchQueryString()
+        {
+            return null;
+        }
+
+        private void TagImageListUpdateControls()
+        {
+            imageMainViewerList.Clear();
+
+            if (currentTagImageList == null)
+                return;
+
+            if (currentTagImageList.Images == null)
+                return;
+
+            foreach (TagImageListImageRef imageRef in currentTagImageList.Images)
+            {
+                GeneralImage newImage = new GeneralImage();
+                newImage.imageId = imageRef.id;
+                newImage.Name = imageRef.name;
+                newImage.Description = imageRef.desc;
+                newImage.TakenDate = imageRef.takenDate;
+                newImage.UploadDate = imageRef.uploadDate;
+                newImage.FilePath = imageRef.localPath;
+                newImage.LoadImage();
+
+                imageMainViewerList.Add(newImage);
+            }
+        }
+
+        private void PopulateTagMetaData()
         {
             RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
 
@@ -690,7 +806,7 @@ namespace ManageWalla
 
         private void cmdEditTag_Click(object sender, RoutedEventArgs e)
         {
-            PopulateTagData();
+            PopulateTagMetaData();
             RefreshPanesAllControls(PaneMode.TagEdit);
         }
 
@@ -795,6 +911,8 @@ namespace ManageWalla
                 uploadUIState.Mode = UploadUIState.UploadMode.None;
                  */
                 uploadUIState = new UploadUIState();
+                //TODO need to re-initiailse bindings, as controls will not be in sync with object now.
+
             }
             else
             {
@@ -803,8 +921,6 @@ namespace ManageWalla
             }
             //TODO = get list of all controls with a name starts chkUpload% and finishes %All
             //Loop through and set checked to false
-
-
         }
 
         private void chkUploadTagsAll_Checked(object sender, RoutedEventArgs e)
@@ -920,7 +1036,6 @@ namespace ManageWalla
 
         private void UploadEnableDisableTags(UploadImage current)
         {
-
             //Either check the gloabl tags collection or the image specific collection.
             ImageMetaTagRef[] tagToCheck = null;
             try
@@ -1030,21 +1145,76 @@ namespace ManageWalla
 
             //TODO - Remove Images which were successfully uploaded.
             uploadUIState.Uploading = false;
-            //lstUploadImageFileList.Items.Clear();
-            ResetUploadState(true);
 
-            /*
-            if (lstUploadImageFileList.Items.Count == 0)
+            if (lstUploadImageFileList.Items.Count > 0)
             {
-                
+                lstUploadImageFileList.IsEnabled = true;
             }
             else
             {
-                
+                ResetUploadState(true);
             }
-            */
 
             RefreshPanesAllControls(PaneMode.Upload);
+        }
+
+        async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            await RefreshUploadStatusStateAsync();
+        }
+
+        private void RefreshUploadStatusFromStateList(string message)
+        {
+            /* Clear list and add local image load errors */
+            uploadStatusListBind.Clear();
+
+            foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.Error))
+            {
+                UploadStatusListImageUploadRef newImageRef = new UploadStatusListImageUploadRef();
+                newImageRef.imageStatus = -1;
+                newImageRef.name = currentUploadImage.Meta.Name;
+                newImageRef.lastUpdated = DateTime.Now;
+                newImageRef.errorMessage = currentUploadImage.UploadError;
+
+                uploadStatusListBind.Add(newImageRef);
+            }
+
+            /* Load in existing upload entries */
+            if (state.uploadStatusList != null)
+            {
+                foreach (UploadStatusListImageUploadRef currentImageUploadRef in state.uploadStatusList.ImageUploadRef)
+                {
+                    uploadStatusListBind.Add(currentImageUploadRef);
+                }
+            }
+
+            /* Refresh message and icon */
+            datUploadStatusList.GetBindingExpression(DataGrid.ItemsSourceProperty).UpdateTarget();
+
+            //TODO update message and icon
+        }
+
+        async private Task RefreshUploadStatusStateAsync()
+        {
+            state.uploadStatusListState = GlobalState.DataLoadState.Pending;
+            string response = await controller.RefreshUploadStatusListAsync();
+            RefreshUploadStatusFromStateList(response);
+        }
+
+        async private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (tabUpload.SelectedIndex == 2)
+            {
+                if (state.uploadStatusListState == GlobalState.DataLoadState.No)
+                {
+                    state.uploadStatusListState = GlobalState.DataLoadState.LocalCache;
+
+                    RefreshUploadStatusFromStateList(null);
+
+                    await RefreshUploadStatusStateAsync();
+                }
+
+            }
         }
         #endregion
 
@@ -1308,6 +1478,18 @@ namespace ManageWalla
             cmdCategory.IsChecked = false;
             cmdView.IsChecked = false;
 
+
+            //One off load from cache if available.
+            if (state.tagLoadState == GlobalState.DataLoadState.No)
+            {
+                if (state.tagList != null)
+                {
+                    state.tagLoadState = GlobalState.DataLoadState.LocalCache;
+                    RefreshPanesLoadingState(PaneMode.TagView, null, true);
+                }
+                RefreshTagsList();
+            }
+
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
@@ -1359,47 +1541,21 @@ namespace ManageWalla
         }
         #endregion
 
-        async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
+        private void cmdRefreshCategoryList_Click(object sender, RoutedEventArgs e)
         {
-            await RefreshUploadStatusStateAsync();
+
         }
 
-        //Force refresh of the Upload control from state.
-
-
-        private void RefreshUploadStatusFromStateList(string message)
+        private void cmdRefreshViewList_Click(object sender, RoutedEventArgs e)
         {
-            /* Clear list and add local image load errors */
-            uploadStatusListBind.Clear();
 
-            //foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.Error))
-            foreach (UploadImage currentUploadImage in uploadFots)
-            {
-                UploadStatusListImageUploadRef newImageRef = new UploadStatusListImageUploadRef();
-                newImageRef.imageStatus = -1;
-                newImageRef.name = currentUploadImage.Meta.Name;
-                newImageRef.lastUpdated = DateTime.Now;
-                newImageRef.errorMessage = currentUploadImage.UploadError;
-
-                uploadStatusListBind.Add(newImageRef);
-            }
-
-            /* Load in existing upload entries */
-            //ForceCursor (int i = 0; int < state.uploadStatusList.ImageUploadRef
-
-            if (state.uploadStatusList != null)
-            {
-                foreach (UploadStatusListImageUploadRef currentImageUploadRef in state.uploadStatusList.ImageUploadRef)
-                {
-                    uploadStatusListBind.Add(currentImageUploadRef);
-                }
-            }
-
-            /* Refresh message and icon */
-
-            datUploadStatusList.GetBindingExpression(DataGrid.ItemsSourceProperty).UpdateTarget();
         }
+    }
+}
 
+
+
+#region codegraveyard
         /*
         private void RefreshUploadStatusFromStateListOld(string message)
         {
@@ -1408,9 +1564,6 @@ namespace ManageWalla
             XmlDocument uploadstatusXmldoc = new XmlDocument();
             uploadstatusXmldoc.LoadXml(state.uploadStatusListXml);
 
-
-
-
             XmlDocument newStatusList = new XmlDocument();
             XmlNamespaceManager nsManager = new XmlNamespaceManager(newStatusList.NameTable);
             nsManager.AddNamespace("s", "http://www.example.org/UploadStatusList");
@@ -1418,16 +1571,8 @@ namespace ManageWalla
             XmlElement documentRootNode = newStatusList.CreateElement("UploadStatusList", "http://www.example.org/UploadStatusList");
             newStatusList.AppendChild(documentRootNode);
 
-
-
-
-
             if (state.uploadStatusListXml != null)
             {
-
-
-
-
                 //foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.Error))
                 foreach (UploadImage currentUploadImage in uploadFots)
                 {
@@ -1442,10 +1587,6 @@ namespace ManageWalla
                     
                     //Create new entries for local uploads which have failed.
                     //<ImageUploadRef imageId="100310" imageStatus="1" name="051" lastUpdated="2013-07-27T10:45:59.333+01:00" />
-
-
-
-
 
                     XmlElement newNode = uploadstatusXmldoc.CreateElement("ImageUploadRef", "http://www.example.org/UploadStatusList");
                     XmlAttribute idAttribute = uploadstatusXmldoc.CreateAttribute("imageId");
@@ -1480,44 +1621,5 @@ namespace ManageWalla
 
             //Refresh message + icon.
         }
-        
-         */ 
-        //Force refresh of the Upload status List
-        async private Task RefreshUploadStatusStateAsync()
-        {
-            state.uploadStatusListState = GlobalState.DataLoadState.Pending;
-            string response = await controller.RefreshUploadStatusListAsync();
-            RefreshUploadStatusFromStateList(response);
-        }
-
-        private void cmdRefreshCategoryList_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void cmdRefreshViewList_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        async private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (tabUpload.SelectedIndex == 2)
-            {
-                if (state.uploadStatusListState == GlobalState.DataLoadState.No)
-                {
-                    if (state.uploadStatusList != null)
-                    {
-                        state.uploadStatusListState = GlobalState.DataLoadState.LocalCache;
-                        RefreshUploadStatusFromStateList(null);
-                    }
-                    await RefreshUploadStatusStateAsync();
-                }
-            }
-        }
-
-
-
-
-    }
-}
+        */
+#endregion

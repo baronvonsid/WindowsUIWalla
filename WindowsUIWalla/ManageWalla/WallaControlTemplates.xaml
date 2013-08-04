@@ -6,7 +6,8 @@
     <local:UploadImageFileList x:Key="uploadImagefileListKey" />
     <local:UploadUIState x:Key="uploadUIStateKey"  />
     <local:UploadStatusListBind x:Key="uploadStatusListBindKey"  />
-    <local:WallaDateConverter x:Key="wallaDateConverterKey"  />
+    <local:ImageMainViewerList x:Key="imageMainViewerListKey" /> 
+
     <local:WallaUploadStatusConverter x:Key="wallaUploadStatusConverterKey"  />
     
 

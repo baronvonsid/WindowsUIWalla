@@ -20,6 +20,7 @@ targetNamespace="http://www.example.org/TagImageList"
                       <attribute type="string" name="desc" />
                       <attribute type="date" name="uploadDate" />
                       <attribute type="date" name="takenDate" />
+                      <attribute type="string" name="localPath" />
                       </complexType>
               </element>
             </sequence>

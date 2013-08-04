@@ -21,7 +21,14 @@ namespace ManageWalla
     {
         //Infra Properties
         static GlobalState state = null;
-        public string userName {get; set;}
+        public string userName { get; set; }
+        public string hostName { get; set; }
+        public bool online { get; set; }
+        public int platformId { get; set; }
+        public string machineName { get; set; }
+        public long machineId { get; set; }
+        public int imageFetchSize { get; set; }
+
         private static byte[] key = { 1, 2, 3, 4, 5, 6, 7, 8 };
         private static byte[] iv = { 1, 2, 3, 4, 5, 6, 7, 8 };
         //public UploadImageFileList uploadImageFileList {get; set;}
@@ -30,6 +37,9 @@ namespace ManageWalla
         public TagList tagList { get; set; }
         public String categoryXml { get; set; }
         public UploadStatusList uploadStatusList { get; set; }
+
+
+        public List<TagImageList> tagImageList { get; set; }
 
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }

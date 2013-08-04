@@ -121,6 +121,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="GlobalState.cs" />
+    <Compile Include="ProjectDataType\GeneralImage.cs" />
+    <Compile Include="ProjectDataType\ImageMainViewerList.cs" />
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="WallaDateConverter.cs" />
     <Compile Include="Main.xaml.cs">
@@ -323,6 +325,9 @@
     <Resource Include="ExampleXml\UploadStatusList.xml">
       <SubType>Designer</SubType>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\loading.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

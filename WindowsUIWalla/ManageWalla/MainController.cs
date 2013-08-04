@@ -22,7 +22,6 @@ using log4net;
 using log4net.Config;
 using System.Configuration;
 
-
 namespace ManageWalla
 {
     public class MainController : IDisposable
@@ -43,8 +42,38 @@ namespace ManageWalla
             state.tagLoadState = GlobalState.DataLoadState.No;
             state.viewLoadState = GlobalState.DataLoadState.No;
             state.uploadStatusListState = GlobalState.DataLoadState.No;
+            state.platformId = GetPlatformId();
+            state.machineName = GetMachineName();
+            state.machineId = GetMachineId();
+            state.online = CheckIfOnline();
+            if (state.tagImageList == null)
+            {
+                state.tagImageList = new List<TagImageList>();
+            }
 
             serverHelper = new ServerHelper(state);
+        }
+
+        //TODO return operating system.
+        private int GetPlatformId()
+        {
+            return 100;
+        }
+
+        private long GetMachineId()
+        {
+            return 100000;
+        }
+
+        //TODO validation on whether this state is now void.
+        private string GetMachineName()
+        {
+            return "HAL2";
+        }
+
+        private bool CheckIfOnline()
+        {
+            return true;
         }
 
         public GlobalState GetState()
@@ -176,12 +205,29 @@ namespace ManageWalla
                     currentImage.Meta.categoryId = rootCategoryId;
                 }
 
-                //Check for each chkAll box set to true, then replace respective values.
+                
+
+
+
+
             }
 
-            while (meFots.Count > 0)
+            //Check for each chkAll box set to true, then replace respective values.
+            foreach (UploadImage currentImage in meFots)
             {
-                string response = await serverHelper.UploadImageAsync(meFots[0]);
+                if (uploadState.MetaTagRefAll)
+                {
+                    currentImage.Meta.Tags = uploadState.MetaTagRef;
+                }
+            }
+
+
+
+            while (meFots.Where(r => r.State == UploadImage.UploadState.None).Count() > 0)
+            {
+                UploadImage currentUpload = meFots.Where(r => r.State == UploadImage.UploadState.None).First();
+
+                string response = await serverHelper.UploadImageAsync(currentUpload);
                 if (response == null)
                 {
                     //meFots.RemoveAt(0);
@@ -189,7 +235,7 @@ namespace ManageWalla
 
                     //theLabel.Invoke(new Action(() => theLabel.Text = "hello world from worker thread!"));
 
-                    currentMain.uploadFots.Remove(meFots[0]);
+                    currentMain.uploadFots.Remove(currentUpload);
 
                     /*
                     Action UpdateFotsAction = delegate()
@@ -202,8 +248,8 @@ namespace ManageWalla
                 }
                 else
                 {
-                    currentMain.uploadFots[0].State = UploadImage.UploadState.Error;
-                    currentMain.uploadFots[0].UploadError = response;
+                    currentUpload.State = UploadImage.UploadState.Error;
+                    currentUpload.UploadError = response;
                 }
             }
             return null;
@@ -262,6 +308,69 @@ namespace ManageWalla
                 return ex.Message;
             }
         }
+
+        /// <summary>
+        /// Finds a local cached version of the image list.  If there is one present and no search qeury is specified,
+        /// then the server version is requested if a newer one is available, this is then added to the cache.
+        /// If the application is in offline mode then just return the cached version.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="tagName"></param>
+        /// <param name="cursor"></param>
+        /// <param name="searchQueryString"></param>
+        /// <returns></returns>
+        async public Task<TagImageList> GetTagImagesAsync(long id, string tagName, int cursor, string searchQueryString)
+        {
+            try
+            {
+                //Find a locally cached version,  ignore query string. 
+                TagImageList localTagList = state.tagImageList.Where(r => (r.id == id && r.imageCursor == cursor)).FirstOrDefault();
+                if (!state.online)
+                {
+                    return localTagList;
+                }
+
+                if (localTagList != null && searchQueryString.Length == 0)
+                {
+                    //With Local version, check with server is a new version is required.
+                    DateTime lastModified = localTagList.LastChanged;
+                    TagImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, true, lastModified, cursor, searchQueryString);
+                    if (tagImageList != null)
+                    {
+                        state.tagImageList.Add(tagImageList);
+                        return tagImageList;
+                    }
+                    else
+                    {
+                        return localTagList;
+                    }
+                }
+                else
+                {
+                    //Add the image list to the state if no search is specified.
+                    TagImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, false, DateTime.Now, cursor, searchQueryString);
+                    if (tagImageList != null)
+                    {
+                        if (searchQueryString != null)
+                            state.tagImageList.Add(tagImageList);
+
+                        return tagImageList;
+                    }
+                    else
+                    {
+                        return localTagList;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //TODO send error to the error message handler in the sky
+                //"There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.message;
+                return null;
+            }
+        }
+
+        
 
         public string UpdateTag(Tag newTag, string oldTagName)
         {

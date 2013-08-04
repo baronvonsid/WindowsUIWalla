@@ -22,8 +22,8 @@ namespace ManageWalla
 {
     public class ServerHelper
     {
-        private const String baseUri = "http://192.168.0.4:8080/WallaWS/v1/user/simo1n/";
-        //private const String baseUri = "http://localhost:8081/WallaWS/v1/user/simo1n/";
+        //private const String baseUri = "http://192.168.0.4:8080/WallaWS/v1/user/simo1n/";
+        private const String baseUri = "http://localhost:8081/WallaWS/v1/user/simo1n/";
         private HttpClient http = null;
         private GlobalState state = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(ServerHelper));
@@ -146,6 +146,38 @@ namespace ManageWalla
             state.tagList = null;
 
             return "";
+        }
+
+        async public Task<TagImageList> GetTagImagesAsync(string tagName, bool useDate, DateTime lastModified, int cursor, string searchQueryString)
+        {
+            try
+            {
+                /* GET /{userName}/tag/{tagName}/{platformId}/{imageCursor} */
+                string requestUrl = "tag/" + tagName + "/" + cursor.ToString() + "?" + searchQueryString ?? "";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                if (useDate)
+                {
+                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified);
+                }
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(TagImageList));
+                    TagImageList tagImageList = (TagImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                    return tagImageList;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         async public Task<string> UploadImageAsync(UploadImage image)
