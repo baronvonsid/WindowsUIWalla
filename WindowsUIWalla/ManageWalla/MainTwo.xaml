@@ -1,0 +1,179 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ManageWalla"
+        xmlns:walla="clr-namespace:ManageWalla"
+        x:Name="mainTwo" x:Class="ManageWalla.MainTwo"
+        Title="FotoWalla"  FontFamily="Tahoma" FontWeight="Light" >
+
+    <Window.Resources>
+        <ResourceDictionary Source="WallaControlTemplates.xaml" />
+    </Window.Resources>
+
+    <Grid x:Name="gridLeft" Margin="2,2,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40" />
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Grid.Column="0" Grid.Row="0" Grid.RowSpan="9" Margin="2,2,2,2" Background="#FFA9C4FF" LastChildFill="True">
+            <Button x:Name="cmdExpand" DockPanel.Dock="Top" Margin="2,3,2,2" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdExpand_Click">
+                <Button.Content>
+                    <Image Source="Icons/arrow-round.gif" RenderTransformOrigin="0.5,0.5" Height="28">
+                        <Image.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleY="1" ScaleX="-1"/>
+                                <SkewTransform AngleY="0" AngleX="0"/>
+                                <RotateTransform Angle="0"/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Image.RenderTransform>
+                    </Image>
+                </Button.Content>
+            </Button>
+
+            <TextBlock x:Name="lblFotoWallaHorizontal" FontSize="16" Padding="0,0,20,0" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" Foreground="#FF408383">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="-90"></RotateTransform>
+                </TextBlock.LayoutTransform>
+                <TextBlock.Text>FotoWalla</TextBlock.Text>
+            </TextBlock>
+        </DockPanel>
+
+        <DockPanel Grid.Column="1" Grid.Row="0" Margin="2,2,2,2" LastChildFill="True" Background="#FFA9C4FF">
+            <Button x:Name="cmdContract" DockPanel.Dock="Right" Margin="0,0,4,0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdContract_Click">
+                <Button.Content>
+                    <Image Source="Icons/arrow-round.gif" Height="28" />
+                </Button.Content>
+            </Button>
+            <Button x:Name="cmdAccount" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                <Button.Content>
+                    <Image Source="Icons/agent.gif" Height="28" />
+                </Button.Content>
+            </Button>
+            <Label x:Name="lblFotoWalla" FontSize="16" Content="FotoWalla" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="#FF408383" />
+        </DockPanel>
+
+        <ToggleButton x:Name="cmdCategory" Grid.Column="1" Grid.Row="1" Checked="cmdCategory_Checked" Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" Background="#FFFFFA92">
+            <DockPanel LastChildFill="True">
+                <Button x:Name="cmdCategoryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                    <Button.Content>
+                        <Image Source="Icons/reload.gif" Height="28" />
+                    </Button.Content>
+                </Button>
+                
+                <Image Source="Icons/tree.gif" Height="28" DockPanel.Dock="Left"/>
+                <Label Content="Category" VerticalContentAlignment="Center" Foreground="#FF408383" />
+            </DockPanel>
+        </ToggleButton>
+
+        <DockPanel x:Name="panCategoryUnavailable" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" Background="#CCFFFA92" Margin="2">
+            <TextBlock Text="Category" TextAlignment="Center" />
+        </DockPanel>
+
+        <ToggleButton x:Name="cmdTag" Grid.Column="1" Grid.Row="3" Checked="cmdTag_Checked" Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" Background="#FFBFFF92">
+            <DockPanel LastChildFill="True">
+                <Button x:Name="cmdTagRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                    <Button.Content>
+                        <Image Source="Icons/reload.gif" Height="28" />
+                    </Button.Content>
+                </Button>
+                <Image Source="Icons/star.gif" Height="28" DockPanel.Dock="Left"/>
+                <Label Content="Tag" VerticalContentAlignment="Center" Foreground="#FF408383" />
+            </DockPanel>
+        </ToggleButton>
+
+        <DockPanel x:Name="panTagUnavailable" Grid.Column="1" Grid.Row="4" VerticalAlignment="Stretch" Background="#CCBFFF92" Margin="2">
+            <TextBlock Text="Tag" TextAlignment="Center" />
+        </DockPanel>
+
+        <ToggleButton x:Name="cmdView" Grid.Column="1" Grid.Row="5" Checked="cmdView_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" Background="#FFFD91C7">
+            <DockPanel LastChildFill="True">
+                <Button x:Name="cmdViewRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                    <Button.Content>
+                        <Image Source="Icons/reload.gif" Height="28" />
+                    </Button.Content>
+                </Button>
+                <Image Source="Icons/fancy-globe.gif" Height="28" DockPanel.Dock="Left"/>
+                <Label Content="View" VerticalContentAlignment="Center" Foreground="#FF408383" />
+            </DockPanel>
+        </ToggleButton>
+
+        <DockPanel x:Name="panViewUnavailable" Grid.Column="1" Grid.Row="6" VerticalAlignment="Stretch" Background="#CCFD91C7" Margin="2">
+            <TextBlock Text="View" TextAlignment="Center" />
+        </DockPanel>
+
+        <ToggleButton x:Name="cmdUpload" Grid.Column="1" Grid.Row="7" Checked="cmdUpload_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" Background="#FF8CFFE5">
+            <DockPanel LastChildFill="True">
+                <Image Source="Icons/heart.gif" Height="28" DockPanel.Dock="Left"/>
+                <Label Content="Upload" VerticalContentAlignment="Center" Foreground="#FF408383" />
+            </DockPanel>
+        </ToggleButton>
+
+        <DockPanel x:Name="panUploadUnavailable" Grid.Column="1" Grid.Row="8" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2">
+            <TextBlock Text="Upload" TextAlignment="Center" />
+        </DockPanel>
+
+        <Grid x:Name="gridRight" Margin="0,0,0,0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="9">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="250"/>
+            </Grid.ColumnDefinitions>
+
+            <DockPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="2,2,2,2" Background="#FFA9C4FF" HorizontalAlignment="Stretch" LastChildFill="True">
+                <ToggleButton x:Name="cmdSort" ToolTip="Sort" DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Checked="cmdSort_Checked" Unchecked="cmdSort_Unchecked">
+                    <ToggleButton.Content>
+                        <Image Source="Icons/Disc.gif" Height="28" />
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+                <ToggleButton x:Name="cmdFilter" ToolTip="Filter" DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Checked="cmdFilter_Checked" Unchecked="cmdFilter_Unchecked">
+                    <ToggleButton.Content>
+                        <Image Source="Icons/Fan.gif" Height="28" />
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+                <Slider DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
+                            Value="3"
+                            Delay="200"
+                            Interval="1"
+                            TickPlacement="BottomRight"
+                            Minimum="1"
+                            Maximum="5"
+                            Width="200" ValueChanged="Slider_ValueChanged" ></Slider>
+
+            </DockPanel>
+
+            <DockPanel x:Name="panImagesUnavailable" Grid.Column="0" Grid.Row="1" Margin="2,2,2,2" VerticalAlignment="Stretch" Background="#FFFFFFDC" >
+                <TextBlock Text="Images" TextAlignment="Center" />
+            </DockPanel>
+
+            <DockPanel x:Name="panFilter" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
+                <TextBlock Text="Filter" TextAlignment="Center" />
+            </DockPanel>
+
+            <DockPanel x:Name="panSort" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed">
+                <TextBlock Text="Sort" TextAlignment="Center" />
+            </DockPanel>
+
+        </Grid>
+
+    </Grid>
+
+</Window>

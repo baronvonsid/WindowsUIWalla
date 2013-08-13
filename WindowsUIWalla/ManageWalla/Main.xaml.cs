@@ -34,8 +34,9 @@ namespace ManageWalla
             ViewEdit = 7,
             ViewAdd = 8,
             Upload = 9,
-            ImageViewFull = 10,
-            Settings = 11
+            Uploading = 10,
+            ImageViewFull = 11,
+            Settings = 12
         }
 
         private enum FetchDirection
@@ -46,6 +47,13 @@ namespace ManageWalla
             Previous = 3
         }
 
+        private enum MessageSeverity
+        {
+            Info = 0,
+            Warning = 1,
+            Error = 2
+        }
+
         private PaneMode currentPane;
         private Tag currentTag = null;
 
@@ -54,10 +62,7 @@ namespace ManageWalla
         public UploadImageFileList uploadFots = null;
         public UploadStatusListBind uploadStatusListBind = null;
         public ImageMainViewerList imageMainViewerList = null;
-
-
         public GlobalState state = null;
-
         public TagImageList currentTagImageList = null;
 
 
@@ -76,18 +81,57 @@ namespace ManageWalla
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //Apply busy panes overlay
+            //TODO Apply busy panes overlay
 
-            //Kick off asyncronous data syncronising.
-            //This will update all UI Elements eventually
             controller = new MainController(this);
 
+            string response = controller.InitApplication();
             state = controller.GetState();
-            currentPane = PaneMode.CategoryView;            
-            this.cmdCategory.IsChecked = true;
 
-            //Asyncronously check\update local cache information for Categories\Tags\Views.
-            //Task.Run(controller.RetrieveGeneralUserConfigAsync());
+            switch (state.connectionState)
+            {
+                case GlobalState.ConnectionState.LoggedOn:
+                    DisplayMessage("Account: " + state.userName + " has been connected with FotoWalla", MessageSeverity.Info);
+                    //TODO show online status
+                    //currentPane = PaneMode.CategoryView;
+                    this.cmdCategory.IsChecked = true;
+                    break;
+                case GlobalState.ConnectionState.Offline:
+                    //TODO show offline status
+                    DisplayMessage("No internet connection could be established with FotoWalla", MessageSeverity.Warning);
+                    this.cmdCategory.IsChecked = true;
+                    break;
+                case GlobalState.ConnectionState.NoAccount:
+                    DisplayMessage("There is no account settings saved for this user, you must associate an account", MessageSeverity.Info);
+                    //TODO show offline status
+                    this.cmdSettings.IsChecked = true;
+                    break;
+                case GlobalState.ConnectionState.FailedLogin:
+                    DisplayMessage("The logon for account: " + state.userName + ", failed with the message: " + response, MessageSeverity.Warning);
+                    //TODO show offline status
+                    this.cmdSettings.IsChecked = true;
+                    break;
+            }
+
+            DisplayConnectionStatus();
+        }
+
+        private void DisplayMessage(string message, MessageSeverity severity)
+        {
+            //TODO sort out severity.
+            MessageBox.Show(message);
+        }
+
+        private void DisplayConnectionStatus()
+        {
+            if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+            {
+                this.Title = "FotoWalla - Connected";
+            }
+            else
+            {
+                this.Title = "FotoWalla - Offline";
+            }
         }
 
         private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -381,6 +425,21 @@ namespace ManageWalla
 
         private void RefreshPanesAllControls(PaneMode mode)
         {
+            currentPane = mode;
+            switch (currentPane)
+            {
+                //These actions indicate a change has occured which requires a window re-jig.
+                case PaneMode.CategoryView:
+                case PaneMode.TagView:
+                case PaneMode.ViewView:
+                case PaneMode.Upload:
+                case PaneMode.ImageViewFull:
+                case PaneMode.Settings:
+                    //RefreshPanesLoadingState(mode, null, false);
+                    RefreshOverallPanesStructure();
+                    break;
+            }
+
             switch (mode)
             {
                 #region Category
@@ -427,6 +486,8 @@ namespace ManageWalla
                     gridTag.RowDefinitions[2].MaxHeight = 0;
                     gridTag.RowDefinitions[3].MaxHeight = 0;
                     gridTag.RowDefinitions[4].MaxHeight = 0;
+
+                    RefreshAndDisplayTagList(false);
 
                     cmdAssociateTag.Visibility = Visibility.Collapsed;
                     cmdAddTag.Visibility = Visibility.Visible;
@@ -484,24 +545,48 @@ namespace ManageWalla
                 #region Upload
                 case PaneMode.Upload:
 
-                    //Sort out Tag view options
-                    gridTag.RowDefinitions[1].MaxHeight = 34;
-                    gridTag.RowDefinitions[2].MaxHeight = 0;
-                    gridTag.RowDefinitions[3].MaxHeight = 0;
-                    gridTag.RowDefinitions[4].MaxHeight = 0;
-
-                    cmdAssociateTag.Visibility = Visibility.Visible;
-                    cmdAddTag.Visibility = Visibility.Collapsed;
-                    cmdEditTag.Visibility = Visibility.Collapsed;
-                    wrapMyTags.IsEnabled = false;
-                    cmdAssociateTag.IsEnabled = false;
-                    
-                    if (!uploadUIState.Uploading && (uploadUIState.Mode == UploadUIState.UploadMode.Images || uploadUIState.Mode == UploadUIState.UploadMode.Folder))
+                    if (uploadUIState.Uploading == true)
                     {
-                        //Common
+                        lstUploadImageFileList.IsEnabled = false;
+                        cmdUploadImportFiles.Visibility = Visibility.Hidden;
+                        cmdUploadImportFolder.Visibility = Visibility.Hidden;
+                        cmdUploadClear.IsEnabled = true;
+                        cmdUploadClear.Content = "Cancel Uploads";
+                        break;
+                    }
+
+                    //Initialise upload controls, no state to consider.
+                    if (uploadUIState.Mode == UploadUIState.UploadMode.None)
+                    {
+                        //Tag Setup
+                        gridTag.RowDefinitions[1].MaxHeight = 34;
+                        gridTag.RowDefinitions[2].MaxHeight = 0;
+                        gridTag.RowDefinitions[3].MaxHeight = 0;
+                        gridTag.RowDefinitions[4].MaxHeight = 0;
+                        cmdAssociateTag.Visibility = Visibility.Visible;
+                        cmdAddTag.Visibility = Visibility.Collapsed;
+                        cmdEditTag.Visibility = Visibility.Collapsed;
+                        wrapMyTags.IsEnabled = false;
+                        cmdAssociateTag.IsEnabled = false;
+                        RefreshAndDisplayTagList(false);
+
+                        //Upload controls setup
+                        lstUploadImageFileList.IsEnabled = false;
+                        cmdUploadImportFolder.Visibility = Visibility.Visible;
+                        cmdUploadImportFiles.Visibility = Visibility.Visible;
+                        cmdUploadClear.Visibility = Visibility.Collapsed;
+                        grdUploadSettings.RowDefinitions[2].MaxHeight = 0;
+                        grdUploadSettings.RowDefinitions[3].MaxHeight = 0;
+                        grdUploadSettings.RowDefinitions[4].MaxHeight = 0;
+                        grdUploadSettings.RowDefinitions[5].MaxHeight = 0;
+                        cmdUploadAll.IsEnabled = false;
+                        tabUploadImageDetails.IsEnabled = false;
+                    }
+                    else
+                    {
+                        //Upload has been initialised, set controls to reflect upload options.
                         lstUploadImageFileList.IsEnabled = true;
                         tabUploadImageDetails.IsEnabled = true;
-                        grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
                         grdUploadSettings.RowDefinitions[3].MaxHeight = 25; //Upload to new category
                         tabUploadImageDetails.IsEnabled = true;
                         if (uploadUIState.UploadToNewCategory)
@@ -514,77 +599,45 @@ namespace ManageWalla
                             grdUploadSettings.RowDefinitions[4].MaxHeight = 0;
                             grdUploadSettings.RowDefinitions[5].MaxHeight = 0;
                         }
-                        
+
                         cmdUploadAll.IsEnabled = true;
+                        cmdUploadClear.Content = "Clear";
                         cmdUploadClear.IsEnabled = true;
+                        cmdUploadClear.IsEnabled = true;
+                        cmdUploadClear.Visibility = Visibility.Visible;
 
                         //Enable Tags
                         wrapMyTags.IsEnabled = true;
                         cmdAssociateTag.IsEnabled = true;
 
-                        //Enable Category
-                        //TODO
 
                         if (uploadUIState.Mode == UploadUIState.UploadMode.Images)
                         {
                             grdUploadImageDetails.RowDefinitions[0].MaxHeight = 0; //Sub category marker
-                            //grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
+                            grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
                             chkUploadMapToSubFolders.IsEnabled = false;
 
                             cmdUploadImportFolder.Visibility = Visibility.Hidden;
                         }
                         else if (uploadUIState.Mode == UploadUIState.UploadMode.Folder)
                         {
-                           
+
                             if (uploadUIState.GotSubFolders)
                             {
                                 grdUploadImageDetails.RowDefinitions[0].MaxHeight = 25; //Sub category marker
-                                //grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
+                                grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
                                 chkUploadMapToSubFolders.IsEnabled = true;
                             }
                             else
                             {
                                 grdUploadImageDetails.RowDefinitions[0].MaxHeight = 0; //Sub category marker
-                                //grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
+                                grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
                                 chkUploadMapToSubFolders.IsEnabled = false;
                             }
                             cmdUploadImportFiles.Visibility = Visibility.Hidden;
                         }
                     }
-                    else
-                    {
-                        //Check if there are outstanding upload items then just allow progress or cancel.
-                        if (uploadUIState.Uploading)
-                        {
-                            lstUploadImageFileList.IsEnabled = false;
-                            cmdUploadImportFiles.Visibility = Visibility.Hidden;
-                            cmdUploadImportFolder.Visibility = Visibility.Hidden;
-                            cmdUploadClear.IsEnabled = true;
-                            cmdUploadClear.Content = "Cancel Uploads";
-                        }
-                        else
-                        {
-                            //New Upload
-                            lstUploadImageFileList.IsEnabled = false;
 
-                            cmdUploadImportFolder.Visibility = Visibility.Visible;
-                            cmdUploadImportFiles.Visibility = Visibility.Visible;
-                            cmdUploadClear.Content = "Clear";
-                            cmdUploadClear.IsEnabled = false;
-                            grdUploadSettings.RowDefinitions[2].MaxHeight = 0;
-                            grdUploadSettings.RowDefinitions[3].MaxHeight = 0;
-                            grdUploadSettings.RowDefinitions[4].MaxHeight = 0;
-                            grdUploadSettings.RowDefinitions[5].MaxHeight = 0;
-                        }
-                        cmdUploadAll.IsEnabled = false;
-                        tabUploadImageDetails.IsEnabled = false;
-
-                        //Disable Tags
-                        wrapMyTags.IsEnabled = false;
-                        cmdAssociateTag.IsEnabled = false;
-
-                        //Disable Category
-                    }
                     break;
                 #endregion
 
@@ -593,21 +646,6 @@ namespace ManageWalla
                     break;
                 case PaneMode.Settings:
 
-                    break;
-            }
-
-            currentPane = mode;
-            switch (currentPane)
-            {
-                //These actions indicate a change has occured which requires a window re-jig.
-                case PaneMode.CategoryView:
-                case PaneMode.TagView:
-                case PaneMode.ViewView:
-                case PaneMode.Upload:
-                case PaneMode.ImageViewFull:
-                case PaneMode.Settings:
-                    RefreshPanesLoadingState(mode, null, false);
-                    RefreshOverallPanesStructure();
                     break;
             }
         }
@@ -653,7 +691,47 @@ namespace ManageWalla
         #endregion
 
         #region Tag UI Control
+
+
+        /// <summary>
+        /// Method to load and refresh the tag list, based on online status and whether or not a local cache contains a previous version
+        /// </summary>
+        /// <param name="forceRefresh"></param>
+        async private void RefreshAndDisplayTagList(bool forceRefresh)
+        {
+            //Catch first time loads, user intiated refresh and when user was offline and is now online.  But only if logged on.
+            if (state.connectionState == GlobalState.ConnectionState.LoggedOn && 
+                (state.tagLoadState == GlobalState.DataLoadState.No || forceRefresh || state.tagLoadState == GlobalState.DataLoadState.LocalCache))
+            {
+                //TODO show pending animation.
+                panTagWorking.Visibility = System.Windows.Visibility.Visible;
+                gridTag.Visibility = Visibility.Collapsed;
+
+                string response = await controller.RefreshTagsListAsync();
+                if (response != "OK")
+                {
+                    DisplayMessage(response, MessageSeverity.Error);
+                }
+            }
+
+            switch (state.tagLoadState)
+            {
+                case GlobalState.DataLoadState.Loaded:
+                case GlobalState.DataLoadState.LocalCache:
+                    TagListReloadFromState();
+                    panTagWorking.Visibility = System.Windows.Visibility.Collapsed;
+                    gridTag.Visibility = Visibility.Visible;
+                    break;
+                case GlobalState.DataLoadState.Unavailable:
+                    panTagWorking.Visibility = System.Windows.Visibility.Visible;
+                    gridTag.Visibility = Visibility.Collapsed;
+                    break;
+            }
+        }
+        
+        
         //Force refresh of the Tags List
+        /*
         async private void RefreshTagsList()
         {
             state.tagLoadState = GlobalState.DataLoadState.Pending;
@@ -661,6 +739,7 @@ namespace ManageWalla
             string response = await controller.RefreshTagsListAsync();
             RefreshPanesLoadingState(PaneMode.TagView, response, true);
         }
+        */
 
         public void TagListReloadFromState()
         {
@@ -794,7 +873,7 @@ namespace ManageWalla
             }
 
             RefreshPanesAllControls(PaneMode.TagView);
-            RefreshTagsList();
+            RefreshAndDisplayTagList(true);
         }
 
         private void cmdAddTag_Click(object sender, RoutedEventArgs e)
@@ -817,7 +896,7 @@ namespace ManageWalla
 
         private void cmdRefreshTagList_Click(object sender, RoutedEventArgs e)
         {
-            RefreshTagsList();
+            RefreshAndDisplayTagList(true);
         }
 
         private void cmdAddEditTagSave_Click(object sender, RoutedEventArgs e)
@@ -853,7 +932,7 @@ namespace ManageWalla
             }
 
             RefreshPanesAllControls(PaneMode.TagView);
-            RefreshTagsList();
+            RefreshAndDisplayTagList(true);
         }
         #endregion
 
@@ -901,7 +980,6 @@ namespace ManageWalla
         {
             if (fullReset)
             {
-                /*
                 uploadUIState.GotSubFolders = false;
                 uploadUIState.CategoryName = "";
                 uploadUIState.CategoryDesc = "";
@@ -909,10 +987,8 @@ namespace ManageWalla
                 uploadUIState.UploadToNewCategory = false;
 
                 uploadUIState.Mode = UploadUIState.UploadMode.None;
-                 */
-                uploadUIState = new UploadUIState();
-                //TODO need to re-initiailse bindings, as controls will not be in sync with object now.
 
+                //TODO Remove all ALL meta attributes.
             }
             else
             {
@@ -1478,7 +1554,6 @@ namespace ManageWalla
             cmdCategory.IsChecked = false;
             cmdView.IsChecked = false;
 
-
             //One off load from cache if available.
             if (state.tagLoadState == GlobalState.DataLoadState.No)
             {
@@ -1487,7 +1562,7 @@ namespace ManageWalla
                     state.tagLoadState = GlobalState.DataLoadState.LocalCache;
                     RefreshPanesLoadingState(PaneMode.TagView, null, true);
                 }
-                RefreshTagsList();
+                RefreshAndDisplayTagList(false);
             }
 
             RefreshPanesAllControls(PaneMode.Upload);
@@ -1505,29 +1580,12 @@ namespace ManageWalla
 
         private void cmdTag_Checked(object sender, RoutedEventArgs e)
         {
-            bool tagLoadFirstTime = false;
             cmdSettings.IsChecked = false;
             cmdCategory.IsChecked = false;
             cmdUpload.IsChecked = false;
             cmdView.IsChecked = false;
 
-            //One off load from cache if available.
-            if (state.tagLoadState == GlobalState.DataLoadState.No)
-            {
-                if (state.tagList != null)
-                {
-                    state.tagLoadState = GlobalState.DataLoadState.LocalCache;
-                    RefreshPanesLoadingState(PaneMode.TagView, null, true);
-                }
-                tagLoadFirstTime = true;
-            }
-
             RefreshPanesAllControls(PaneMode.TagView);
-
-            if (tagLoadFirstTime)
-            {
-                RefreshTagsList();
-            }
         }
 
         private void cmdSettings_Checked(object sender, RoutedEventArgs e)

@@ -26,54 +26,16 @@ namespace ManageWalla
 {
     public class MainController : IDisposable
     {
+        #region ClassSetup
         private MainWindow currentMain;
         private GlobalState state = null;
         private ServerHelper serverHelper = null;
-        private string userName = ConfigurationManager.AppSettings["UserName"];
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainController));
 
-        public MainController(MainWindow currentMainParam)
+        public MainController(MainWindow currentMainParam) 
         {
+            //Set a reference to the main window for two way comms.
             currentMain = currentMainParam;
-
-            state = GlobalState.GetState(userName);
-
-            state.categoryLoadState = GlobalState.DataLoadState.No;
-            state.tagLoadState = GlobalState.DataLoadState.No;
-            state.viewLoadState = GlobalState.DataLoadState.No;
-            state.uploadStatusListState = GlobalState.DataLoadState.No;
-            state.platformId = GetPlatformId();
-            state.machineName = GetMachineName();
-            state.machineId = GetMachineId();
-            state.online = CheckIfOnline();
-            if (state.tagImageList == null)
-            {
-                state.tagImageList = new List<TagImageList>();
-            }
-
-            serverHelper = new ServerHelper(state);
-        }
-
-        //TODO return operating system.
-        private int GetPlatformId()
-        {
-            return 100;
-        }
-
-        private long GetMachineId()
-        {
-            return 100000;
-        }
-
-        //TODO validation on whether this state is now void.
-        private string GetMachineName()
-        {
-            return "HAL2";
-        }
-
-        private bool CheckIfOnline()
-        {
-            return true;
         }
 
         public GlobalState GetState()
@@ -81,55 +43,93 @@ namespace ManageWalla
             return state;
         }
 
-        async public Task LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots)
+        public void Dispose()
         {
-            for (int i = 0; i < fileNames.Length; i++)
-            {
-                UploadImage newImage = new UploadImage();
-                await newImage.Setup(fileNames[i]);
-                meFots.Add(newImage);
-            }
+            state.SaveState();
+        }
+        #endregion
 
+        #region AppInitialise
+        /// <summary>
+        /// Check for user specific state, saved locally.  Initialise object.
+        /// Create Server helper and check if online.
+        /// If not online then set online flag and finish further initialisation.
+        /// If online. If user credentials in state object are present attempt logon to Walla.
+        /// When success - Pass Machine details to Walla and retrieve machine id.
+        /// If logon fails or no user credentials.
+        /// Show Settings form and display message about failure.
+        /// </summary>
+        /// <param name="currentMainParam"></param>
+        /// <returns></returns>
+        public string InitApplication()
+        {
+            try
+            {
+                //Setup Server helper.
+                serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey);
+
+                //Initialise state.
+                state = GlobalState.GetState();
+                if (state.userName == null || state.password == null)
+                {
+                    state.connectionState = GlobalState.ConnectionState.NoAccount;
+                }
+
+                return Logon(state.userName, state.password);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
         }
 
-        async public Task LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots)
+        //Windows Versions.
+        private int GetPlatformId()
         {
-            if (recursive)
+            System.OperatingSystem osInfo = System.Environment.OSVersion;
+
+            switch (osInfo.Version.Major)
             {
-                foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
-                {
-                    await LoadImagesFromFolder(folder, recursive, meFots);
-                }
+                case 6:
+                    //Windows 7
+                    return 100;
+                case 7:
+                    //Windows 8;
+                    return 110;
+                default:
+                    return -1;
+            }
+        }
+
+        //Used if initially there wa no user credentials or if the logon failed.
+        public string Logon(string userName, string password)
+        {
+            //Verify if online
+            if (!serverHelper.isOnline())
+            {
+                state.connectionState = GlobalState.ConnectionState.Offline;
+                return "";
             }
 
-            foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
+            //Perform login
+            string logonResponse = serverHelper.Logon(userName, password);
+            if (logonResponse == "OK")
             {
-                UploadImage newImage = new UploadImage();
-                await newImage.Setup(file.FullName);
-                meFots.Add(newImage);
+                state.connectionState = GlobalState.ConnectionState.LoggedOn;
+                state.userName = userName;
+                state.password = password;
+                state.lastLoggedIn = DateTime.Now;
+            }
+            else
+            {
+                state.connectionState = GlobalState.ConnectionState.FailedLogin;
+                return logonResponse;
             }
 
-            /*
-            public Window()
-            {
-                InitializeComponent();
-
-                ThreadPool.QueueUserWorkItem(LoadImage,
-                     "http://z.about.com/d/animatedtv/1/0/1/m/simpf.jpg");
-            }
-
-            public void LoadImage(object uri)
-            {
-                var decoder = new JpegBitmapDecoder(new Uri(uri.ToString()), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-                decoder.Frames[0].Freeze();
-                this.Dispatcher.Invoke(DispatcherPriority.Send, new Action<ImageSource>(SetImage), decoder.Frames[0]);
-            }
-
-            public void SetImage(ImageSource source)
-            {
-                this.BackgroundImage.Source = source;
-            } 
-            */
+            //Set MachineId server side and client side.
+            state.machineId = serverHelper.SetSessionMachineId(System.Environment.MachineName, GetPlatformId());
+            return "OK";
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace ManageWalla
         /// Check local cache for entries and check Walla Hub for updates
         /// Then refresh local data caches.
         /// </summary>
-        public async Task RetrieveGeneralUserConfigAsync()
+        public async Task RetrieveGeneralUserConfigAsynctodelete()
         {
             Task<string> tagListLoadedTask = RefreshTagsListAsync();
 
@@ -151,9 +151,19 @@ namespace ManageWalla
                 //Call dispatcher thread to run method TagListUpdateWorkingPane();
             }
 
-            
-
             //TODO - Categotry and Views.
+        }
+        #endregion
+
+        #region Upload Methods
+        async public Task LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots)
+        {
+            for (int i = 0; i < fileNames.Length; i++)
+            {
+                UploadImage newImage = new UploadImage();
+                await newImage.Setup(fileNames[i]);
+                meFots.Add(newImage);
+            }
 
         }
 
@@ -195,7 +205,7 @@ namespace ManageWalla
                 {
                     //Check local category xml for matches or create new.
                     //TODO after categories have been developed.
-                    
+
                 }
             }
             else
@@ -204,12 +214,6 @@ namespace ManageWalla
                 {
                     currentImage.Meta.categoryId = rootCategoryId;
                 }
-
-                
-
-
-
-
             }
 
             //Check for each chkAll box set to true, then replace respective values.
@@ -231,7 +235,7 @@ namespace ManageWalla
                 if (response == null)
                 {
                     //meFots.RemoveAt(0);
-                        //Dispatcher.Invoke(DispatcherPriority.Send,
+                    //Dispatcher.Invoke(DispatcherPriority.Send,
 
                     //theLabel.Invoke(new Action(() => theLabel.Text = "hello world from worker thread!"));
 
@@ -286,25 +290,76 @@ namespace ManageWalla
             }
         }
 
+        async public Task LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots)
+        {
+            if (recursive)
+            {
+                foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
+                {
+                    await LoadImagesFromFolder(folder, recursive, meFots);
+                }
+            }
+
+            foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
+            {
+                UploadImage newImage = new UploadImage();
+                await newImage.Setup(file.FullName);
+                meFots.Add(newImage);
+            }
+
+            /* old code
+            public void LoadImage(object uri)
+            {
+                var decoder = new JpegBitmapDecoder(new Uri(uri.ToString()), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                decoder.Frames[0].Freeze();
+                this.Dispatcher.Invoke(DispatcherPriority.Send, new Action<ImageSource>(SetImage), decoder.Frames[0]);
+            }
+
+            public void SetImage(ImageSource source)
+            {
+                this.BackgroundImage.Source = source;
+            } 
+            */
+        }
+        #endregion
+
+        #region Tag Methods
         async public Task<string> RefreshTagsListAsync()
         {
             try
             {
-                TagList tagList = await serverHelper.GetTagsAvailableAsync();
-                state.tagList = tagList;
-                state.tagLoadState = GlobalState.DataLoadState.Loaded;
-                return "OK";
-            }
-            catch (Exception ex)
-            {
-                if (state.tagList != null)
+                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
-                    state.tagLoadState = GlobalState.DataLoadState.LocalCache;
+                    TagList tagList;
+                    if (state.tagList != null)
+                    {
+                        tagList = await serverHelper.GetTagsAvailableAsync(true, state.tagList.LastChanged);
+                    }
+                    else
+                    {
+                        tagList = await serverHelper.GetTagsAvailableAsync(false, DateTime.Now);
+                    }
+                    state.tagList = tagList;
+                    state.tagLoadState = GlobalState.DataLoadState.Loaded;
+                    return "OK";
                 }
                 else
                 {
-                    state.tagLoadState = GlobalState.DataLoadState.Unavailable;
+                    if (state.tagList != null)
+                    {
+                        state.tagLoadState = GlobalState.DataLoadState.LocalCache;
+                        return "OK";
+                    }
+                    else
+                    {
+                        state.tagLoadState = GlobalState.DataLoadState.Unavailable;
+                        return "No local tag list is available to show.";
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                state.tagLoadState = GlobalState.DataLoadState.Unavailable;
                 return ex.Message;
             }
         }
@@ -370,8 +425,6 @@ namespace ManageWalla
             }
         }
 
-        
-
         public string UpdateTag(Tag newTag, string oldTagName)
         {
             return serverHelper.UpdateTag(newTag, oldTagName);
@@ -391,10 +444,6 @@ namespace ManageWalla
         {
             return serverHelper.DeleteTag(tag);
         }
-
-        public void Dispose()
-        {
-            state.SaveState();
-        }
+        #endregion
     }
 }

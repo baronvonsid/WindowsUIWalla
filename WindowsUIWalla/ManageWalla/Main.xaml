@@ -4,11 +4,10 @@
         xmlns:local="clr-namespace:ManageWalla"
         xmlns:walla="clr-namespace:ManageWalla"
         x:Name="mainWindow" x:Class="ManageWalla.MainWindow"
-        Title="Main"  Loaded="MainWindow_Loaded" FontFamily="Tahoma" FontWeight="Light" Closing="mainWindow_Closing">
+        Title="FotoWalla"  Loaded="MainWindow_Loaded" FontFamily="Tahoma" FontWeight="Light" Closing="mainWindow_Closing">
 
     <Window.Resources>
         <ResourceDictionary Source="WallaControlTemplates.xaml" />
-
     </Window.Resources>
 
     <Grid x:Name="gridLeft" Margin="0,2,0,0">

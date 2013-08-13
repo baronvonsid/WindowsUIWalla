@@ -121,9 +121,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="GlobalState.cs" />
+    <Compile Include="MainTwo.xaml.cs">
+      <DependentUpon>MainTwo.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ProjectDataType\GeneralImage.cs" />
     <Compile Include="ProjectDataType\ImageMainViewerList.cs" />
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="WallaDateConverter.cs" />
     <Compile Include="Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>
@@ -147,6 +151,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MainTwo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WallaControlTemplates.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -170,6 +178,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

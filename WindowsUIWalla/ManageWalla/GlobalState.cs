@@ -22,29 +22,37 @@ namespace ManageWalla
         //Infra Properties
         static GlobalState state = null;
         public string userName { get; set; }
-        public string hostName { get; set; }
+        public string password { get; set; }
         public bool online { get; set; }
         public int platformId { get; set; }
         public string machineName { get; set; }
         public long machineId { get; set; }
         public int imageFetchSize { get; set; }
+        public DateTime lastLoggedIn { get; set; }
 
+        //Complex-ify !!!
         private static byte[] key = { 1, 2, 3, 4, 5, 6, 7, 8 };
         private static byte[] iv = { 1, 2, 3, 4, 5, 6, 7, 8 };
-        //public UploadImageFileList uploadImageFileList {get; set;}
 
         //Business Objects
         public TagList tagList { get; set; }
         public String categoryXml { get; set; }
         public UploadStatusList uploadStatusList { get; set; }
-
-
         public List<TagImageList> tagImageList { get; set; }
 
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }
         public DataLoadState viewLoadState { get; set; }
         public DataLoadState uploadStatusListState { get; set; }
+
+        public ConnectionState connectionState { get; set; }
+        public enum ConnectionState
+        {
+            NoAccount = 0,
+            Offline = 1,
+            FailedLogin = 2,
+            LoggedOn = 3
+        }
 
         public enum DataLoadState
         {
@@ -58,22 +66,32 @@ namespace ManageWalla
         #region InfraCodes
         public GlobalState() { }
 
-        public static GlobalState GetState(string userNameParam)
+        public static GlobalState GetState()
         {
             // Try to load from File
-            state = RetreiveFromFile(userNameParam);
+            state = RetreiveFromFile();
             if (state == null)
             {
                 state = new GlobalState();
-                state.userName = userNameParam;
+
+                //Initialise objects.
+                if (state.tagImageList == null)
+                {
+                    state.tagImageList = new List<TagImageList>();
+                }
             }
+
+            state.categoryLoadState = GlobalState.DataLoadState.No;
+            state.tagLoadState = GlobalState.DataLoadState.No;
+            state.viewLoadState = GlobalState.DataLoadState.No;
+            state.uploadStatusListState = GlobalState.DataLoadState.No;
 
             return state;
         }
 
-        private static GlobalState RetreiveFromFile(string userNameParam)
+        private static GlobalState RetreiveFromFile()
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, "Walla-" + userNameParam + ".config");
+            string fileName = Path.Combine(Application.UserAppDataPath, "Walla-LocalCache.config");
             GlobalState stateTemp = null;
 
             DESCryptoServiceProvider des = new DESCryptoServiceProvider();
@@ -87,10 +105,7 @@ namespace ManageWalla
                     stateTemp = (GlobalState)formatter.Deserialize(cryptoStream);
                 }
 
-                if (stateTemp.userName == userNameParam)
-                {
-                    return stateTemp;
-                }
+                return stateTemp;
             }
 
             return null;
@@ -98,8 +113,7 @@ namespace ManageWalla
 
         public void SaveState()
         {
-
-            string fileName = Path.Combine(Application.UserAppDataPath, "Walla-" + userName + ".config");
+            string fileName = Path.Combine(Application.UserAppDataPath, "Walla-LocalCache.config");
             DESCryptoServiceProvider des = new DESCryptoServiceProvider();
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
@@ -112,9 +126,6 @@ namespace ManageWalla
                 cryptoStream.FlushFinalBlock();
             }
         }
-
-
-
         #endregion
 
         /*

@@ -55,28 +55,31 @@
     <ControlTemplate x:Key="templateToggleButton" TargetType="{x:Type ToggleButton}">
         
         <Grid>
-                <Rectangle x:Name="outerRectangle">
-                    <Rectangle.Fill>
-                        <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Background.Color}" />
-                            
-                        </Rectangle.Fill>
-                </Rectangle>
-           
+            <Rectangle x:Name="outerRectangle" StrokeThickness="0">
+                
+                <Rectangle.Stroke>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
+                </Rectangle.Stroke>
 
-            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Rectangle.Fill>
+                        <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Background.Color}" />       
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <ContentPresenter Margin="{TemplateBinding Margin}" />
         </Grid>
-        <!--
         <ControlTemplate.Triggers>
 
             <Trigger Property="IsChecked" Value="True">
-                <Setter TargetName="outerRectangle" Property="Stroke">
-                    <Setter.Value>
-                        <SolidColorBrush Color="Black" />
-                    </Setter.Value>
-                </Setter>
+                <Setter TargetName="outerRectangle" Property="StrokeThickness" Value="1" />
             </Trigger>
+            
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="outerRectangle" Property="StrokeThickness" Value="1.5" />
+            </Trigger>
+
         </ControlTemplate.Triggers>
-        -->
+
     </ControlTemplate>
 
     <ControlTemplate x:Key="templateRadioButton" TargetType="{x:Type RadioButton}">

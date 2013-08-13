@@ -22,20 +22,70 @@ namespace ManageWalla
 {
     public class ServerHelper
     {
-        //private const String baseUri = "http://192.168.0.4:8080/WallaWS/v1/user/simo1n/";
-        private const String baseUri = "http://localhost:8081/WallaWS/v1/user/simo1n/";
         private HttpClient http = null;
-        private GlobalState state = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(ServerHelper));
+        private string hostName;
+        private string wsPath;
+        private string appKey;
 
-        public ServerHelper(GlobalState value)
+        public ServerHelper(string hostNameParam, string wsPathParam, string appKeyParam)
         {
-            state = value;
-            http = new HttpClient();
-            http.BaseAddress = new Uri(baseUri);
+            hostName = hostNameParam;
+            wsPath = wsPathParam;
+            appKey = appKeyParam;
         }
 
-        async public Task<TagList> GetTagsAvailableAsync()
+        /// <summary>
+        /// Simple test for the Walla hostname being online, uses GetHostaddresses method.
+        /// </summary>
+        /// <returns></returns>
+        public bool isOnline()
+        {
+            try
+            {
+                string myAddress = hostName;
+                IPAddress[] addresslist = Dns.GetHostAddresses(myAddress);
+
+                if (addresslist[0].ToString().Length > 6)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public string Logon(string username, string password)
+        {
+            if (http == null)
+            {
+                http = new HttpClient();
+                http.BaseAddress = new Uri(hostName + wsPath);
+            }
+
+            //Do logon
+            //TODO - Logon and send application key.
+
+            //Log failed login as a warning.
+
+            return "OK";
+        }
+
+        //The web server needs to know what machine id is using this connection, so relevant
+        //Additional details can be returned in XML.
+        //Also held locally for new uploads to associate images with.
+        public long SetSessionMachineId(string machineName, int platformId)
+        {
+            return 100000;
+        }
+
+        async public Task<TagList> GetTagsAvailableAsync(bool useDate, DateTime lastModified)
         {
             try
             {
@@ -43,9 +93,9 @@ namespace ManageWalla
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
-                if (state.tagList != null)
+                if (useDate)
                 {
-                    request.Headers.IfModifiedSince = new DateTimeOffset(state.tagList.LastChanged);
+                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified);
                 }
 
                 HttpResponseMessage response = await http.SendAsync(request);
@@ -143,7 +193,7 @@ namespace ManageWalla
             HttpResponseMessage response = http.SendAsync(request).Result;
             response.EnsureSuccessStatusCode();
 
-            state.tagList = null;
+            //state.tagList = null;
 
             return "";
         }
