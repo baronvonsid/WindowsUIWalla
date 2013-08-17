@@ -221,7 +221,6 @@
                 <Button x:Name="cmdAddEditTagCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagCancel_Click" />
                 <Button x:Name="cmdAddEditTagDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagDelete_Click" />
             </StackPanel>
-
         </Grid>
 
         <ToggleButton x:Name="cmdSettings" Grid.Column="0" Grid.Row="4" Content="Settings" Margin="4,2,2,4" Checked="cmdSettings_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}"/>

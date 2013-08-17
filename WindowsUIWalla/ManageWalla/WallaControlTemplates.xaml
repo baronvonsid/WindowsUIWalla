@@ -10,7 +10,6 @@
 
     <local:WallaUploadStatusConverter x:Key="wallaUploadStatusConverterKey"  />
     
-
     <XmlNamespaceMappingCollection x:Key="wallaNamespaceMappingKey">
         <XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
     </XmlNamespaceMappingCollection>
@@ -53,7 +52,6 @@
     </ControlTemplate>
 
     <ControlTemplate x:Key="templateToggleButton" TargetType="{x:Type ToggleButton}">
-        
         <Grid>
             <Rectangle x:Name="outerRectangle" StrokeThickness="0">
                 
@@ -69,7 +67,6 @@
             <ContentPresenter Margin="{TemplateBinding Margin}" />
         </Grid>
         <ControlTemplate.Triggers>
-
             <Trigger Property="IsChecked" Value="True">
                 <Setter TargetName="outerRectangle" Property="StrokeThickness" Value="1" />
             </Trigger>
@@ -77,11 +74,9 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter TargetName="outerRectangle" Property="StrokeThickness" Value="1.5" />
             </Trigger>
-
         </ControlTemplate.Triggers>
-
     </ControlTemplate>
-
+   
     <ControlTemplate x:Key="templateRadioButton" TargetType="{x:Type RadioButton}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <Rectangle x:Name="outerRectangle" StrokeThickness="0.5">
@@ -96,7 +91,7 @@
 
             </Rectangle>
 
-            <ContentPresenter Margin="{TemplateBinding Padding}" />
+            <ContentPresenter Margin="{TemplateBinding Margin}" />
 
         </Grid>
         <ControlTemplate.Triggers>
@@ -109,10 +104,12 @@
                 </Setter>
             </Trigger>
 
+            <!--
             <Trigger Property="IsPressed" Value="True">
                 <Setter Property="IsChecked" Value="True" />
             </Trigger>
-
+            -->
+            
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
@@ -212,5 +209,29 @@
                 -->
         </Style.Triggers>
     </Style>
+
+    <ControlTemplate x:Key="templateRadioButtonTest" TargetType="{x:Type RadioButton}">
+        <Grid>
+            <Rectangle x:Name="outerRectangle" StrokeThickness="0">
+                <Rectangle.Stroke>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
+                </Rectangle.Stroke>
+
+                <Rectangle.Fill>
+                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Background.Color}" />
+                </Rectangle.Fill>
+            </Rectangle>
+            <ContentPresenter Margin="{TemplateBinding Margin}" />
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="outerRectangle" Property="StrokeThickness" Value="1" />
+            </Trigger>
+
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="outerRectangle" Property="StrokeThickness" Value="1.5" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
 
 </ResourceDictionary>

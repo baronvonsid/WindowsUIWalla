@@ -56,7 +56,6 @@ namespace ManageWalla
 
         private PaneMode currentPane;
         private Tag currentTag = null;
-
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
         public UploadImageFileList uploadFots = null;
@@ -1539,20 +1538,24 @@ namespace ManageWalla
         #region Pane Control Events
         private void cmdCategory_Checked(object sender, RoutedEventArgs e)
         {
+            /*
             cmdSettings.IsChecked = false;
             cmdTag.IsChecked = false;
             cmdUpload.IsChecked = false;
             cmdView.IsChecked = false;
+            */
 
             RefreshPanesAllControls(PaneMode.CategoryView);
         }
 
         private void cmdUpload_Checked(object sender, RoutedEventArgs e)
         {
+            /*
             cmdSettings.IsChecked = false;
             cmdTag.IsChecked = false;
             cmdCategory.IsChecked = false;
             cmdView.IsChecked = false;
+            */
 
             //One off load from cache if available.
             if (state.tagLoadState == GlobalState.DataLoadState.No)
@@ -1570,30 +1573,36 @@ namespace ManageWalla
 
         private void cmdView_Checked(object sender, RoutedEventArgs e)
         {
+            /*
             cmdSettings.IsChecked = false;
             cmdTag.IsChecked = false;
             cmdUpload.IsChecked = false;
             cmdCategory.IsChecked = false;
+            */
 
             RefreshPanesAllControls(PaneMode.ViewView);
         }
 
         private void cmdTag_Checked(object sender, RoutedEventArgs e)
         {
+            /*
             cmdSettings.IsChecked = false;
             cmdCategory.IsChecked = false;
             cmdUpload.IsChecked = false;
             cmdView.IsChecked = false;
+            */
 
             RefreshPanesAllControls(PaneMode.TagView);
         }
 
         private void cmdSettings_Checked(object sender, RoutedEventArgs e)
         {
+            /*
             cmdCategory.IsChecked = false;
             cmdTag.IsChecked = false;
             cmdUpload.IsChecked = false;
             cmdView.IsChecked = false;
+            */
 
             RefreshPanesAllControls(PaneMode.Settings);
         }

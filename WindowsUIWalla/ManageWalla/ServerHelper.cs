@@ -25,12 +25,14 @@ namespace ManageWalla
         private HttpClient http = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(ServerHelper));
         private string hostName;
+        private long port;
         private string wsPath;
         private string appKey;
 
-        public ServerHelper(string hostNameParam, string wsPathParam, string appKeyParam)
+        public ServerHelper(string hostNameParam, long portParam, string wsPathParam, string appKeyParam)
         {
             hostName = hostNameParam;
+            port = portParam;
             wsPath = wsPathParam;
             appKey = appKeyParam;
         }
@@ -43,7 +45,7 @@ namespace ManageWalla
         {
             try
             {
-                string myAddress = hostName;
+                string myAddress = "www.google.com";
                 IPAddress[] addresslist = Dns.GetHostAddresses(myAddress);
 
                 if (addresslist[0].ToString().Length > 6)
@@ -66,7 +68,7 @@ namespace ManageWalla
             if (http == null)
             {
                 http = new HttpClient();
-                http.BaseAddress = new Uri(hostName + wsPath);
+                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + username + "/");
             }
 
             //Do logon
@@ -198,12 +200,12 @@ namespace ManageWalla
             return "";
         }
 
-        async public Task<TagImageList> GetTagImagesAsync(string tagName, bool useDate, DateTime lastModified, int cursor, string searchQueryString)
+        async public Task<TagImageList> GetTagImagesAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
         {
             try
             {
-                /* GET /{userName}/tag/{tagName}/{platformId}/{imageCursor} */
-                string requestUrl = "tag/" + tagName + "/" + cursor.ToString() + "?" + searchQueryString ?? "";
+                /* GET /{userName}/tag/{tagName}/{imageCursor}/{size}/ */
+                string requestUrl = "tag/" + tagName + "/" + cursor.ToString() + "/" + size.ToString() + "/?" + searchQueryString ?? "";
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 

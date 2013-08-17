@@ -27,12 +27,18 @@ namespace ManageWalla
     public class MainController : IDisposable
     {
         #region ClassSetup
-        private MainWindow currentMain;
+        private MainTwo currentMain;
         private GlobalState state = null;
         private ServerHelper serverHelper = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainController));
 
         public MainController(MainWindow currentMainParam) 
+        {
+            //Set a reference to the main window for two way comms.
+            //currentMain = currentMainParam;
+        }
+
+        public MainController(MainTwo currentMainParam)
         {
             //Set a reference to the main window for two way comms.
             currentMain = currentMainParam;
@@ -66,13 +72,14 @@ namespace ManageWalla
             try
             {
                 //Setup Server helper.
-                serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey);
+                serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, long.Parse(Properties.Settings.Default.WallaWSPort), Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey);
 
                 //Initialise state.
                 state = GlobalState.GetState();
                 if (state.userName == null || state.password == null)
                 {
                     state.connectionState = GlobalState.ConnectionState.NoAccount;
+                    return "";
                 }
 
                 return Logon(state.userName, state.password);
@@ -380,16 +387,16 @@ namespace ManageWalla
             {
                 //Find a locally cached version,  ignore query string. 
                 TagImageList localTagList = state.tagImageList.Where(r => (r.id == id && r.imageCursor == cursor)).FirstOrDefault();
-                if (!state.online)
+                if (state.connectionState != GlobalState.ConnectionState.LoggedOn)
                 {
                     return localTagList;
                 }
 
-                if (localTagList != null && searchQueryString.Length == 0)
+                if (localTagList != null && searchQueryString == null)
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localTagList.LastChanged;
-                    TagImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, true, lastModified, cursor, searchQueryString);
+                    TagImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
                     if (tagImageList != null)
                     {
                         state.tagImageList.Add(tagImageList);
@@ -403,10 +410,10 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    TagImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, false, DateTime.Now, cursor, searchQueryString);
+                    TagImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
                     if (tagImageList != null)
                     {
-                        if (searchQueryString != null)
+                        if (searchQueryString == null)
                             state.tagImageList.Add(tagImageList);
 
                         return tagImageList;
@@ -421,6 +428,8 @@ namespace ManageWalla
             {
                 //TODO send error to the error message handler in the sky
                 //"There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.message;
+                logger.Error(ex);
+                currentMain.DisplayMessage(ex.Message, MainTwo.MessageSeverity.Error);
                 return null;
             }
         }

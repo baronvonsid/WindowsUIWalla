@@ -23,7 +23,7 @@ namespace ManageWalla
         static GlobalState state = null;
         public string userName { get; set; }
         public string password { get; set; }
-        public bool online { get; set; }
+        //public bool online { get; set; }
         public int platformId { get; set; }
         public string machineName { get; set; }
         public long machineId { get; set; }
@@ -80,6 +80,11 @@ namespace ManageWalla
                     state.tagImageList = new List<TagImageList>();
                 }
             }
+
+            //TODO - delete
+            state.userName = "simo1n";
+            state.password = "simon";
+            state.imageFetchSize = 5;
 
             state.categoryLoadState = GlobalState.DataLoadState.No;
             state.tagLoadState = GlobalState.DataLoadState.No;

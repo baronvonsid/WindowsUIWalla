@@ -4,7 +4,7 @@
         xmlns:local="clr-namespace:ManageWalla"
         xmlns:walla="clr-namespace:ManageWalla"
         x:Name="mainTwo" x:Class="ManageWalla.MainTwo"
-        Title="FotoWalla"  FontFamily="Tahoma" FontWeight="Light" >
+        Title="FotoWalla"  FontFamily="Tahoma" FontWeight="Light" Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" >
 
     <Window.Resources>
         <ResourceDictionary Source="WallaControlTemplates.xaml" />
@@ -24,8 +24,9 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40" />
-            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="300" />
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="0"/>
         </Grid.ColumnDefinitions>
 
         <DockPanel Grid.Column="0" Grid.Row="0" Grid.RowSpan="9" Margin="2,2,2,2" Background="#FFA9C4FF" LastChildFill="True">
@@ -58,7 +59,7 @@
                     <Image Source="Icons/arrow-round.gif" Height="28" />
                 </Button.Content>
             </Button>
-            <Button x:Name="cmdAccount" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+            <Button x:Name="cmdAccount" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccount_Click" >
                 <Button.Content>
                     <Image Source="Icons/agent.gif" Height="28" />
                 </Button.Content>
@@ -66,7 +67,7 @@
             <Label x:Name="lblFotoWalla" FontSize="16" Content="FotoWalla" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="#FF408383" />
         </DockPanel>
 
-        <ToggleButton x:Name="cmdCategory" Grid.Column="1" Grid.Row="1" Checked="cmdCategory_Checked" Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" Background="#FFFFFA92">
+        <RadioButton x:Name="cmdCategory" GroupName="MainSection" Grid.Column="1" Grid.Row="1" Checked="cmdCategory_Checked" Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFFFA92">
             <DockPanel LastChildFill="True">
                 <Button x:Name="cmdCategoryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
                     <Button.Content>
@@ -77,15 +78,17 @@
                 <Image Source="Icons/tree.gif" Height="28" DockPanel.Dock="Left"/>
                 <Label Content="Category" VerticalContentAlignment="Center" Foreground="#FF408383" />
             </DockPanel>
-        </ToggleButton>
+        </RadioButton>
 
         <DockPanel x:Name="panCategoryUnavailable" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" Background="#CCFFFA92" Margin="2">
-            <TextBlock Text="Category" TextAlignment="Center" />
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Category" TextAlignment="Center" />
+            </StackPanel>
         </DockPanel>
 
-        <ToggleButton x:Name="cmdTag" Grid.Column="1" Grid.Row="3" Checked="cmdTag_Checked" Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" Background="#FFBFFF92">
+        <RadioButton x:Name="cmdTag" GroupName="MainSection" Grid.Column="1" Grid.Row="3" Checked="cmdTag_Checked" Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFBFFF92">
             <DockPanel LastChildFill="True">
-                <Button x:Name="cmdTagRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                <Button x:Name="cmdTagRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagRefresh_Click" >
                     <Button.Content>
                         <Image Source="Icons/reload.gif" Height="28" />
                     </Button.Content>
@@ -93,13 +96,52 @@
                 <Image Source="Icons/star.gif" Height="28" DockPanel.Dock="Left"/>
                 <Label Content="Tag" VerticalContentAlignment="Center" Foreground="#FF408383" />
             </DockPanel>
-        </ToggleButton>
+        </RadioButton>
 
         <DockPanel x:Name="panTagUnavailable" Grid.Column="1" Grid.Row="4" VerticalAlignment="Stretch" Background="#CCBFFF92" Margin="2">
-            <TextBlock Text="Tag" TextAlignment="Center" />
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Tags Unavailable" TextAlignment="Center" />
+            </StackPanel>
         </DockPanel>
 
-        <ToggleButton x:Name="cmdView" Grid.Column="1" Grid.Row="5" Checked="cmdView_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" Background="#FFFD91C7">
+        <Grid x:Name="gridTag" Background="#FFFFFFDE" Grid.Column="1" Grid.Row="4" Margin="4,2,2,2" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="34" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="75" />
+                <RowDefinition Height="34" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="200" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Disabled">
+                <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal">
+                    
+                </WrapPanel>
+            </ScrollViewer>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button x:Name="cmdAddTag" Content="Add Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddTag_Click"  />
+                <Button x:Name="cmdEditTag" Content="Edit Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdEditTag_Click" />
+                <Button x:Name="cmdAssociateTag" Content="Associate Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAssociateTag_Click" />
+            </StackPanel>
+
+            <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
+            <TextBox x:Name="txtTagAddEditName" Margin="3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" CharacterCasing="Upper" Cursor="IBeam" PreviewTextInput="txtTagAddEditName_PreviewTextInput" Text="12345678901234567890"/>
+            <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+            <TextBox x:Name="txtTagAddEditDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" Text="W234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789X" MaxLines="1" MaxLength="100"/>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button x:Name="cmdAddEditTagSave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagSave_Click" />
+                <Button x:Name="cmdAddEditTagCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagCancel_Click" />
+                <Button x:Name="cmdAddEditTagDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagDelete_Click" />
+            </StackPanel>
+        </Grid>
+
+        <RadioButton x:Name="cmdView" GroupName="MainSection" Grid.Column="1" Grid.Row="5" Checked="cmdView_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFD91C7">
             <DockPanel LastChildFill="True">
                 <Button x:Name="cmdViewRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
                     <Button.Content>
@@ -109,18 +151,18 @@
                 <Image Source="Icons/fancy-globe.gif" Height="28" DockPanel.Dock="Left"/>
                 <Label Content="View" VerticalContentAlignment="Center" Foreground="#FF408383" />
             </DockPanel>
-        </ToggleButton>
+        </RadioButton>
 
         <DockPanel x:Name="panViewUnavailable" Grid.Column="1" Grid.Row="6" VerticalAlignment="Stretch" Background="#CCFD91C7" Margin="2">
             <TextBlock Text="View" TextAlignment="Center" />
         </DockPanel>
 
-        <ToggleButton x:Name="cmdUpload" Grid.Column="1" Grid.Row="7" Checked="cmdUpload_Checked"  Template="{StaticResource templateToggleButton}" Style="{StaticResource styleToggleButton}" Background="#FF8CFFE5">
+        <RadioButton x:Name="cmdUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Checked="cmdUpload_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FF8CFFE5">
             <DockPanel LastChildFill="True">
                 <Image Source="Icons/heart.gif" Height="28" DockPanel.Dock="Left"/>
                 <Label Content="Upload" VerticalContentAlignment="Center" Foreground="#FF408383" />
             </DockPanel>
-        </ToggleButton>
+        </RadioButton>
 
         <DockPanel x:Name="panUploadUnavailable" Grid.Column="1" Grid.Row="8" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2">
             <TextBlock Text="Upload" TextAlignment="Center" />
@@ -137,6 +179,8 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="2,2,2,2" Background="#FFA9C4FF" HorizontalAlignment="Stretch" LastChildFill="True">
+
+                
                 <ToggleButton x:Name="cmdSort" ToolTip="Sort" DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Checked="cmdSort_Checked" Unchecked="cmdSort_Unchecked">
                     <ToggleButton.Content>
                         <Image Source="Icons/Disc.gif" Height="28" />
@@ -149,6 +193,16 @@
                     </ToggleButton.Content>
                 </ToggleButton>
 
+                
+                
+                
+                <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Content="|>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
+                <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Content=">" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click" />
+                <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Content="&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click" />
+                <Button x:Name="cmdImageNavigationBegin" DockPanel.Dock="Right" Content="|&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click" />
+                
+                
+                
                 <Slider DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
                             Value="3"
                             Delay="200"
@@ -160,9 +214,21 @@
 
             </DockPanel>
 
-            <DockPanel x:Name="panImagesUnavailable" Grid.Column="0" Grid.Row="1" Margin="2,2,2,2" VerticalAlignment="Stretch" Background="#FFFFFFDC" >
-                <TextBlock Text="Images" TextAlignment="Center" />
-            </DockPanel>
+            <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
+                            		    x:Name ="lstImageMainViewerList" 
+                            		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource imageMainViewerListKey}}"
+                            		    ItemContainerStyle="{DynamicResource PhotoListItem}" 
+                            		    SelectedIndex="0"
+                            		    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                        SelectionMode="Single"
+                                        IsSynchronizedWithCurrentItem="True">
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding Image}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <DockPanel x:Name="panFilter" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
                 <TextBlock Text="Filter" TextAlignment="Center" />
@@ -174,6 +240,19 @@
 
         </Grid>
 
+        <Grid x:Name="gridAccount" Margin="0,0,0,0" Grid.Column="3" Grid.Row="0" Grid.RowSpan="9">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <DockPanel x:Name="panAccountTemp" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2">
+                <TextBlock Text="Account" TextAlignment="Center" />
+            </DockPanel>
+
+        </Grid>
     </Grid>
 
 </Window>

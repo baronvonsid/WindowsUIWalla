@@ -32,7 +32,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
+        
         <Style x:Key="styleRadioButton" TargetType="{x:Type RadioButton}">
             <Setter Property="Background" Value="#FFE6D4D4" />
             <Setter Property="Margin" Value="4" />
@@ -71,55 +71,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!--
-            <ControlTemplate x:Key="templateRadioButton" TargetType="{x:Type RadioButton}">
-        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Rectangle x:Name="outerRectangle" StrokeThickness="0.5">
-
-                <Rectangle.Stroke>
-                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
-                </Rectangle.Stroke>
-
-                <Rectangle.Fill>
-                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Background.Color}" />
-                </Rectangle.Fill>
-
-            </Rectangle>
-
-            <ContentPresenter Margin="{TemplateBinding Padding}" />
-
-        </Grid>
-        <ControlTemplate.Triggers>
-            
-            <Trigger Property="IsChecked" Value="True">
-                <Setter TargetName="outerRectangle" Property="Stroke">
-                    <Setter.Value>
-                        <SolidColorBrush Color="Black" />
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-
-
-        </ControlTemplate.Triggers>
-    </ControlTemplate>
-        
-        
-                        <Border Name="Border" BorderThickness="1" SnapsToDevicePixels="true">
-                            <Border.BorderBrush>
-                                <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
-                            </Border.BorderBrush>
-                            
-                            <ContentPresenter />
-                            
-                        </Border>
-        
-        
-
-                            <Trigger Property="IsSelected" Value="true">
-                                <Setter TargetName="Border" Property="Background" Value="Black"/>
-                            </Trigger>
-        -->
         
         <Style x:Key="TagListItem" TargetType="{x:Type ListBoxItem}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -127,7 +78,6 @@
             <Setter Property="Margin" Value="4" />
             <Setter Property="Padding" Value="4" />
             <Setter Property="Foreground" Value="#FFB82F5A" />
-            <!--<Setter Property="BorderThickness" Value="1" />-->
             <Setter Property="BorderBrush" Value="#FF616161" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -203,6 +153,21 @@
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+
+        <Style x:Key="styleMainSectionRadioButton" TargetType="{x:Type RadioButton}">
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="Background" Value="#FFE6D4D4" />
+            <Setter Property="BorderBrush" Value="#FF214D4D" />
+            <Setter Property="Foreground" Value="#FF408383" />
+            <Setter Property="TextBlock.FontSize" Value="16" />
+            <Setter Property="Opacity" Value="0.8" />
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="true">
+                    <Setter Property="Opacity" Value="1.0" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
 
     </Application.Resources>
 </Application>

@@ -25,7 +25,7 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:8081/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.4")]
         public string WallaWSHostname {
             get {
                 return ((string)(this["WallaWSHostname"]));
@@ -43,13 +43,25 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("WallaWS/v1/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("/WallaWS/v1/")]
         public string WallaWSPath {
             get {
                 return ((string)(this["WallaWSPath"]));
             }
             set {
                 this["WallaWSPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("8081")]
+        public string WallaWSPort {
+            get {
+                return ((string)(this["WallaWSPort"]));
+            }
+            set {
+                this["WallaWSPort"] = value;
             }
         }
     }
