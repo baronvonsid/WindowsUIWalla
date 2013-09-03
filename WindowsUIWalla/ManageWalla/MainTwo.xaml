@@ -14,13 +14,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
             <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
             <RowDefinition Height="*"/>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="0"/>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="0"/>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="0"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40" />
@@ -67,14 +67,14 @@
             <Label x:Name="lblFotoWalla" FontSize="16" Content="FotoWalla" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="#FF408383" />
         </DockPanel>
 
-        <RadioButton x:Name="cmdCategory" GroupName="MainSection" Grid.Column="1" Grid.Row="1" Checked="cmdCategory_Checked" Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFFFA92">
+        <RadioButton x:Name="radCategory" GroupName="MainSection" Grid.Column="1" Grid.Row="1" Checked="radCategory_Checked" Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFFFA92">
             <DockPanel LastChildFill="True">
                 <Button x:Name="cmdCategoryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
                     <Button.Content>
                         <Image Source="Icons/reload.gif" Height="28" />
                     </Button.Content>
                 </Button>
-                
+
                 <Image Source="Icons/tree.gif" Height="28" DockPanel.Dock="Left"/>
                 <Label Content="Category" VerticalContentAlignment="Center" Foreground="#FF408383" />
             </DockPanel>
@@ -86,7 +86,7 @@
             </StackPanel>
         </DockPanel>
 
-        <RadioButton x:Name="cmdTag" GroupName="MainSection" Grid.Column="1" Grid.Row="3" Checked="cmdTag_Checked" Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFBFFF92">
+        <RadioButton x:Name="radTag" GroupName="MainSection" Grid.Column="1" Grid.Row="3" Checked="radTag_Checked" Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFBFFF92">
             <DockPanel LastChildFill="True">
                 <Button x:Name="cmdTagRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagRefresh_Click" >
                     <Button.Content>
@@ -98,13 +98,13 @@
             </DockPanel>
         </RadioButton>
 
-        <DockPanel x:Name="panTagUnavailable" Grid.Column="1" Grid.Row="4" VerticalAlignment="Stretch" Background="#CCBFFF92" Margin="2">
+        <DockPanel x:Name="panTagUnavailable" Grid.Column="1" Grid.Row="4" VerticalAlignment="Stretch" Background="#CCBFFF92" Margin="2" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock Text="Tags Unavailable" TextAlignment="Center" />
             </StackPanel>
         </DockPanel>
 
-        <Grid x:Name="gridTag" Background="#FFFFFFDE" Grid.Column="1" Grid.Row="4" Margin="4,2,2,2" Visibility="Collapsed">
+        <Grid x:Name="gridTag" Background="#FFFFFFDE" Grid.Column="1" Grid.Row="4" Margin="4,2,2,2" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="34" />
@@ -119,14 +119,12 @@
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Disabled">
                 <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal">
-                    
                 </WrapPanel>
             </ScrollViewer>
 
             <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                <Button x:Name="cmdAddTag" Content="Add Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddTag_Click"  />
-                <Button x:Name="cmdEditTag" Content="Edit Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdEditTag_Click" />
-                <Button x:Name="cmdAssociateTag" Content="Associate Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAssociateTag_Click" />
+                <Button x:Name="cmdTagAdd" Content="Add Tag" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagAdd_Click"  />
+                <Button x:Name="cmdTagEdit" Content="Edit Tag" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagEdit_Click" />
             </StackPanel>
 
             <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
@@ -135,13 +133,13 @@
             <TextBox x:Name="txtTagAddEditDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" Text="W234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789X" MaxLines="1" MaxLength="100"/>
 
             <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
-                <Button x:Name="cmdAddEditTagSave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagSave_Click" />
-                <Button x:Name="cmdAddEditTagCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagCancel_Click" />
-                <Button x:Name="cmdAddEditTagDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAddEditTagDelete_Click" />
+                <Button x:Name="cmdTagSave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagSave_Click" />
+                <Button x:Name="cmdTagCancel" Content="Cancel" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagCancel_Click"  />
+                <Button x:Name="cmdTagDelete" Content="Delete" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagDelete_Click" />
             </StackPanel>
         </Grid>
 
-        <RadioButton x:Name="cmdView" GroupName="MainSection" Grid.Column="1" Grid.Row="5" Checked="cmdView_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFD91C7">
+        <RadioButton x:Name="radView" GroupName="MainSection" Grid.Column="1" Grid.Row="5" Checked="radView_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFD91C7">
             <DockPanel LastChildFill="True">
                 <Button x:Name="cmdViewRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
                     <Button.Content>
@@ -157,16 +155,127 @@
             <TextBlock Text="View" TextAlignment="Center" />
         </DockPanel>
 
-        <RadioButton x:Name="cmdUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Checked="cmdUpload_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FF8CFFE5">
+        <RadioButton x:Name="radUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Checked="radUpload_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FF8CFFE5">
             <DockPanel LastChildFill="True">
                 <Image Source="Icons/heart.gif" Height="28" DockPanel.Dock="Left"/>
+                <Label x:Name="lblUploadProposedImageCount" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" DockPanel.Dock="Right" FontSize="12" VerticalContentAlignment="Center">
+                    <Label.Content>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <Binding Path="Count" Source="{StaticResource uploadImagefileListKey}">
+                                    <Binding.StringFormat>{0} Fotos</Binding.StringFormat>
+                                </Binding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Label.Content>
+                </Label>
                 <Label Content="Upload" VerticalContentAlignment="Center" Foreground="#FF408383" />
             </DockPanel>
         </RadioButton>
 
-        <DockPanel x:Name="panUploadUnavailable" Grid.Column="1" Grid.Row="8" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2">
-            <TextBlock Text="Upload" TextAlignment="Center" />
-        </DockPanel>
+        <Grid x:Name="grdUploadSettings" Grid.Column="1" Grid.Row="8" DataContext="{StaticResource uploadUIStateKey}" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="80" />
+                <RowDefinition Height="34" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="200" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="4">
+                <TreeView x:Name="treeCategoryView" Background="#FFFFF4F4">
+                    <TreeViewItem Header="Barons Photo Album" IsExpanded="True">
+                        <TreeViewItem IsExpanded="false">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="icons\star.gif" Height="18"/>
+                                    <TextBlock Text="Holidays (30)"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+
+                            <TreeViewItem>
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="icons\star.gif" Height="18"/>
+                                        <TextBlock Text="Albania (30)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                            <TreeViewItem>
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="icons\star.gif" Height="18"/>
+                                        <TextBlock Text="Uzbekki (40)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                            <TreeViewItem IsExpanded="True">
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="icons\star.gif" Height="18"/>
+                                        <TextBlock Text="USA (200)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                            <TreeViewItem IsExpanded="True">
+                                <TreeViewItem.Header>
+                                    <CheckBox>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="icons\star.gif" Height="18"/>
+                                            <TextBlock Text="China (5)"/>
+                                        </StackPanel>
+                                    </CheckBox>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                        </TreeViewItem>
+                        <TreeViewItem>
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="icons\star.gif" Height="18"/>
+                                    <TextBlock Text="London life (400)"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+
+                            <TreeViewItem>
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="icons\star.gif" Height="18"/>
+                                        <TextBlock Text="Around town (30)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                </TreeView>
+            </ScrollViewer>
+
+            <!-- <Label x:Name="lblRootCalegory" Content="{Binding Mode=OneWay, Path=CategoryPath}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" /> 
+
+            <Label Content="Map sub folders as categories" Grid.Column="0" Grid.Row="1" />
+            <CheckBox x:Name="chkUploadMapToSubFolders" Grid.Row="1" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=MapToSubFolders}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+-->
+            <Label Content="New category" Grid.Column="0" Grid.Row="1" />
+            <CheckBox x:Name="chkUploadToNewCategory" Grid.Row="1" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=UploadToNewCategory}" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="chkUploadToNewCategory_Checked" Unchecked="chkUploadToNewCategory_Unchecked" />
+
+            <Label Content="Category Name" Grid.Column="0" Grid.Row="2" />
+            <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" CharacterCasing="Upper" Cursor="IBeam" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
+
+            <Label Content="Description" Grid.Column="0" Grid.Row="3" />
+            <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" MaxLines="1" MaxLength="100" />
+
+            <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button x:Name="cmdUploadAll" Content="Upload" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadAll_Click"/>
+                <Button x:Name="cmdUploadClear" Content="Clear" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
+                <Button x:Name="cmdUploadImportFolder" Content="Import Folder" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFolder_Click" />
+                <Button x:Name="cmdUploadImportFiles" Content="Import Images" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFiles_Click" />
+            </StackPanel>
+
+        </Grid>
+
 
         <Grid x:Name="gridRight" Margin="0,0,0,0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="9">
             <Grid.RowDefinitions>
@@ -180,7 +289,6 @@
 
             <DockPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="2,2,2,2" Background="#FFA9C4FF" HorizontalAlignment="Stretch" LastChildFill="True">
 
-                
                 <ToggleButton x:Name="cmdSort" ToolTip="Sort" DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Checked="cmdSort_Checked" Unchecked="cmdSort_Unchecked">
                     <ToggleButton.Content>
                         <Image Source="Icons/Disc.gif" Height="28" />
@@ -193,25 +301,20 @@
                     </ToggleButton.Content>
                 </ToggleButton>
 
-                
-                
-                
-                <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Content="|>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
-                <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Content=">" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click" />
-                <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Content="&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click" />
-                <Button x:Name="cmdImageNavigationBegin" DockPanel.Dock="Right" Content="|&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click" />
-                
-                
-                
-                <Slider DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
-                            Value="3"
-                            Delay="200"
+
+                <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="4" Content="|>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
+                <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Padding="4" Content=">" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click" />
+                <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Padding="4" Content="&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click" />
+                <Button x:Name="cmdImageNavigationBegin" DockPanel.Dock="Right" Padding="4" Content="|&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click" />
+
+                <Slider x:Name="sldImageSize" DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
+                            Value="130"
+                            Delay="500"
                             Interval="1"
                             TickPlacement="BottomRight"
-                            Minimum="1"
-                            Maximum="5"
-                            Width="200" ValueChanged="Slider_ValueChanged" ></Slider>
-
+                            Minimum="10"
+                            Maximum="250"
+                            Width="100" ValueChanged="Slider_ValueChanged" ></Slider>
             </DockPanel>
 
             <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
@@ -221,23 +324,202 @@
                             		    SelectedIndex="0"
                             		    ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         SelectionMode="Single"
-                                        IsSynchronizedWithCurrentItem="True">
-
+                                        IsSynchronizedWithCurrentItem="True"
+                                        Visibility="Visible">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Image Source="{Binding Image}" />
+                        <Image Source="{Binding Image}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}"/>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <DockPanel x:Name="panFilter" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">
+            <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
+                            		    x:Name ="lstUploadImageFileList" 
+                            		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadImagefileListKey}}"
+                            		    ItemContainerStyle="{DynamicResource PhotoListItem}" 
+                            		    SelectedIndex="0"
+                            		    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                        SelectionMode="Single"
+                                        IsSynchronizedWithCurrentItem="True"
+                                        SelectionChanged="lstUploadImageFileList_SelectionChanged"
+                                        Visibility="Hidden">
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding Image}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <DockPanel x:Name="panFilter" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed" Background="Black">
                 <TextBlock Text="Filter" TextAlignment="Center" />
             </DockPanel>
 
-            <DockPanel x:Name="panSort" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed">
+            <DockPanel x:Name="panSort" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed" Background="Azure">
                 <TextBlock Text="Sort" TextAlignment="Center" />
             </DockPanel>
 
+            <DockPanel x:Name="panUpload" Grid.Column="1" Grid.Row="1" Background="#FF81B0AE" Margin="4">
+                <Grid x:Name="grdUploadImageDetails" DataContext="{StaticResource uploadImagefileListKey}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="0" />
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="80" />
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="25" />
+
+                        <!-- Spacer -->
+                        <RowDefinition Height="4"/>
+
+                        <!-- Tags -->
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="2*" />
+
+                        <!-- Spacer -->
+                        <RowDefinition Height="4" />
+
+                        <!-- Additional Fields -->
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="34"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition MaxWidth="180"/>
+                        <ColumnDefinition Width="20"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Grid.Row="0" Content="Category"/>
+                    <Label x:Name="lblUploadTargetCat"  Grid.Column="1" Grid.Row="0" Content=""/>
+
+                    <Label Grid.Column="0" Grid.Row="1" Content="File name" />
+                    <Label x:Name="lblUploadImageFileName" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Content="{Binding Mode=OneWay, Path=/Meta.OriginalFileName}" />
+
+                    <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
+                    <TextBox x:Name="txtUploadImageName" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Name}"/>
+
+                    <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+                    <TextBox x:Name="txtUploadImageDescription" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" TextWrapping="Wrap" Height="80"  Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Desc}" MaxLines="1" MaxLength="100"/>
+
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3">
+                        <Label Content="Format:"/>
+                        <Label x:Name="lblUploadFormat" Content="{Binding Mode=OneWay, Path=/Meta.Format}" TextElement.FontWeight="Bold"/>
+                        <Label Content="Size:"/>
+                        <Label x:Name="lblUploadSize" Content="{Binding Mode=OneWay, Path=/Meta.Size}" TextElement.FontWeight="Bold"/>
+                        <Label Content="KB"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
+                        <Label Content="Width:"/>
+                        <Label x:Name="lblUploadWidth" Content="{Binding Mode=OneWay, Path=/Meta.Width}" TextElement.FontWeight="Bold"/>
+                        <Label Content="Height:"/>
+                        <Label x:Name="lblUploadHeight" Content="{Binding Mode=OneWay, Path=/Meta.Height}" TextElement.FontWeight="Bold"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" TextAlignment="Center" Background="White" />
+                    
+                    <Label Content="All Fotos"  Grid.Column="1" Grid.Row="7" HorizontalContentAlignment="Right" ToolTip="Check this so the same Tags are associated with every Foto"></Label>
+                    <Label Grid.Column="0" Grid.Row="7" Content="Tags"/>
+                    <CheckBox x:Name="chkUploadTagsAll" Grid.Column="2" Grid.Row="7" Style="{StaticResource styleCheckbox}" IsChecked="{Binding Source={StaticResource uploadUIStateKey}, Mode=TwoWay, Path=MetaTagRefAll}" Checked="chkUploadTagsAll_Checked" Unchecked="chkUploadTagsAll_Unchecked"  />
+
+                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3">
+                        <ListBox Style="{DynamicResource TagListStyle}" 
+                            		        x:Name ="lstUploadTagList" 
+                            		        ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                            SelectionMode="Multiple" 
+                                            ItemContainerStyle="{DynamicResource TagListItem}" SelectionChanged="lstUploadTagList_SelectionChanged" >
+                            <!--
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <ListBoxItem Content="{Binding Path=name, Mode=OneWay}"></ListBoxItem>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>-->
+                        </ListBox>
+                    </ScrollViewer>
+
+                    <!--
+                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="3">
+                        <ListBox Style="{DynamicResource TagListStyle}" 
+                            		        x:Name ="lstUploadTagList" 
+                            		        ItemsSource="{Binding Mode=TwoWay, Source={StaticResource uploadImagefileListKey}, Path=/Meta.Tags}"
+                            		        ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                            SelectionMode="Single" 
+                                                    IsSynchronizedWithCurrentItem="True"
+                                            ItemContainerStyle="{DynamicResource TagListItem}" >
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <ListBoxItem Content="{Binding Path=name, Mode=OneWay}"></ListBoxItem>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
+-->
+                    <TextBlock Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="3" TextAlignment="Center" Background="White" />
+
+                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="3">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition x:Name="rowUploadUdfChar1" Height="25" />
+                                    <RowDefinition x:Name="rowUploadUdfChar2" Height="25" />
+                                    <RowDefinition x:Name="rowUploadUdfChar3" Height="25" />
+                                    <RowDefinition x:Name="rowUploadUdfText1" Height="75" />
+                                    <RowDefinition x:Name="rowUploadUdfNum1" Height="25" />
+                                    <RowDefinition x:Name="rowUploadUdfNum2" Height="25" />
+                                    <RowDefinition x:Name="rowUploadUdfNum3" Height="25" />
+                                    <RowDefinition x:Name="rowUploadUdfDate1" Height="25" />
+                                    <RowDefinition x:Name="rowUploadUdfDate2" Height="25" />
+                                    <RowDefinition x:Name="rowUploadUdfDate3" Height="25" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="0"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label x:Name="lblUdfChar1" Grid.Column="0" Grid.Row="0" Content="User Field 1"/>
+                                <TextBox x:Name="txtUploadUdfChar1" Grid.Column="1" Grid.Row="0" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar1}" Grid.ColumnSpan="2"/>
+                                <CheckBox x:Name="chkUploadUdfChar1All" Grid.Column="2" Grid.Row="0" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar1All_Checked" Unchecked="chkUploadUdfChar1All_Unchecked" Margin="3,6" />
+
+                                <Label x:Name="lblUdfChar2" Grid.Column="0" Grid.Row="1" Content="User Field 2"/>
+                                <TextBox x:Name="txtUploadUdfChar2" Grid.Column="1" Grid.Row="1" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar2}" Grid.ColumnSpan="2"/>
+                                <CheckBox x:Name="chkUploadUdfChar2All" Grid.Column="2" Grid.Row="1" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar2All_Checked" Unchecked="chkUploadUdfChar2All_Unchecked" Margin="3,6"/>
+
+                                <Label x:Name="lblUdfChar3" Grid.Column="0" Grid.Row="2" Content="User Field 3"/>
+                                <TextBox x:Name="txtUploadUdfChar3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar3}" Grid.ColumnSpan="2"/>
+                                <CheckBox x:Name="chkUploadUdfChar3All" Grid.Column="2" Grid.Row="2" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar3All_Checked" Unchecked="chkUploadUdfChar3All_Unchecked" Margin="3,6"/>
+
+                                <Label x:Name="lblUdfText1" Grid.Column="0" Grid.Row="3" Content="User Text"/>
+                                <TextBox x:Name="txtUploadUdfText1" Grid.Column="1" Grid.Row="3" Margin="2" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxLines="3" MaxLength="500" TextWrapping="Wrap" Text="{Binding Mode=TwoWay, Path=/Meta.UdfText1}" Grid.ColumnSpan="2"/>
+                                <CheckBox x:Name="chkUploadUdfText1All" Grid.Column="2" Grid.Row="3" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfText1All_Checked" Unchecked="chkUploadUdfText1All_Unchecked" Margin="3,6"/>
+
+                                <Label x:Name="lblUdfNum1" Grid.Column="0" Grid.Row="4" Content="User Num 1"/>
+                                <TextBox x:Name="txtUploadUdfNum1" Grid.Column="1" Grid.Row="4" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum1}" Grid.ColumnSpan="2"/>
+                                <CheckBox x:Name="chkUploadUdfNum1All" Grid.Column="2" Grid.Row="4" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum1All_Checked" Unchecked="chkUploadUdfNum1All_Unchecked" Margin="3,6"/>
+
+                                <Label x:Name="lblUdfNum2" Grid.Column="0" Grid.Row="5" Content="User Num 2"/>
+                                <TextBox x:Name="txtUploadUdfNum2" Grid.Column="1" Grid.Row="5" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum2}" Grid.ColumnSpan="2"/>
+                                <CheckBox x:Name="chkUploadUdfNum2All" Grid.Column="2" Grid.Row="5" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum2All_Checked" Unchecked="chkUploadUdfNum2All_Unchecked" Margin="3,6"/>
+
+                                <Label x:Name="lblUdfNum3" Grid.Column="0" Grid.Row="6" Content="User Num 3"/>
+                                <TextBox x:Name="txtUploadUdfNum3" Grid.Column="1" Grid.Row="6" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum3}" Grid.ColumnSpan="2"/>
+                                <CheckBox x:Name="chkUploadUdfNum3All" Grid.Column="2" Grid.Row="6" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum3All_Checked" Unchecked="chkUploadUdfNum3All_Unchecked" Margin="3,6"/>
+
+                                <Label x:Name="lblUdfDate1" Grid.Column="0" Grid.Row="7" Content="User Date 1"/>
+                                <DatePicker x:Name="datUploadUdfDate1" Grid.Column="1" Grid.Row="7" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate1}" Grid.ColumnSpan="2" />
+                                <CheckBox x:Name="chkUploadUdfDate1All" Grid.Column="2" Grid.Row="7" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate1All_Checked" Unchecked="chkUploadUdfDate1All_Unchecked" Margin="3,6"/>
+
+                                <Label x:Name="lblUdfDate2" Grid.Column="0" Grid.Row="8" Content="User Date 2"/>
+                                <DatePicker x:Name="datUploadUdfDate2" Grid.Column="1" Grid.Row="8" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate2}" Grid.ColumnSpan="2" />
+                                <CheckBox x:Name="chkUploadUdfDate2All" Grid.Column="2" Grid.Row="8" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate2All_Checked" Unchecked="chkUploadUdfDate2All_Unchecked" Margin="3,6"/>
+
+                                <Label x:Name="lblUdfDate3" Grid.Column="0" Grid.Row="9" Content="User Date 3"/>
+                                <DatePicker x:Name="datUploadUdfDate3" Grid.Column="1" Grid.Row="9" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate3}" Grid.ColumnSpan="2" />
+                                <CheckBox x:Name="chkUploadUdfDate3All" Grid.Column="3" Grid.Row="9" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate3All_Checked" Unchecked="chkUploadUdfDate3All_Unchecked" Margin="3,6"/>
+                            </Grid>
+                    </ScrollViewer>
+                    <Button x:Name="cmdUploadResetMeta" Content="Reset all image info" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadResetMeta_Click" Grid.Column="1" Grid.Row="11" Grid.ColumnSpan="2" HorizontalAlignment="Right" />
+                </Grid>
+            </DockPanel>
         </Grid>
 
         <Grid x:Name="gridAccount" Margin="0,0,0,0" Grid.Column="3" Grid.Row="0" Grid.RowSpan="9">
@@ -248,8 +530,49 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <DockPanel x:Name="panAccountTemp" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2">
-                <TextBlock Text="Account" TextAlignment="Center" />
+            <DockPanel x:Name="panAccount" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2">
+                <TabControl x:Name="tabAccount" Margin="4">
+                    <TabItem x:Name="tabAccountSettings" Header="Account Details" >
+                    </TabItem>
+
+                    <TabItem x:Name="tabUploadStatusList" Header="Upload Status" >
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="34" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <DataGrid x:Name="datUploadStatusList" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible"
+                                        SelectionMode="Single" CanUserResizeColumns="True" MinColumnWidth="40" CanUserSortColumns="True" 
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="0" Grid.Row="0" >
+                                <DataGrid.ItemsSource>
+                                    <Binding Source="{StaticResource uploadStatusListBindKey}" />
+                                </DataGrid.ItemsSource>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Name" Binding="{Binding name}" MinWidth="40" Width="*" IsReadOnly="True" CanUserSort="True" />
+                                    <DataGridTemplateColumn Header="Status" MinWidth="40" Width="3*" IsReadOnly="True" SortMemberPath="imageStatus">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding imageStatus, Converter={StaticResource wallaUploadStatusConverterKey}}" ToolTip="{Binding errorMessage}">
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Last Updated" Binding="{Binding lastUpdated, StringFormat=g}" MinWidth="40" Width="*" IsReadOnly="True" CanUserSort="True" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <DockPanel x:Name="panUploadStatusListUnavailable" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2" Visibility="Collapsed">
+                                <TextBlock Text="Upload Status List" TextAlignment="Center" />
+                            </DockPanel>
+
+                            <Button x:Name="cmdUploadStatusRefresh" Content="Refresh" HorizontalAlignment="Right" Padding="4" Grid.Column="0" Grid.Row="1" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadStatusRefresh_Click" />
+                        </Grid>
+                    </TabItem>
+                </TabControl>
             </DockPanel>
 
         </Grid>

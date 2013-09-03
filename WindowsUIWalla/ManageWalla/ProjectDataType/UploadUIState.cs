@@ -20,7 +20,6 @@ namespace ManageWalla
         private string categoryName = null;
         private string categoryDesc = null;
 
-        private string metaCamera = null;
 		private string metaUdfChar1 = null;
 		private string metaUdfChar2 = null;
 		private string metaUdfChar3 = null;
@@ -28,13 +27,11 @@ namespace ManageWalla
 		private decimal metaUdfNum1 = 0;
 		private decimal metaUdfNum2 = 0;
 		private decimal metaUdfNum3 = 0;
-		private DateTime metaUdfDate1;
+        private DateTime metaUdfDate1;
         private DateTime metaUdfDate2;
         private DateTime metaUdfDate3;
-        private DateTime metaTakenDate;
         private ImageMetaTagRef[] metaTagRef = null;
 
-        private bool metaCameraAll = false;
         private bool metaUdfChar1All = false;
         private bool metaUdfChar2All = false;
         private bool metaUdfChar3All = false;
@@ -45,7 +42,6 @@ namespace ManageWalla
         private bool metaUdfDate1All = false;
         private bool metaUdfDate2All = false;
         private bool metaUdfDate3All = false;
-        private bool metaTakenDateAll = false;
         private bool metaTagRefAll = false;
 
         public enum UploadMode
@@ -140,16 +136,6 @@ namespace ManageWalla
         #endregion
 
         #region Meta attributes
-        public string MetaCamera
-        {
-            get { return metaCamera; }
-            set
-            {
-                metaCamera = value;
-                OnPropertyChanged("MetaCamera");
-            }
-        }
-
         public string MetaUdfChar1
         {
             get { return metaUdfChar1; }
@@ -250,16 +236,6 @@ namespace ManageWalla
             }
         }
 
-        public DateTime MetaTakenDate
-        {
-            get { return metaTakenDate; }
-            set
-            {
-                metaTakenDate = value;
-                OnPropertyChanged("MetaTakenDate");
-            }
-        }
-
         public ImageMetaTagRef[] MetaTagRef
         {
             get { return metaTagRef; }
@@ -272,16 +248,6 @@ namespace ManageWalla
         #endregion
 
         #region Meta All attributes
-        public bool MetaCameraAll
-        {
-            get { return metaCameraAll; }
-            set
-            {
-                metaCameraAll = value;
-                OnPropertyChanged("metaCameraAll");
-            }
-        }
-
         public bool MetaUdfChar1All
         {
             get { return metaUdfChar1All; }
@@ -379,16 +345,6 @@ namespace ManageWalla
             {
                 metaUdfDate3All = value;
                 OnPropertyChanged("MetaUdfDate3All");
-            }
-        }
-
-        public bool MetaTakenDateAll
-        {
-            get { return metaTakenDateAll; }
-            set
-            {
-                metaTakenDateAll = value;
-                OnPropertyChanged("MetaTakenDateAll");
             }
         }
 

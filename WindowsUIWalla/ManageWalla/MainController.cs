@@ -32,8 +32,8 @@ namespace ManageWalla
         private ServerHelper serverHelper = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainController));
 
-        public MainController(MainWindow currentMainParam) 
-        {
+        public MainController() 
+        {//MainWindow currentMainParam
             //Set a reference to the main window for two way comms.
             //currentMain = currentMainParam;
         }
@@ -47,6 +47,11 @@ namespace ManageWalla
         public GlobalState GetState()
         {
             return state;
+        }
+
+        public ServerHelper GetServerHelper()
+        {
+            return serverHelper;
         }
 
         public void Dispose()
@@ -146,7 +151,7 @@ namespace ManageWalla
         /// </summary>
         public async Task RetrieveGeneralUserConfigAsynctodelete()
         {
-            Task<string> tagListLoadedTask = RefreshTagsListAsync();
+            Task<string> tagListLoadedTask = TagRefreshListAsync();
 
             string tagListLoadedOK = await tagListLoadedTask;
             if (tagListLoadedOK == "OK")
@@ -266,28 +271,7 @@ namespace ManageWalla
             return null;
         }
 
-        async public Task<string> RefreshUploadStatusListAsync()
-        {
-            try
-            {
-                UploadStatusList uploadStatusList = await serverHelper.GetUploadStatusListAsync();
-                state.uploadStatusList = uploadStatusList;
-                state.uploadStatusListState = GlobalState.DataLoadState.Loaded;
-                return "OK";
-            }
-            catch (Exception ex)
-            {
-                if (state.tagList != null)
-                {
-                    state.uploadStatusListState = GlobalState.DataLoadState.LocalCache;
-                }
-                else
-                {
-                    state.uploadStatusListState = GlobalState.DataLoadState.Unavailable;
-                }
-                return ex.Message;
-            }
-        }
+
 
         async public Task ResetMeFotsMeta(UploadImageFileList metFots)
         {
@@ -328,10 +312,47 @@ namespace ManageWalla
             } 
             */
         }
+
+        async public Task<string> RefreshUploadStatusListAsync()
+        {
+            try
+            {
+
+                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                {
+                    state.uploadStatusList = await serverHelper.GetUploadStatusListAsync();
+                    state.uploadStatusListState = GlobalState.DataLoadState.Loaded;
+                    return "OK";
+                }
+                else
+                {
+                    if (state.uploadStatusList != null)
+                    {
+                        state.uploadStatusListState = GlobalState.DataLoadState.LocalCache;
+                        return "OK";
+                    }
+                    else
+                    {
+                        state.uploadStatusListState = GlobalState.DataLoadState.Unavailable;
+                        return "No local upload status list is available to show.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                state.uploadStatusListState = GlobalState.DataLoadState.Unavailable;
+                return ex.Message;
+            }
+        }
         #endregion
 
         #region Tag Methods
-        async public Task<string> RefreshTagsListAsync()
+        /// <summary>
+        /// Depending on connection status and whether there is a local cached version, this method
+        /// refreshes the cached object and sets the status of the load state used.
+        /// </summary>
+        /// <returns>OK or error</returns>
+        async public Task<string> TagRefreshListAsync()
         {
             try
             {
@@ -340,11 +361,11 @@ namespace ManageWalla
                     TagList tagList;
                     if (state.tagList != null)
                     {
-                        tagList = await serverHelper.GetTagsAvailableAsync(true, state.tagList.LastChanged);
+                        tagList = await serverHelper.GetTagsAvailableAsync(state.tagList.LastChanged);
                     }
                     else
                     {
-                        tagList = await serverHelper.GetTagsAvailableAsync(false, DateTime.Now);
+                        tagList = await serverHelper.GetTagsAvailableAsync(null);
                     }
                     state.tagList = tagList;
                     state.tagLoadState = GlobalState.DataLoadState.Loaded;
@@ -381,7 +402,7 @@ namespace ManageWalla
         /// <param name="cursor"></param>
         /// <param name="searchQueryString"></param>
         /// <returns></returns>
-        async public Task<TagImageList> GetTagImagesAsync(long id, string tagName, int cursor, string searchQueryString)
+        async public Task<TagImageList> TagGetImagesAsync(long id, string tagName, int cursor, string searchQueryString)
         {
             try
             {
@@ -426,33 +447,54 @@ namespace ManageWalla
             }
             catch (Exception ex)
             {
-                //TODO send error to the error message handler in the sky
-                //"There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.message;
                 logger.Error(ex);
-                currentMain.DisplayMessage(ex.Message, MainTwo.MessageSeverity.Error);
+                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error);
                 return null;
             }
         }
 
-        public string UpdateTag(Tag newTag, string oldTagName)
+        async public Task<Tag> TagGetMetaAsync(TagListTagRef tagRef)
         {
-            return serverHelper.UpdateTag(newTag, oldTagName);
+            try
+            {
+                return await serverHelper.GetTagMeta(tagRef);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                currentMain.DisplayMessage("There was a problem retrieving the tag meta data: " + tagRef.name + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error);
+                return null;
+            }
+            
         }
 
-        public string SaveNewTag(Tag tag)
+        async public Task<string> TagUpdateAsync(Tag newTag, string oldTagName)
         {
-            return serverHelper.SaveNewTag(tag);
+            string response = await serverHelper.UpdateTagAsync(newTag, oldTagName);
+            if (response != "OK")
+                response = "Tag could not be updated, there was an error on the server:" + response;
+
+            return response;
         }
 
-        public Tag GetTagMeta(TagListTagRef tagRef)
+        async public Task<string> TagSaveNewAsync(Tag tag)
         {
-            return serverHelper.GetTagMeta(tagRef);
+            string response = await serverHelper.TagSaveNewAsync(tag);
+            if (response != "OK")
+                response = "Tag could not be created, there was an error on the server:" + response;
+
+            return response;
         }
 
-        public string DeleteTag(Tag tag)
+        async public Task<string> TagDeleteAsync(Tag tag)
         {
-            return serverHelper.DeleteTag(tag);
+            string response = await serverHelper.TagDeleteAsync(tag);
+            if (response != "OK")
+                response = "Tag could not be deleted, there was an error on the server:" + response;
+
+            return response;
         }
         #endregion
+
     }
 }

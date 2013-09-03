@@ -32,6 +32,10 @@ namespace ManageWalla {
         
         private string formatField;
         
+        private string localPathField;
+        
+        private int machineIdField;
+        
         private int statusField;
         
         private long widthField;
@@ -40,11 +44,23 @@ namespace ManageWalla {
         
         private long sizeField;
         
-        private string localPathField;
+        private string cameraMakerField;
         
-        private int machineIdField;
+        private string cameraModelField;
         
-        private string cameraField;
+        private string apertureField;
+        
+        private string shutterSpeedField;
+        
+        private int iSOField;
+        
+        private int orientationField;
+        
+        private System.DateTime takenDateFileField;
+        
+        private System.DateTime takenDateMetaField;
+        
+        private System.DateTime uploadDateField;
         
         private string udfChar1Field;
         
@@ -65,10 +81,6 @@ namespace ManageWalla {
         private System.DateTime udfDate2Field;
         
         private System.DateTime udfDate3Field;
-        
-        private System.DateTime uploadDateField;
-        
-        private System.DateTime takenDateField;
         
         private ImageMetaTagRef[] tagsField;
         
@@ -129,6 +141,26 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
+        public string LocalPath {
+            get {
+                return this.localPathField;
+            }
+            set {
+                this.localPathField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public int MachineId {
+            get {
+                return this.machineIdField;
+            }
+            set {
+                this.machineIdField = value;
+            }
+        }
+        
+        /// <remarks/>
         public int Status {
             get {
                 return this.statusField;
@@ -169,32 +201,92 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        public string LocalPath {
+        public string CameraMaker {
             get {
-                return this.localPathField;
+                return this.cameraMakerField;
             }
             set {
-                this.localPathField = value;
+                this.cameraMakerField = value;
             }
         }
         
         /// <remarks/>
-        public int MachineId {
+        public string CameraModel {
             get {
-                return this.machineIdField;
+                return this.cameraModelField;
             }
             set {
-                this.machineIdField = value;
+                this.cameraModelField = value;
             }
         }
         
         /// <remarks/>
-        public string Camera {
+        public string Aperture {
             get {
-                return this.cameraField;
+                return this.apertureField;
             }
             set {
-                this.cameraField = value;
+                this.apertureField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public string ShutterSpeed {
+            get {
+                return this.shutterSpeedField;
+            }
+            set {
+                this.shutterSpeedField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public int ISO {
+            get {
+                return this.iSOField;
+            }
+            set {
+                this.iSOField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public int Orientation {
+            get {
+                return this.orientationField;
+            }
+            set {
+                this.orientationField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public System.DateTime TakenDateFile {
+            get {
+                return this.takenDateFileField;
+            }
+            set {
+                this.takenDateFileField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public System.DateTime TakenDateMeta {
+            get {
+                return this.takenDateMetaField;
+            }
+            set {
+                this.takenDateMetaField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public System.DateTime UploadDate {
+            get {
+                return this.uploadDateField;
+            }
+            set {
+                this.uploadDateField = value;
             }
         }
         
@@ -295,26 +387,6 @@ namespace ManageWalla {
             }
             set {
                 this.udfDate3Field = value;
-            }
-        }
-        
-        /// <remarks/>
-        public System.DateTime UploadDate {
-            get {
-                return this.uploadDateField;
-            }
-            set {
-                this.uploadDateField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public System.DateTime TakenDate {
-            get {
-                return this.takenDateField;
-            }
-            set {
-                this.takenDateField = value;
             }
         }
         

@@ -37,11 +37,11 @@ namespace ManageWalla
             filePath = value;
             FolderPath = Path.GetDirectoryName(filePath);
 
-            image = await LoadBitmapAsync(filePath);
-
             string format = GetFormat(filePath);
             if (format == null)
             { return; }
+
+            image = await LoadBitmapAsync(filePath);
 
             FileInfo fileInfo = new FileInfo(filePath);
             meta = new ImageMeta();
@@ -51,28 +51,37 @@ namespace ManageWalla
             meta.LocalPath = filePath;
             meta.MachineId = 100000;
 
-            MapFileProperties();
+            //MapFileProperties();
 
-            meta.UdfDate1 = DateTime.Now;
-            meta.UdfDate1 = DateTime.Now;
-            meta.UdfDate1 = DateTime.Now;
             meta.UploadDate = DateTime.Now;
-            meta.TakenDate = DateTime.Now;
+            meta.TakenDateFile = fileInfo.LastWriteTime;
 
-            //meta.TakenDate = ;
-            //meta.Camera = ;
+            meta.Width = image.PixelWidth;
+            meta.Height = image.PixelHeight;
+            meta.Size = fileInfo.Length;
 
         }
 
         private string GetFormat(string fileName)
         {
+            //Camera Raw (NEF/CR2/ORF/ARW/RW2/...) 
+
             switch (Path.GetExtension(fileName).ToUpper())
             {
                 case ".JPG":
                 case ".JPEG":
                     return "JPEG";
+                case ".TIF":
+                case ".TIFF":
+                    return "TIFF";
+                case ".PSD":
+                    return "PSD";
+                case ".PNG":
+                    return "PNG";
                 case ".BMP":
                     return "BMP";
+                case ".GIF":
+                    return "GIF";
                 default:
                     return null;
             }
@@ -114,10 +123,15 @@ namespace ManageWalla
              */ 
         }
 
+        //TODO delete
         private void MapFileProperties()
         {
             
             FileInfo file = new FileInfo(filePath);
+            meta.Width = image.PixelWidth;
+            meta.Height = image.PixelHeight;
+            meta.Size = file.Length;
+
             /*
             List<string> arrHeaders = new List<string>();
 
@@ -158,9 +172,7 @@ namespace ManageWalla
                 164	Height: ?2736 pixel
              * 
              */
-            meta.Width = image.PixelWidth;
-            meta.Height = image.PixelHeight;
-            meta.Size = (long)(file.Length / 1000);
+
         }
 
         async public Task ResetMeta()

@@ -22,6 +22,7 @@ namespace ManageWalla
 {
     public class ServerHelper
     {
+        #region Object setup and session management
         private HttpClient http = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(ServerHelper));
         private string hostName;
@@ -86,8 +87,10 @@ namespace ManageWalla
         {
             return 100000;
         }
+        #endregion
 
-        async public Task<TagList> GetTagsAvailableAsync(bool useDate, DateTime lastModified)
+        #region Tag
+        async public Task<TagList> GetTagsAvailableAsync(DateTime? lastModified)
         {
             try
             {
@@ -95,9 +98,9 @@ namespace ManageWalla
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
-                if (useDate)
+                if (lastModified.HasValue)
                 {
-                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified);
+                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
                 HttpResponseMessage response = await http.SendAsync(request);
@@ -118,37 +121,34 @@ namespace ManageWalla
             }
         }
 
-        public string UpdateTag(Tag newTag, string oldTagName)
+        async public Task<string> UpdateTagAsync(Tag newTag, string oldTagName)
         {
             try
             {
-
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "tag/" + Uri.EscapeUriString(oldTagName));
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
-
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(newTag, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = http.SendAsync(request).Result;
+                HttpResponseMessage response = await http.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
-                return "";
+                return "OK";
             }
             catch (Exception ex)
             {
-                //TODO Log failure.
-                return "Tag could not be updated, there was an error on the server:" + ex.Message;
+                logger.Error(ex);
+                return ex.Message;
             }
         }
 
-        public string SaveNewTag(Tag tag)
+        async public Task<string> TagSaveNewAsync(Tag tag)
         {
             try
             {
-
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "tag/" + Uri.EscapeUriString(tag.Name));
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
@@ -157,47 +157,61 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = http.SendAsync(request).Result;
+                HttpResponseMessage response = await http.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
-                return "";
+                return "OK";
             }
             catch (Exception ex)
             {
-                //TODO Log failure.
+                logger.Error(ex);
                 return ex.Message;
             }
         }
 
-        public Tag GetTagMeta(TagListTagRef tagRef)
+        async public Task<Tag> GetTagMeta(TagListTagRef tagRef)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tag/" + Uri.EscapeUriString(tagRef.name));
-            request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tag/" + Uri.EscapeUriString(tagRef.name));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-            HttpResponseMessage response = http.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
 
-            XmlSerializer serialKiller = new XmlSerializer(typeof(Tag));
-            Tag tag = (Tag)serialKiller.Deserialize(response.Content.ReadAsStreamAsync().Result);
+                XmlSerializer serialKiller = new XmlSerializer(typeof(Tag));
+                Tag tag = (Tag)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
 
-            return tag;
+                return tag;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
-        public string DeleteTag(Tag tag)
+        async public Task<string> TagDeleteAsync(Tag tag)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "tag/" + Uri.EscapeUriString(tag.Name));
-            request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "tag/" + Uri.EscapeUriString(tag.Name));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-            XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-            xmlFormatter.UseXmlSerializer = true;
-            HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
-            request.Content = content;
-            HttpResponseMessage response = http.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
 
-            //state.tagList = null;
-
-            return "";
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
         }
 
         async public Task<TagImageList> GetTagImagesAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
@@ -231,7 +245,9 @@ namespace ManageWalla
                 throw ex;
             }
         }
+        #endregion
 
+        #region Upload
         async public Task<string> UploadImageAsync(UploadImage image)
         {
             try
@@ -306,19 +322,12 @@ namespace ManageWalla
                 HttpResponseMessage response = await http.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
-                //return await response.Content.ReadAsStringAsync();
-
-                XmlSerializer serialKiller = new XmlSerializer(typeof(UploadStatusList));
-                UploadStatusList uploadStatusList = (UploadStatusList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                return uploadStatusList;
-            }
-            catch (HttpRequestException httpEx)
-            {
-                logger.Error(httpEx);
-                throw httpEx;
-            }
-            catch (TaskCanceledException)
-            {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(UploadStatusList));
+                    UploadStatusList uploadStatusList = (UploadStatusList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                    return uploadStatusList;
+                }
                 return null;
             }
             catch (Exception ex)
@@ -327,11 +336,41 @@ namespace ManageWalla
                 throw ex;
             }
         }
+        #endregion
 
+        #region Category
         public long CreateCategory(string categoryName, string categoryDesc, long parentCategoryId)
         {
             //TODO
             return 10;
         }
+        #endregion
+
+        async public Task<BitmapImage> GetImage(long imageId, int size)
+        {
+            try
+            {
+                /* GET /{userName}/image/{imageId}/{size}/ */
+                string requestUrl = "image/" + imageId.ToString() + "/" + size.ToString() + "/";
+                //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                //request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                BitmapImage myBitmapImage = new BitmapImage();
+                myBitmapImage.BeginInit();
+                myBitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                myBitmapImage.DecodePixelWidth = size;
+                myBitmapImage.StreamSource = await http.GetStreamAsync(requestUrl);
+                myBitmapImage.EndInit();
+                //myBitmapImage.Freeze();
+
+                return myBitmapImage;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
     }
 }

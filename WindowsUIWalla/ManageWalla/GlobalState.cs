@@ -84,7 +84,7 @@ namespace ManageWalla
             //TODO - delete
             state.userName = "simo1n";
             state.password = "simon";
-            state.imageFetchSize = 5;
+            state.imageFetchSize = 10;
 
             state.categoryLoadState = GlobalState.DataLoadState.No;
             state.tagLoadState = GlobalState.DataLoadState.No;

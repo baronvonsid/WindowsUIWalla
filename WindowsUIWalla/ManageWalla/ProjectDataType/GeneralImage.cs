@@ -12,6 +12,7 @@ namespace ManageWalla
 {
     public class GeneralImage : INotifyPropertyChanged
     {
+        private ServerHelper serverHelper;
         private BitmapImage image;
 
         public long imageId;
@@ -20,29 +21,23 @@ namespace ManageWalla
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime UploadDate { get; set; }
-        public DateTime TakenDate { get; set; }
 
         //TODO need this extra event plumbing ??
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public GeneralImage() 
+        public GeneralImage(ServerHelper serverHelperParam) 
         {
+            serverHelper = serverHelperParam;
             image = LoadingBitmap();
         }
 
         async public Task LoadImage()
         {
-            //FilePath = @"C:\Users\FastEddy\Desktop\019.JPG";
-
             if (FilePath == null && imageId == 0)
                 return;
 
-
-            if (File.Exists(FilePath ?? ""))
-            {
-                image = await LoadBitmapAsync();
-                OnPropertyChanged("Image");
-            }
+            image = await LoadBitmapAsync();
+            OnPropertyChanged("Image");
         }
 
         private BitmapImage LoadingBitmap()
@@ -62,8 +57,6 @@ namespace ManageWalla
 
         async private Task<BitmapImage> LoadBitmapAsync()
         {
-            
-
             if (File.Exists(FilePath ?? ""))
             {
                 //Local version exists, nice !
@@ -86,26 +79,8 @@ namespace ManageWalla
             }
             else
             {
-                //Must get server version, not so nice !
-                
-                //TODO - Go back to walla.
-                /*
-                BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
-                {
-                    myBitmapImage = new BitmapImage();
-                    myBitmapImage.BeginInit();
-                    myBitmapImage.DecodePixelWidth = 300;
-                    myBitmapImage.UriSource = new Uri(filePath);
-                    myBitmapImage.EndInit();
-                    myBitmapImage.Freeze();
-
-                    return myBitmapImage;
-                });
-
-                return myBitmapImage;
-                */
+                return await serverHelper.GetImage(imageId, 300);
             }
-            return null;
         }
 
         #region Propery Events

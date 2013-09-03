@@ -11,25 +11,31 @@ targetNamespace="http://www.example.org/ImageMeta"
         <element type="string" name="Desc"/>
         <element type="string" name="OriginalFileName"/>
         <element type="string" name="Format"/>
+        <element type="string" name="LocalPath"/>
+        <element type="int" name="MachineId"/>
         <element type="int" name="Status" default="0"/>
-		    <element type="long" name="Width" default="0"/>
-		    <element type="long" name="Height" default="0"/>
-		    <element type="long" name="Size" default="0"/>
-        <element type="string" name="LocalPath" />
-        <element type="int" name="MachineId" />
-		    <element type="string" name="Camera"/>
-		    <element type="string" name="UdfChar1"/>
-		    <element type="string" name="UdfChar2"/>
-		    <element type="string" name="UdfChar3"/>
-		    <element type="string" name="UdfText1"/>
-		    <element type="decimal" name="UdfNum1"/>
-		    <element type="decimal" name="UdfNum2"/>
-		    <element type="decimal" name="UdfNum3"/>
-		    <element type="dateTime" name="UdfDate1"/>
-		    <element type="dateTime" name="UdfDate2"/>
-		    <element type="dateTime" name="UdfDate3"/>
-		    <element type="dateTime" name="UploadDate"/>
-		    <element type="dateTime" name="TakenDate"/>
+	    <element type="long" name="Width" default="0"/>
+	    <element type="long" name="Height" default="0"/>
+	    <element type="long" name="Size" default="0"/>
+	    <element type="string" name="CameraMaker"/>
+	    <element type="string" name="CameraModel"/>
+	    <element type="string" name="Aperture"/>
+	    <element type="string" name="ShutterSpeed"/>
+	    <element type="int" name="ISO"/>
+	    <element type="int" name="Orientation"/>
+	    <element type="dateTime" name="TakenDateFile"/>
+	    <element type="dateTime" name="TakenDateMeta"/>
+	    <element type="dateTime" name="UploadDate"/>
+	    <element type="string" name="UdfChar1"/>
+	    <element type="string" name="UdfChar2"/>
+	    <element type="string" name="UdfChar3"/>
+	    <element type="string" name="UdfText1"/>
+	    <element type="decimal" name="UdfNum1"/>
+	    <element type="decimal" name="UdfNum2"/>
+	    <element type="decimal" name="UdfNum3"/>
+	    <element type="dateTime" name="UdfDate1"/>
+	    <element type="dateTime" name="UdfDate2"/>
+	    <element type="dateTime" name="UdfDate3"/>
         <element name="Tags">
           <complexType>
             <sequence>

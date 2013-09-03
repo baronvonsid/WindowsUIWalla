@@ -129,9 +129,6 @@
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="WallaDateConverter.cs" />
-    <Compile Include="Main.xaml.cs">
-      <DependentUpon>Main.xaml</DependentUpon>
-    </Compile>
     <Compile Include="MainController.cs" />
     <Compile Include="ProjectDataType\UploadUIState.cs" />
     <Compile Include="ServerHelper.cs" />
@@ -143,10 +140,6 @@
     <Compile Include="ProjectDataType\UploadImageFileList.cs" />
     <Compile Include="WallaDataType\UploadStatusList.cs" />
     <Compile Include="WallaUploadStatusConverter.cs" />
-    <Page Include="Main.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>

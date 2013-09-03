@@ -706,7 +706,7 @@ namespace ManageWalla
                 panTagWorking.Visibility = System.Windows.Visibility.Visible;
                 gridTag.Visibility = Visibility.Collapsed;
 
-                string response = await controller.RefreshTagsListAsync();
+                string response = await controller.TagRefreshListAsync();
                 if (response != "OK")
                 {
                     DisplayMessage(response, MessageSeverity.Error);
@@ -768,7 +768,7 @@ namespace ManageWalla
             if (checkedButton != null)
             {
                 TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
-                currentTagImageList = await controller.GetTagImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetTagSearchQueryString());
+                currentTagImageList = await controller.TagGetImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetTagSearchQueryString());
             }
 
             /* Populate tag image list from state */
@@ -799,7 +799,7 @@ namespace ManageWalla
                     break;
             }
 
-            currentTagImageList = await controller.GetTagImagesAsync(currentTagImageList.id, currentTagImageList.Name, cursor, GetTagSearchQueryString());
+            currentTagImageList = await controller.TagGetImagesAsync(currentTagImageList.id, currentTagImageList.Name, cursor, GetTagSearchQueryString());
 
             /* Populate tag image list from state */
             TagImageListUpdateControls();
@@ -843,7 +843,7 @@ namespace ManageWalla
             if (checkedButton != null)
             {
                 TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
-                Tag tag = controller.GetTagMeta((TagListTagRef)checkedButton.Tag);
+                Tag tag = controller.TagGetMetaAsync((TagListTagRef)checkedButton.Tag);
                 txtTagAddEditName.Text = tag.Name;
                 txtTagAddEditDescription.Text = tag.Desc;
                 currentTag = tag;
@@ -863,7 +863,7 @@ namespace ManageWalla
 
         private void cmdAddEditTagDelete_Click(object sender, RoutedEventArgs e)
         {
-            string response = controller.DeleteTag(currentTag);
+            string response = controller.TagDeleteAsync(currentTag);
 
             if (response.Length > 0)
             {
@@ -912,7 +912,7 @@ namespace ManageWalla
 
                 //Add Images selected
 
-                response = controller.SaveNewTag(tag);
+                response = controller.TagSaveNewAsync(tag);
             }
             else
             {
@@ -920,7 +920,7 @@ namespace ManageWalla
                 currentTag.Name = txtTagAddEditName.Text;
                 currentTag.Desc = txtTagAddEditDescription.Text;
 
-                response = controller.UpdateTag(currentTag, oldTagName);
+                response = controller.TagUpdateAsync(currentTag, oldTagName);
             }
 
 
