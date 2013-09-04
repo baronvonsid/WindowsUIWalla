@@ -47,7 +47,7 @@ namespace ManageWalla
          
             BitmapImage loadingImage = new BitmapImage();
             loadingImage.BeginInit();
-            loadingImage.DecodePixelWidth = 300;
+            loadingImage.DecodePixelWidth = 250;
             loadingImage.UriSource = new Uri(loadingImagePath);
             loadingImage.EndInit();
             loadingImage.Freeze();
@@ -67,7 +67,7 @@ namespace ManageWalla
                 {
                     myBitmapImage = new BitmapImage();
                     myBitmapImage.BeginInit();
-                    myBitmapImage.DecodePixelWidth = 300;
+                    myBitmapImage.DecodePixelWidth = 250;
                     myBitmapImage.UriSource = new Uri(FilePath);
                     myBitmapImage.EndInit();
                     myBitmapImage.Freeze();
@@ -79,7 +79,7 @@ namespace ManageWalla
             }
             else
             {
-                return await serverHelper.GetImage(imageId, 300);
+                return await serverHelper.GetImage(imageId, 250);
             }
         }
 
