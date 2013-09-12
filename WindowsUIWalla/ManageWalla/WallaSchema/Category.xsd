@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.example.org/Category"
+	xmlns:tns="http://www.example.org/Category" 
+	elementFormDefault="qualified">
+
+  <element name="Category">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="0">
+        <element type="string" name="Name"/>
+        <element type="string" name="Desc"/>
+        <element type="dateTime" name="LastChanged"/>
+        </sequence>
+      <attribute type="long" name="id" default="0"/>
+      <attribute type="long" name="parentId" default="0"/>
+      <attribute type="int" name="version" default="0"/>
+    </complexType>
+  </element>
+</schema>

@@ -402,12 +402,12 @@ namespace ManageWalla
         /// <param name="cursor"></param>
         /// <param name="searchQueryString"></param>
         /// <returns></returns>
-        async public Task<TagImageList> TagGetImagesAsync(long id, string tagName, int cursor, string searchQueryString)
+        async public Task<ImageList> TagGetImagesAsync(long id, string tagName, int cursor, string searchQueryString)
         {
             try
             {
                 //Find a locally cached version,  ignore query string. 
-                TagImageList localTagList = state.tagImageList.Where(r => (r.id == id && r.imageCursor == cursor)).FirstOrDefault();
+                ImageList localTagList = state.tagImageList.Where(r => (r.id == id && r.imageCursor == cursor)).FirstOrDefault();
                 if (state.connectionState != GlobalState.ConnectionState.LoggedOn)
                 {
                     return localTagList;
@@ -417,7 +417,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localTagList.LastChanged;
-                    TagImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
                     if (tagImageList != null)
                     {
                         state.tagImageList.Add(tagImageList);
@@ -431,7 +431,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    TagImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
                     if (tagImageList != null)
                     {
                         if (searchQueryString == null)

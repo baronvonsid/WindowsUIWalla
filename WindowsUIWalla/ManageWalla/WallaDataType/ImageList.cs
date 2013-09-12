@@ -20,9 +20,9 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/TagImageList")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/TagImageList", IsNullable=false)]
-    public partial class TagImageList {
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageList")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/ImageList", IsNullable=false)]
+    public partial class ImageList {
         
         private string nameField;
         
@@ -30,11 +30,13 @@ namespace ManageWalla {
         
         private System.DateTime lastChangedField;
         
-        private TagImageListImageRef[] imagesField;
+        private ImageListImageRef[] imagesField;
         
         private long idField;
         
         private bool idFieldSpecified;
+        
+        private string typeField;
         
         private int versionField;
         
@@ -84,7 +86,7 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayItemAttribute("ImageRef", IsNullable=false)]
-        public TagImageListImageRef[] Images {
+        public ImageListImageRef[] Images {
             get {
                 return this.imagesField;
             }
@@ -112,6 +114,17 @@ namespace ManageWalla {
             }
             set {
                 this.idFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string type {
+            get {
+                return this.typeField;
+            }
+            set {
+                this.typeField = value;
             }
         }
         
@@ -209,10 +222,10 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/TagImageList")]
-    public partial class TagImageListImageRef {
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageList")]
+    public partial class ImageListImageRef {
         
-        private int idField;
+        private long idField;
         
         private bool idFieldSpecified;
         
@@ -232,7 +245,7 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public int id {
+        public long id {
             get {
                 return this.idField;
             }

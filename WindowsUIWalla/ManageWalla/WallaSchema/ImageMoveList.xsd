@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/ImageMoveList"
+	xmlns:tns="http://www.example.org/ImageMoveList" elementFormDefault="qualified">
+
+	<element name="ImageMoveList">
+	<complexType>
+	<sequence>
+		<element name="ImageRef" maxOccurs="unbounded" minOccurs="0">
+		<simpleType>
+		<restriction base="long"></restriction>
+				</simpleType>
+		</element>
+		</sequence>
+	</complexType>
+	</element>
+
+</schema>

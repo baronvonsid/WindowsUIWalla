@@ -61,7 +61,7 @@ namespace ManageWalla
         public UploadStatusListBind uploadStatusListBind = null;
         public ImageMainViewerList imageMainViewerList = null;
         public GlobalState state = null;
-        public TagImageList currentTagImageList = null;
+        public ImageList currentTagImageList = null;
         private bool tagListUploadRefreshing = false;
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
@@ -500,7 +500,6 @@ namespace ManageWalla
 
         }
 
-
         private void cmdTagRefresh_Click(object sender, RoutedEventArgs e)
         {
             RefreshAndDisplayTagList(true);
@@ -571,7 +570,9 @@ namespace ManageWalla
                 newRadioButton.Template = (ControlTemplate)FindResource("templateRadioButton");
                 newRadioButton.GroupName = "GroupTag";
                 newRadioButton.Tag = tag;
+                newRadioButton.AllowDrop = true;
                 newRadioButton.Checked += new RoutedEventHandler(FetchTagImagesFirstAsync);
+                newRadioButton.Drop += new DragEventHandler(TagDroppedImages);
                 wrapMyTags.Children.Add(newRadioButton);
             }
 
@@ -617,8 +618,6 @@ namespace ManageWalla
                 /* Populate tag image list from state */
                 TagImageListUpdateControls();
             }
-
-
         }
 
         async private Task FetchMoreTagImagesAsync(FetchDirection direction)
@@ -667,7 +666,7 @@ namespace ManageWalla
             if (currentTagImageList.Images == null)
                 return;
 
-            foreach (TagImageListImageRef imageRef in currentTagImageList.Images)
+            foreach (ImageListImageRef imageRef in currentTagImageList.Images)
             {
                 GeneralImage newImage = new GeneralImage(controller.GetServerHelper());
                 newImage.imageId = imageRef.id;
@@ -718,6 +717,22 @@ namespace ManageWalla
                 txtTagAddEditName.Text = tag.Name;
                 txtTagAddEditDescription.Text = tag.Desc;
                 currentTag = tag;
+            }
+        }
+
+        async private void TagDroppedImages(object sender, DragEventArgs e)
+        {
+            
+            RadioButton meTagButton = sender as RadioButton;
+            TagListTagRef meTag = (TagListTagRef)meTagButton.Tag;
+
+            int count = lstImageMainViewerList.SelectedItems.Count;
+            if (count > 0)
+            {
+                if (MessageBox.Show("Do you want to move the " + count.ToString() + " selected images to the tag: " + meTag.name, "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    
+                }
             }
         }
 
@@ -1586,6 +1601,15 @@ namespace ManageWalla
         private void cmdTagAddRemoveImages_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void Image_MouseMove(object sender, MouseEventArgs e)
+        {
+            Image meImage = sender as Image;
+            if (meImage != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragDrop.DoDragDrop(meImage, "dunno", DragDropEffects.Copy);
+            }
         }
 
 

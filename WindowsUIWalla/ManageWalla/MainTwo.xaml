@@ -323,12 +323,12 @@
                             		    ItemContainerStyle="{DynamicResource PhotoListItem}" 
                             		    SelectedIndex="0"
                             		    ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                        SelectionMode="Single"
+                                        SelectionMode="Multiple"
                                         IsSynchronizedWithCurrentItem="True"
                                         Visibility="Visible">
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Image Source="{Binding Image}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}"/>
+                    <DataTemplate >
+                        <Image Source="{Binding Image}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" AllowDrop="True" MouseMove="Image_MouseMove" />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

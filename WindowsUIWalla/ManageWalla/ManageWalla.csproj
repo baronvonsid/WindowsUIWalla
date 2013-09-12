@@ -128,14 +128,17 @@
     <Compile Include="ProjectDataType\ImageMainViewerList.cs" />
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="WallaDataType\Category.cs" />
+    <Compile Include="WallaDataType\CategoryList.cs" />
+    <Compile Include="WallaDataType\ImageList.cs" />
+    <Compile Include="WallaDataType\ImageMoveList.cs" />
+    <Compile Include="WallaDataType\Tag.cs" />
     <Compile Include="WallaDateConverter.cs" />
     <Compile Include="MainController.cs" />
     <Compile Include="ProjectDataType\UploadUIState.cs" />
     <Compile Include="ServerHelper.cs" />
     <Compile Include="WallaDataType\ImageMeta.cs" />
-    <Compile Include="WallaDataType\TagImageList.cs" />
     <Compile Include="WallaDataType\TagList.cs" />
-    <Compile Include="WallaDataType\Tags.cs" />
     <Compile Include="ProjectDataType\UploadImage.cs" />
     <Compile Include="ProjectDataType\UploadImageFileList.cs" />
     <Compile Include="WallaDataType\UploadStatusList.cs" />
@@ -178,10 +181,13 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <None Include="WallaSchema\Category.xsd" />
+    <None Include="WallaSchema\CategoryList.xsd" />
+    <None Include="WallaSchema\ImageList.xsd" />
     <None Include="WallaSchema\ImageMeta.xsd" />
-    <None Include="WallaSchema\TagImageList.xsd" />
+    <None Include="WallaSchema\ImageMoveList.xsd" />
     <None Include="WallaSchema\TagList.xsd" />
-    <None Include="WallaSchema\Tags.xsd" />
+    <None Include="WallaSchema\Tag.xsd" />
     <None Include="WallaSchema\UploadStatusList.xsd" />
   </ItemGroup>
   <ItemGroup>

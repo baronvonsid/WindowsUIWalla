@@ -10,18 +10,6 @@ targetNamespace="http://www.example.org/Tag"
         <element type="string" name="Name"/>
         <element type="string" name="Desc"/>
         <element type="dateTime" name="LastChanged"/>
-        <element name="Images">
-          <complexType>
-            <sequence>
-              <element name="ImageRef" maxOccurs="unbounded" minOccurs="0">
-                <complexType>
-                  <attribute type="int" name="id" />
-                  <attribute type="string" name="op" />
-                </complexType>
-              </element>
-            </sequence>
-          </complexType>
-        </element>
       </sequence>
       <attribute type="long" name="id"/>
       <attribute type="int" name="version"/>

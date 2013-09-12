@@ -38,7 +38,7 @@ namespace ManageWalla
         public TagList tagList { get; set; }
         public String categoryXml { get; set; }
         public UploadStatusList uploadStatusList { get; set; }
-        public List<TagImageList> tagImageList { get; set; }
+        public List<ImageList> tagImageList { get; set; }
 
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }
@@ -77,7 +77,7 @@ namespace ManageWalla
                 //Initialise objects.
                 if (state.tagImageList == null)
                 {
-                    state.tagImageList = new List<TagImageList>();
+                    state.tagImageList = new List<ImageList>();
                 }
             }
 

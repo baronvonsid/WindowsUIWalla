@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.example.org/TagImageList"
-	xmlns:tns="http://www.example.org/TagImageList" 
+targetNamespace="http://www.example.org/ImageList"
+	xmlns:tns="http://www.example.org/ImageList" 
 	elementFormDefault="qualified">
 
-  <element name="TagImageList">
+  <element name="ImageList">
     <complexType>
       <sequence maxOccurs="1" minOccurs="1">
         <element type="string" name="Name"/>
@@ -15,7 +15,7 @@ targetNamespace="http://www.example.org/TagImageList"
             <sequence>
               <element name="ImageRef" maxOccurs="unbounded" minOccurs="0">
               <complexType>
-                      <attribute type="int" name="id" />
+                      <attribute type="long" name="id" />
                       <attribute type="string" name="name" />
                       <attribute type="string" name="desc" />
                       <attribute type="date" name="uploadDate" />
@@ -28,6 +28,7 @@ targetNamespace="http://www.example.org/TagImageList"
         </element>
       </sequence>
       <attribute type="long" name="id"/>
+      <attribute type="string" name="type"/> <!-- Category, Tag, View -->
       <attribute type="int" name="version"/>
       <attribute type="int" name="imageCursor"/>
       <attribute type="int" name="imageCount"/>

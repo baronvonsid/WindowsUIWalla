@@ -214,7 +214,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<TagImageList> GetTagImagesAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
+        async public Task<ImageList> GetTagImagesAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
         {
             try
             {
@@ -229,13 +229,17 @@ namespace ManageWalla
                 }
 
                 HttpResponseMessage response = await http.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+                
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(TagImageList));
-                    TagImageList tagImageList = (TagImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
+                    ImageList tagImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
                     return tagImageList;
+                }
+                else if (response.StatusCode != HttpStatusCode.NotModified)
+                {
+                    response.EnsureSuccessStatusCode();
                 }
                 return null;
             }
