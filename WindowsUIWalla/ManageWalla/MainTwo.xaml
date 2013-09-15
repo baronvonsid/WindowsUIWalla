@@ -14,13 +14,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
             <RowDefinition Height="40" />
-            <RowDefinition Height="0"/>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="0"/>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="0"/>
-            <RowDefinition Height="40" />
             <RowDefinition Height="*"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40" />
@@ -69,7 +69,7 @@
 
         <RadioButton x:Name="radCategory" GroupName="MainSection" Grid.Column="1" Grid.Row="1" Checked="radCategory_Checked" Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFFFA92">
             <DockPanel LastChildFill="True">
-                <Button x:Name="cmdCategoryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                <Button x:Name="cmdCategoryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategoryRefresh_Click" >
                     <Button.Content>
                         <Image Source="Icons/reload.gif" Height="28" />
                     </Button.Content>
@@ -85,6 +85,104 @@
                 <TextBlock Text="Category" TextAlignment="Center" />
             </StackPanel>
         </DockPanel>
+
+        <Grid x:Name="gridCategory" Grid.Column="1" Grid.Row="2" Background="#FF6FD1FF">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="34" />
+                <RowDefinition Height="25" />
+                <RowDefinition Height="75" />
+                <RowDefinition Height="34" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2">
+                <TreeView x:Name="treeCategoryView" Background="#FFE8E8E8">
+                    <TreeViewItem Header="Barons Photo Album" IsExpanded="True">
+                        <TreeViewItem IsExpanded="true">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="icons\star.gif" Height="18"/>
+                                    <TextBlock Text="Holidays (30)"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+
+                            <TreeViewItem>
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="icons\star.gif" Height="18"/>
+                                        <TextBlock Text="Albania (30)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                            <TreeViewItem>
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="icons\star.gif" Height="18"/>
+                                        <TextBlock Text="Uzbekki (40)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                            <TreeViewItem IsExpanded="True">
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="icons\star.gif" Height="18"/>
+                                        <TextBlock Text="USA (200)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                            <TreeViewItem IsExpanded="True">
+                                <TreeViewItem.Header>
+                                    <CheckBox>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="icons\star.gif" Height="18"/>
+                                            <TextBlock Text="China (5)"/>
+                                        </StackPanel>
+                                    </CheckBox>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                        </TreeViewItem>
+                        <TreeViewItem>
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="icons\star.gif" Height="18"/>
+                                    <TextBlock Text="London life (400)"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+
+                            <TreeViewItem>
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="icons\star.gif" Height="18"/>
+                                        <TextBlock Text="Around town (30)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                        </TreeViewItem>
+                    </TreeViewItem>
+                </TreeView>
+            </ScrollViewer>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button x:Name="cmdCategoryAdd" Content="Add New" Click="cmdCategoryAdd_Click" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                <Button x:Name="cmdCategoryEdit" Content="Edit Existing" Click="cmdCategoryEdit_Click" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+            </StackPanel>
+            
+            <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
+            <TextBox x:Name="txtCategoryName" Grid.Column="1" Grid.Row="2" Cursor="IBeam" MaxLength="30" PreviewTextInput="txtCategoryName_PreviewTextInput" Margin="2" />
+            <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+            <TextBox x:Name="txtCategoryDescription" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2"/>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button x:Name="cmdCategorySave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategorySave_Click" />
+                <Button x:Name="cmdCategoryCancel" Content="Cancel" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategoryCancel_Click" />
+                <Button x:Name="cmdCategoryDelete" Content="Delete" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategoryDelete_Click" />
+            </StackPanel>
+
+        </Grid>
 
         <RadioButton x:Name="radTag" GroupName="MainSection" Grid.Column="1" Grid.Row="3" Checked="radTag_Checked" Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFBFFF92">
             <DockPanel LastChildFill="True">
@@ -128,9 +226,9 @@
             </StackPanel>
 
             <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-            <TextBox x:Name="txtTagAddEditName" Margin="3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" CharacterCasing="Upper" Cursor="IBeam" PreviewTextInput="txtTagAddEditName_PreviewTextInput" Text="12345678901234567890"/>
+            <TextBox x:Name="txtTagAddEditName" Margin="3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" CharacterCasing="Upper" Cursor="IBeam" PreviewTextInput="txtTagAddEditName_PreviewTextInput" />
             <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
-            <TextBox x:Name="txtTagAddEditDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" Text="W234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789XW234567890123456789X" MaxLines="1" MaxLength="100"/>
+            <TextBox x:Name="txtTagAddEditDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
 
             <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button x:Name="cmdTagSave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagSave_Click" />
@@ -187,7 +285,7 @@
             </Grid.ColumnDefinitions>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="4">
-                <TreeView x:Name="treeCategoryView" Background="#FFFFF4F4">
+                <TreeView x:Name="treeUploadCategoryView" Background="#FFFFF4F4">
                     <TreeViewItem Header="Barons Photo Album" IsExpanded="True">
                         <TreeViewItem IsExpanded="false">
                             <TreeViewItem.Header>
@@ -262,10 +360,10 @@
             <CheckBox x:Name="chkUploadToNewCategory" Grid.Row="1" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=UploadToNewCategory}" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="chkUploadToNewCategory_Checked" Unchecked="chkUploadToNewCategory_Unchecked" />
 
             <Label Content="Category Name" Grid.Column="0" Grid.Row="2" />
-            <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" CharacterCasing="Upper" Cursor="IBeam" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
+            <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryName_PreviewTextInput" Margin="2" Cursor="IBeam" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
 
             <Label Content="Description" Grid.Column="0" Grid.Row="3" />
-            <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" MaxLines="1" MaxLength="100" />
+            <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
 
             <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button x:Name="cmdUploadAll" Content="Upload" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadAll_Click"/>
@@ -314,14 +412,13 @@
                             TickPlacement="BottomRight"
                             Minimum="10"
                             Maximum="250"
-                            Width="100" ValueChanged="Slider_ValueChanged" ></Slider>
+                            Width="100" ></Slider>
             </DockPanel>
 
             <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
                             		    x:Name ="lstImageMainViewerList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource imageMainViewerListKey}}"
                             		    ItemContainerStyle="{DynamicResource PhotoListItem}" 
-                            		    SelectedIndex="0"
                             		    ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         SelectionMode="Multiple"
                                         IsSynchronizedWithCurrentItem="True"

@@ -181,7 +181,7 @@ namespace ManageWalla
 
         public void CreateCategoryFromFolder(DirectoryInfo currentFolder, UploadImageFileList meFots, long parentCategoryId)
         {
-            long categoryId = serverHelper.CreateCategory(currentFolder.Name, "", parentCategoryId);
+            long categoryId = 0; //serverHelper.CreateCategory(currentFolder.Name, "", parentCategoryId);
             foreach (UploadImage currentImage in meFots.OfType<UploadImage>().Where(r => r.FolderPath == currentFolder.FullName))
             {
                 currentImage.Meta.categoryId = categoryId;
@@ -193,51 +193,49 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> DoUploadAsync(UploadImageFileList meFots, UploadUIState uploadState)
+        async public Task<string> DoUploadAsync(UploadImageFileList meFots, UploadUIState uploadState, long categoryId)
         {
-            long rootCategoryId = 1;
             if (uploadState.UploadToNewCategory)
             {
-                rootCategoryId = serverHelper.CreateCategory(uploadState.CategoryName, uploadState.CategoryDesc, uploadState.CategoryId);
-            }
-            else
-            {
-                rootCategoryId = uploadState.CategoryId;
+                Category category = new Category();
+                category.parentId = categoryId;
+                category.Name = uploadState.CategoryName;
+                category.Desc = uploadState.CategoryDesc;
+                categoryId = await serverHelper.CategoryCreateAsync(category);
+                //rootCategoryId = serverHelper.CreateCategory(uploadState.CategoryName, uploadState.CategoryDesc, uploadState.CategoryId);
             }
 
+            //TODO - Implement, taken out of GUI.
             if (uploadState.MapToSubFolders)
             {
                 if (uploadState.UploadToNewCategory)
                 {
                     //Assumption being that all sub categories will now need to be created.
                     DirectoryInfo rootFolder = new DirectoryInfo(uploadState.RootFolder);
-                    CreateCategoryFromFolder(rootFolder, meFots, rootCategoryId);
+                    CreateCategoryFromFolder(rootFolder, meFots, categoryId);
                 }
                 else
                 {
                     //Check local category xml for matches or create new.
                     //TODO after categories have been developed.
-
                 }
             }
             else
             {
                 foreach (UploadImage currentImage in meFots)
                 {
-                    currentImage.Meta.categoryId = rootCategoryId;
+                    currentImage.Meta.categoryId = categoryId;
                 }
             }
 
             //Check for each chkAll box set to true, then replace respective values.
-            foreach (UploadImage currentImage in meFots)
+            if (uploadState.MetaTagRefAll)
             {
-                if (uploadState.MetaTagRefAll)
+                foreach (UploadImage currentImage in meFots)
                 {
                     currentImage.Meta.Tags = uploadState.MetaTagRef;
                 }
             }
-
-
 
             while (meFots.Where(r => r.State == UploadImage.UploadState.None).Count() > 0)
             {
@@ -270,8 +268,6 @@ namespace ManageWalla
             }
             return null;
         }
-
-
 
         async public Task ResetMeFotsMeta(UploadImageFileList metFots)
         {
@@ -320,7 +316,7 @@ namespace ManageWalla
 
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
-                    state.uploadStatusList = await serverHelper.GetUploadStatusListAsync();
+                    state.uploadStatusList = await serverHelper.UploadGetStatusListAsync();
                     state.uploadStatusListState = GlobalState.DataLoadState.Loaded;
                     return "OK";
                 }
@@ -361,11 +357,11 @@ namespace ManageWalla
                     TagList tagList;
                     if (state.tagList != null)
                     {
-                        tagList = await serverHelper.GetTagsAvailableAsync(state.tagList.LastChanged);
+                        tagList = await serverHelper.TagGetListAsync(state.tagList.LastChanged);
                     }
                     else
                     {
-                        tagList = await serverHelper.GetTagsAvailableAsync(null);
+                        tagList = await serverHelper.TagGetListAsync(null);
                     }
                     state.tagList = tagList;
                     state.tagLoadState = GlobalState.DataLoadState.Loaded;
@@ -417,7 +413,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localTagList.LastChanged;
-                    ImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList tagImageList = await serverHelper.TagGetImageListAsync(tagName, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
                     if (tagImageList != null)
                     {
                         state.tagImageList.Add(tagImageList);
@@ -431,7 +427,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList tagImageList = await serverHelper.GetTagImagesAsync(tagName, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList tagImageList = await serverHelper.TagGetImageListAsync(tagName, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
                     if (tagImageList != null)
                     {
                         if (searchQueryString == null)
@@ -457,7 +453,7 @@ namespace ManageWalla
         {
             try
             {
-                return await serverHelper.GetTagMeta(tagRef);
+                return await serverHelper.TagGetMeta(tagRef.name);
             }
             catch (Exception ex)
             {
@@ -470,16 +466,16 @@ namespace ManageWalla
 
         async public Task<string> TagUpdateAsync(Tag newTag, string oldTagName)
         {
-            string response = await serverHelper.UpdateTagAsync(newTag, oldTagName);
+            string response = await serverHelper.TagUpdateAsync(newTag, oldTagName);
             if (response != "OK")
                 response = "Tag could not be updated, there was an error on the server:" + response;
 
             return response;
         }
 
-        async public Task<string> TagSaveNewAsync(Tag tag)
+        async public Task<string> TagCreateAsync(Tag tag)
         {
-            string response = await serverHelper.TagSaveNewAsync(tag);
+            string response = await serverHelper.TagCreateAsync(tag);
             if (response != "OK")
                 response = "Tag could not be created, there was an error on the server:" + response;
 
@@ -494,7 +490,154 @@ namespace ManageWalla
 
             return response;
         }
+
+        async public Task<string> TagAddRemoveImagesAsync(string tagName, ImageMoveList moveList, bool add)
+        {
+            string response = await serverHelper.TagAddRemoveImagesAsync(tagName, moveList, add);
+            if (response != "OK")
+                response = "Images could not be add\removed from the Tag, there was an error on the server:" + response;
+
+            return response;
+        }
         #endregion
 
+        #region Category
+        async public Task<Category> CategoryGetMetaAsync(CategoryListCategoryRef categoryRef)
+        {
+            try
+            {
+                return await serverHelper.CategoryGetMeta(categoryRef.id);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                currentMain.DisplayMessage("There was a problem retrieving the Category meta data: " + categoryRef.id.ToString() + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error);
+                return null;
+            }
+
+        }
+
+        async public Task<string> CategoryUpdateAsync(Category existingCategory)
+        {
+            string response = await serverHelper.CategoryUpdateAsync(existingCategory);
+            if (response != "OK")
+                response = "Category could not be updated, there was an error on the server:" + response;
+
+            return response;
+        }
+
+        async public Task<string> CategoryCreateAsync(Category category)
+        {
+            try
+            {
+                long categoryId = await serverHelper.CategoryCreateAsync(category);
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                return "Category could not be created, there was an error on the server: " + ex.Message;
+            }
+        }
+
+        async public Task<string> CategoryDeleteAsync(Category category)
+        {
+            string response = await serverHelper.CategoryDeleteAsync(category);
+            if (response != "OK")
+                response = "Category could not be deleted, there was an error on the server:" + response;
+
+            return response;
+        }
+
+        async public Task<ImageList> CategoryGetImagesAsync(long categoryId, int cursor, string searchQueryString)
+        {
+            try
+            {
+                //Find a locally cached version,  ignore query string. 
+                ImageList localCategoryList = state.categoryImageList.Where(r => (r.id == categoryId && r.imageCursor == cursor)).FirstOrDefault();
+                if (state.connectionState != GlobalState.ConnectionState.LoggedOn)
+                {
+                    return localCategoryList;
+                }
+
+                if (localCategoryList != null && searchQueryString == null)
+                {
+                    //With Local version, check with server is a new version is required.
+                    DateTime lastModified = localCategoryList.LastChanged;
+                    ImageList categoryImageList = await serverHelper.CategorGetImageListAsync(categoryId, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    if (categoryImageList != null)
+                    {
+                        state.categoryImageList.Add(categoryImageList);
+                        return categoryImageList;
+                    }
+                    else
+                    {
+                        return localCategoryList;
+                    }
+                }
+                else
+                {
+                    //Add the image list to the state if no search is specified.
+                    ImageList categoryImageList = await serverHelper.CategorGetImageListAsync(categoryId, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
+                    if (categoryImageList != null)
+                    {
+                        if (searchQueryString == null)
+                            state.categoryImageList.Add(categoryImageList);
+
+                        return categoryImageList;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Category: " + categoryId.ToString() + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error);
+                return null;
+            }
+        }
+
+        async public Task<string> CategoryRefreshListAsync()
+        {
+            try
+            {
+                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                {
+                    CategoryList categoryList;
+                    if (state.categoryList != null)
+                    {
+                        categoryList = await serverHelper.CategoryGetListAsync(state.categoryList.lastChanged);
+                    }
+                    else
+                    {
+                        categoryList = await serverHelper.CategoryGetListAsync(null);
+                    }
+                    state.categoryList = categoryList;
+                    state.categoryLoadState = GlobalState.DataLoadState.Loaded;
+                    return "OK";
+                }
+                else
+                {
+                    if (state.tagList != null)
+                    {
+                        state.categoryLoadState = GlobalState.DataLoadState.LocalCache;
+                        return "OK";
+                    }
+                    else
+                    {
+                        state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
+                        return "No local Category list is available.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
+                return ex.Message;
+            }
+        }
+        #endregion
     }
 }

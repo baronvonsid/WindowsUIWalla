@@ -55,13 +55,14 @@ namespace ManageWalla
 
         private PaneMode currentPane;
         private Tag currentTag = null;
+        private Category currentCategory = null;
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
         public UploadImageFileList uploadFots = null;
         public UploadStatusListBind uploadStatusListBind = null;
         public ImageMainViewerList imageMainViewerList = null;
         public GlobalState state = null;
-        public ImageList currentTagImageList = null;
+        public ImageList currentImageList = null;
         private bool tagListUploadRefreshing = false;
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
@@ -86,6 +87,7 @@ namespace ManageWalla
 
             RefreshOverallPanesStructure(PaneMode.CategoryView);
             RefreshPanesAllControls(PaneMode.CategoryView);
+            RefreshAndDisplayCategoryList(false);
         }
 
         private void radUpload_Checked(object sender, RoutedEventArgs e)
@@ -228,66 +230,52 @@ namespace ManageWalla
             }
         }
 
-
         private void RefreshPanesAllControls(PaneMode mode)
         {
-            /*
-            
-            switch (currentPane)
-            {
-                //These actions indicate a change has occured which requires a window re-jig.
-                case PaneMode.CategoryView:
-                case PaneMode.TagView:
-                case PaneMode.ViewView:
-                case PaneMode.Upload:
-                case PaneMode.Account:
-                    //RefreshPanesLoadingState(mode, null, false);
-                    RefreshOverallPanesStructure();
-                    break;
-            }
-            */
 
             switch (mode)
             {
-
                 #region Category
-                /*    
                 case PaneMode.CategoryView:
-
                     gridCategory.RowDefinitions[1].MaxHeight = 34;
                     gridCategory.RowDefinitions[2].MaxHeight = 0;
                     gridCategory.RowDefinitions[3].MaxHeight = 0;
                     gridCategory.RowDefinitions[4].MaxHeight = 0;
+                    
+                    treeCategoryView.IsEnabled = true;
+                    cmdCategoryAdd.IsEnabled = true;
+                    cmdCategoryEdit.IsEnabled = true;
 
-                    //treeCategoryView.IsEnabled = true;
-                    //gridCatgeoryAddEdit gridCategoryView
+                    radTag.IsEnabled = true;
+                    radView.IsEnabled = true;
+                    radUpload.IsEnabled = true;
+                    cmdAccount.IsEnabled = true;
                     break;
                 case PaneMode.CategoryAdd:
-                    //treeCategoryView.IsEnabled = false;
-
-                    gridCategory.RowDefinitions[1].MaxHeight = 0;
-                    gridCategory.RowDefinitions[2].MaxHeight = 25;
-                    gridCategory.RowDefinitions[3].MaxHeight = 75;
-                    gridCategory.RowDefinitions[4].MaxHeight = 34;
-
-                    cmdAddEditCategoryMove.Visibility = Visibility.Collapsed;
-                    cmdAddEditCategorySave.Content = "Save New";
-                    cmdAddEditCategoryDelete.Visibility = Visibility.Collapsed;
-
-                    break;
                 case PaneMode.CategoryEdit:
-                    //treeCategoryView.IsEnabled = false;
-
                     gridCategory.RowDefinitions[1].MaxHeight = 0;
                     gridCategory.RowDefinitions[2].MaxHeight = 25;
                     gridCategory.RowDefinitions[3].MaxHeight = 75;
                     gridCategory.RowDefinitions[4].MaxHeight = 34;
-                    cmdAddEditCategoryMove.Visibility = Visibility.Visible;
-                    cmdAddEditCategorySave.Content = "Save Edit";
-                    cmdAddEditCategoryDelete.Visibility = Visibility.Visible;
+                    
+                    cmdCategoryCancel.Visibility = Visibility.Visible;
+                    
+                    if (mode == PaneMode.CategoryAdd)
+                    {
+                        cmdCategorySave.Content = "Save New";
+                        cmdCategoryDelete.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        cmdCategorySave.Content = "Save Edit";
+                        cmdCategoryDelete.Visibility = Visibility.Visible;
+                    }
 
+                    radTag.IsEnabled = false;
+                    radView.IsEnabled = false;
+                    radUpload.IsEnabled = false;
+                    cmdAccount.IsEnabled = false;
                     break;
-                 */
                 #endregion
 
                 #region Tag
@@ -297,9 +285,6 @@ namespace ManageWalla
                     gridTag.RowDefinitions[3].MaxHeight = 0;
                     gridTag.RowDefinitions[4].MaxHeight = 0;
 
-                    //RefreshAndDisplayTagList(false);
-
-                    //cmdAssociateTag.Visibility = Visibility.Collapsed;
                     cmdTagAdd.Visibility = Visibility.Visible;
                     cmdTagEdit.Visibility = Visibility.Visible;
                     wrapMyTags.IsEnabled = true;
@@ -450,7 +435,6 @@ namespace ManageWalla
             currentPane = mode;
         }
 
-
         private void ShowHideFilterSort()
         {
             if (cmdFilter.IsChecked == true)
@@ -471,7 +455,6 @@ namespace ManageWalla
             }
         }
         #endregion
-
 
         private void cmdFilter_Checked(object sender, RoutedEventArgs e)
         {
@@ -495,16 +478,361 @@ namespace ManageWalla
             ShowHideFilterSort();
         }
 
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
 
+        #region Category UI Control
+        /// <summary>
+        /// Method to load and refresh the category list, based on online status and whether or not a local cache contains a previous version
+        /// </summary>
+        /// <param name="forceRefresh"></param>
+        async private void RefreshAndDisplayCategoryList(bool forceRefresh)
+        {
+            //Catch first time loads, user intiated refresh and when user was offline and is now online.  But only if logged on.
+            if (state.connectionState != GlobalState.ConnectionState.NoAccount &&
+                (state.categoryLoadState == GlobalState.DataLoadState.No || forceRefresh || state.categoryLoadState == GlobalState.DataLoadState.LocalCache))
+            {
+                //TODO show pending animation.
+                panCategoryUnavailable.Visibility = System.Windows.Visibility.Visible;
+                gridCategory.Visibility = Visibility.Collapsed;
+
+                string response = await controller.CategoryRefreshListAsync();
+                if (response != "OK")
+                {
+                    DisplayMessage(response, MessageSeverity.Error);
+                }
+            }
+
+            switch (state.categoryLoadState)
+            {
+                case GlobalState.DataLoadState.Loaded:
+                case GlobalState.DataLoadState.LocalCache:
+
+                    CategoryListReloadFromState();
+                    panCategoryUnavailable.Visibility = System.Windows.Visibility.Collapsed;
+                    gridCategory.Visibility = Visibility.Visible;
+                    break;
+                case GlobalState.DataLoadState.Unavailable:
+                    panCategoryUnavailable.Visibility = System.Windows.Visibility.Visible;
+                    gridCategory.Visibility = Visibility.Collapsed;
+                    break;
+            }
         }
 
-        private void cmdTagRefresh_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Update controls from populated state object.
+        /// </summary>
+        public void CategoryListReloadFromState()
         {
-            RefreshAndDisplayTagList(true);
+            long categoryId = 0;
+            //Keep a reference to the currently selected tag list.
+            TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
+            if (item != null)
+            {
+                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+                categoryId = category.id;
+            }
+            else
+            {
+                CategoryListCategoryRef firstCategoryWithImages = state.categoryList.CategoryRef.First<CategoryListCategoryRef>(r => r.count > 0);
+                categoryId = firstCategoryWithImages.id;
+            }
+
+            treeCategoryView.Items.Clear();
+            CategoryAddTreeViewLevel(0, null);
+
+            CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
+
+            UploadRefreshCategoryList();
         }
 
+        private void CategoryAddTreeViewLevel(long parentId, TreeViewItem currentHeader)
+        {
+            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            {
+                TreeViewItem newItem = new TreeViewItem();
+                int totalCount = current.count;
+                CategoryGetImageCountRecursive(current.id, ref totalCount);
+                newItem.Header = current.name + " (" + totalCount.ToString() + ")";
+                newItem.ToolTip = current.desc + " (" + current.count.ToString() + ")";
+                newItem.Tag = current;
+                newItem.IsExpanded = true;
+                //newItem.Style = (Style)FindResource("styleRadioButton");
+                //newItem.Template = (ControlTemplate)FindResource("templateRadioButton");
+                newItem.AllowDrop = true;
+                newItem.Drop += new DragEventHandler(CategoryDroppedImages);
+                newItem.Selected += new RoutedEventHandler(FetchCategoryImagesFirstAsync);
+
+                if (currentHeader == null)
+                {
+                    treeCategoryView.Items.Add(newItem);
+                }
+                else
+                {
+                    currentHeader.Items.Add(newItem);
+                }
+
+                CategoryAddTreeViewLevel(current.id, newItem);
+            }
+        }
+
+        private void CategoryGetImageCountRecursive(long parentId, ref int count)
+        {
+            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            {
+                count = count + current.count;
+                CategoryGetImageCountRecursive(current.id, ref count);
+            }
+        }
+
+        private void CategorySelect(long categoryId, TreeViewItem currentHeader, TreeView treeViewToUpdate)
+        {
+            foreach (TreeViewItem item in currentHeader.Items)
+            {
+                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+                if (category.id == categoryId)
+                {
+                    item.IsSelected = true;
+                    treeViewToUpdate.Items.MoveCurrentTo(item);
+                    return;
+                }
+                if (item.HasItems)
+                {
+                    CategorySelect(categoryId, item, treeViewToUpdate);
+                }
+            }
+        }
+
+        async private Task CategoryPopulateMetaData()
+        {
+            TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
+            if (item == null)
+            {
+                return;
+            }
+
+            Category category = await controller.CategoryGetMetaAsync((CategoryListCategoryRef)item.Tag);
+            txtCategoryName.Text = category.Name;
+            txtCategoryDescription.Text = category.Desc;
+            currentCategory = category;
+        }
+
+        //TODO - ensure that this is called when a search is applied.
+        async private void FetchCategoryImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+
+            TreeViewItem selectedTreeViewItem = (TreeViewItem)sender;
+
+            /* Refresh tag image state */
+            if (selectedTreeViewItem != null)
+            {
+                CategoryListCategoryRef categoryRef = (CategoryListCategoryRef)selectedTreeViewItem.Tag;
+                currentImageList = await controller.CategoryGetImagesAsync(categoryRef.id, 0, GetSearchQueryString());
+
+                /* Populate tag image list from state */
+                ImageListUpdateControls();
+            }
+        }
+
+        async private Task FetchMoreImagesAsync(FetchDirection direction)
+        {
+            if (currentImageList == null)
+                return;
+
+            /* Update current tag image list */
+            int cursor = 0;
+            switch (direction)
+            {
+                case FetchDirection.Begin:
+                    cursor = 0;
+                    break;
+                case FetchDirection.Next:
+                    if ((currentImageList.imageCursor + state.imageFetchSize) <= currentImageList.totalImageCount)
+                        cursor = currentImageList.imageCursor + state.imageFetchSize;
+                    break;
+                case FetchDirection.Previous:
+                    cursor = Math.Max(currentImageList.imageCursor - state.imageFetchSize, 0);
+                    break;
+                case FetchDirection.Last:
+                    cursor = Math.Abs(currentImageList.totalImageCount / state.imageFetchSize) * state.imageFetchSize;
+                    break;
+            }
+
+            switch (currentPane)
+            {
+                case PaneMode.CategoryView:
+                case PaneMode.CategoryEdit:
+                case PaneMode.CategoryAdd:
+                    currentImageList = await controller.CategoryGetImagesAsync(currentImageList.id, cursor, GetSearchQueryString());
+                    break;
+                case PaneMode.TagAdd:
+                case PaneMode.TagEdit:
+                case PaneMode.TagView:
+                    currentImageList = await controller.TagGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, GetSearchQueryString());
+                    break;
+            }
+            
+
+            /* Populate tag image list from state */
+            ImageListUpdateControls();
+        }
+
+        async private Task ImageListUpdateControls()
+        {
+            imageMainViewerList.Clear();
+
+            if (currentImageList == null)
+                return;
+
+            if (currentImageList.Images == null)
+                return;
+
+            foreach (ImageListImageRef imageRef in currentImageList.Images)
+            {
+                GeneralImage newImage = new GeneralImage(controller.GetServerHelper());
+                newImage.imageId = imageRef.id;
+                newImage.Name = imageRef.name;
+                newImage.Description = imageRef.desc;
+                newImage.UploadDate = imageRef.uploadDate;
+                newImage.FilePath = imageRef.localPath;
+
+                imageMainViewerList.Add(newImage);
+            }
+
+            if (currentImageList.imageCursor == 0)
+            {
+                cmdImageNavigationBegin.IsEnabled = false;
+                cmdImageNavigationPrevious.IsEnabled = false;
+            }
+            else
+            {
+                cmdImageNavigationBegin.IsEnabled = true;
+                cmdImageNavigationPrevious.IsEnabled = true;
+            }
+
+            if ((currentImageList.imageCursor + state.imageFetchSize) > currentImageList.totalImageCount)
+            {
+                cmdImageNavigationLast.IsEnabled = false;
+                cmdImageNavigationNext.IsEnabled = false;
+            }
+            else
+            {
+                cmdImageNavigationLast.IsEnabled = true;
+                cmdImageNavigationNext.IsEnabled = true;
+            }
+
+            foreach (GeneralImage newImage in imageMainViewerList)
+            {
+                await newImage.LoadImage();
+            }
+        }
+
+        private void cmdCategoryCancel_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshPanesAllControls(PaneMode.CategoryView);
+        }
+
+        private void txtCategoryName_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Filter out non-digits, except spaces input
+            foreach (char c in e.Text)
+                if (!Char.IsLetterOrDigit(c) && !Char.IsWhiteSpace(c))
+                {
+                    e.Handled = true;
+                    break;
+                }
+        }
+
+        private void cmdCategoryAdd_Click(object sender, RoutedEventArgs e)
+        {
+            txtCategoryName.Text = "";
+            txtCategoryDescription.Text = "";
+            RefreshPanesAllControls(PaneMode.CategoryAdd);
+        }
+
+        async private void cmdCategoryEdit_Click(object sender, RoutedEventArgs e)
+        {
+            await CategoryPopulateMetaData();
+            RefreshPanesAllControls(PaneMode.CategoryEdit);
+        }
+
+        async private void cmdCategorySave_Click(object sender, RoutedEventArgs e)
+        {
+            string response = null;
+
+            CategoryListCategoryRef currentSelectedCategory = null;
+            TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
+            if (item != null)
+            {
+                currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+            }
+
+            if (currentPane == PaneMode.CategoryAdd)
+            {
+                Category category = new Category();
+                category.Name = txtCategoryName.Text;
+                category.Desc = txtCategoryDescription.Text;
+                if (currentSelectedCategory == null)
+                {
+                    category.parentId = 0;
+                }
+                else
+                {
+                    category.parentId = currentSelectedCategory.id;
+                }
+                response = await controller.CategoryCreateAsync(category);
+            }
+            else
+            {
+                currentCategory.Name = txtCategoryName.Text;
+                currentCategory.Desc = txtCategoryDescription.Text;
+                if (currentSelectedCategory != null && currentCategory.id != currentSelectedCategory.id)
+                {
+                    currentCategory.parentId = currentSelectedCategory.id;
+                }
+
+                response = await controller.CategoryUpdateAsync(currentCategory);
+            }
+
+            if (response != "OK")
+            {
+                DisplayMessage(response, MessageSeverity.Error);
+                return;
+            }
+
+            RefreshPanesAllControls(PaneMode.CategoryView);
+            RefreshAndDisplayCategoryList(true);
+        }
+
+        async private void cmdCategoryDelete_Click(object sender, RoutedEventArgs e)
+        {
+            string response = await controller.CategoryDeleteAsync(currentCategory);
+            if (response != "OK")
+            {
+                DisplayMessage(response, MessageSeverity.Error);
+                return;
+            }
+
+            RefreshPanesAllControls(PaneMode.CategoryView);
+            RefreshAndDisplayCategoryList(true);
+        }
+
+        async private void CategoryDroppedImages(object sender, DragEventArgs e)
+        {
+            /*
+            RadioButton meTagButton = sender as RadioButton;
+            TagListTagRef meTag = (TagListTagRef)meTagButton.Tag;
+
+            int count = lstImageMainViewerList.SelectedItems.Count;
+            if (count > 0)
+            {
+                if (MessageBox.Show("Do you want to move the " + count.ToString() + " selected images to the tag: " + meTag.name, "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+
+                }
+            }
+             * */
+        }
+        #endregion
 
         #region Tag UI Control
         /// <summary>
@@ -598,9 +926,7 @@ namespace ManageWalla
             if (recheckButton != null)
                 recheckButton.IsChecked = true;
 
-            RefreshTagsListUpload();
-                //recheckButton.RaiseEvent(new RoutedEventArgs(RadioButton.CheckedEvent));
-
+            UploadRefreshTagsList();
         }
 
         //TODO - ensure that this is called when a search is applied.
@@ -613,19 +939,20 @@ namespace ManageWalla
             if (checkedButton != null)
             {
                 TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
-                currentTagImageList = await controller.TagGetImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetTagSearchQueryString());
+                currentImageList = await controller.TagGetImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetSearchQueryString());
 
                 /* Populate tag image list from state */
-                TagImageListUpdateControls();
+                await ImageListUpdateControls();
             }
         }
 
-        async private Task FetchMoreTagImagesAsync(FetchDirection direction)
+        /*
+        async private Task FetchMoreImagesAsync(FetchDirection direction)
         {
-            if (currentTagImageList == null)
+            if (currentImageList == null)
                 return;
 
-            /* Update current tag image list */
+            //Update current tag image list
             int cursor = 0;
             switch (direction)
             {
@@ -633,40 +960,41 @@ namespace ManageWalla
                     cursor = 0;
                     break;
                 case FetchDirection.Next:
-                    if ((currentTagImageList.imageCursor + state.imageFetchSize) <= currentTagImageList.totalImageCount)
-                        cursor = currentTagImageList.imageCursor + state.imageFetchSize;
+                    if ((currentImageList.imageCursor + state.imageFetchSize) <= currentImageList.totalImageCount)
+                        cursor = currentImageList.imageCursor + state.imageFetchSize;
                     break;
                 case FetchDirection.Previous:
-                    cursor = Math.Max(currentTagImageList.imageCursor - state.imageFetchSize, 0);
+                    cursor = Math.Max(currentImageList.imageCursor - state.imageFetchSize, 0);
                     break;
                 case FetchDirection.Last:
-                    cursor = Math.Abs(currentTagImageList.totalImageCount / state.imageFetchSize) * state.imageFetchSize;
+                    cursor = Math.Abs(currentImageList.totalImageCount / state.imageFetchSize) * state.imageFetchSize;
                     break;
             }
 
-            currentTagImageList = await controller.TagGetImagesAsync(currentTagImageList.id, currentTagImageList.Name, cursor, GetTagSearchQueryString());
+            currentImageList = await controller.TagGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, GetSearchQueryString());
 
-            /* Populate tag image list from state */
-            TagImageListUpdateControls();
+            ImageListUpdateControls();
         }
+*/
 
         //TODO add functionality + server side.
-        private string GetTagSearchQueryString()
+        private string GetSearchQueryString()
         {
             return null;
         }
 
+        /*
         async private Task TagImageListUpdateControls()
         {
             imageMainViewerList.Clear();
 
-            if (currentTagImageList == null)
+            if (currentImageList == null)
                 return;
 
-            if (currentTagImageList.Images == null)
+            if (currentImageList.Images == null)
                 return;
 
-            foreach (ImageListImageRef imageRef in currentTagImageList.Images)
+            foreach (ImageListImageRef imageRef in currentImageList.Images)
             {
                 GeneralImage newImage = new GeneralImage(controller.GetServerHelper());
                 newImage.imageId = imageRef.id;
@@ -678,7 +1006,7 @@ namespace ManageWalla
                 imageMainViewerList.Add(newImage);
             }
 
-            if (currentTagImageList.imageCursor == 0)
+            if (currentImageList.imageCursor == 0)
             {
                 cmdImageNavigationBegin.IsEnabled = false;
                 cmdImageNavigationPrevious.IsEnabled = false;
@@ -689,7 +1017,7 @@ namespace ManageWalla
                 cmdImageNavigationPrevious.IsEnabled = true;
             }
 
-            if ((currentTagImageList.imageCursor + state.imageFetchSize) > currentTagImageList.totalImageCount)
+            if ((currentImageList.imageCursor + state.imageFetchSize) > currentImageList.totalImageCount)
             {
                 cmdImageNavigationLast.IsEnabled = false;
                 cmdImageNavigationNext.IsEnabled = false;
@@ -705,8 +1033,9 @@ namespace ManageWalla
                 await newImage.LoadImage();
             }
         }
+        */
 
-        async private void PopulateTagMetaData()
+        async private Task PopulateTagMetaData()
         {
             RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
 
@@ -722,7 +1051,6 @@ namespace ManageWalla
 
         async private void TagDroppedImages(object sender, DragEventArgs e)
         {
-            
             RadioButton meTagButton = sender as RadioButton;
             TagListTagRef meTag = (TagListTagRef)meTagButton.Tag;
 
@@ -731,9 +1059,29 @@ namespace ManageWalla
             {
                 if (MessageBox.Show("Do you want to move the " + count.ToString() + " selected images to the tag: " + meTag.name, "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    
+                    ImageMoveList moveList = new ImageMoveList();
+                    moveList.ImageRef = new long[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        GeneralImage image = (GeneralImage)lstImageMainViewerList.Items[i];
+                        moveList.ImageRef[i] = image.imageId;
+                    }
+
+                    string response = await controller.TagAddRemoveImagesAsync(meTag.name, moveList, true);
+                    if (response != "OK")
+                    {
+                        DisplayMessage(response, MessageSeverity.Error);
+                        return;
+                    }
+
+                    RefreshAndDisplayTagList(true);
                 }
             }
+        }
+
+        private void cmdTagRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshAndDisplayTagList(true);
         }
 
         private void txtTagAddEditName_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -767,10 +1115,9 @@ namespace ManageWalla
             RefreshPanesAllControls(PaneMode.TagAdd);
         }
 
-        //TODO - check is rfesponse is OK or UI freezes.
-        private void cmdTagEdit_Click(object sender, RoutedEventArgs e)
+        async private void cmdTagEdit_Click(object sender, RoutedEventArgs e)
         {
-            PopulateTagMetaData();
+            await PopulateTagMetaData();
             RefreshPanesAllControls(PaneMode.TagEdit);
         }
 
@@ -793,7 +1140,7 @@ namespace ManageWalla
 
                 //Add Images selected
 
-                response = await controller.TagSaveNewAsync(tag);
+                response = await controller.TagCreateAsync(tag);
             }
             else
             {
@@ -974,7 +1321,55 @@ namespace ManageWalla
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
-        private void RefreshTagsListUpload()
+        private void UploadRefreshCategoryList()
+        {
+            
+            long categoryId = 0;
+            //Keep a reference to the currently selected category item.
+            TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
+            if (item != null)
+            {
+                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+                categoryId = category.id;
+            }
+            else
+            {
+                CategoryListCategoryRef firstCategoryWithImages = state.categoryList.CategoryRef.First<CategoryListCategoryRef>(r => r.parentId != 0);
+                categoryId = firstCategoryWithImages.id;
+            }
+
+            treeUploadCategoryView.Items.Clear();
+            UploadAddCategoryToTreeView(0, null);
+
+            CategorySelect(categoryId, (TreeViewItem)treeUploadCategoryView.Items[0], treeUploadCategoryView);
+        }
+
+        private void UploadAddCategoryToTreeView(long parentId, TreeViewItem currentHeader)
+        {
+            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            {
+                TreeViewItem newItem = new TreeViewItem();
+                newItem.Header = current.name;
+                newItem.ToolTip = current.desc + " (" + current.count.ToString() + ")";
+                newItem.Tag = current;
+                newItem.IsExpanded = true;
+                //newItem.Style = (Style)FindResource("styleRadioButton");
+                //newItem.Template = (ControlTemplate)FindResource("templateRadioButton");
+
+                if (currentHeader == null)
+                {
+                    treeUploadCategoryView.Items.Add(newItem);
+                }
+                else
+                {
+                    currentHeader.Items.Add(newItem);
+                }
+
+                UploadAddCategoryToTreeView(current.id, newItem);
+            }
+        }
+
+        private void UploadRefreshTagsList()
         {
             lstUploadTagList.Items.Clear();
             //Load existing tags into the tag
@@ -991,7 +1386,6 @@ namespace ManageWalla
         {
             UploadTagListReload();
         }
-
 
         private void UploadTagListReload()
         {
@@ -1253,10 +1647,26 @@ namespace ManageWalla
 
         async private void cmdUploadAll_Click(object sender, RoutedEventArgs e)
         {
+            TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
+            if (item == null)
+            {
+                MessageBox.Show("You must select a Category for your uploaded images to be stored in.");
+                return;
+            }
+
+            if (uploadUIState.UploadToNewCategory && uploadUIState.CategoryName.Length < 1)
+            {
+                MessageBox.Show("You have selected to add a new category, you must enter a name to continue.");
+                return;
+            }
+
+            CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+            long categoryId = category.id;
+
             uploadUIState.Uploading = true;
             RefreshPanesAllControls(PaneMode.Upload);
 
-            string response = await controller.DoUploadAsync(uploadFots, uploadUIState);
+            string response = await controller.DoUploadAsync(uploadFots, uploadUIState, categoryId);
             if (response != null)
             {
                 MessageBox.Show("The upload encountered an error.  Message: " + response);
@@ -1502,7 +1912,6 @@ namespace ManageWalla
         }
         #endregion
 
-
         #region Account
         async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
         {
@@ -1576,26 +1985,24 @@ namespace ManageWalla
         }
         #endregion
 
-
-
         async private void cmdImageNavigationLast_Click(object sender, RoutedEventArgs e)
         {
-            await FetchMoreTagImagesAsync(FetchDirection.Last);
+            await FetchMoreImagesAsync(FetchDirection.Last);
         }
 
         async private void cmdImageNavigationNext_Click(object sender, RoutedEventArgs e)
         {
-            await FetchMoreTagImagesAsync(FetchDirection.Next);
+            await FetchMoreImagesAsync(FetchDirection.Next);
         }
 
         async private void cmdImageNavigationPrevious_Click(object sender, RoutedEventArgs e)
         {
-            await FetchMoreTagImagesAsync(FetchDirection.Previous);
+            await FetchMoreImagesAsync(FetchDirection.Previous);
         }
 
         async private void cmdImageNavigationBegin_Click(object sender, RoutedEventArgs e)
         {
-            await FetchMoreTagImagesAsync(FetchDirection.Begin);
+            await FetchMoreImagesAsync(FetchDirection.Begin);
         }
 
         private void cmdTagAddRemoveImages_Click(object sender, RoutedEventArgs e)
@@ -1611,6 +2018,13 @@ namespace ManageWalla
                 DragDrop.DoDragDrop(meImage, "dunno", DragDropEffects.Copy);
             }
         }
+
+        private void cmdCategoryRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshAndDisplayCategoryList(true);
+        }
+
+
 
 
 

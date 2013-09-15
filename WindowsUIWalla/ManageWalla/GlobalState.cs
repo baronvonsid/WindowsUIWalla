@@ -36,9 +36,12 @@ namespace ManageWalla
 
         //Business Objects
         public TagList tagList { get; set; }
+        public CategoryList categoryList { get; set; }
+        
         public String categoryXml { get; set; }
         public UploadStatusList uploadStatusList { get; set; }
         public List<ImageList> tagImageList { get; set; }
+        public List<ImageList> categoryImageList { get; set; }
 
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }
@@ -75,10 +78,11 @@ namespace ManageWalla
                 state = new GlobalState();
 
                 //Initialise objects.
-                if (state.tagImageList == null)
-                {
+                //if (state.tagImageList == null)
+                //{
                     state.tagImageList = new List<ImageList>();
-                }
+                //}
+                    state.categoryImageList = new List<ImageList>();
             }
 
             //TODO - delete

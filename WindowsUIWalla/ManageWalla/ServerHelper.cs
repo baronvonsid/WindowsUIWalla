@@ -90,7 +90,7 @@ namespace ManageWalla
         #endregion
 
         #region Tag
-        async public Task<TagList> GetTagsAvailableAsync(DateTime? lastModified)
+        async public Task<TagList> TagGetListAsync(DateTime? lastModified)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> UpdateTagAsync(Tag newTag, string oldTagName)
+        async public Task<string> TagUpdateAsync(Tag newTag, string oldTagName)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> TagSaveNewAsync(Tag tag)
+        async public Task<string> TagCreateAsync(Tag tag)
         {
             try
             {
@@ -169,11 +169,11 @@ namespace ManageWalla
             }
         }
 
-        async public Task<Tag> GetTagMeta(TagListTagRef tagRef)
+        async public Task<Tag> TagGetMeta(string tagName)
         {
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tag/" + Uri.EscapeUriString(tagRef.name));
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tag/" + Uri.EscapeUriString(tagName));
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await http.SendAsync(request);
@@ -214,12 +214,12 @@ namespace ManageWalla
             }
         }
 
-        async public Task<ImageList> GetTagImagesAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
+        async public Task<ImageList> TagGetImageListAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
         {
             try
             {
-                /* GET /{userName}/tag/{tagName}/{imageCursor}/{size}/ */
-                string requestUrl = "tag/" + tagName + "/" + cursor.ToString() + "/" + size.ToString() + "/?" + searchQueryString ?? "";
+                /* GET /{userName}/tag/{tagName}/{imageCursor}/{size} */
+                string requestUrl = "tag/" + tagName + "/" + cursor.ToString() + "/" + size.ToString() + "?" + searchQueryString ?? "";
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
@@ -247,6 +247,39 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 throw ex;
+            }
+        }
+
+        async public Task<string> TagAddRemoveImagesAsync(string tagName, ImageMoveList imagesToMove, bool add)
+        {
+            try
+            {
+                HttpRequestMessage request = null;
+                string url =  "tag/" + Uri.EscapeUriString(tagName) + "/images";
+                if (add)
+                {
+                    request = new HttpRequestMessage(HttpMethod.Put, url);
+                }
+                else
+                {
+                    request = new HttpRequestMessage(HttpMethod.Delete, url);
+                }
+                
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<ImageMoveList>(imagesToMove, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
             }
         }
         #endregion
@@ -316,7 +349,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<UploadStatusList> GetUploadStatusListAsync()
+        async public Task<UploadStatusList> UploadGetStatusListAsync()
         {
             try
             {
@@ -343,13 +376,194 @@ namespace ManageWalla
         #endregion
 
         #region Category
-        public long CreateCategory(string categoryName, string categoryDesc, long parentCategoryId)
+        async public Task<long> CategoryCreateAsync(Category category)
         {
-            //TODO
-            return 10;
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "category");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                reader.MoveToContent();
+                long categoryId = reader.ReadElementContentAsLong();
+
+                return categoryId;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task<CategoryList> CategoryGetListAsync(DateTime? lastModified)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "categories");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                if (lastModified.HasValue)
+                {
+                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
+                }
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(CategoryList));
+                    CategoryList categoryList = (CategoryList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                    return categoryList;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task<string> CategoryUpdateAsync(Category category)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "category/" + Uri.EscapeUriString(category.id.ToString()));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
+        }
+
+        async public Task<Category> CategoryGetMeta(long categoryId)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "category/" + Uri.EscapeUriString(categoryId.ToString()));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                XmlSerializer serialKiller = new XmlSerializer(typeof(Category));
+                Category category = (Category)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+
+                return category;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task<string> CategoryDeleteAsync(Category category)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "category/" + Uri.EscapeUriString(category.id.ToString()));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
+        }
+
+        async public Task<ImageList> CategorGetImageListAsync(long categoryId, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
+        {
+            try
+            {
+                /* GET /{userName}/category/{categoryId}/{imageCursor}/{size} */
+                string requestUrl = "category/" + categoryId.ToString() + "/" + cursor.ToString() + "/" + size.ToString() + "?" + searchQueryString ?? "";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                if (useDate)
+                {
+                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified);
+                }
+
+                HttpResponseMessage response = await http.SendAsync(request);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
+                    ImageList categoryImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                    return categoryImageList;
+                }
+                else if (response.StatusCode != HttpStatusCode.NotModified)
+                {
+                    response.EnsureSuccessStatusCode();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task<string> CategoryMoveImagesAsync(long categoryId, long newCategoryId,  ImageMoveList imagesToMove)
+        {
+            try
+            {
+                string url = "category/" + Uri.EscapeUriString(categoryId.ToString()) + "/" + Uri.EscapeUriString(newCategoryId.ToString());
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
+
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<ImageMoveList>(imagesToMove, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
         }
         #endregion
 
+        #region Images
         async public Task<BitmapImage> GetImage(long imageId, int size)
         {
             try
@@ -375,6 +589,6 @@ namespace ManageWalla
                 throw ex;
             }
         }
-
+        #endregion
     }
 }
