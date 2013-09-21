@@ -638,6 +638,15 @@ namespace ManageWalla
                 return ex.Message;
             }
         }
+
+        async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageMoveList moveList)
+        {
+            string response = await serverHelper.CategoryMoveImagesAsync(categoryId, moveList);
+            if (response != "OK")
+                response = "Images could not be moved category, there was an error on the server:" + response;
+
+            return response;
+        }
         #endregion
     }
 }

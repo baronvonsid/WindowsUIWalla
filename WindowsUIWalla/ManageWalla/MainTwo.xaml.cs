@@ -31,9 +31,9 @@ namespace ManageWalla
             TagView = 3,
             TagEdit = 4,
             TagAdd = 5,
-            ViewView = 6,
-            ViewEdit = 7,
-            ViewAdd = 8,
+            GalleryView = 6,
+            GalleryEdit = 7,
+            GalleryAdd = 8,
             Upload = 9,
             Account = 10
         }
@@ -55,6 +55,7 @@ namespace ManageWalla
 
         private PaneMode currentPane;
         private Tag currentTag = null;
+        private Gallery currentGallery = null;
         private Category currentCategory = null;
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
@@ -82,7 +83,7 @@ namespace ManageWalla
         {
             cmdCategoryRefresh.Visibility = System.Windows.Visibility.Visible;
             cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdViewRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
             lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
 
             RefreshOverallPanesStructure(PaneMode.CategoryView);
@@ -94,29 +95,29 @@ namespace ManageWalla
         {
             cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
             cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdViewRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
             lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Visible;
 
             RefreshOverallPanesStructure(PaneMode.Upload);
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
-        private void radView_Checked(object sender, RoutedEventArgs e)
+        private void radGallery_Checked(object sender, RoutedEventArgs e)
         {
             cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
             cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdViewRefresh.Visibility = System.Windows.Visibility.Visible;
+            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Visible;
             lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
 
-            RefreshOverallPanesStructure(PaneMode.ViewView);
-            RefreshPanesAllControls(PaneMode.TagView);
+            RefreshOverallPanesStructure(PaneMode.GalleryView);
+            RefreshPanesAllControls(PaneMode.GalleryView);
         }
 
         private void radTag_Checked(object sender, RoutedEventArgs e)
         {
             cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
             cmdTagRefresh.Visibility = System.Windows.Visibility.Visible;
-            cmdViewRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
             lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
 
             RefreshOverallPanesStructure(PaneMode.TagView);
@@ -163,7 +164,7 @@ namespace ManageWalla
                 case PaneMode.CategoryEdit:
                     panCategoryUnavailable.Visibility = Visibility.Visible;
                     panTagUnavailable.Visibility = Visibility.Collapsed;
-                    panViewUnavailable.Visibility = Visibility.Collapsed;
+                    panGalleryUnavailable.Visibility = Visibility.Collapsed;
                     lstImageMainViewerList.Visibility = Visibility.Visible;
                     lstUploadImageFileList.Visibility = Visibility.Collapsed;
                     panUpload.Visibility = System.Windows.Visibility.Collapsed;
@@ -178,7 +179,7 @@ namespace ManageWalla
                 case PaneMode.TagEdit:
                     panTagUnavailable.Visibility = Visibility.Visible;
                     panCategoryUnavailable.Visibility = Visibility.Collapsed;
-                    panViewUnavailable.Visibility = Visibility.Collapsed;
+                    panGalleryUnavailable.Visibility = Visibility.Collapsed;
                     lstImageMainViewerList.Visibility = Visibility.Visible;
                     lstUploadImageFileList.Visibility = Visibility.Collapsed;
                     panUpload.Visibility = System.Windows.Visibility.Collapsed;
@@ -188,10 +189,8 @@ namespace ManageWalla
                     gridLeft.RowDefinitions[6].Height = new GridLength(0);
                     gridLeft.RowDefinitions[8].Height = new GridLength(0);
                     break;
-                case PaneMode.ViewView:
-                case PaneMode.ViewEdit:
-                case PaneMode.ViewAdd:
-                    panViewUnavailable.Visibility = Visibility.Visible;
+                case PaneMode.GalleryView:
+                    panGalleryUnavailable.Visibility = Visibility.Visible;
                     panCategoryUnavailable.Visibility = Visibility.Collapsed;
                     panTagUnavailable.Visibility = Visibility.Collapsed;
                     lstImageMainViewerList.Visibility = Visibility.Visible;
@@ -202,11 +201,25 @@ namespace ManageWalla
                     gridLeft.RowDefinitions[4].Height = new GridLength(0);
                     gridLeft.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Star);
                     gridLeft.RowDefinitions[8].Height = new GridLength(0);
+
+                    gridRight.RowDefinitions[0].Height = new GridLength(40);
+                    gridRight.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
+
+                    gridGallerySelection.Visibility = Visibility.Collapsed;
+                    panGridRightHeader.Visibility = Visibility.Visible;
+                    break;
+                case PaneMode.GalleryEdit:
+                case PaneMode.GalleryAdd:
+                    gridRight.RowDefinitions[0].Height = new GridLength(2, GridUnitType.Star);
+                    gridRight.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
+
+                    gridGallerySelection.Visibility = Visibility.Visible;
+                    panGridRightHeader.Visibility = Visibility.Collapsed;
                     break;
                 case PaneMode.Upload:
                     panCategoryUnavailable.Visibility = Visibility.Collapsed;
                     panTagUnavailable.Visibility = Visibility.Collapsed;
-                    panViewUnavailable.Visibility = Visibility.Collapsed;
+                    panGalleryUnavailable.Visibility = Visibility.Collapsed;
                     lstImageMainViewerList.Visibility = Visibility.Collapsed;
                     lstUploadImageFileList.Visibility = Visibility.Visible;
                     panUpload.Visibility = System.Windows.Visibility.Visible;
@@ -247,8 +260,9 @@ namespace ManageWalla
                     cmdCategoryEdit.IsEnabled = true;
 
                     radTag.IsEnabled = true;
-                    radView.IsEnabled = true;
-                    radUpload.IsEnabled = true;
+                    radGallery.IsEnabled = true;
+                    
+                    //radUpload.IsEnabled = true;
                     cmdAccount.IsEnabled = true;
                     break;
                 case PaneMode.CategoryAdd:
@@ -272,7 +286,7 @@ namespace ManageWalla
                     }
 
                     radTag.IsEnabled = false;
-                    radView.IsEnabled = false;
+                    radGallery.IsEnabled = false;
                     radUpload.IsEnabled = false;
                     cmdAccount.IsEnabled = false;
                     break;
@@ -290,7 +304,7 @@ namespace ManageWalla
                     wrapMyTags.IsEnabled = true;
 
                     radCategory.IsEnabled = true;
-                    radView.IsEnabled = true;
+                    radGallery.IsEnabled = true;
                     radUpload.IsEnabled = true;
                     cmdAccount.IsEnabled = true;
 
@@ -304,7 +318,7 @@ namespace ManageWalla
                     wrapMyTags.IsEnabled = false;
 
                     radCategory.IsEnabled = false;
-                    radView.IsEnabled = false;
+                    radGallery.IsEnabled = false;
                     radUpload.IsEnabled = false;
                     cmdAccount.IsEnabled = false;
 
@@ -321,15 +335,71 @@ namespace ManageWalla
                     break;
                 #endregion
 
-                #region View
-                case PaneMode.ViewView:
+                #region Gallery
+                case PaneMode.GalleryView:
+                    /*
+                <RowDefinition Height="*" /> <!-- wrap galleries -->
+                <RowDefinition Height="34" /> <!-- add edit buttons -->
+                <RowDefinition Height="25" /> <!-- Name -->
+                <RowDefinition Height="75" /> <!-- Desc -->
+                <RowDefinition Height="25" /><!-- Access Type -->
+                <RowDefinition Height="25" /> <!-- Password -->
+                <RowDefinition Height="25" /> <!-- Group Fotos -->
+                <RowDefinition Height="34" /> <!-- Save buttons --> 
+                    */
+
+                    gridGallery.RowDefinitions[1].MaxHeight = 34;
+                    gridGallery.RowDefinitions[2].MaxHeight = 0;
+                    gridGallery.RowDefinitions[3].MaxHeight = 0;
+                    gridGallery.RowDefinitions[4].MaxHeight = 0;
+                    gridGallery.RowDefinitions[5].MaxHeight = 0;
+                    gridGallery.RowDefinitions[6].MaxHeight = 0;
+                    gridGallery.RowDefinitions[7].MaxHeight = 0;
+
+                    radCategory.IsEnabled = true;
+                    radTag.IsEnabled = true;
+                    radUpload.IsEnabled = true;
+                    cmdAccount.IsEnabled = true;
+                    wrapMyGalleries.IsEnabled = true;
 
                     break;
-                case PaneMode.ViewEdit:
+                case PaneMode.GalleryEdit:
+                case PaneMode.GalleryAdd:
+                    gridGallery.RowDefinitions[1].MaxHeight = 0;
+                    gridGallery.RowDefinitions[2].MaxHeight = 25;
+                    gridGallery.RowDefinitions[3].MaxHeight = 75;
+                    gridGallery.RowDefinitions[4].MaxHeight = 25;
+                    gridGallery.RowDefinitions[5].MaxHeight = 25;
+                    gridGallery.RowDefinitions[6].MaxHeight = 25;
+                    gridGallery.RowDefinitions[7].MaxHeight = 34;
 
-                    break;
-                case PaneMode.ViewAdd:
+                    radCategory.IsEnabled = false;
+                    radTag.IsEnabled = false;
+                    radUpload.IsEnabled = false;
+                    cmdAccount.IsEnabled = false;
 
+                    wrapMyGalleries.IsEnabled = false;
+
+                    if (cmbGalleryAccessType.SelectedIndex != 1)
+                    {
+                        txtGalleryPassword.Text = "";
+                        txtGalleryPassword.IsEnabled = false;
+                    }
+                    else
+                    {
+                        txtGalleryPassword.IsEnabled = true;
+                    }
+
+                    if (mode == PaneMode.GalleryAdd)
+                    {
+                        this.cmdGallerySave.Content = "Save New";
+                        cmdGalleryDelete.Visibility = System.Windows.Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        this.cmdGallerySave.Content = "Save Edit";
+                        cmdGalleryDelete.Visibility = System.Windows.Visibility.Visible;
+                    }
                     break;
                 #endregion
 
@@ -478,7 +548,6 @@ namespace ManageWalla
             ShowHideFilterSort();
         }
 
-
         #region Category UI Control
         /// <summary>
         /// Method to load and refresh the category list, based on online status and whether or not a local cache contains a previous version
@@ -536,8 +605,10 @@ namespace ManageWalla
                 categoryId = firstCategoryWithImages.id;
             }
 
+            CategoryListCategoryRef baseCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.parentId == 0);
+
             treeCategoryView.Items.Clear();
-            CategoryAddTreeViewLevel(0, null);
+            CategoryAddTreeViewLevel(baseCategory.id, null);
 
             CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
 
@@ -551,8 +622,8 @@ namespace ManageWalla
                 TreeViewItem newItem = new TreeViewItem();
                 int totalCount = current.count;
                 CategoryGetImageCountRecursive(current.id, ref totalCount);
-                newItem.Header = current.name + " (" + totalCount.ToString() + ")";
-                newItem.ToolTip = current.desc + " (" + current.count.ToString() + ")";
+                newItem.Header = current.name + " (" + current.count.ToString() + ")";
+                newItem.ToolTip = current.desc + " (" + totalCount.ToString() + ")";
                 newItem.Tag = current;
                 newItem.IsExpanded = true;
                 //newItem.Style = (Style)FindResource("styleRadioButton");
@@ -818,19 +889,58 @@ namespace ManageWalla
 
         async private void CategoryDroppedImages(object sender, DragEventArgs e)
         {
-            /*
-            RadioButton meTagButton = sender as RadioButton;
-            TagListTagRef meTag = (TagListTagRef)meTagButton.Tag;
+            e.Handled = true;
+
+            TreeViewItem meTreeviewNode = sender as TreeViewItem;
+            CategoryListCategoryRef meToCategory = (CategoryListCategoryRef)meTreeviewNode.Tag;
+
+            TreeViewItem meFromTreeviewNode = (TreeViewItem)treeCategoryView.SelectedItem;
+            CategoryListCategoryRef meFromCategory = (CategoryListCategoryRef)meFromTreeviewNode.Tag;
+
+            if (meFromCategory == null || meToCategory == null)
+            {
+                MessageBox.Show("Unexpected error, selected category could not be established.");
+                return;
+            }
 
             int count = lstImageMainViewerList.SelectedItems.Count;
             if (count > 0)
             {
-                if (MessageBox.Show("Do you want to move the " + count.ToString() + " selected images to the tag: " + meTag.name, "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show("Do you want to move the " + count.ToString() + " selected images to the category: " + meToCategory.name + "?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
+                    ImageMoveList moveList = new ImageMoveList();
+                    moveList.ImageRef = new long[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        GeneralImage image = (GeneralImage)lstImageMainViewerList.Items[i];
+                        if (image.categoryId == meToCategory.id)
+                        {
+                            MessageBox.Show("The update cannot be done, you have selected images which are already in the category: " + meToCategory.name);
+                            return;
+                        }
+                        moveList.ImageRef[i] = image.imageId;
+                    }
 
+                    string response = await controller.CategoryMoveImagesAsync(meToCategory.id, moveList);
+                    if (response != "OK")
+                    {
+                        DisplayMessage(response, MessageSeverity.Error);
+                        return;
+                    }
+
+                    RefreshAndDisplayCategoryList(true);
                 }
             }
-             * */
+
+
+
+
+
+
+
+
+
+
         }
         #endregion
 
@@ -1043,8 +1153,8 @@ namespace ManageWalla
             {
                 TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
                 Tag tag = await controller.TagGetMetaAsync((TagListTagRef)checkedButton.Tag);
-                txtTagAddEditName.Text = tag.Name;
-                txtTagAddEditDescription.Text = tag.Desc;
+                txtTagName.Text = tag.Name;
+                txtTagDescription.Text = tag.Desc;
                 currentTag = tag;
             }
         }
@@ -1057,7 +1167,7 @@ namespace ManageWalla
             int count = lstImageMainViewerList.SelectedItems.Count;
             if (count > 0)
             {
-                if (MessageBox.Show("Do you want to move the " + count.ToString() + " selected images to the tag: " + meTag.name, "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show("Do you want to add the " + count.ToString() + " selected images to the tag: " + meTag.name + "?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     ImageMoveList moveList = new ImageMoveList();
                     moveList.ImageRef = new long[count];
@@ -1084,7 +1194,7 @@ namespace ManageWalla
             RefreshAndDisplayTagList(true);
         }
 
-        private void txtTagAddEditName_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void txtTagName_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             // Filter out non-digit text input
             foreach (char c in e.Text)
@@ -1110,8 +1220,8 @@ namespace ManageWalla
 
         private void cmdTagAdd_Click(object sender, RoutedEventArgs e)
         {
-            txtTagAddEditName.Text = "";
-            txtTagAddEditDescription.Text = "";
+            txtTagName.Text = "";
+            txtTagDescription.Text = "";
             RefreshPanesAllControls(PaneMode.TagAdd);
         }
 
@@ -1135,8 +1245,8 @@ namespace ManageWalla
             if (currentPane == PaneMode.TagAdd)
             {
                 Tag tag = new Tag();
-                tag.Name = txtTagAddEditName.Text;
-                tag.Desc = txtTagAddEditDescription.Text;
+                tag.Name = txtTagName.Text;
+                tag.Desc = txtTagDescription.Text;
 
                 //Add Images selected
 
@@ -1145,8 +1255,8 @@ namespace ManageWalla
             else
             {
                 string oldTagName = currentTag.Name;
-                currentTag.Name = txtTagAddEditName.Text;
-                currentTag.Desc = txtTagAddEditDescription.Text;
+                currentTag.Name = txtTagName.Text;
+                currentTag.Desc = txtTagDescription.Text;
 
                 response = await controller.TagUpdateAsync(currentTag, oldTagName);
             }
@@ -2025,6 +2135,176 @@ namespace ManageWalla
         }
 
 
+        #region Gallery
+
+        async private Task<bool> PopulateGalleryMetaData()
+        {
+            RadioButton checkedButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+
+            if (checkedButton != null)
+            {
+                GalleryListGalleryRef galleryListGalleryRef = (GalleryListGalleryRef)checkedButton.Tag;
+                Gallery gallery = new Gallery(); // await controller.TagGetMetaAsync((TagListTagRef)checkedButton.Tag);
+                //txtGalleryName.Text = gallery.Name;
+                //txtGalleryDescription.Text = gallery.Desc;
+                //txtGalleryPassword.Text = gallery.Password;
+                //cmbGalleryAccessType.SelectedIndex = gallery.AccessType;
+                //cmbGalleryGroupingType.SelectedIndex = gallery.GroupingType;
+
+                currentGallery = gallery;
+                return true;
+            }
+            return false;
+        }
+
+        private void GalleryRefreshTagsList()
+        {
+
+            lstGalleryTagListExclude.Items.Clear();
+            lstGalleryTagListInclude.Items.Clear();
+            //Load existing tags into the tag
+            foreach (TagListTagRef tagRef in state.tagList.TagRef)
+            {
+                ListBoxItem newItemInclude = new ListBoxItem();
+                newItemInclude.Content = tagRef.name;
+                newItemInclude.Tag = tagRef;
+
+                ListBoxItem newItemExclude = new ListBoxItem();
+                newItemExclude.Content = tagRef.name;
+                newItemExclude.Tag = tagRef;
+
+                lstGalleryTagListExclude.Items.Add(newItemExclude);
+                lstGalleryTagListInclude.Items.Add(newItemInclude);
+            }
+
+            if (currentPane == PaneMode.GalleryEdit)
+            {
+                //TODO Update tag list from XML.
+            }
+        }
+
+        private void GalleryRefreshCategoryList()
+        {
+            CategoryListCategoryRef baseCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.parentId == 0);
+
+            treeGalleryCategoryView.Items.Clear();
+            GalleryCategoryAddTreeViewLevel(baseCategory.id, null);
+
+            if (currentPane == PaneMode.GalleryEdit)
+            {
+                //TODO Update tag list from XML.
+            }
+        }
+
+
+
+        private void GalleryCategoryAddTreeViewLevel(long parentId, TreeViewItem currentHeader)
+        {
+            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            {
+                TreeViewItem newItem = new TreeViewItem();
+                newItem.Header = current.name;
+                newItem.ToolTip = current.desc;
+                newItem.Tag = current;
+                newItem.IsExpanded = true;
+                //newItem.Style = (Style)FindResource("styleRadioButton");
+                //newItem.Template = (ControlTemplate)FindResource("templateRadioButton");
+                //newItem.Selected += new RoutedEventHandler(FetchCategoryImagesFirstAsync);
+
+                if (currentHeader == null)
+                {
+                    treeGalleryCategoryView.Items.Add(newItem);
+                }
+                else
+                {
+                    currentHeader.Items.Add(newItem);
+                }
+
+                CategoryAddTreeViewLevel(current.id, newItem);
+            }
+        }
+
+        private void cmdGalleryView_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("TODO");
+        }
+
+        private void cmdGalleryCopyUrl_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("TODO");
+        }
+
+        private void cmdGalleryAdd_Click(object sender, RoutedEventArgs e)
+        {
+            txtGalleryName.Text = "";
+            txtGalleryDescription.Text = "";
+            txtGalleryPassword.Text = "";
+            cmbGalleryAccessType.SelectedIndex = 0;
+            cmbGalleryGroupingType.SelectedIndex = 0;
+
+            GalleryRefreshTagsList();
+            GalleryRefreshCategoryList();
+
+            RefreshOverallPanesStructure(PaneMode.GalleryAdd);
+            RefreshPanesAllControls(PaneMode.GalleryAdd);
+        }
+
+        async private void cmdGalleryEdit_Click(object sender, RoutedEventArgs e)
+        {
+            if (await PopulateGalleryMetaData())
+            {
+                RefreshOverallPanesStructure(PaneMode.GalleryEdit);
+                RefreshPanesAllControls(PaneMode.GalleryEdit);
+
+                UploadRefreshTagsList();
+                GalleryRefreshCategoryList();
+            }
+        }
+
+        private void txtGalleryName_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Filter out non-digits, except spaces input
+            foreach (char c in e.Text)
+                if (!Char.IsLetterOrDigit(c) && !Char.IsWhiteSpace(c))
+                {
+                    e.Handled = true;
+                    break;
+                }
+        }
+
+        private void cmbGalleryAccessType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshPanesAllControls(currentPane);
+        }
+
+        private void cmdGallerySave_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("TODO");
+
+            RefreshOverallPanesStructure(PaneMode.GalleryView);
+            RefreshPanesAllControls(PaneMode.GalleryView);
+        }
+
+        private void cmdGalleryCancel_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshOverallPanesStructure(PaneMode.GalleryView);
+            RefreshPanesAllControls(PaneMode.GalleryView);
+        }
+
+        private void cmdGalleryDelete_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("TODO");
+
+            RefreshOverallPanesStructure(PaneMode.GalleryView);
+            RefreshPanesAllControls(PaneMode.GalleryView);
+        }
+
+        private void cmdGalleryPreview_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("TODO");
+        }
+
+        #endregion
 
 
 

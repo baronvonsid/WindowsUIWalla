@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.example.org/Gallery"
+	xmlns:tns="http://www.example.org/Gallery" 
+	elementFormDefault="qualified">
+
+  <element name="Gallery">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="0">
+        <element type="string" name="Name"/>
+        <element type="string" name="Desc"/>
+        <element type="string" name="UrlComplex"/>
+        <element type="int" name="AccessType"/>
+        <element type="string" name="Password"/>
+        <element type="int" name="GroupingType" />
+        <element type="dateTime" name="LastChanged"/>
+        
+        <element name="Users">
+          <complexType>
+            <sequence>
+              <element name="UserRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+                      <attribute type="string" name="emailAddress" />
+              </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+        
+        <element name="Categories">
+          <complexType>
+            <sequence>
+              <element name="CategoryRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+                      <attribute type="long" name="categoryId" />
+                      <attribute type="boolean" name="recursive"/>
+              </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+        
+        <element name="Tags">
+          <complexType>
+            <sequence>
+              <element name="TagRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+                      <attribute type="long" name="tagId" />
+                      <attribute type="boolean" name="exclude"/>
+              </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+        
+        <element name="Sorts">
+          <complexType>
+            <sequence>
+              <element name="SortRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+                      <attribute type="string" name="fieldname" />
+                      <attribute type="boolean" name="ascending"/>
+              </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+  
+      </sequence>
+      <attribute type="long" name="id"/>
+      <attribute type="int" name="version"/>
+    </complexType>
+  </element>
+</schema>
+

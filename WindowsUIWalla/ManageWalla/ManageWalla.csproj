@@ -130,6 +130,8 @@
     <Compile Include="Settings.cs" />
     <Compile Include="WallaDataType\Category.cs" />
     <Compile Include="WallaDataType\CategoryList.cs" />
+    <Compile Include="WallaDataType\Gallery.cs" />
+    <Compile Include="WallaDataType\GalleryList.cs" />
     <Compile Include="WallaDataType\ImageList.cs" />
     <Compile Include="WallaDataType\ImageMoveList.cs" />
     <Compile Include="WallaDataType\Tag.cs" />
@@ -183,6 +185,8 @@
     <AppDesigner Include="Properties\" />
     <None Include="WallaSchema\Category.xsd" />
     <None Include="WallaSchema\CategoryList.xsd" />
+    <None Include="WallaSchema\Gallery.xsd" />
+    <None Include="WallaSchema\GalleryList.xsd" />
     <None Include="WallaSchema\ImageList.xsd" />
     <None Include="WallaSchema\ImageMeta.xsd" />
     <None Include="WallaSchema\ImageMoveList.xsd" />

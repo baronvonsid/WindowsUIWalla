@@ -536,11 +536,11 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> CategoryMoveImagesAsync(long categoryId, long newCategoryId,  ImageMoveList imagesToMove)
+        async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageMoveList imagesToMove)
         {
             try
             {
-                string url = "category/" + Uri.EscapeUriString(categoryId.ToString()) + "/" + Uri.EscapeUriString(newCategoryId.ToString());
+                string url = "category/" + Uri.EscapeUriString(categoryId.ToString()) + "/images";
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
 

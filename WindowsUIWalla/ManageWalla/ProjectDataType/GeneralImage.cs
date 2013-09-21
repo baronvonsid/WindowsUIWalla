@@ -16,6 +16,7 @@ namespace ManageWalla
         private BitmapImage image;
 
         public long imageId;
+        public long categoryId { get; set; }
         public String FilePath { get; set; }
         public BitmapImage Image { get { return image; } }
         public string Name { get; set; }

@@ -14,11 +14,11 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
             <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="40" />
             <RowDefinition Height="*"/>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="0"/>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="0"/>
             <RowDefinition Height="40" />
             <RowDefinition Height="0"/>
         </Grid.RowDefinitions>
@@ -99,14 +99,14 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2">
-                <TreeView x:Name="treeCategoryView" Background="#FFE8E8E8">
-                    <TreeViewItem Header="Barons Photo Album" IsExpanded="True">
-                        <TreeViewItem IsExpanded="true">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2" FontFamily="Tahoma" FontWeight="Medium">
+                <TreeView x:Name="treeCategoryView" Background="#FFFDFFCE">
+                    <TreeViewItem Header="Barons Photo Album" IsExpanded="True" Background="#FFEED7D7">
+                        <TreeViewItem IsExpanded="true"  >
                             <TreeViewItem.Header>
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" Margin="2">
                                     <Image Source="icons\star.gif" Height="18"/>
-                                    <TextBlock Text="Holidays (30)"/>
+                                    <TextBlock Text="Holidays (30)" />
                                 </StackPanel>
                             </TreeViewItem.Header>
 
@@ -174,7 +174,7 @@
             <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
             <TextBox x:Name="txtCategoryName" Grid.Column="1" Grid.Row="2" Cursor="IBeam" MaxLength="30" PreviewTextInput="txtCategoryName_PreviewTextInput" Margin="2" />
             <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
-            <TextBox x:Name="txtCategoryDescription" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2"/>
+            <TextBox x:Name="txtCategoryDescription" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" MaxLines="1" MaxLength="200" Margin="2"/>
 
             <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button x:Name="cmdCategorySave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategorySave_Click" />
@@ -198,11 +198,11 @@
 
         <DockPanel x:Name="panTagUnavailable" Grid.Column="1" Grid.Row="4" VerticalAlignment="Stretch" Background="#CCBFFF92" Margin="2" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="Tags Unavailable" TextAlignment="Center" />
+                <TextBlock Text="Tags not loaded..." TextAlignment="Center" />
             </StackPanel>
         </DockPanel>
 
-        <Grid x:Name="gridTag" Background="#FFFFFFDE" Grid.Column="1" Grid.Row="4" Margin="4,2,2,2" >
+        <Grid x:Name="gridTag" Background="#FFFFFFDE" Grid.Column="1" Grid.Row="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="34" />
@@ -226,9 +226,9 @@
             </StackPanel>
 
             <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-            <TextBox x:Name="txtTagAddEditName" Margin="3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" CharacterCasing="Upper" Cursor="IBeam" PreviewTextInput="txtTagAddEditName_PreviewTextInput" />
+            <TextBox x:Name="txtTagName" Margin="3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" CharacterCasing="Upper" Cursor="IBeam" PreviewTextInput="txtTagName_PreviewTextInput" />
             <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
-            <TextBox x:Name="txtTagAddEditDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
+            <TextBox x:Name="txtTagDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
 
             <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button x:Name="cmdTagSave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagSave_Click" />
@@ -237,22 +237,93 @@
             </StackPanel>
         </Grid>
 
-        <RadioButton x:Name="radView" GroupName="MainSection" Grid.Column="1" Grid.Row="5" Checked="radView_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFD91C7">
+        <RadioButton x:Name="radGallery" GroupName="MainSection" Grid.Column="1" Grid.Row="5" Checked="radGallery_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFD91C7">
             <DockPanel LastChildFill="True">
-                <Button x:Name="cmdViewRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                <Button x:Name="cmdGalleryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
                     <Button.Content>
                         <Image Source="Icons/reload.gif" Height="28" />
                     </Button.Content>
                 </Button>
                 <Image Source="Icons/fancy-globe.gif" Height="28" DockPanel.Dock="Left"/>
-                <Label Content="View" VerticalContentAlignment="Center" Foreground="#FF408383" />
+                <Label Content="Gallery" VerticalContentAlignment="Center" Foreground="#FF408383" />
             </DockPanel>
         </RadioButton>
 
-        <DockPanel x:Name="panViewUnavailable" Grid.Column="1" Grid.Row="6" VerticalAlignment="Stretch" Background="#CCFD91C7" Margin="2">
-            <TextBlock Text="View" TextAlignment="Center" />
+        <DockPanel x:Name="panGalleryUnavailable" Grid.Column="1" Grid.Row="6" VerticalAlignment="Stretch" Background="#CCFD91C7" Margin="2" Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Galleries not loaded..." TextAlignment="Center" />
+            </StackPanel>
         </DockPanel>
 
+        <Grid x:Name="gridGallery" Background="#CCFD91C7" Grid.Column="1" Grid.Row="6" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" /> <!-- wrap galleries -->
+                <RowDefinition Height="34" /> <!-- add edit buttons -->
+                <RowDefinition Height="25" /> <!-- Name -->
+                <RowDefinition Height="75" /> <!-- Desc -->
+                <RowDefinition Height="25" /><!-- Access Type -->
+                <RowDefinition Height="25" /> <!-- Password -->
+                <RowDefinition Height="25" /> <!-- Group Fotos -->
+                <RowDefinition Height="34" /> <!-- Save buttons -->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="200" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Disabled">
+                <WrapPanel x:Name="wrapMyGalleries" Orientation="Horizontal">
+                </WrapPanel>
+            </ScrollViewer>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button x:Name="cmdGalleryView" Content="View" Padding="4" ToolTip="Open Gallery in your Browser" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryView_Click"  />
+                <Button x:Name="cmdGalleryCopyUrl" Content="Copy Url" ToolTip="Copy Url to your Clipboard" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCopyUrl_Click"  />
+                <Button x:Name="cmdGalleryAdd" Content="Add" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryAdd_Click"  />
+                <Button x:Name="cmdGalleryEdit" Content="Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryEdit_Click" />
+            </StackPanel>
+
+            <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
+            <TextBox x:Name="txtGalleryName" Margin="3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" CharacterCasing="Upper" Cursor="IBeam" PreviewTextInput="txtGalleryName_PreviewTextInput" />
+            <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+            <TextBox x:Name="txtGalleryDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
+
+            <Label Grid.Column="0" Grid.Row="4" Content="Access Type"/>
+            <ComboBox x:Name="cmbGalleryAccessType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="4" SelectionChanged="cmbGalleryAccessType_SelectionChanged" >
+                <ComboBoxItem>
+                    <TextBlock Text="Private" TextAlignment="Left" />
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <TextBlock Text="Shared (Password)" TextAlignment="Left" />
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <TextBlock Text="Public (Complex Url)" TextAlignment="Left" />
+                </ComboBoxItem>
+            </ComboBox>
+            
+            <Label Grid.Column="0" Grid.Row="5" Content="Password"/>
+            <TextBox x:Name="txtGalleryPassword" Margin="3" Grid.Column="1" Grid.Row="5" MaxLines="1" MaxLength="30"/>
+
+            <Label Content="Group Fotos" Grid.Column="0" Grid.Row="6" />
+            <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="6">
+                <ComboBoxItem>
+                    <TextBlock Text="No Grouping" TextAlignment="Left" ToolTip="Fotos will not be grouped" />
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <TextBlock Text="Group by Category" TextAlignment="Left" ToolTip="Fotos will be displayed within their Category" />
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <TextBlock Text="Group by Tag" TextAlignment="Left" ToolTip="Fotos will be displayed by their tags" />
+                </ComboBoxItem>
+            </ComboBox>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button x:Name="cmdGallerySave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGallerySave_Click" />
+                <Button x:Name="cmdGalleryCancel" Content="Cancel" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCancel_Click"  />
+                <Button x:Name="cmdGalleryDelete" Content="Delete" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryDelete_Click" />
+            </StackPanel>
+        </Grid>
+        
         <RadioButton x:Name="radUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Checked="radUpload_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FF8CFFE5">
             <DockPanel LastChildFill="True">
                 <Image Source="Icons/heart.gif" Height="28" DockPanel.Dock="Left"/>
@@ -385,7 +456,7 @@
                 <ColumnDefinition Width="250"/>
             </Grid.ColumnDefinitions>
 
-            <DockPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="2,2,2,2" Background="#FFA9C4FF" HorizontalAlignment="Stretch" LastChildFill="True">
+            <DockPanel x:Name="panGridRightHeader" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="2,2,2,2" Background="#FFA9C4FF" HorizontalAlignment="Stretch" LastChildFill="True">
 
                 <ToggleButton x:Name="cmdSort" ToolTip="Sort" DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Checked="cmdSort_Checked" Unchecked="cmdSort_Unchecked">
                     <ToggleButton.Content>
@@ -398,7 +469,6 @@
                         <Image Source="Icons/Fan.gif" Height="28" />
                     </ToggleButton.Content>
                 </ToggleButton>
-
 
                 <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="4" Content="|>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
                 <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Padding="4" Content=">" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click" />
@@ -415,6 +485,50 @@
                             Width="100" ></Slider>
             </DockPanel>
 
+            <Grid x:Name="gridGallerySelection" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="34"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="4">
+                    <TreeView x:Name="treeGalleryCategoryView" Background="#FFFFF4F4">
+                    </TreeView>
+                </ScrollViewer>
+
+                <ListBox Style="{DynamicResource TagListStyle}" 
+                            		x:Name ="lstGalleryTagListInclude" 
+                            		ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    SelectionMode="Multiple" 
+                                    ItemContainerStyle="{DynamicResource TagListItem}"
+                                    Grid.Column="1" Grid.Row="0">
+                </ListBox>
+
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="1" Grid.Row="1">
+
+                        <ListBox Style="{DynamicResource TagListStyle}" 
+                            		x:Name ="lstGalleryTagListExclude" 
+                            		ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                    SelectionMode="Multiple" 
+                                    ItemContainerStyle="{DynamicResource TagListItem}"
+                                    >
+                        </ListBox>
+                    </ScrollViewer>
+
+                <DockPanel x:Name="panGallerySort" Grid.Column="2" Grid.Row="0" VerticalAlignment="Center" Background="MediumOrchid">
+                    <TextBlock Text="Sort it" TextAlignment="Center" />
+                </DockPanel>
+
+                <Button x:Name="cmdGalleryPreview" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" HorizontalAlignment="Right" Content="Pre-view Images" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryPreview_Click" />
+            </Grid>
+            
             <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
                             		    x:Name ="lstImageMainViewerList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource imageMainViewerListKey}}"
