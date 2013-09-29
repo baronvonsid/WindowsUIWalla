@@ -143,28 +143,6 @@ namespace ManageWalla
             state.machineId = serverHelper.SetSessionMachineId(System.Environment.MachineName, GetPlatformId());
             return "OK";
         }
-
-        /// <summary>
-        /// For each entity - Category, Tag, View List
-        /// Check local cache for entries and check Walla Hub for updates
-        /// Then refresh local data caches.
-        /// </summary>
-        public async Task RetrieveGeneralUserConfigAsynctodelete()
-        {
-            Task<string> tagListLoadedTask = TagRefreshListAsync();
-
-            string tagListLoadedOK = await tagListLoadedTask;
-            if (tagListLoadedOK == "OK")
-            {
-                //Call dispatcher thread to run method TagListReloadFromState();
-            }
-            else
-            {
-                //Call dispatcher thread to run method TagListUpdateWorkingPane();
-            }
-
-            //TODO - Categotry and Views.
-        }
         #endregion
 
         #region Upload Methods
@@ -444,7 +422,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error);
+                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
                 return null;
             }
         }
@@ -458,7 +436,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the tag meta data: " + tagRef.name + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error);
+                currentMain.DisplayMessage("There was a problem retrieving the tag meta data: " + tagRef.name + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
                 return null;
             }
             
@@ -511,7 +489,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the Category meta data: " + categoryRef.id.ToString() + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error);
+                currentMain.DisplayMessage("There was a problem retrieving the Category meta data: " + categoryRef.id.ToString() + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
                 return null;
             }
 
@@ -594,7 +572,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Category: " + categoryId.ToString() + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error);
+                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Category: " + categoryId.ToString() + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
                 return null;
             }
         }
@@ -646,6 +624,141 @@ namespace ManageWalla
                 response = "Images could not be moved category, there was an error on the server:" + response;
 
             return response;
+        }
+        #endregion
+
+        #region Gallery
+        async public Task<string> GalleryRefreshListAsync()
+        {
+            try
+            {
+                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                {
+                    GalleryList galleryList;
+                    if (state.galleryList != null)
+                    {
+                        galleryList = await serverHelper.GalleryGetListAsync(state.galleryList.lastChanged);
+                    }
+                    else
+                    {
+                        galleryList = await serverHelper.GalleryGetListAsync(null);
+                    }
+                    state.galleryList = galleryList;
+                    state.galleryLoadState = GlobalState.DataLoadState.Loaded;
+                    return "OK";
+                }
+                else
+                {
+                    if (state.galleryList != null)
+                    {
+                        state.galleryLoadState = GlobalState.DataLoadState.LocalCache;
+                        return "OK";
+                    }
+                    else
+                    {
+                        state.galleryLoadState = GlobalState.DataLoadState.Unavailable;
+                        return "No local gallery list is available to show.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                state.galleryLoadState = GlobalState.DataLoadState.Unavailable;
+                return ex.Message;
+            }
+        }
+
+        async public Task<Gallery> GalleryGetMetaAsync(GalleryListGalleryRef galleryRef)
+        {
+            try
+            {
+                return await serverHelper.GalleryGetMeta(galleryRef.name);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                currentMain.DisplayMessage("There was a problem retrieving the tag meta data: " + galleryRef.name + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
+                return null;
+            }
+
+        }
+
+        async public Task<string> GalleryUpdateAsync(Gallery gallery, string oldGalleryName)
+        {
+            string response = await serverHelper.GalleryUpdateAsync(gallery, oldGalleryName);
+            if (response != "OK")
+                response = "Gallery could not be updated, there was an error on the server:" + response;
+
+            return response;
+        }
+
+        async public Task<string> GalleryCreateAsync(Gallery gallery)
+        {
+            string response = await serverHelper.GalleryCreateAsync(gallery);
+            if (response != "OK")
+                response = "Gallery could not be created, there was an error on the server:" + response;
+
+            return response;
+        }
+
+        async public Task<string> GalleryDeleteAsync(Gallery gallery)
+        {
+            string response = await serverHelper.GalleryDeleteAsync(gallery);
+            if (response != "OK")
+                response = "Gallery could not be deleted, there was an error on the server:" + response;
+
+            return response;
+        }
+
+        async public Task<ImageList> GalleryGetImagesAsync(long id, string galleryName, int cursor, string searchQueryString)
+        {
+            try
+            {
+                //Find a locally cached version,  ignore query string. 
+                ImageList localGalleryList = state.galleryImageList.Where(r => (r.id == id && r.imageCursor == cursor)).FirstOrDefault();
+                if (state.connectionState != GlobalState.ConnectionState.LoggedOn)
+                {
+                    return localGalleryList;
+                }
+
+                if (localGalleryList != null && searchQueryString == null)
+                {
+                    //With Local version, check with server is a new version is required.
+                    DateTime lastModified = localGalleryList.LastChanged;
+                    ImageList galleryImageList = await serverHelper.TagGetImageListAsync(galleryName, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    if (galleryImageList != null)
+                    {
+                        state.tagImageList.Add(galleryImageList);
+                        return galleryImageList;
+                    }
+                    else
+                    {
+                        return localGalleryList;
+                    }
+                }
+                else
+                {
+                    //Add the image list to the state if no search is specified.
+                    ImageList galleryImageList = await serverHelper.TagGetImageListAsync(galleryName, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
+                    if (galleryImageList != null)
+                    {
+                        if (searchQueryString == null)
+                            state.tagImageList.Add(galleryImageList);
+
+                        return galleryImageList;
+                    }
+                    else
+                    {
+                        return localGalleryList;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Gallery: " + galleryName + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
+                return null;
+            }
         }
         #endregion
     }

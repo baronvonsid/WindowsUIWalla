@@ -284,6 +284,169 @@ namespace ManageWalla
         }
         #endregion
 
+        #region Gallery
+        async public Task<GalleryList> GalleryGetListAsync(DateTime? lastModified)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "galleries");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+                //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
+
+                if (lastModified.HasValue)
+                {
+                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
+                }
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(GalleryList));
+                    GalleryList galleryList = (GalleryList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                    return galleryList;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task<string> GalleryUpdateAsync(Gallery gallery, string oldGalleryName)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "gallery/" + Uri.EscapeUriString(oldGalleryName));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+                //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
+        }
+
+        async public Task<string> GalleryCreateAsync(Gallery gallery)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "gallery/" + Uri.EscapeUriString(gallery.Name));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+                //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
+        }
+
+        async public Task<Gallery> GalleryGetMeta(string galleryName)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "gallery/" + Uri.EscapeUriString(galleryName));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                XmlSerializer serialKiller = new XmlSerializer(typeof(Gallery));
+                Gallery gallery = (Gallery)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+
+                return gallery;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task<string> GalleryDeleteAsync(Gallery gallery)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "gallery/" + Uri.EscapeUriString(gallery.Name));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return ex.Message;
+            }
+        }
+
+        async public Task<ImageList> GalleryGetImageListAsync(string galleryName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
+        {
+            try
+            {
+                /* GET /{userName}/tag/{tagName}/{imageCursor}/{size} */
+                string requestUrl = "gallery/" + galleryName + "/" + cursor.ToString() + "/" + size.ToString() + "?" + searchQueryString ?? "";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                if (useDate)
+                {
+                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified);
+                }
+
+                HttpResponseMessage response = await http.SendAsync(request);
+
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
+                    ImageList tagImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                    return tagImageList;
+                }
+                else if (response.StatusCode != HttpStatusCode.NotModified)
+                {
+                    response.EnsureSuccessStatusCode();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        #endregion
+
         #region Upload
         async public Task<string> UploadImageAsync(UploadImage image)
         {

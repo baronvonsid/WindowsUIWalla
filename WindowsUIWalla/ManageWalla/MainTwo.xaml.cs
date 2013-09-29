@@ -111,6 +111,7 @@ namespace ManageWalla
 
             RefreshOverallPanesStructure(PaneMode.GalleryView);
             RefreshPanesAllControls(PaneMode.GalleryView);
+            RefreshAndDisplayGalleryList(false);
         }
 
         private void radTag_Checked(object sender, RoutedEventArgs e)
@@ -566,7 +567,7 @@ namespace ManageWalla
                 string response = await controller.CategoryRefreshListAsync();
                 if (response != "OK")
                 {
-                    DisplayMessage(response, MessageSeverity.Error);
+                    DisplayMessage(response, MessageSeverity.Error, false);
                 }
             }
 
@@ -740,6 +741,9 @@ namespace ManageWalla
                 case PaneMode.TagView:
                     currentImageList = await controller.TagGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, GetSearchQueryString());
                     break;
+                case PaneMode.GalleryView:
+                    currentImageList = await controller.GalleryGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, GetSearchQueryString());
+                    break;
             }
             
 
@@ -866,7 +870,7 @@ namespace ManageWalla
 
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error);
+                DisplayMessage(response, MessageSeverity.Error, false);
                 return;
             }
 
@@ -879,7 +883,7 @@ namespace ManageWalla
             string response = await controller.CategoryDeleteAsync(currentCategory);
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error);
+                DisplayMessage(response, MessageSeverity.Error, false);
                 return;
             }
 
@@ -924,7 +928,7 @@ namespace ManageWalla
                     string response = await controller.CategoryMoveImagesAsync(meToCategory.id, moveList);
                     if (response != "OK")
                     {
-                        DisplayMessage(response, MessageSeverity.Error);
+                        DisplayMessage(response, MessageSeverity.Error, false);
                         return;
                     }
 
@@ -962,7 +966,7 @@ namespace ManageWalla
                 string response = await controller.TagRefreshListAsync();
                 if (response != "OK")
                 {
-                    DisplayMessage(response, MessageSeverity.Error);
+                    DisplayMessage(response, MessageSeverity.Error, false);
                 }
             }
 
@@ -1180,7 +1184,7 @@ namespace ManageWalla
                     string response = await controller.TagAddRemoveImagesAsync(meTag.name, moveList, true);
                     if (response != "OK")
                     {
-                        DisplayMessage(response, MessageSeverity.Error);
+                        DisplayMessage(response, MessageSeverity.Error, false);
                         return;
                     }
 
@@ -1210,7 +1214,7 @@ namespace ManageWalla
             string response = await controller.TagDeleteAsync(currentTag);
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error);
+                DisplayMessage(response, MessageSeverity.Error, false);
                 return;
             }
 
@@ -1263,7 +1267,7 @@ namespace ManageWalla
 
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error);
+                DisplayMessage(response, MessageSeverity.Error, false);
                 return;
             }
 
@@ -1288,22 +1292,22 @@ namespace ManageWalla
             switch (state.connectionState)
             {
                 case GlobalState.ConnectionState.LoggedOn:
-                    DisplayMessage("Account: " + state.userName + " has been connected with FotoWalla", MessageSeverity.Info);
+                    DisplayMessage("Account: " + state.userName + " has been connected with FotoWalla", MessageSeverity.Info, false);
                     radCategory.IsChecked = true;
                     //cmdCategory.RaiseEvent(new RoutedEventArgs(CheckBox.CheckedEvent));
                     break;
                 case GlobalState.ConnectionState.Offline:
-                    DisplayMessage("No internet connection could be established with FotoWalla", MessageSeverity.Warning);
+                    DisplayMessage("No internet connection could be established with FotoWalla", MessageSeverity.Warning, false);
                     //cmdCategory.RaiseEvent(new RoutedEventArgs(CheckBox.CheckedEvent));
                     break;
                 case GlobalState.ConnectionState.NoAccount:
-                    DisplayMessage("There is no account settings saved for this user, you must associate an account", MessageSeverity.Info);
+                    DisplayMessage("There is no account settings saved for this user, you must associate an account", MessageSeverity.Info, false);
 
                     cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
                     break;
                 case GlobalState.ConnectionState.FailedLogin:
-                    DisplayMessage("The logon for account: " + state.userName + ", failed with the message: " + response, MessageSeverity.Warning);
+                    DisplayMessage("The logon for account: " + state.userName + ", failed with the message: " + response, MessageSeverity.Warning, false);
                     cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     break;
             }
@@ -1311,10 +1315,17 @@ namespace ManageWalla
             DisplayConnectionStatus();
         }
 
-        public void DisplayMessage(string message, MessageSeverity severity)
+        public void DisplayMessage(string message, MessageSeverity severity, bool modal)
         {
             //TODO sort out severity.
-            MessageBox.Show(message);
+            if (modal)
+            {
+                MessageBox.Show(message);
+            }
+            else
+            {
+                MessageBox.Show(message);
+            }
         }
 
         private void DisplayConnectionStatus()
@@ -2067,7 +2078,7 @@ namespace ManageWalla
                 string response = await controller.RefreshUploadStatusListAsync();
                 if (response != "OK")
                 {
-                    DisplayMessage(response, MessageSeverity.Error);
+                    DisplayMessage(response, MessageSeverity.Error, false);
                 }
             }
 
@@ -2136,6 +2147,87 @@ namespace ManageWalla
 
 
         #region Gallery
+        async private void RefreshAndDisplayGalleryList(bool forceRefresh)
+        {
+            //Catch first time loads, user intiated refresh and when user was offline and is now online.  But only if logged on.
+            if (state.connectionState != GlobalState.ConnectionState.NoAccount &&
+                (state.galleryLoadState == GlobalState.DataLoadState.No || forceRefresh || state.galleryLoadState == GlobalState.DataLoadState.LocalCache))
+            {
+                //TODO show pending animation.
+                panGalleryUnavailable.Visibility = System.Windows.Visibility.Visible;
+                gridGallery.Visibility = Visibility.Collapsed;
+
+                string response = await controller.GalleryRefreshListAsync();
+                if (response != "OK")
+                {
+                    DisplayMessage(response, MessageSeverity.Error, false);
+                }
+            }
+
+            switch (state.galleryLoadState)
+            {
+                case GlobalState.DataLoadState.Loaded:
+                case GlobalState.DataLoadState.LocalCache:
+                    GalleryListReloadFromState();
+                    panGalleryUnavailable.Visibility = System.Windows.Visibility.Collapsed;
+                    gridGallery.Visibility = Visibility.Visible;
+                    break;
+                case GlobalState.DataLoadState.Unavailable:
+                    panGalleryUnavailable.Visibility = System.Windows.Visibility.Visible;
+                    gridGallery.Visibility = Visibility.Collapsed;
+                    break;
+            }
+        }
+
+        public void GalleryListReloadFromState()
+        {
+            //Keep a reference to the currently selected gallery item.
+            long galleryId = 0;
+            RadioButton checkedButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            if (checkedButton != null)
+            {
+
+                GalleryListGalleryRef current = (GalleryListGalleryRef)checkedButton.Tag;
+                galleryId = current.id;
+            }
+
+            wrapMyGalleries.Children.Clear();
+
+            foreach (GalleryListGalleryRef gallery in state.galleryList.GalleryRef)
+            {
+                RadioButton newRadioButton = new RadioButton();
+
+                newRadioButton.Content = gallery.name + " (" + gallery.count + ")";
+                newRadioButton.Style = (Style)FindResource("styleRadioButton");
+                newRadioButton.Template = (ControlTemplate)FindResource("templateRadioButton");
+                newRadioButton.GroupName = "GroupGallery";
+                newRadioButton.Tag = gallery;
+                //newRadioButton.Checked += new RoutedEventHandler(FetchGalleryImagesFirstAsync);
+                wrapMyGalleries.Children.Add(newRadioButton);
+            }
+
+            //Re-check the selected checkbox, else check the first
+            RadioButton recheckButton = null;
+            if (galleryId == 0)
+            {
+                recheckButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().First();
+            }
+            else
+            {
+                foreach (RadioButton currentButton in wrapMyGalleries.Children.OfType<RadioButton>())
+                {
+                    GalleryListGalleryRef current = (GalleryListGalleryRef)currentButton.Tag;
+                    if (current.id == galleryId)
+                    {
+                        recheckButton = currentButton;
+                        break;
+                    }
+                }
+            }
+
+            if (recheckButton != null)
+                recheckButton.IsChecked = true;
+        }
 
         async private Task<bool> PopulateGalleryMetaData()
         {
@@ -2144,14 +2236,45 @@ namespace ManageWalla
             if (checkedButton != null)
             {
                 GalleryListGalleryRef galleryListGalleryRef = (GalleryListGalleryRef)checkedButton.Tag;
-                Gallery gallery = new Gallery(); // await controller.TagGetMetaAsync((TagListTagRef)checkedButton.Tag);
-                //txtGalleryName.Text = gallery.Name;
-                //txtGalleryDescription.Text = gallery.Desc;
-                //txtGalleryPassword.Text = gallery.Password;
-                //cmbGalleryAccessType.SelectedIndex = gallery.AccessType;
-                //cmbGalleryGroupingType.SelectedIndex = gallery.GroupingType;
+                Gallery gallery = await controller.GalleryGetMetaAsync(galleryListGalleryRef);
+                txtGalleryName.Text = gallery.Name;
+                txtGalleryDescription.Text = gallery.Desc;
+                txtGalleryPassword.Text = gallery.Password;
+                cmbGalleryAccessType.SelectedIndex = gallery.AccessType;
+                cmbGalleryGroupingType.SelectedIndex = gallery.GroupingType;
+
+                //TODO select radio buttons for tags.
+                //lstGalleryTagListInclude.SelectedItems
+                foreach (GalleryTagRef tagRef in gallery.Tags)
+                {
+                    if (tagRef.exclude)
+                    {
+                        foreach (ListBoxItem current in lstGalleryTagListExclude.Items)
+                        {
+                            TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
+                            if (tagRefInList.id == tagRef.tagId)
+                            {
+                                current.IsSelected = true;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (ListBoxItem current in lstGalleryTagListInclude.Items)
+                        {
+                            TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
+                            if (tagRefInList.id == tagRef.tagId)
+                            {
+                                current.IsSelected = true;
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 currentGallery = gallery;
+
                 return true;
             }
             return false;
@@ -2168,10 +2291,12 @@ namespace ManageWalla
                 ListBoxItem newItemInclude = new ListBoxItem();
                 newItemInclude.Content = tagRef.name;
                 newItemInclude.Tag = tagRef;
+                newItemInclude.Selected += new RoutedEventHandler(GalleryCheckForIncludeConflict);
 
                 ListBoxItem newItemExclude = new ListBoxItem();
                 newItemExclude.Content = tagRef.name;
                 newItemExclude.Tag = tagRef;
+                newItemExclude.Selected += new RoutedEventHandler(GalleryCheckForExcludeConflict);
 
                 lstGalleryTagListExclude.Items.Add(newItemExclude);
                 lstGalleryTagListInclude.Items.Add(newItemInclude);
@@ -2180,6 +2305,42 @@ namespace ManageWalla
             if (currentPane == PaneMode.GalleryEdit)
             {
                 //TODO Update tag list from XML.
+            }
+        }
+
+        private void GalleryCheckForIncludeConflict(object sender, RoutedEventArgs e)
+        {
+            //e.Handled = true;
+
+            ListBoxItem listBoxItem = (ListBoxItem)sender;
+            TagListTagRef tagRef = (TagListTagRef)listBoxItem.Tag;
+
+            foreach (ListBoxItem current in lstGalleryTagListExclude.Items)
+            {
+                TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
+                if (tagRefInList.id == tagRef.id)
+                {
+                    current.IsSelected = false;
+                    break;
+                }
+            }
+        }
+
+        private void GalleryCheckForExcludeConflict(object sender, RoutedEventArgs e)
+        {
+            //e.Handled = true;
+
+            ListBoxItem listBoxItem = (ListBoxItem)sender;
+            TagListTagRef tagRef = (TagListTagRef)listBoxItem.Tag;
+
+            foreach (ListBoxItem current in lstGalleryTagListInclude.Items)
+            {
+                TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
+                if (tagRefInList.id == tagRef.id)
+                {
+                    current.IsSelected = false;
+                    break;
+                }
             }
         }
 
@@ -2195,8 +2356,6 @@ namespace ManageWalla
                 //TODO Update tag list from XML.
             }
         }
-
-
 
         private void GalleryCategoryAddTreeViewLevel(long parentId, TreeViewItem currentHeader)
         {
@@ -2251,13 +2410,13 @@ namespace ManageWalla
 
         async private void cmdGalleryEdit_Click(object sender, RoutedEventArgs e)
         {
+            GalleryRefreshTagsList();
+            GalleryRefreshCategoryList();
+
             if (await PopulateGalleryMetaData())
             {
                 RefreshOverallPanesStructure(PaneMode.GalleryEdit);
                 RefreshPanesAllControls(PaneMode.GalleryEdit);
-
-                UploadRefreshTagsList();
-                GalleryRefreshCategoryList();
             }
         }
 
@@ -2277,12 +2436,96 @@ namespace ManageWalla
             RefreshPanesAllControls(currentPane);
         }
 
-        private void cmdGallerySave_Click(object sender, RoutedEventArgs e)
+        async private void cmdGallerySave_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("TODO");
+            //TODO check for selected categories....
+            int tagsCount = lstGalleryTagListInclude.SelectedItems.Count + lstGalleryTagListExclude.SelectedItems.Count;
+
+            if (lstGalleryTagListInclude.SelectedItems.Count == 0)
+            {
+                DisplayMessage("The gallery does not have any catgories or tags associated with it, so cannot be saved.", MessageSeverity.Info, true);
+                return;
+            }
+
+            if (cmbGalleryAccessType.SelectedIndex == 1 && txtGalleryPassword.Text.Length == 0)
+            {
+                DisplayMessage("This gallery has been marked as password protected, but the password does not meet the minumimum criteria of being 8 charactors long.", MessageSeverity.Info, true);
+                return;
+            }
+
+            if (txtGalleryName.Text.Length == 0)
+            {
+                DisplayMessage("You must select a name for your Gallery to continue.", MessageSeverity.Info, true);
+                return;
+            }
+
+            if (currentPane == PaneMode.GalleryAdd)
+            {
+                currentGallery = new Gallery();
+            }
+
+            string oldGalleryName = currentGallery.Name;
+            currentGallery.Name = txtGalleryName.Text;
+            currentGallery.Desc = txtGalleryDescription.Text;
+            currentGallery.Password = txtGalleryPassword.Text;
+            currentGallery.AccessType = cmbGalleryAccessType.SelectedIndex;
+            currentGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
+
+            /* Category add to object ************************************************ */
+            //TODO
+
+
+            /* Tags add to object ************************************************ */
+            currentGallery.Tags = new GalleryTagRef[tagsCount];
+            int currentItemIndex = 0;
+            foreach (ListBoxItem current in lstGalleryTagListInclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                GalleryTagRef galleryTag = new GalleryTagRef();
+                galleryTag.tagId = tagRef.id;
+                galleryTag.tagIdSpecified = true;
+                galleryTag.exclude = false;
+                galleryTag.excludeSpecified = true;
+                currentGallery.Tags[currentItemIndex] = galleryTag;
+                currentItemIndex++;
+            }
+
+            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                GalleryTagRef galleryTag = new GalleryTagRef();
+                galleryTag.tagId = tagRef.id;
+                galleryTag.tagIdSpecified = true;
+                galleryTag.exclude = true;
+                galleryTag.excludeSpecified = true;
+                currentGallery.Tags[currentItemIndex] = galleryTag;
+                currentItemIndex++;
+            }
+
+            /* Sorts add to object ************************************************ */
+            //TODO
+
+            string response = null;
+            if (currentPane == PaneMode.GalleryAdd)
+            {
+                response = await controller.GalleryCreateAsync(currentGallery);
+            }
+            else
+            {
+                response = await controller.GalleryUpdateAsync(currentGallery, oldGalleryName);
+            }
+
+            if (response != "OK")
+            {
+                DisplayMessage(response, MessageSeverity.Error, false);
+                return;
+            }
 
             RefreshOverallPanesStructure(PaneMode.GalleryView);
             RefreshPanesAllControls(PaneMode.GalleryView);
+            RefreshAndDisplayGalleryList(true);
         }
 
         private void cmdGalleryCancel_Click(object sender, RoutedEventArgs e)
@@ -2291,12 +2534,17 @@ namespace ManageWalla
             RefreshPanesAllControls(PaneMode.GalleryView);
         }
 
-        private void cmdGalleryDelete_Click(object sender, RoutedEventArgs e)
+        async private void cmdGalleryDelete_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("TODO");
+            string response = await controller.GalleryDeleteAsync(currentGallery);
+            if (response != "OK")
+            {
+                DisplayMessage(response, MessageSeverity.Error, false);
+                return;
+            }
 
             RefreshOverallPanesStructure(PaneMode.GalleryView);
-            RefreshPanesAllControls(PaneMode.GalleryView);
+            RefreshAndDisplayGalleryList(true);
         }
 
         private void cmdGalleryPreview_Click(object sender, RoutedEventArgs e)
@@ -2304,9 +2552,14 @@ namespace ManageWalla
             MessageBox.Show("TODO");
         }
 
+        
+
+        private void cmdGalleryRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshAndDisplayGalleryList(true);
+        }
+
         #endregion
-
-
 
 
     }

@@ -37,15 +37,17 @@ namespace ManageWalla
         //Business Objects
         public TagList tagList { get; set; }
         public CategoryList categoryList { get; set; }
-        
+        public GalleryList galleryList { get; set; }
+
         public String categoryXml { get; set; }
         public UploadStatusList uploadStatusList { get; set; }
         public List<ImageList> tagImageList { get; set; }
         public List<ImageList> categoryImageList { get; set; }
+        public List<ImageList> galleryImageList { get; set; }
 
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }
-        public DataLoadState viewLoadState { get; set; }
+        public DataLoadState galleryLoadState { get; set; }
         public DataLoadState uploadStatusListState { get; set; }
 
         public ConnectionState connectionState { get; set; }
@@ -88,11 +90,11 @@ namespace ManageWalla
             //TODO - delete
             state.userName = "simo1n";
             state.password = "simon";
-            state.imageFetchSize = 100;
+            state.imageFetchSize = 10;
 
             state.categoryLoadState = GlobalState.DataLoadState.No;
             state.tagLoadState = GlobalState.DataLoadState.No;
-            state.viewLoadState = GlobalState.DataLoadState.No;
+            state.galleryLoadState = GlobalState.DataLoadState.No;
             state.uploadStatusListState = GlobalState.DataLoadState.No;
 
             return state;

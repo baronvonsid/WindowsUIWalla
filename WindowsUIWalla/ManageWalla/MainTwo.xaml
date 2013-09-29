@@ -239,7 +239,7 @@
 
         <RadioButton x:Name="radGallery" GroupName="MainSection" Grid.Column="1" Grid.Row="5" Checked="radGallery_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FFFD91C7">
             <DockPanel LastChildFill="True">
-                <Button x:Name="cmdGalleryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                <Button x:Name="cmdGalleryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryRefresh_Click">
                     <Button.Content>
                         <Image Source="Icons/reload.gif" Height="28" />
                     </Button.Content>
@@ -498,7 +498,7 @@
                 </Grid.ColumnDefinitions>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="4">
-                    <TreeView x:Name="treeGalleryCategoryView" Background="#FFFFF4F4">
+                    <TreeView x:Name="treeGalleryCategoryView" Background="#FFFFF4F4" >
                     </TreeView>
                 </ScrollViewer>
 
