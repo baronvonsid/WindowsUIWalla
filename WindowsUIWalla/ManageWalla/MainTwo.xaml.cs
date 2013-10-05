@@ -2202,7 +2202,7 @@ namespace ManageWalla
                 newRadioButton.Template = (ControlTemplate)FindResource("templateRadioButton");
                 newRadioButton.GroupName = "GroupGallery";
                 newRadioButton.Tag = gallery;
-                //newRadioButton.Checked += new RoutedEventHandler(FetchGalleryImagesFirstAsync);
+                newRadioButton.Checked += new RoutedEventHandler(FetchGalleryImagesFirstAsync);
                 wrapMyGalleries.Children.Add(newRadioButton);
             }
 
@@ -2227,6 +2227,22 @@ namespace ManageWalla
 
             if (recheckButton != null)
                 recheckButton.IsChecked = true;
+        }
+
+        async private void FetchGalleryImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            RadioButton checkedButton = (RadioButton)sender;
+
+            /* Refresh tag image state */
+            if (checkedButton != null)
+            {
+                GalleryListGalleryRef galleryListRefTemp = (GalleryListGalleryRef)checkedButton.Tag;
+                currentImageList = await controller.GalleryGetImagesAsync(galleryListRefTemp.id, galleryListRefTemp.name, 0, GetSearchQueryString());
+
+                /* Populate tag image list from state */
+                await ImageListUpdateControls();
+            }
+
         }
 
         async private Task<bool> PopulateGalleryMetaData()

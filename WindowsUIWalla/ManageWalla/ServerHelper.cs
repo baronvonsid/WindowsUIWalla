@@ -214,7 +214,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<ImageList> TagGetImageListAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
+        async public Task<ImageList> DeleteMeTagGetImageListAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
         {
             try
             {
@@ -409,7 +409,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<ImageList> GalleryGetImageListAsync(string galleryName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
+        async public Task<ImageList> DeleteMeGalleryGetImageListAsync(string galleryName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
         {
             try
             {
@@ -664,7 +664,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<ImageList> CategorGetImageListAsync(long categoryId, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
+        async public Task<ImageList> DeleteMeCategorGetImageListAsync(long categoryId, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
         {
             try
             {
@@ -752,6 +752,42 @@ namespace ManageWalla
                 throw ex;
             }
         }
+
+        async public Task<ImageList> GetImageListAsync(string type, string id, DateTime? lastModified, int cursor, int size, string searchQueryString)
+        {
+            try
+            {
+                /* GET /{userName}/{type}/{identity}/{imageCursor}/{size} */
+                string requestUrl = type + "/" + id + "/" + cursor.ToString() + "/" + size.ToString() + "?" + searchQueryString ?? "";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                if (lastModified.HasValue)
+                {
+                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
+                }
+
+                HttpResponseMessage response = await http.SendAsync(request);
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
+                    ImageList categoryImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                    return categoryImageList;
+                }
+                else if (response.StatusCode != HttpStatusCode.NotModified)
+                {
+                    response.EnsureSuccessStatusCode();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
         #endregion
     }
 }

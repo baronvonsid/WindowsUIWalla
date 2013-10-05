@@ -79,12 +79,9 @@ namespace ManageWalla
             {
                 state = new GlobalState();
 
-                //Initialise objects.
-                //if (state.tagImageList == null)
-                //{
-                    state.tagImageList = new List<ImageList>();
-                //}
-                    state.categoryImageList = new List<ImageList>();
+                state.tagImageList = new List<ImageList>();
+                state.categoryImageList = new List<ImageList>();
+                state.galleryImageList = new List<ImageList>();
             }
 
             //TODO - delete

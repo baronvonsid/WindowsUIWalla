@@ -391,7 +391,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localTagList.LastChanged;
-                    ImageList tagImageList = await serverHelper.TagGetImageListAsync(tagName, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.imageFetchSize, searchQueryString);
                     if (tagImageList != null)
                     {
                         state.tagImageList.Add(tagImageList);
@@ -405,7 +405,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList tagImageList = await serverHelper.TagGetImageListAsync(tagName, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, null, cursor, state.imageFetchSize, searchQueryString);
                     if (tagImageList != null)
                     {
                         if (searchQueryString == null)
@@ -540,8 +540,7 @@ namespace ManageWalla
                 if (localCategoryList != null && searchQueryString == null)
                 {
                     //With Local version, check with server is a new version is required.
-                    DateTime lastModified = localCategoryList.LastChanged;
-                    ImageList categoryImageList = await serverHelper.CategorGetImageListAsync(categoryId, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), localCategoryList.LastChanged, cursor, state.imageFetchSize, searchQueryString);
                     if (categoryImageList != null)
                     {
                         state.categoryImageList.Add(categoryImageList);
@@ -555,7 +554,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList categoryImageList = await serverHelper.CategorGetImageListAsync(categoryId, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), null, cursor, state.imageFetchSize, searchQueryString);
                     if (categoryImageList != null)
                     {
                         if (searchQueryString == null)
@@ -725,7 +724,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localGalleryList.LastChanged;
-                    ImageList galleryImageList = await serverHelper.TagGetImageListAsync(galleryName, true, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.imageFetchSize, searchQueryString);
                     if (galleryImageList != null)
                     {
                         state.tagImageList.Add(galleryImageList);
@@ -739,7 +738,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList galleryImageList = await serverHelper.TagGetImageListAsync(galleryName, false, DateTime.Now, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, null, cursor, state.imageFetchSize, searchQueryString);
                     if (galleryImageList != null)
                     {
                         if (searchQueryString == null)
