@@ -39,7 +39,11 @@ namespace ManageWalla
 
             string format = GetFormat(filePath);
             if (format == null)
-            { return; }
+            { 
+                UploadError = "Format is not supported (" + Path.GetExtension(filePath).ToUpper().Substring(1) + "), image is excluded from Upload";
+                State = UploadState.Error;
+                return;
+            }
 
             image = await LoadBitmapAsync(filePath);
 
@@ -61,32 +65,34 @@ namespace ManageWalla
             meta.UdfDate2 = DateTime.Parse("01/01/1900");
             meta.UdfDate3 = DateTime.Parse("01/01/1900");
 
-            meta.Width = image.PixelWidth;
-            meta.Height = image.PixelHeight;
+            //meta.Width = image.PixelWidth;
+            //meta.Height = image.PixelHeight;
             meta.Size = fileInfo.Length;
-
+            
         }
 
         private string GetFormat(string fileName)
         {
-            //Camera Raw (NEF/CR2/ORF/ARW/RW2/...) 
+            //JPG,JPEG,TIF,TIFF,PSD,PNG,BMP,GIF,CR2,ARW,NEF
+			//Need to investigate CRW/NEF/ORF/RW2 and other RAW types.
+            string extension = Path.GetExtension(fileName).ToUpper().Substring(1);
 
-            switch (Path.GetExtension(fileName).ToUpper())
+            switch (extension)
             {
-                case ".JPG":
-                case ".JPEG":
-                    return "JPEG";
-                case ".TIF":
-                case ".TIFF":
-                    return "TIFF";
-                case ".PSD":
-                    return "PSD";
-                case ".PNG":
-                    return "PNG";
-                case ".BMP":
-                    return "BMP";
-                case ".GIF":
-                    return "GIF";
+                case "JPG":
+                case "JPEG":
+                    return "JPG";
+                case "TIF":
+                case "TIFF":
+                    return "TIF";
+                case "PSD":
+                case "PNG":
+                case "BMP":
+                case "GIF":
+                case "CR2":
+                case "ARW":
+                case "NEF":
+                    return extension;
                 default:
                     return null;
             }
@@ -198,6 +204,7 @@ namespace ManageWalla
 
         public string HttpFormat
         {
+            
             get
             {
                 switch (meta.Format)
@@ -205,7 +212,7 @@ namespace ManageWalla
                     case "JPEG":
                         return "image/jpeg";
                     default:
-                        return null;
+                        return "image/jpeg";
                 }
             }
         }

@@ -489,7 +489,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="2*" />
                     <RowDefinition Height="2*" />
-                    <RowDefinition Height="34"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="3*"/>
@@ -522,11 +521,12 @@
                         </ListBox>
                     </ScrollViewer>
 
-                <DockPanel x:Name="panGallerySort" Grid.Column="2" Grid.Row="0" VerticalAlignment="Center" Background="MediumOrchid">
+                <DockPanel x:Name="panGallerySort" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Stretch" Background="MediumOrchid">
                     <TextBlock Text="Sort it" TextAlignment="Center" />
                 </DockPanel>
 
-                <Button x:Name="cmdGalleryPreview" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" HorizontalAlignment="Right" Content="Pre-view Images" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryPreview_Click" />
+
+
             </Grid>
             
             <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 

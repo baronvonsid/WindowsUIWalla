@@ -556,6 +556,8 @@ namespace ManageWalla
         /// <param name="forceRefresh"></param>
         async private void RefreshAndDisplayCategoryList(bool forceRefresh)
         {
+            bool redrawList = false;
+
             //Catch first time loads, user intiated refresh and when user was offline and is now online.  But only if logged on.
             if (state.connectionState != GlobalState.ConnectionState.NoAccount &&
                 (state.categoryLoadState == GlobalState.DataLoadState.No || forceRefresh || state.categoryLoadState == GlobalState.DataLoadState.LocalCache))
@@ -569,6 +571,7 @@ namespace ManageWalla
                 {
                     DisplayMessage(response, MessageSeverity.Error, false);
                 }
+                redrawList = true;
             }
 
             switch (state.categoryLoadState)
@@ -576,7 +579,7 @@ namespace ManageWalla
                 case GlobalState.DataLoadState.Loaded:
                 case GlobalState.DataLoadState.LocalCache:
 
-                    CategoryListReloadFromState();
+                    if (redrawList) { CategoryListReloadFromState(); }
                     panCategoryUnavailable.Visibility = System.Windows.Visibility.Collapsed;
                     gridCategory.Visibility = Visibility.Visible;
                     break;
@@ -611,7 +614,18 @@ namespace ManageWalla
             treeCategoryView.Items.Clear();
             CategoryAddTreeViewLevel(baseCategory.id, null);
 
-            CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
+            TreeViewItem baseItem = (TreeViewItem)treeCategoryView.Items[0];
+            CategoryListCategoryRef baseCategoryObj = (CategoryListCategoryRef)baseItem.Tag;
+            if (baseCategoryObj.id == categoryId)
+            {
+                baseItem.IsSelected = true;
+                treeCategoryView.Items.MoveCurrentTo(baseItem);
+
+            }
+            else
+            {
+                CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
+            }
 
             UploadRefreshCategoryList();
         }
@@ -898,10 +912,11 @@ namespace ManageWalla
             TreeViewItem meTreeviewNode = sender as TreeViewItem;
             CategoryListCategoryRef meToCategory = (CategoryListCategoryRef)meTreeviewNode.Tag;
 
-            TreeViewItem meFromTreeviewNode = (TreeViewItem)treeCategoryView.SelectedItem;
-            CategoryListCategoryRef meFromCategory = (CategoryListCategoryRef)meFromTreeviewNode.Tag;
+            //TreeViewItem meFromTreeviewNode = (TreeViewItem)treeCategoryView.SelectedItem;
+            //CategoryListCategoryRef meFromCategory = (CategoryListCategoryRef)meFromTreeviewNode.Tag;
+            //meFromCategory == null || 
 
-            if (meFromCategory == null || meToCategory == null)
+            if (meToCategory == null)
             {
                 MessageBox.Show("Unexpected error, selected category could not be established.");
                 return;
@@ -914,15 +929,17 @@ namespace ManageWalla
                 {
                     ImageMoveList moveList = new ImageMoveList();
                     moveList.ImageRef = new long[count];
-                    for (int i = 0; i < count; i++)
+                    int i = 0;
+                    foreach (GeneralImage image in lstImageMainViewerList.SelectedItems)
                     {
-                        GeneralImage image = (GeneralImage)lstImageMainViewerList.Items[i];
+                        //GeneralImage image = (GeneralImage)lstImageMainViewerList.Items[i];
                         if (image.categoryId == meToCategory.id)
                         {
                             MessageBox.Show("The update cannot be done, you have selected images which are already in the category: " + meToCategory.name);
                             return;
                         }
                         moveList.ImageRef[i] = image.imageId;
+                        i++;
                     }
 
                     string response = await controller.CategoryMoveImagesAsync(meToCategory.id, moveList);
@@ -936,15 +953,6 @@ namespace ManageWalla
                 }
             }
 
-
-
-
-
-
-
-
-
-
         }
         #endregion
 
@@ -955,6 +963,7 @@ namespace ManageWalla
         /// <param name="forceRefresh"></param>
         async private void RefreshAndDisplayTagList(bool forceRefresh)
         {
+            bool redrawList = false;
             //Catch first time loads, user intiated refresh and when user was offline and is now online.  But only if logged on.
             if (state.connectionState != GlobalState.ConnectionState.NoAccount &&
                 (state.tagLoadState == GlobalState.DataLoadState.No || forceRefresh || state.tagLoadState == GlobalState.DataLoadState.LocalCache))
@@ -968,6 +977,7 @@ namespace ManageWalla
                 {
                     DisplayMessage(response, MessageSeverity.Error, false);
                 }
+                redrawList = true;
             }
 
             switch (state.tagLoadState)
@@ -975,7 +985,7 @@ namespace ManageWalla
                 case GlobalState.DataLoadState.Loaded:
                 case GlobalState.DataLoadState.LocalCache:
 
-                    TagListReloadFromState();
+                    if (redrawList) { TagListReloadFromState(); }
                     panTagUnavailable.Visibility = System.Windows.Visibility.Collapsed;
                     gridTag.Visibility = Visibility.Visible;
                     break;
@@ -1020,11 +1030,11 @@ namespace ManageWalla
 
             //Re-check the selected checkbox, else check the first
             RadioButton recheckButton = null;
-            if (tagId == 0)
-            {
-                recheckButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().First();
-            }
-            else
+            
+            //{
+             //   recheckButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().First();
+            //}
+            if (tagId != 0)
             {
                 foreach (RadioButton currentButton in wrapMyTags.Children.OfType<RadioButton>())
                 {
@@ -1035,10 +1045,11 @@ namespace ManageWalla
                         break;
                     }
                 }
+                if (recheckButton != null)
+                    recheckButton.IsChecked = true;
             }
 
-            if (recheckButton != null)
-                recheckButton.IsChecked = true;
+
 
             UploadRefreshTagsList();
         }
@@ -1175,10 +1186,12 @@ namespace ManageWalla
                 {
                     ImageMoveList moveList = new ImageMoveList();
                     moveList.ImageRef = new long[count];
-                    for (int i = 0; i < count; i++)
+                    int i = 0;
+                    foreach (GeneralImage image in lstImageMainViewerList.SelectedItems)
                     {
-                        GeneralImage image = (GeneralImage)lstImageMainViewerList.Items[i];
+                        //GeneralImage image = (GeneralImage)lstImageMainViewerList.Items[i];
                         moveList.ImageRef[i] = image.imageId;
+                        i++;
                     }
 
                     string response = await controller.TagAddRemoveImagesAsync(meTag.name, moveList, true);
@@ -1218,6 +1231,7 @@ namespace ManageWalla
                 return;
             }
 
+            lstImageMainViewerList.Items.Clear();
             RefreshPanesAllControls(PaneMode.TagView);
             RefreshAndDisplayTagList(true);
         }
@@ -1371,13 +1385,19 @@ namespace ManageWalla
 
                 uploadUIState.Mode = UploadUIState.UploadMode.Folder;
                 RefreshPanesAllControls(PaneMode.Upload);
+
+                if (lstUploadImageFileList.Items.Count > 0 && lstUploadImageFileList.SelectedItems.Count == 0)
+                {
+                    lstUploadImageFileList.SelectedIndex = 0;
+                }
             }
         }
 
         async private void cmdUploadImportFiles_Click(object sender, RoutedEventArgs e)
         {
             var openDialog = new System.Windows.Forms.OpenFileDialog();
-            openDialog.DefaultExt = @"*.JPG;*.BMP";  //TODO add additional formats.
+            openDialog.DefaultExt = @"*.JPG;*.BMP;*.JPEG;*.TIF;*.TIFF;*.PSD;*.PNG;*.GIF;*.CR2;*.ARW;*.NEF;";
+
             openDialog.Multiselect = true;
             System.Windows.Forms.DialogResult result = openDialog.ShowDialog();
             if (openDialog.FileNames.Length > 0)
@@ -1386,6 +1406,11 @@ namespace ManageWalla
                 uploadUIState.GotSubFolders = false;
                 uploadUIState.Mode = UploadUIState.UploadMode.Images;
                 RefreshPanesAllControls(PaneMode.Upload);
+            }
+
+            if (lstUploadImageFileList.Items.Count > 0 && lstUploadImageFileList.SelectedItems.Count == 0)
+            {
+                lstUploadImageFileList.SelectedIndex = 0;
             }
         }
 
@@ -2149,6 +2174,8 @@ namespace ManageWalla
         #region Gallery
         async private void RefreshAndDisplayGalleryList(bool forceRefresh)
         {
+            bool redrawList = false;
+
             //Catch first time loads, user intiated refresh and when user was offline and is now online.  But only if logged on.
             if (state.connectionState != GlobalState.ConnectionState.NoAccount &&
                 (state.galleryLoadState == GlobalState.DataLoadState.No || forceRefresh || state.galleryLoadState == GlobalState.DataLoadState.LocalCache))
@@ -2162,13 +2189,14 @@ namespace ManageWalla
                 {
                     DisplayMessage(response, MessageSeverity.Error, false);
                 }
+                redrawList = true;
             }
 
             switch (state.galleryLoadState)
             {
                 case GlobalState.DataLoadState.Loaded:
                 case GlobalState.DataLoadState.LocalCache:
-                    GalleryListReloadFromState();
+                    if (redrawList) { GalleryListReloadFromState(); }
                     panGalleryUnavailable.Visibility = System.Windows.Visibility.Collapsed;
                     gridGallery.Visibility = Visibility.Visible;
                     break;
@@ -2562,13 +2590,6 @@ namespace ManageWalla
             RefreshOverallPanesStructure(PaneMode.GalleryView);
             RefreshAndDisplayGalleryList(true);
         }
-
-        private void cmdGalleryPreview_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("TODO");
-        }
-
-        
 
         private void cmdGalleryRefresh_Click(object sender, RoutedEventArgs e)
         {

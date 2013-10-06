@@ -265,11 +265,28 @@ namespace ManageWalla
                 }
             }
 
-            foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>().Where(r => r.Extension.ToUpper() == ".JPG"))
+            foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>())
             {
-                UploadImage newImage = new UploadImage();
-                await newImage.Setup(file.FullName);
-                meFots.Add(newImage);
+                switch (file.Extension.ToUpper().Substring(1))
+                {
+                    case "JPG":
+                    case "JPEG":
+                    case "TIF":
+                    case "TIFF":
+                    case "PSD":
+                    case "PNG":
+                    case "BMP":
+                    case "GIF":
+                    case "CR2":
+                    case "ARW":
+                    case "NEF":
+                        UploadImage newImage = new UploadImage();
+                        await newImage.Setup(file.FullName);
+                        meFots.Add(newImage);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             /* old code
