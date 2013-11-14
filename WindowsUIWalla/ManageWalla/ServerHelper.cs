@@ -85,7 +85,7 @@ namespace ManageWalla
         //Also held locally for new uploads to associate images with.
         public long SetSessionMachineId(string machineName, int platformId)
         {
-            return 100000;
+            return 100001;
         }
         #endregion
 
@@ -727,19 +727,19 @@ namespace ManageWalla
         #endregion
 
         #region Images
-        async public Task<BitmapImage> GetImage(long imageId, int size)
+        async public Task<BitmapImage> GetImage(long imageId, int width, int height)
         {
             try
             {
                 /* GET /{userName}/image/{imageId}/{size}/ */
-                string requestUrl = "image/" + imageId.ToString() + "/" + size.ToString() + "/";
+                string requestUrl = "image/" + imageId.ToString() + "/" + width.ToString() + "/" + height.ToString() + "/";
                 //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 //request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 BitmapImage myBitmapImage = new BitmapImage();
                 myBitmapImage.BeginInit();
                 myBitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                myBitmapImage.DecodePixelWidth = size;
+                myBitmapImage.DecodePixelHeight = height;
                 myBitmapImage.StreamSource = await http.GetStreamAsync(requestUrl);
                 myBitmapImage.EndInit();
                 //myBitmapImage.Freeze();
@@ -749,7 +749,8 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                throw ex;
+                return null;
+                //throw ex;
             }
         }
 

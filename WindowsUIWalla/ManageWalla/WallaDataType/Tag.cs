@@ -28,6 +28,8 @@ namespace ManageWalla {
         
         private string descField;
         
+        private int imageCountField;
+        
         private System.DateTime lastChangedField;
         
         private long idField;
@@ -55,6 +57,16 @@ namespace ManageWalla {
             }
             set {
                 this.descField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public int ImageCount {
+            get {
+                return this.imageCountField;
+            }
+            set {
+                this.imageCountField = value;
             }
         }
         

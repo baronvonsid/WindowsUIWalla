@@ -34,7 +34,15 @@ namespace ManageWalla {
         
         private string passwordField;
         
+        private int selectionTypeField;
+        
         private int groupingTypeField;
+        
+        private int styleIdField;
+        
+        private int presentationIdField;
+        
+        private int totalImageCountField;
         
         private System.DateTime lastChangedField;
         
@@ -45,6 +53,8 @@ namespace ManageWalla {
         private GalleryTagRef[] tagsField;
         
         private GallerySortRef[] sortsField;
+        
+        private GallerySectionRef[] sectionsField;
         
         private long idField;
         
@@ -105,12 +115,52 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
+        public int SelectionType {
+            get {
+                return this.selectionTypeField;
+            }
+            set {
+                this.selectionTypeField = value;
+            }
+        }
+        
+        /// <remarks/>
         public int GroupingType {
             get {
                 return this.groupingTypeField;
             }
             set {
                 this.groupingTypeField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public int StyleId {
+            get {
+                return this.styleIdField;
+            }
+            set {
+                this.styleIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public int PresentationId {
+            get {
+                return this.presentationIdField;
+            }
+            set {
+                this.presentationIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public int TotalImageCount {
+            get {
+                return this.totalImageCountField;
+            }
+            set {
+                this.totalImageCountField = value;
             }
         }
         
@@ -165,6 +215,17 @@ namespace ManageWalla {
             }
             set {
                 this.sortsField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayItemAttribute("SectionRef", IsNullable=false)]
+        public GallerySectionRef[] Sections {
+            get {
+                return this.sectionsField;
+            }
+            set {
+                this.sectionsField = value;
             }
         }
         
@@ -401,6 +462,93 @@ namespace ManageWalla {
             }
             set {
                 this.ascendingFieldSpecified = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.17929")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/Gallery")]
+    public partial class GallerySectionRef {
+        
+        private long sectionIdField;
+        
+        private bool sectionIdFieldSpecified;
+        
+        private string nameField;
+        
+        private string descField;
+        
+        private int imageCountField;
+        
+        private bool imageCountFieldSpecified;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public long sectionId {
+            get {
+                return this.sectionIdField;
+            }
+            set {
+                this.sectionIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool sectionIdSpecified {
+            get {
+                return this.sectionIdFieldSpecified;
+            }
+            set {
+                this.sectionIdFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string Name {
+            get {
+                return this.nameField;
+            }
+            set {
+                this.nameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string Desc {
+            get {
+                return this.descField;
+            }
+            set {
+                this.descField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public int imageCount {
+            get {
+                return this.imageCountField;
+            }
+            set {
+                this.imageCountField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool imageCountSpecified {
+            get {
+                return this.imageCountFieldSpecified;
+            }
+            set {
+                this.imageCountFieldSpecified = value;
             }
         }
     }

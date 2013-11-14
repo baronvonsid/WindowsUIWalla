@@ -38,6 +38,10 @@ namespace ManageWalla {
         
         private string typeField;
         
+        private long sectionIdField;
+        
+        private bool sectionIdFieldSpecified;
+        
         private int versionField;
         
         private bool versionFieldSpecified;
@@ -49,6 +53,10 @@ namespace ManageWalla {
         private int imageCountField;
         
         private bool imageCountFieldSpecified;
+        
+        private int sectionImageCountField;
+        
+        private bool sectionImageCountFieldSpecified;
         
         private int totalImageCountField;
         
@@ -130,6 +138,28 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        public long sectionId {
+            get {
+                return this.sectionIdField;
+            }
+            set {
+                this.sectionIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool sectionIdSpecified {
+            get {
+                return this.sectionIdFieldSpecified;
+            }
+            set {
+                this.sectionIdFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
         public int version {
             get {
                 return this.versionField;
@@ -196,6 +226,28 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        public int sectionImageCount {
+            get {
+                return this.sectionImageCountField;
+            }
+            set {
+                this.sectionImageCountField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool sectionImageCountSpecified {
+            get {
+                return this.sectionImageCountFieldSpecified;
+            }
+            set {
+                this.sectionImageCountFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
         public int totalImageCount {
             get {
                 return this.totalImageCountField;
@@ -228,6 +280,10 @@ namespace ManageWalla {
         private long idField;
         
         private bool idFieldSpecified;
+        
+        private long categoryIdField;
+        
+        private bool categoryIdFieldSpecified;
         
         private string nameField;
         
@@ -262,6 +318,28 @@ namespace ManageWalla {
             }
             set {
                 this.idFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public long categoryId {
+            get {
+                return this.categoryIdField;
+            }
+            set {
+                this.categoryIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool categoryIdSpecified {
+            get {
+                return this.categoryIdFieldSpecified;
+            }
+            set {
+                this.categoryIdFieldSpecified = value;
             }
         }
         

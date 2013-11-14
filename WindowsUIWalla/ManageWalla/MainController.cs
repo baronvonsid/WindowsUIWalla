@@ -352,7 +352,7 @@ namespace ManageWalla
                     TagList tagList;
                     if (state.tagList != null)
                     {
-                        tagList = await serverHelper.TagGetListAsync(state.tagList.LastChanged);
+                        tagList = await serverHelper.TagGetListAsync(state.tagList.lastChanged);
                     }
                     else
                     {

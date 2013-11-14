@@ -38,9 +38,9 @@ namespace ManageWalla {
         
         private int statusField;
         
-        private long widthField;
+        private int widthField;
         
-        private long heightField;
+        private int heightField;
         
         private long sizeField;
         
@@ -92,8 +92,8 @@ namespace ManageWalla {
         
         public ImageMeta() {
             this.statusField = 0;
-            this.widthField = ((long)(0));
-            this.heightField = ((long)(0));
+            this.widthField = 0;
+            this.heightField = 0;
             this.sizeField = ((long)(0));
             this.idField = ((long)(0));
             this.versionField = 0;
@@ -171,7 +171,7 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        public long Width {
+        public int Width {
             get {
                 return this.widthField;
             }
@@ -181,7 +181,7 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        public long Height {
+        public int Height {
             get {
                 return this.heightField;
             }

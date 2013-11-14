@@ -16,6 +16,7 @@ targetNamespace="http://www.example.org/ImageList"
               <element name="ImageRef" maxOccurs="unbounded" minOccurs="0">
               <complexType>
                       <attribute type="long" name="id" />
+                      <attribute type="long" name="categoryId" />
                       <attribute type="string" name="name" />
                       <attribute type="string" name="desc" />
                       <attribute type="date" name="uploadDate" />
@@ -28,10 +29,12 @@ targetNamespace="http://www.example.org/ImageList"
         </element>
       </sequence>
       <attribute type="long" name="id"/>
-      <attribute type="string" name="type"/> <!-- Category, Tag, View -->
+      <attribute type="string" name="type"/> <!-- Category, Tag, Gallery -->
+      <attribute type="long" name="sectionId" />
       <attribute type="int" name="version"/>
       <attribute type="int" name="imageCursor"/>
       <attribute type="int" name="imageCount"/>
+      <attribute type="int" name="sectionImageCount"/>
       <attribute type="int" name="totalImageCount"/>
     </complexType>
   </element>

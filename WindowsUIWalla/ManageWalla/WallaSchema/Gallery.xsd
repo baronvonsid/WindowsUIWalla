@@ -12,7 +12,11 @@ targetNamespace="http://www.example.org/Gallery"
         <element type="string" name="UrlComplex"/>
         <element type="int" name="AccessType"/>
         <element type="string" name="Password"/>
+        <element type="int" name="SelectionType" />
         <element type="int" name="GroupingType" />
+        <element type="int" name="StyleId" />
+        <element type="int" name="PresentationId" />
+        <element type="int" name="TotalImageCount" />
         <element type="dateTime" name="LastChanged"/>
         
         <element name="Users">
@@ -60,6 +64,21 @@ targetNamespace="http://www.example.org/Gallery"
               <complexType>
                       <attribute type="string" name="fieldname" />
                       <attribute type="boolean" name="ascending"/>
+              </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+  
+        <element name="Sections">
+          <complexType>
+            <sequence>
+              <element name="SectionRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+                      <attribute type="long" name="sectionId" />
+                      <attribute type="string" name="Name"></attribute>
+                      <attribute type="string" name="Desc"></attribute>
+                      <attribute type="int" name="imageCount"/>
               </complexType>
               </element>
             </sequence>

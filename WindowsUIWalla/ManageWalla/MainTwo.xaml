@@ -45,12 +45,71 @@
                 </Button.Content>
             </Button>
 
-            <TextBlock x:Name="lblFotoWallaHorizontal" FontSize="16" Padding="0,0,20,0" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" Foreground="#FF408383">
-                <TextBlock.LayoutTransform>
-                    <RotateTransform Angle="-90"></RotateTransform>
-                </TextBlock.LayoutTransform>
-                <TextBlock.Text>FotoWalla</TextBlock.Text>
-            </TextBlock>
+
+
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" DockPanel.Dock="Bottom">
+                <Button x:Name="cmdImageNavigationBeginVert" Padding="4" Content="&lt;&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click" />
+                <Button x:Name="cmdImageNavigationPreviousVert" Padding="4" Content=" &lt; " Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click" />
+                <Button x:Name="cmdImageNavigationNextVert" Padding="4" Content=" > " Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click" />
+                <Button x:Name="cmdImageNavigationLastVert" Padding="4" Content=">>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
+            </StackPanel>
+
+            <!--
+
+            
+                            <Label x:Name="lblImageListNameVert" FontSize="16" Content="Gallery Name"  Background="Transparent" Foreground="#FF408383" Width="109">
+                    <Label.LayoutTransform>
+                        <RotateTransform Angle="-90"></RotateTransform>
+                    </Label.LayoutTransform>
+                </Label>
+            -->
+
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+
+
+                <ComboBox x:Name="cmbGallerySectionVert" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="100" SelectedIndex="0" Background="{x:Null}" BorderThickness="0" BorderBrush="{x:Null}">
+                    <ComboBox.LayoutTransform>
+                        <RotateTransform Angle="270" />
+                    </ComboBox.LayoutTransform>
+                    <ComboBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" IsItemsHost="True" MinWidth="100">
+                                <StackPanel.Background>
+                                    <SolidColorBrush Color="#FFFFE2E2" Opacity="0.5"/>
+                                </StackPanel.Background>
+                                <StackPanel.LayoutTransform>
+                                    <RotateTransform Angle="90" />
+                                </StackPanel.LayoutTransform>
+                            </StackPanel>
+                        </ItemsPanelTemplate>
+                    </ComboBox.ItemsPanel>
+                    
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <!--
+                            <Setter Property="LayoutTransform">
+                                <Setter.Value>
+                                    <RotateTransform Angle="-90" />
+                                </Setter.Value>
+                            </Setter>
+                            -->
+                            <Setter Property="Padding" Value="5" />
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                    
+                    <ComboBoxItem>Hello</ComboBoxItem>
+                    <ComboBoxItem>World</ComboBoxItem>
+                    <ComboBoxItem>Foo</ComboBoxItem>
+                    <ComboBoxItem>Bar</ComboBoxItem>
+                </ComboBox>
+                <TextBlock x:Name="lblImageListNameVert" Text="Gallery Name" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#FF408383" Margin="0,20,0,0">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="-90"></RotateTransform>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </StackPanel>
+
+
         </DockPanel>
 
         <DockPanel Grid.Column="1" Grid.Row="0" Margin="2,2,2,2" LastChildFill="True" Background="#FFA9C4FF">
@@ -91,14 +150,14 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="34" />
                 <RowDefinition Height="25" />
-                <RowDefinition Height="75" />
+                <RowDefinition Height="80" />
                 <RowDefinition Height="34" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            
+
             <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2" FontFamily="Tahoma" FontWeight="Medium">
                 <TreeView x:Name="treeCategoryView" Background="#FFFDFFCE">
                     <TreeViewItem Header="Barons Photo Album" IsExpanded="True" Background="#FFEED7D7">
@@ -170,11 +229,11 @@
                 <Button x:Name="cmdCategoryAdd" Content="Add New" Click="cmdCategoryAdd_Click" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
                 <Button x:Name="cmdCategoryEdit" Content="Edit Existing" Click="cmdCategoryEdit_Click" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
             </StackPanel>
-            
+
             <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-            <TextBox x:Name="txtCategoryName" Grid.Column="1" Grid.Row="2" Cursor="IBeam" MaxLength="30" PreviewTextInput="txtCategoryName_PreviewTextInput" Margin="2" />
+            <TextBox x:Name="txtCategoryName" Grid.Column="1" Grid.Row="2" Cursor="IBeam" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" Margin="2" />
             <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
-            <TextBox x:Name="txtCategoryDescription" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" MaxLines="1" MaxLength="200" Margin="2"/>
+            <TextBox x:Name="txtCategoryDescription" Grid.Column="1" Grid.Row="3" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" MaxLines="1" MaxLength="200" Margin="2"/>
 
             <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button x:Name="cmdCategorySave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategorySave_Click" />
@@ -257,14 +316,24 @@
 
         <Grid x:Name="gridGallery" Background="#CCFD91C7" Grid.Column="1" Grid.Row="6" >
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" /> <!-- wrap galleries -->
-                <RowDefinition Height="34" /> <!-- add edit buttons -->
-                <RowDefinition Height="25" /> <!-- Name -->
-                <RowDefinition Height="75" /> <!-- Desc -->
-                <RowDefinition Height="25" /><!-- Access Type -->
-                <RowDefinition Height="25" /> <!-- Password -->
-                <RowDefinition Height="25" /> <!-- Group Fotos -->
-                <RowDefinition Height="34" /> <!-- Save buttons -->
+                <RowDefinition Height="*" />
+                <!-- wrap galleries -->
+                <RowDefinition Height="34" />
+                <!-- add edit buttons -->
+                <RowDefinition Height="25" />
+                <!-- Name -->
+                <RowDefinition Height="75" />
+                <!-- Desc -->
+                <RowDefinition Height="25" />
+                <!-- Access Type -->
+                <RowDefinition Height="25" />
+                <!-- Password -->
+                <RowDefinition Height="25" />
+                <!-- Select Fotos -->
+                <RowDefinition Height="25" />
+                <!-- Group Fotos -->
+                <RowDefinition Height="34" />
+                <!-- Save buttons -->
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100" />
@@ -284,28 +353,28 @@
             </StackPanel>
 
             <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-            <TextBox x:Name="txtGalleryName" Margin="3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" CharacterCasing="Upper" Cursor="IBeam" PreviewTextInput="txtGalleryName_PreviewTextInput" />
+            <TextBox x:Name="txtGalleryName" Margin="3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" Cursor="IBeam" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" />
             <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
             <TextBox x:Name="txtGalleryDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
 
-            <Label Grid.Column="0" Grid.Row="4" Content="Access Type"/>
-            <ComboBox x:Name="cmbGalleryAccessType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="4" SelectionChanged="cmbGalleryAccessType_SelectionChanged" >
+            <Label Content="Select Fotos" Grid.Column="0" Grid.Row="4" />
+            <ComboBox x:Name="cmbGallerySelectionType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="4" SelectionChanged="cmbGallerySelectionType_SelectionChanged">
                 <ComboBoxItem>
-                    <TextBlock Text="Private" TextAlignment="Left" />
+                    <TextBlock Text="Category" TextAlignment="Left" ToolTip="Fotos will be included from selected categories" />
                 </ComboBoxItem>
                 <ComboBoxItem>
-                    <TextBlock Text="Shared (Password)" TextAlignment="Left" />
+                    <TextBlock Text="Tags" TextAlignment="Left" ToolTip="Fotos will be included from selected tags" />
                 </ComboBoxItem>
                 <ComboBoxItem>
-                    <TextBlock Text="Public (Complex Url)" TextAlignment="Left" />
+                    <TextBlock Text="Category AND Tag" TextAlignment="Left" ToolTip="Fotos will be included when they are present in selected categories AND tags" />
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <TextBlock Text="Category OR Tag" TextAlignment="Left" ToolTip="Fotos will be included when they are present in either the selected categories OR tags" />
                 </ComboBoxItem>
             </ComboBox>
-            
-            <Label Grid.Column="0" Grid.Row="5" Content="Password"/>
-            <TextBox x:Name="txtGalleryPassword" Margin="3" Grid.Column="1" Grid.Row="5" MaxLines="1" MaxLength="30"/>
 
-            <Label Content="Group Fotos" Grid.Column="0" Grid.Row="6" />
-            <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="6">
+            <Label Content="Group Fotos" Grid.Column="0" Grid.Row="5" />
+            <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="5">
                 <ComboBoxItem>
                     <TextBlock Text="No Grouping" TextAlignment="Left" ToolTip="Fotos will not be grouped" />
                 </ComboBoxItem>
@@ -317,13 +386,31 @@
                 </ComboBoxItem>
             </ComboBox>
 
-            <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
+            <Label Grid.Column="0" Grid.Row="6" Content="Access Type"/>
+            <ComboBox x:Name="cmbGalleryAccessType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="6" SelectionChanged="cmbGalleryAccessType_SelectionChanged" >
+                <ComboBoxItem>
+                    <TextBlock Text="Private" TextAlignment="Left" />
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <TextBlock Text="Shared (Password)" TextAlignment="Left" />
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <TextBlock Text="Public (Complex Url)" TextAlignment="Left" />
+                </ComboBoxItem>
+            </ComboBox>
+
+            <Label Grid.Column="0" Grid.Row="7" Content="Password"/>
+            <TextBox x:Name="txtGalleryPassword" Margin="3" Grid.Column="1" Grid.Row="7" MaxLines="1" MaxLength="30"/>
+
+
+
+            <StackPanel Orientation="Horizontal" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
                 <Button x:Name="cmdGallerySave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGallerySave_Click" />
                 <Button x:Name="cmdGalleryCancel" Content="Cancel" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCancel_Click"  />
                 <Button x:Name="cmdGalleryDelete" Content="Delete" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryDelete_Click" />
             </StackPanel>
         </Grid>
-        
+
         <RadioButton x:Name="radUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Checked="radUpload_Checked"  Template="{StaticResource templateRadioButtonTest}" Style="{StaticResource styleMainSectionRadioButton}" Background="#FF8CFFE5">
             <DockPanel LastChildFill="True">
                 <Image Source="Icons/heart.gif" Height="28" DockPanel.Dock="Left"/>
@@ -431,11 +518,11 @@
             <CheckBox x:Name="chkUploadToNewCategory" Grid.Row="1" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=UploadToNewCategory}" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="chkUploadToNewCategory_Checked" Unchecked="chkUploadToNewCategory_Unchecked" />
 
             <Label Content="Category Name" Grid.Column="0" Grid.Row="2" />
-            <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryName_PreviewTextInput" Margin="2" Cursor="IBeam" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
+            <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" Margin="2" Cursor="IBeam" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
 
             <Label Content="Description" Grid.Column="0" Grid.Row="3" />
-            <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
-
+            <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="3" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
+            
             <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button x:Name="cmdUploadAll" Content="Upload" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadAll_Click"/>
                 <Button x:Name="cmdUploadClear" Content="Clear" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
@@ -458,23 +545,6 @@
 
             <DockPanel x:Name="panGridRightHeader" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="2,2,2,2" Background="#FFA9C4FF" HorizontalAlignment="Stretch" LastChildFill="True">
 
-                <ToggleButton x:Name="cmdSort" ToolTip="Sort" DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Checked="cmdSort_Checked" Unchecked="cmdSort_Unchecked">
-                    <ToggleButton.Content>
-                        <Image Source="Icons/Disc.gif" Height="28" />
-                    </ToggleButton.Content>
-                </ToggleButton>
-
-                <ToggleButton x:Name="cmdFilter" ToolTip="Filter" DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Checked="cmdFilter_Checked" Unchecked="cmdFilter_Unchecked">
-                    <ToggleButton.Content>
-                        <Image Source="Icons/Fan.gif" Height="28" />
-                    </ToggleButton.Content>
-                </ToggleButton>
-
-                <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="4" Content="|>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
-                <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Padding="4" Content=">" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click" />
-                <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Padding="4" Content="&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click" />
-                <Button x:Name="cmdImageNavigationBegin" DockPanel.Dock="Right" Padding="4" Content="|&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click" />
-
                 <Slider x:Name="sldImageSize" DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
                             Value="130"
                             Delay="500"
@@ -483,52 +553,76 @@
                             Minimum="10"
                             Maximum="250"
                             Width="100" ></Slider>
+
+
+
+
+                <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="4" Content="|>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
+                <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Padding="4" Content=">" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click" />
+                <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Padding="4" Content="&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click" />
+                <Button x:Name="cmdImageNavigationBegin" DockPanel.Dock="Right" Padding="4" Content="|&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click" />
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Label x:Name="lblImageListName" FontSize="16" Content="Gallery Name"  Background="Transparent" Foreground="#FF408383" />
+                    <ComboBox x:Name="cmbGallerySection" Margin="4" Background="{x:Null}" SelectedIndex="0"  >
+                        <ComboBoxItem Content="Section 1"/>
+                        <ComboBoxItem Content="Section 2"/>
+                        <ComboBoxItem Content="Section 3"/>
+                    </ComboBox>
+                </StackPanel>
+
             </DockPanel>
 
             <Grid x:Name="gridGallerySelection" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Visibility="Collapsed">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
 
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="4">
+                <Label Content="Categories to include" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="0" />
+
+                
+
+
+                <ScrollViewer x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="1" Margin="4">
                     <TreeView x:Name="treeGalleryCategoryView" Background="#FFFFF4F4" >
                     </TreeView>
                 </ScrollViewer>
 
-                <ListBox Style="{DynamicResource TagListStyle}" 
+                <Label x:Name="lblGallerySelectionAndOr" Content="AND" Grid.Column="1" Grid.Row="1" Margin="4" VerticalContentAlignment="Center"  />
+
+                <Label Content="Tags to include" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="0" />
+                
+                <ScrollViewer x:Name="scrollGalleryTagInclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="2" Grid.Row="1">
+                    <ListBox Style="{DynamicResource TagListStyle}" 
                             		x:Name ="lstGalleryTagListInclude" 
                             		ScrollViewer.VerticalScrollBarVisibility="Auto"
                                     SelectionMode="Multiple" 
-                                    ItemContainerStyle="{DynamicResource TagListItem}"
-                                    Grid.Column="1" Grid.Row="0">
-                </ListBox>
+                                    ItemContainerStyle="{DynamicResource TagListItem}">
+                    </ListBox>
+                </ScrollViewer>
 
-
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="1" Grid.Row="1">
-
-                        <ListBox Style="{DynamicResource TagListStyle}" 
+                <Label Content="Tags to exclude" Grid.Column="4" Grid.Row="0" Margin="4" VerticalContentAlignment="Center"  />
+                
+                <ScrollViewer x:Name="scrollGalleryTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="1">
+                    <ListBox Style="{DynamicResource TagListStyle}" 
                             		x:Name ="lstGalleryTagListExclude" 
                             		ScrollViewer.VerticalScrollBarVisibility="Visible"
                                     SelectionMode="Multiple" 
                                     ItemContainerStyle="{DynamicResource TagListItem}"
                                     >
-                        </ListBox>
-                    </ScrollViewer>
-
-                <DockPanel x:Name="panGallerySort" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" VerticalAlignment="Stretch" Background="MediumOrchid">
-                    <TextBlock Text="Sort it" TextAlignment="Center" />
-                </DockPanel>
-
-
+                    </ListBox>
+                </ScrollViewer>
 
             </Grid>
-            
+
             <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
                             		    x:Name ="lstImageMainViewerList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource imageMainViewerListKey}}"
@@ -562,14 +656,6 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <DockPanel x:Name="panFilter" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed" Background="Black">
-                <TextBlock Text="Filter" TextAlignment="Center" />
-            </DockPanel>
-
-            <DockPanel x:Name="panSort" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed" Background="Azure">
-                <TextBlock Text="Sort" TextAlignment="Center" />
-            </DockPanel>
-
             <DockPanel x:Name="panUpload" Grid.Column="1" Grid.Row="1" Background="#FF81B0AE" Margin="4">
                 <Grid x:Name="grdUploadImageDetails" DataContext="{StaticResource uploadImagefileListKey}">
                     <Grid.RowDefinitions>
@@ -591,7 +677,7 @@
                         <RowDefinition Height="4" />
 
                         <!-- Additional Fields -->
-                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="0" />
                         <RowDefinition Height="34"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
@@ -628,7 +714,7 @@
                     </StackPanel>
 
                     <TextBlock Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" TextAlignment="Center" Background="White" />
-                    
+
                     <Label Content="All Fotos"  Grid.Column="1" Grid.Row="7" HorizontalContentAlignment="Right" ToolTip="Check this so the same Tags are associated with every Foto"></Label>
                     <Label Grid.Column="0" Grid.Row="7" Content="Tags"/>
                     <CheckBox x:Name="chkUploadTagsAll" Grid.Column="2" Grid.Row="7" Style="{StaticResource styleCheckbox}" IsChecked="{Binding Source={StaticResource uploadUIStateKey}, Mode=TwoWay, Path=MetaTagRefAll}" Checked="chkUploadTagsAll_Checked" Unchecked="chkUploadTagsAll_Unchecked"  />
@@ -668,65 +754,65 @@
                     <TextBlock Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="3" TextAlignment="Center" Background="White" />
 
                     <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="3">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition x:Name="rowUploadUdfChar1" Height="25" />
-                                    <RowDefinition x:Name="rowUploadUdfChar2" Height="25" />
-                                    <RowDefinition x:Name="rowUploadUdfChar3" Height="25" />
-                                    <RowDefinition x:Name="rowUploadUdfText1" Height="75" />
-                                    <RowDefinition x:Name="rowUploadUdfNum1" Height="25" />
-                                    <RowDefinition x:Name="rowUploadUdfNum2" Height="25" />
-                                    <RowDefinition x:Name="rowUploadUdfNum3" Height="25" />
-                                    <RowDefinition x:Name="rowUploadUdfDate1" Height="25" />
-                                    <RowDefinition x:Name="rowUploadUdfDate2" Height="25" />
-                                    <RowDefinition x:Name="rowUploadUdfDate3" Height="25" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="0"/>
-                                </Grid.ColumnDefinitions>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition x:Name="rowUploadUdfChar1" Height="25" />
+                                <RowDefinition x:Name="rowUploadUdfChar2" Height="25" />
+                                <RowDefinition x:Name="rowUploadUdfChar3" Height="25" />
+                                <RowDefinition x:Name="rowUploadUdfText1" Height="75" />
+                                <RowDefinition x:Name="rowUploadUdfNum1" Height="25" />
+                                <RowDefinition x:Name="rowUploadUdfNum2" Height="25" />
+                                <RowDefinition x:Name="rowUploadUdfNum3" Height="25" />
+                                <RowDefinition x:Name="rowUploadUdfDate1" Height="25" />
+                                <RowDefinition x:Name="rowUploadUdfDate2" Height="25" />
+                                <RowDefinition x:Name="rowUploadUdfDate3" Height="25" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="0"/>
+                            </Grid.ColumnDefinitions>
 
-                                <Label x:Name="lblUdfChar1" Grid.Column="0" Grid.Row="0" Content="User Field 1"/>
-                                <TextBox x:Name="txtUploadUdfChar1" Grid.Column="1" Grid.Row="0" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar1}" Grid.ColumnSpan="2"/>
-                                <CheckBox x:Name="chkUploadUdfChar1All" Grid.Column="2" Grid.Row="0" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar1All_Checked" Unchecked="chkUploadUdfChar1All_Unchecked" Margin="3,6" />
+                            <Label x:Name="lblUdfChar1" Grid.Column="0" Grid.Row="0" Content="User Field 1"/>
+                            <TextBox x:Name="txtUploadUdfChar1" Grid.Column="1" Grid.Row="0" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar1}" Grid.ColumnSpan="2"/>
+                            <CheckBox x:Name="chkUploadUdfChar1All" Grid.Column="2" Grid.Row="0" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar1All_Checked" Unchecked="chkUploadUdfChar1All_Unchecked" Margin="3,6" />
 
-                                <Label x:Name="lblUdfChar2" Grid.Column="0" Grid.Row="1" Content="User Field 2"/>
-                                <TextBox x:Name="txtUploadUdfChar2" Grid.Column="1" Grid.Row="1" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar2}" Grid.ColumnSpan="2"/>
-                                <CheckBox x:Name="chkUploadUdfChar2All" Grid.Column="2" Grid.Row="1" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar2All_Checked" Unchecked="chkUploadUdfChar2All_Unchecked" Margin="3,6"/>
+                            <Label x:Name="lblUdfChar2" Grid.Column="0" Grid.Row="1" Content="User Field 2"/>
+                            <TextBox x:Name="txtUploadUdfChar2" Grid.Column="1" Grid.Row="1" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar2}" Grid.ColumnSpan="2"/>
+                            <CheckBox x:Name="chkUploadUdfChar2All" Grid.Column="2" Grid.Row="1" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar2All_Checked" Unchecked="chkUploadUdfChar2All_Unchecked" Margin="3,6"/>
 
-                                <Label x:Name="lblUdfChar3" Grid.Column="0" Grid.Row="2" Content="User Field 3"/>
-                                <TextBox x:Name="txtUploadUdfChar3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar3}" Grid.ColumnSpan="2"/>
-                                <CheckBox x:Name="chkUploadUdfChar3All" Grid.Column="2" Grid.Row="2" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar3All_Checked" Unchecked="chkUploadUdfChar3All_Unchecked" Margin="3,6"/>
+                            <Label x:Name="lblUdfChar3" Grid.Column="0" Grid.Row="2" Content="User Field 3"/>
+                            <TextBox x:Name="txtUploadUdfChar3" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.UdfChar3}" Grid.ColumnSpan="2"/>
+                            <CheckBox x:Name="chkUploadUdfChar3All" Grid.Column="2" Grid.Row="2" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfChar3All_Checked" Unchecked="chkUploadUdfChar3All_Unchecked" Margin="3,6"/>
 
-                                <Label x:Name="lblUdfText1" Grid.Column="0" Grid.Row="3" Content="User Text"/>
-                                <TextBox x:Name="txtUploadUdfText1" Grid.Column="1" Grid.Row="3" Margin="2" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxLines="3" MaxLength="500" TextWrapping="Wrap" Text="{Binding Mode=TwoWay, Path=/Meta.UdfText1}" Grid.ColumnSpan="2"/>
-                                <CheckBox x:Name="chkUploadUdfText1All" Grid.Column="2" Grid.Row="3" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfText1All_Checked" Unchecked="chkUploadUdfText1All_Unchecked" Margin="3,6"/>
+                            <Label x:Name="lblUdfText1" Grid.Column="0" Grid.Row="3" Content="User Text"/>
+                            <TextBox x:Name="txtUploadUdfText1" Grid.Column="1" Grid.Row="3" Margin="2" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxLines="3" MaxLength="500" TextWrapping="Wrap" Text="{Binding Mode=TwoWay, Path=/Meta.UdfText1}" Grid.ColumnSpan="2"/>
+                            <CheckBox x:Name="chkUploadUdfText1All" Grid.Column="2" Grid.Row="3" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfText1All_Checked" Unchecked="chkUploadUdfText1All_Unchecked" Margin="3,6"/>
 
-                                <Label x:Name="lblUdfNum1" Grid.Column="0" Grid.Row="4" Content="User Num 1"/>
-                                <TextBox x:Name="txtUploadUdfNum1" Grid.Column="1" Grid.Row="4" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum1}" Grid.ColumnSpan="2"/>
-                                <CheckBox x:Name="chkUploadUdfNum1All" Grid.Column="2" Grid.Row="4" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum1All_Checked" Unchecked="chkUploadUdfNum1All_Unchecked" Margin="3,6"/>
+                            <Label x:Name="lblUdfNum1" Grid.Column="0" Grid.Row="4" Content="User Num 1"/>
+                            <TextBox x:Name="txtUploadUdfNum1" Grid.Column="1" Grid.Row="4" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum1}" Grid.ColumnSpan="2"/>
+                            <CheckBox x:Name="chkUploadUdfNum1All" Grid.Column="2" Grid.Row="4" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum1All_Checked" Unchecked="chkUploadUdfNum1All_Unchecked" Margin="3,6"/>
 
-                                <Label x:Name="lblUdfNum2" Grid.Column="0" Grid.Row="5" Content="User Num 2"/>
-                                <TextBox x:Name="txtUploadUdfNum2" Grid.Column="1" Grid.Row="5" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum2}" Grid.ColumnSpan="2"/>
-                                <CheckBox x:Name="chkUploadUdfNum2All" Grid.Column="2" Grid.Row="5" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum2All_Checked" Unchecked="chkUploadUdfNum2All_Unchecked" Margin="3,6"/>
+                            <Label x:Name="lblUdfNum2" Grid.Column="0" Grid.Row="5" Content="User Num 2"/>
+                            <TextBox x:Name="txtUploadUdfNum2" Grid.Column="1" Grid.Row="5" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum2}" Grid.ColumnSpan="2"/>
+                            <CheckBox x:Name="chkUploadUdfNum2All" Grid.Column="2" Grid.Row="5" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum2All_Checked" Unchecked="chkUploadUdfNum2All_Unchecked" Margin="3,6"/>
 
-                                <Label x:Name="lblUdfNum3" Grid.Column="0" Grid.Row="6" Content="User Num 3"/>
-                                <TextBox x:Name="txtUploadUdfNum3" Grid.Column="1" Grid.Row="6" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum3}" Grid.ColumnSpan="2"/>
-                                <CheckBox x:Name="chkUploadUdfNum3All" Grid.Column="2" Grid.Row="6" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum3All_Checked" Unchecked="chkUploadUdfNum3All_Unchecked" Margin="3,6"/>
+                            <Label x:Name="lblUdfNum3" Grid.Column="0" Grid.Row="6" Content="User Num 3"/>
+                            <TextBox x:Name="txtUploadUdfNum3" Grid.Column="1" Grid.Row="6" Margin="2" MaxLines="1" MaxLength="20" Text="{Binding Mode=TwoWay, Path=/Meta.UdfNum3}" Grid.ColumnSpan="2"/>
+                            <CheckBox x:Name="chkUploadUdfNum3All" Grid.Column="2" Grid.Row="6" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfNum3All_Checked" Unchecked="chkUploadUdfNum3All_Unchecked" Margin="3,6"/>
 
-                                <Label x:Name="lblUdfDate1" Grid.Column="0" Grid.Row="7" Content="User Date 1"/>
-                                <DatePicker x:Name="datUploadUdfDate1" Grid.Column="1" Grid.Row="7" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate1}" Grid.ColumnSpan="2" />
-                                <CheckBox x:Name="chkUploadUdfDate1All" Grid.Column="2" Grid.Row="7" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate1All_Checked" Unchecked="chkUploadUdfDate1All_Unchecked" Margin="3,6"/>
+                            <Label x:Name="lblUdfDate1" Grid.Column="0" Grid.Row="7" Content="User Date 1"/>
+                            <DatePicker x:Name="datUploadUdfDate1" Grid.Column="1" Grid.Row="7" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate1}" Grid.ColumnSpan="2" />
+                            <CheckBox x:Name="chkUploadUdfDate1All" Grid.Column="2" Grid.Row="7" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate1All_Checked" Unchecked="chkUploadUdfDate1All_Unchecked" Margin="3,6"/>
 
-                                <Label x:Name="lblUdfDate2" Grid.Column="0" Grid.Row="8" Content="User Date 2"/>
-                                <DatePicker x:Name="datUploadUdfDate2" Grid.Column="1" Grid.Row="8" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate2}" Grid.ColumnSpan="2" />
-                                <CheckBox x:Name="chkUploadUdfDate2All" Grid.Column="2" Grid.Row="8" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate2All_Checked" Unchecked="chkUploadUdfDate2All_Unchecked" Margin="3,6"/>
+                            <Label x:Name="lblUdfDate2" Grid.Column="0" Grid.Row="8" Content="User Date 2"/>
+                            <DatePicker x:Name="datUploadUdfDate2" Grid.Column="1" Grid.Row="8" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate2}" Grid.ColumnSpan="2" />
+                            <CheckBox x:Name="chkUploadUdfDate2All" Grid.Column="2" Grid.Row="8" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate2All_Checked" Unchecked="chkUploadUdfDate2All_Unchecked" Margin="3,6"/>
 
-                                <Label x:Name="lblUdfDate3" Grid.Column="0" Grid.Row="9" Content="User Date 3"/>
-                                <DatePicker x:Name="datUploadUdfDate3" Grid.Column="1" Grid.Row="9" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate3}" Grid.ColumnSpan="2" />
-                                <CheckBox x:Name="chkUploadUdfDate3All" Grid.Column="3" Grid.Row="9" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate3All_Checked" Unchecked="chkUploadUdfDate3All_Unchecked" Margin="3,6"/>
-                            </Grid>
+                            <Label x:Name="lblUdfDate3" Grid.Column="0" Grid.Row="9" Content="User Date 3"/>
+                            <DatePicker x:Name="datUploadUdfDate3" Grid.Column="1" Grid.Row="9" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.UdfDate3}" Grid.ColumnSpan="2" />
+                            <CheckBox x:Name="chkUploadUdfDate3All" Grid.Column="3" Grid.Row="9" Style="{StaticResource styleCheckbox}" Checked="chkUploadUdfDate3All_Checked" Unchecked="chkUploadUdfDate3All_Unchecked" Margin="3,6"/>
+                        </Grid>
                     </ScrollViewer>
                     <Button x:Name="cmdUploadResetMeta" Content="Reset all image info" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadResetMeta_Click" Grid.Column="1" Grid.Row="11" Grid.ColumnSpan="2" HorizontalAlignment="Right" />
                 </Grid>

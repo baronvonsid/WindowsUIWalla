@@ -80,7 +80,7 @@ namespace ManageWalla
             }
             else
             {
-                return await serverHelper.GetImage(imageId, 250);
+                return await serverHelper.GetImage(imageId, 250, 250);
             }
         }
 

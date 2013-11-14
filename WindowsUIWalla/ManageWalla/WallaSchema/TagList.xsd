@@ -7,13 +7,14 @@
 				<sequence>
 					<element name="TagRef" maxOccurs="unbounded" minOccurs="0">
 						<complexType>
-							<attribute name="name" type="string"></attribute>
 							<attribute name="id" type="long"></attribute>
 							<attribute name="count" type="int"></attribute>
+							<attribute name="name" type="string"></attribute>
+							<attribute name="desc" type="string"></attribute>
 						</complexType>
 					</element>
 				</sequence>
-			<attribute type="dateTime" name="LastChanged" />
+			<attribute type="dateTime" name="lastChanged" />
 		</complexType>
 	</element>
 
