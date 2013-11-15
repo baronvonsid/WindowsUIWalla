@@ -167,6 +167,10 @@ namespace ManageWalla
                     lstUploadImageFileList.Visibility = Visibility.Collapsed;
                     panUpload.Visibility = System.Windows.Visibility.Collapsed;
 
+                    panGridRightHeader.Visibility = Visibility.Visible;
+                    gridGallerySelection.Visibility = Visibility.Collapsed;
+                    panGalleryFormatting.Visibility = Visibility.Collapsed;
+
                     gridLeft.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Star);
                     gridLeft.RowDefinitions[4].Height = new GridLength(0);
                     gridLeft.RowDefinitions[6].Height = new GridLength(0);
@@ -181,6 +185,7 @@ namespace ManageWalla
                     lstImageMainViewerList.Visibility = Visibility.Visible;
                     lstUploadImageFileList.Visibility = Visibility.Collapsed;
                     panUpload.Visibility = System.Windows.Visibility.Collapsed;
+                    panGridRightHeader.Visibility = Visibility.Visible;
 
                     gridLeft.RowDefinitions[2].Height = new GridLength(0);
                     gridLeft.RowDefinitions[4].Height = new GridLength(1, GridUnitType.Star);
@@ -204,6 +209,7 @@ namespace ManageWalla
                     gridRight.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
 
                     gridGallerySelection.Visibility = Visibility.Collapsed;
+                    panGalleryFormatting.Visibility = Visibility.Collapsed;
                     panGridRightHeader.Visibility = Visibility.Visible;
                     break;
                 case PaneMode.GalleryEdit:
@@ -211,7 +217,10 @@ namespace ManageWalla
                     gridRight.RowDefinitions[0].Height = new GridLength(2, GridUnitType.Star);
                     gridRight.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
 
+                    lstImageMainViewerList.Visibility = Visibility.Collapsed;
+
                     gridGallerySelection.Visibility = Visibility.Visible;
+                    panGalleryFormatting.Visibility = Visibility.Visible;
                     panGridRightHeader.Visibility = Visibility.Collapsed;
                     break;
                 case PaneMode.Upload:
@@ -2338,6 +2347,13 @@ namespace ManageWalla
                 cmbGalleryAccessType.SelectedIndex = gallery.AccessType;
                 cmbGalleryGroupingType.SelectedIndex = gallery.GroupingType;
 
+                cmbGallerySelectionType.SelectedIndex = gallery.SelectionType;
+                cmbGalleryPresentationType.SelectedIndex = gallery.PresentationId;
+                cmbGalleryStyleType.SelectedIndex = gallery.StyleId;
+
+
+
+
                 //TODO select radio buttons for tags.
                 //lstGalleryTagListInclude.SelectedItems
                 foreach (GalleryTagRef tagRef in gallery.Tags)
@@ -2495,6 +2511,9 @@ namespace ManageWalla
             txtGalleryPassword.Text = "";
             cmbGalleryAccessType.SelectedIndex = 0;
             cmbGalleryGroupingType.SelectedIndex = 0;
+            cmbGalleryStyleType.SelectedIndex = 0;
+            cmbGalleryPresentationType.SelectedIndex = 0;
+            cmbGallerySelectionType.SelectedIndex = 0;
 
             GalleryRefreshTagsList();
             GalleryRefreshCategoryList();
@@ -2565,6 +2584,9 @@ namespace ManageWalla
             currentGallery.Password = txtGalleryPassword.Text;
             currentGallery.AccessType = cmbGalleryAccessType.SelectedIndex;
             currentGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
+            currentGallery.SelectionType = cmbGallerySelectionType.SelectedIndex;
+            currentGallery.PresentationId = cmbGalleryPresentationType.SelectedIndex;
+            currentGallery.StyleId = cmbGalleryStyleType.SelectedIndex;
 
             /* Category add to object ************************************************ */
             //TODO
