@@ -2255,6 +2255,8 @@ namespace ManageWalla
             }
 
             wrapMyGalleries.Children.Clear();
+            if (state.galleryList.GalleryRef == null)
+                return;
 
             foreach (GalleryListGalleryRef gallery in state.galleryList.GalleryRef)
             {
@@ -2496,7 +2498,14 @@ namespace ManageWalla
 
         private void cmdGalleryView_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("TODO");
+            RadioButton checkedButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+
+            if (checkedButton != null)
+            {
+                GalleryListGalleryRef galleryListGalleryRef = (GalleryListGalleryRef)checkedButton.Tag;
+                string url = controller.GetGalleryUrl(galleryListGalleryRef.name, galleryListGalleryRef.urlComplex);
+                System.Diagnostics.Process.Start(url);
+            }
         }
 
         private void cmdGalleryCopyUrl_Click(object sender, RoutedEventArgs e)

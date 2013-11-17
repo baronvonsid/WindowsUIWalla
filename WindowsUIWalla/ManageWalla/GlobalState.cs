@@ -85,7 +85,7 @@ namespace ManageWalla
             }
 
             //TODO - delete
-            state.userName = "simo1n";
+            state.userName = "Simon";
             state.password = "simon";
             state.imageFetchSize = 50;
 

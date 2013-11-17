@@ -76,8 +76,11 @@ namespace ManageWalla
         {
             try
             {
+                //Properties.Settings.Default.WallaWebPath
+
                 //Setup Server helper.
-                serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, long.Parse(Properties.Settings.Default.WallaWSPort), Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey);
+                serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, long.Parse(Properties.Settings.Default.WallaWSPort),
+                    Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey, "/WallaHub/v1/web/");
 
                 //Initialise state.
                 state = GlobalState.GetState();
@@ -105,10 +108,10 @@ namespace ManageWalla
             {
                 case 6:
                     //Windows 7
-                    return 100;
+                    return 200;
                 case 7:
                     //Windows 8;
-                    return 110;
+                    return 300;
                 default:
                     return -1;
             }
@@ -774,6 +777,18 @@ namespace ManageWalla
                 logger.Error(ex);
                 currentMain.DisplayMessage("There was a problem retrieving the images associated with the Gallery: " + galleryName + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
                 return null;
+            }
+        }
+
+        public String GetGalleryUrl(string galleryName, string urlComplex)
+        {
+            if (urlComplex != null && urlComplex.Length > 0)
+            {
+                return serverHelper.GetWebUrl() + "gallery/" + galleryName + "?key=" + urlComplex;
+            }
+            else
+            {
+                return serverHelper.GetWebUrl() + "gallery/" + galleryName;
             }
         }
         #endregion

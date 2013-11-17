@@ -53,7 +53,7 @@ namespace ManageWalla
             meta.Name = Path.GetFileNameWithoutExtension(filePath);
             meta.Format = format;
             meta.LocalPath = filePath;
-            meta.MachineId = 100000;
+            meta.MachineId = 500001;
 
             //MapFileProperties();
 

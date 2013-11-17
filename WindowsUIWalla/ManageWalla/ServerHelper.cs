@@ -29,13 +29,17 @@ namespace ManageWalla
         private long port;
         private string wsPath;
         private string appKey;
+        private string username;
+        private string password;
+        private string webPath;
 
-        public ServerHelper(string hostNameParam, long portParam, string wsPathParam, string appKeyParam)
+        public ServerHelper(string hostNameParam, long portParam, string wsPathParam, string appKeyParam, string webPathParam)
         {
             hostName = hostNameParam;
             port = portParam;
             wsPath = wsPathParam;
             appKey = appKeyParam;
+            webPath = webPathParam;
         }
 
         /// <summary>
@@ -64,8 +68,11 @@ namespace ManageWalla
             }
         }
 
-        public string Logon(string username, string password)
+        public string Logon(string usernameParam, string passwordParam)
         {
+            username = usernameParam;
+            password = passwordParam;
+
             if (http == null)
             {
                 http = new HttpClient();
@@ -78,6 +85,11 @@ namespace ManageWalla
             //Log failed login as a warning.
 
             return "OK";
+        }
+
+        public string GetWebUrl()
+        {
+            return "http://" + hostName + ":" + port.ToString() + webPath + username + "/";
         }
 
         //The web server needs to know what machine id is using this connection, so relevant
