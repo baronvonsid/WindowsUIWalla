@@ -766,12 +766,17 @@ namespace ManageWalla
             }
         }
 
-        async public Task<ImageList> GetImageListAsync(string type, string id, DateTime? lastModified, int cursor, int size, string searchQueryString)
+        async public Task<ImageList> GetImageListAsync(string type, string id, DateTime? lastModified, int cursor, int size, string searchQueryString, long sectionId)
         {
             try
             {
                 /* GET /{userName}/{type}/{identity}/{imageCursor}/{size} */
-                string requestUrl = type + "/" + id + "/" + cursor.ToString() + "/" + size.ToString() + "?" + searchQueryString ?? "";
+
+                string requestUrl = type + "/" + id + "/" + cursor.ToString() + "/" + size.ToString(); // +"?" + searchQueryString ?? "";
+                
+                if (sectionId > 0)
+                    requestUrl = requestUrl + "?sectionId=" + sectionId.ToString();
+
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 

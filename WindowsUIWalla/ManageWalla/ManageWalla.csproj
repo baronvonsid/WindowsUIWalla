@@ -120,10 +120,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ProjectDataType\GalleryCategoryModel.cs" />
     <Compile Include="GlobalState.cs" />
     <Compile Include="MainTwo.xaml.cs">
       <DependentUpon>MainTwo.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MultiSelectTreeView.cs" />
     <Compile Include="ProjectDataType\GeneralImage.cs" />
     <Compile Include="ProjectDataType\ImageMainViewerList.cs" />
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />

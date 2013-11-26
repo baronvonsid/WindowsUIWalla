@@ -46,6 +46,16 @@ namespace ManageWalla {
         
         private System.DateTime lastChangedField;
         
+        private bool showGalleryNameField;
+        
+        private bool showGalleryDescField;
+        
+        private bool showImageNameField;
+        
+        private bool showImageDescField;
+        
+        private bool showImageMetaField;
+        
         private GalleryUserRef[] usersField;
         
         private GalleryCategoryRef[] categoriesField;
@@ -171,6 +181,56 @@ namespace ManageWalla {
             }
             set {
                 this.lastChangedField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public bool ShowGalleryName {
+            get {
+                return this.showGalleryNameField;
+            }
+            set {
+                this.showGalleryNameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public bool ShowGalleryDesc {
+            get {
+                return this.showGalleryDescField;
+            }
+            set {
+                this.showGalleryDescField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public bool ShowImageName {
+            get {
+                return this.showImageNameField;
+            }
+            set {
+                this.showImageNameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public bool ShowImageDesc {
+            get {
+                return this.showImageDescField;
+            }
+            set {
+                this.showImageDescField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public bool ShowImageMeta {
+            get {
+                return this.showImageMetaField;
+            }
+            set {
+                this.showImageMetaField = value;
             }
         }
         

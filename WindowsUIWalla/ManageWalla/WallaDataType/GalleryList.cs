@@ -72,6 +72,8 @@ namespace ManageWalla {
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/GalleryList")]
     public partial class GalleryListGalleryRef {
         
+        private GalleryListGalleryRefSectionRef[] sectionRefField;
+        
         private long idField;
         
         private bool idFieldSpecified;
@@ -85,6 +87,17 @@ namespace ManageWalla {
         private string descField;
         
         private string urlComplexField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("SectionRef")]
+        public GalleryListGalleryRefSectionRef[] SectionRef {
+            get {
+                return this.sectionRefField;
+            }
+            set {
+                this.sectionRefField = value;
+            }
+        }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
@@ -160,6 +173,72 @@ namespace ManageWalla {
             }
             set {
                 this.urlComplexField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.17929")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/GalleryList")]
+    public partial class GalleryListGalleryRefSectionRef {
+        
+        private long idField;
+        
+        private string nameField;
+        
+        private int imageCountField;
+        
+        private bool imageCountFieldSpecified;
+        
+        public GalleryListGalleryRefSectionRef() {
+            this.idField = ((long)(0));
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.ComponentModel.DefaultValueAttribute(typeof(long), "0")]
+        public long id {
+            get {
+                return this.idField;
+            }
+            set {
+                this.idField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string name {
+            get {
+                return this.nameField;
+            }
+            set {
+                this.nameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public int imageCount {
+            get {
+                return this.imageCountField;
+            }
+            set {
+                this.imageCountField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool imageCountSpecified {
+            get {
+                return this.imageCountFieldSpecified;
+            }
+            set {
+                this.imageCountFieldSpecified = value;
             }
         }
     }

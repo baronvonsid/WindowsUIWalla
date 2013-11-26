@@ -7,16 +7,45 @@
 				<sequence>
 					<element name="GalleryRef" maxOccurs="unbounded" minOccurs="0">
 						<complexType>
+							<sequence>
+								<element name="SectionRef" maxOccurs="unbounded" minOccurs="0">
+						          <complexType>
+
+						                  <attribute type="long" name="id" default="0" />
+						                  <attribute type="string" name="name" />
+						                  <attribute type="int" name="imageCount" />
+
+						          </complexType>
+						        </element>
+							</sequence>
 							<attribute name="id" type="long"></attribute>
 							<attribute name="count" type="int"></attribute>
 							<attribute name="name" type="string"></attribute>
 							<attribute name="desc" type="string"></attribute>
-							<attribute name="urlComplex" type="string"/>
+							<attribute name="urlComplex" type="string" />
 						</complexType>
 					</element>
 				</sequence>
-			<attribute type="dateTime" name="lastChanged" />
+				<attribute type="dateTime" name="lastChanged" />
 		</complexType>
 	</element>
+
+<!-- 
+							<sequence>
+								<element name="Sections">
+						          <complexType>
+						            <sequence>
+						              <element name="SectionRef" maxOccurs="unbounded" minOccurs="0">
+						                <complexType>
+						                  <attribute type="long" name="id" default="0" />
+						                  <attribute type="string" name="name" />
+						                  <attribute type="int" name="imageCount" />
+						                </complexType>
+						              </element>
+						            </sequence>
+						          </complexType>
+						        </element>
+							</sequence>
+ -->
 
 </schema>

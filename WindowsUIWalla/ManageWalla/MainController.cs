@@ -411,7 +411,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localTagList.LastChanged;
-                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.imageFetchSize, searchQueryString, -1);
                     if (tagImageList != null)
                     {
                         state.tagImageList.Add(tagImageList);
@@ -425,7 +425,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, null, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, null, cursor, state.imageFetchSize, searchQueryString, -1);
                     if (tagImageList != null)
                     {
                         if (searchQueryString == null)
@@ -560,7 +560,7 @@ namespace ManageWalla
                 if (localCategoryList != null && searchQueryString == null)
                 {
                     //With Local version, check with server is a new version is required.
-                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), localCategoryList.LastChanged, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), localCategoryList.LastChanged, cursor, state.imageFetchSize, searchQueryString, -1);
                     if (categoryImageList != null)
                     {
                         state.categoryImageList.Add(categoryImageList);
@@ -574,7 +574,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), null, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), null, cursor, state.imageFetchSize, searchQueryString, -1);
                     if (categoryImageList != null)
                     {
                         if (searchQueryString == null)
@@ -729,7 +729,7 @@ namespace ManageWalla
             return response;
         }
 
-        async public Task<ImageList> GalleryGetImagesAsync(long id, string galleryName, int cursor, string searchQueryString)
+        async public Task<ImageList> GalleryGetImagesAsync(long id, string galleryName, int cursor, long sectionId, string searchQueryString)
         {
             try
             {
@@ -744,7 +744,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localGalleryList.LastChanged;
-                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.imageFetchSize, searchQueryString, sectionId);
                     if (galleryImageList != null)
                     {
                         state.tagImageList.Add(galleryImageList);
@@ -758,7 +758,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, null, cursor, state.imageFetchSize, searchQueryString);
+                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, null, cursor, state.imageFetchSize, searchQueryString, sectionId);
                     if (galleryImageList != null)
                     {
                         if (searchQueryString == null)

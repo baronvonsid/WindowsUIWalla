@@ -18,6 +18,11 @@ targetNamespace="http://www.example.org/Gallery"
         <element type="int" name="PresentationId" />
         <element type="int" name="TotalImageCount" />
         <element type="dateTime" name="LastChanged"/>
+        <element type="boolean" name="ShowGalleryName" />
+        <element type="boolean" name="ShowGalleryDesc" />
+        <element type="boolean" name="ShowImageName" />
+        <element type="boolean" name="ShowImageDesc" />
+        <element type="boolean" name="ShowImageMeta" />
         
         <element name="Users">
           <complexType>

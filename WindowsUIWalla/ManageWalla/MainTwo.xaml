@@ -9,7 +9,7 @@
     <Window.Resources>
         <ResourceDictionary Source="WallaControlTemplates.xaml" />
     </Window.Resources>
-
+    
     <Grid x:Name="gridLeft" Margin="2,2,0,0" Background="#FFE3E6D2">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
@@ -67,7 +67,7 @@
             <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
 
 
-                <ComboBox x:Name="cmbGallerySectionVert" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="100" SelectedIndex="0" Background="{x:Null}" BorderThickness="0" BorderBrush="{x:Null}">
+                <ComboBox x:Name="cmbGallerySectionVert" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="100" SelectedIndex="0" Background="{x:Null}" BorderThickness="0" BorderBrush="{x:Null}" SelectionChanged="cmbGallerySectionVert_SelectionChanged">
                     <ComboBox.LayoutTransform>
                         <RotateTransform Angle="270" />
                     </ComboBox.LayoutTransform>
@@ -322,16 +322,12 @@
                 <!-- add edit buttons -->
                 <RowDefinition Height="25" />
                 <!-- Name -->
-                <RowDefinition Height="75" />
+                <RowDefinition Height="81" />
                 <!-- Desc -->
                 <RowDefinition Height="25" />
                 <!-- Access Type -->
                 <RowDefinition Height="25" />
                 <!-- Password -->
-                <RowDefinition Height="25" />
-                <!-- Select Fotos -->
-                <RowDefinition Height="25" />
-                <!-- Group Fotos -->
                 <RowDefinition Height="34" />
                 <!-- Save buttons -->
             </Grid.RowDefinitions>
@@ -357,37 +353,10 @@
             <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
             <TextBox x:Name="txtGalleryDescription" Margin="3" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
 
-            <Label Content="Select Fotos" Grid.Column="0" Grid.Row="4" />
-            <ComboBox x:Name="cmbGallerySelectionType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="4" SelectionChanged="cmbGallerySelectionType_SelectionChanged">
-                <ComboBoxItem>
-                    <TextBlock Text="Category" TextAlignment="Left" ToolTip="Fotos will be included from selected categories" />
-                </ComboBoxItem>
-                <ComboBoxItem>
-                    <TextBlock Text="Tags" TextAlignment="Left" ToolTip="Fotos will be included from selected tags" />
-                </ComboBoxItem>
-                <ComboBoxItem>
-                    <TextBlock Text="Category AND Tag" TextAlignment="Left" ToolTip="Fotos will be included when they are present in selected categories AND tags" />
-                </ComboBoxItem>
-                <ComboBoxItem>
-                    <TextBlock Text="Category OR Tag" TextAlignment="Left" ToolTip="Fotos will be included when they are present in either the selected categories OR tags" />
-                </ComboBoxItem>
-            </ComboBox>
 
-            <Label Content="Group Fotos" Grid.Column="0" Grid.Row="5" />
-            <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="5">
-                <ComboBoxItem>
-                    <TextBlock Text="No Grouping" TextAlignment="Left" ToolTip="Fotos will not be grouped" />
-                </ComboBoxItem>
-                <ComboBoxItem>
-                    <TextBlock Text="Group by Category" TextAlignment="Left" ToolTip="Fotos will be displayed within their Category" />
-                </ComboBoxItem>
-                <ComboBoxItem>
-                    <TextBlock Text="Group by Tag" TextAlignment="Left" ToolTip="Fotos will be displayed by their tags" />
-                </ComboBoxItem>
-            </ComboBox>
 
-            <Label Grid.Column="0" Grid.Row="6" Content="Access Type"/>
-            <ComboBox x:Name="cmbGalleryAccessType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="6" SelectionChanged="cmbGalleryAccessType_SelectionChanged" >
+            <Label Grid.Column="0" Grid.Row="4" Content="Access Type"/>
+            <ComboBox x:Name="cmbGalleryAccessType" SelectedIndex="0" Margin="3" Grid.Column="1" Grid.Row="4" SelectionChanged="cmbGalleryAccessType_SelectionChanged" Background="{x:Null}">
                 <ComboBoxItem>
                     <TextBlock Text="Private" TextAlignment="Left" />
                 </ComboBoxItem>
@@ -399,12 +368,12 @@
                 </ComboBoxItem>
             </ComboBox>
 
-            <Label Grid.Column="0" Grid.Row="7" Content="Password"/>
-            <TextBox x:Name="txtGalleryPassword" Margin="3" Grid.Column="1" Grid.Row="7" MaxLines="1" MaxLength="30"/>
+            <Label Grid.Column="0" Grid.Row="5" Content="Password"/>
+            <TextBox x:Name="txtGalleryPassword" Margin="3" Grid.Column="1" Grid.Row="5" MaxLines="1" MaxLength="30"/>
 
 
 
-            <StackPanel Orientation="Horizontal" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
+            <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
                 <Button x:Name="cmdGallerySave" Content="Save Edit" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGallerySave_Click" />
                 <Button x:Name="cmdGalleryCancel" Content="Cancel" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCancel_Click"  />
                 <Button x:Name="cmdGalleryDelete" Content="Delete" Padding="4" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryDelete_Click" />
@@ -554,9 +523,6 @@
                             Maximum="250"
                             Width="100" ></Slider>
 
-
-
-
                 <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="4" Content="|>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
                 <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Padding="4" Content=">" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click" />
                 <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Padding="4" Content="&lt;" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click" />
@@ -564,81 +530,188 @@
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Label x:Name="lblImageListName" FontSize="16" Content="Gallery Name"  Background="Transparent" Foreground="#FF408383" />
-                    <ComboBox x:Name="cmbGallerySection" Margin="4" Background="{x:Null}" SelectedIndex="0"  >
-                        <ComboBoxItem Content="Section 1"/>
-                        <ComboBoxItem Content="Section 2"/>
-                        <ComboBoxItem Content="Section 3"/>
+                    <ComboBox x:Name="cmbGallerySection" Margin="4" Background="{x:Null}" MinWidth="100" SelectionChanged="cmbGallerySection_SelectionChanged" >
+
                     </ComboBox>
                 </StackPanel>
 
             </DockPanel>
 
-            <Grid x:Name="gridGallerySelection" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Visibility="Visible">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="25"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="3*"/>
-                </Grid.ColumnDefinitions>
+            <TabControl Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Visible" x:Name="tabGalleryConfiguration">
+                <TabItem Header="Gallery Presentation">
+                    <Grid >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition MinWidth="250"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
 
-                <Label Content="Categories to include" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="0" Foreground="#FF408383" FontSize="12" />
+                        <Grid Grid.Column="0" Grid.Row="0" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="26" />
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="2*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="130"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label FontSize="12" Content="Gallery Options"  Background="Transparent" Foreground="#FF408383" Grid.Column="0" Grid.Row="0" />
+                            
+                            <Label Content="Group Fotos" Grid.Column="0" Grid.Row="1" />
+                            <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="1" Margin="3" Grid.Column="1" Grid.Row="1" Background="{x:Null}">
+                                <ComboBoxItem>
+                                    <TextBlock Text="No Grouping" TextAlignment="Left" ToolTip="Fotos will not be grouped" />
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <TextBlock Text="Group by Category" TextAlignment="Left" ToolTip="Fotos will be displayed within their Category" />
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <TextBlock Text="Group by Tag" TextAlignment="Left" ToolTip="Fotos will be displayed by their tags" />
+                                </ComboBoxItem>
+                            </ComboBox>
+
+                            <Label Content="Show fields" Grid.Column="0" Grid.Row="2" />
+                            <Label Content="Gallery name" Grid.Column="0" Grid.Row="3" />
+                            <CheckBox x:Name="chkGalleryShowName" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"  />
+
+                            <Label Content="Gallery Description" Grid.Column="0" Grid.Row="4" />
+                            <CheckBox x:Name="chkGalleryShowDesc" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"  />
+
+                            <Label Content="Image name" Grid.Column="0" Grid.Row="5" />
+                            <CheckBox x:Name="chkGalleryShowImageName" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"  />
+
+                            <Label Content="Image Description" Grid.Column="0" Grid.Row="6" />
+                            <CheckBox x:Name="chkGalleryShowImageDesc" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"  />
+
+                            <Label Content="Image Meta data" Grid.Column="0" Grid.Row="7" />
+                            <CheckBox x:Name="chkGalleryShowImageMeta" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"  />
+
+                        </Grid>
+
+                        <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left">
+                            <Label FontSize="12" Content="Gallery Display Type"  Background="Transparent" Foreground="#FF408383" />
+                            <ComboBox x:Name="cmbGalleryPresentationType" Margin="4" Background="{x:Null}" SelectedIndex="0" Width="150" SelectionChanged="cmbGalleryPresentationType_SelectionChanged" >
+                                <ComboBoxItem Content="Standard"/>
+                                <ComboBoxItem Content="Lightbox"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Vertical" Grid.Column="3" Grid.Row="0" HorizontalAlignment="Left">
+                            <Label FontSize="12" Content="Gallery Style"  Background="Transparent" Foreground="#FF408383" />
+                            <ComboBox x:Name="cmbGalleryStyleType" Margin="4" Background="{x:Null}" SelectedIndex="0" Width="150" >
+                                <ComboBoxItem Content="Dark Grey"/>
+                                <ComboBoxItem Content="Light Grey"/>
+                                <ComboBoxItem Content="Sky Blue"/>
+                                <ComboBoxItem Content="Black and White"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Gallery Foto Selection">
+                    <Grid x:Name="gridGallerySelection">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="3*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal">
+                            <Label Content="Selection Type"/>
+                            <ComboBox x:Name="cmbGallerySelectionType" SelectedIndex="2" Margin="3" MinWidth="130" SelectionChanged="cmbGallerySelectionType_SelectionChanged" Background="{x:Null}">
+                                <ComboBoxItem>
+                                    <TextBlock Text="Category" TextAlignment="Left" ToolTip="Fotos will be included from selected categories" />
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <TextBlock Text="Tags" TextAlignment="Left" ToolTip="Fotos will be included from selected tags" />
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <TextBlock Text="Category AND Tag" TextAlignment="Left" ToolTip="Fotos will be included when they are present in selected categories AND tags" />
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <TextBlock Text="Category OR Tag" TextAlignment="Left" ToolTip="Fotos will be included when they are present in either the selected categories OR tags" />
+                                </ComboBoxItem>
+                            </ComboBox>
+
+                        </StackPanel>
+
+                        <Label Content="Categories to include" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="1" Foreground="#FF408383" FontSize="12"  />
+
+                        <ScrollViewer  x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="2" Margin="2,0,0,2">
+                            
+                            
+                            
+                            <!--
+                            <local:MultiSelectTreeView
+                                
+                                x:Name="treeGalleryCategoryView"
+                                DataContext="{DynamicResource galleryCategoryModelKey}"
+                                ItemContainerStyle="{StaticResource MultiSelectTreeViewItemStyle}"
+                                ItemsSource="{Binding Mode=TwoWay, Path=GalleryCategories}">
+
+                                <local:MultiSelectTreeView.ItemTemplate>
+                                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <CheckBox IsChecked="{Binding recursive}" Content="All  " ToolTip="Check this to include ALL sub folders." Checked="GalleryCategory_CheckBoxUpdated" Unchecked="GalleryCategory_CheckBoxUpdated"  />
+                                            <TextBlock Text="{Binding name}" ToolTip="{Binding tooltip}"/>
+                                        </StackPanel>
+                                    </HierarchicalDataTemplate>
+                                </local:MultiSelectTreeView.ItemTemplate>
+
+                            </local:MultiSelectTreeView>
+-->
+                            
+                        </ScrollViewer>
+
+                        <StackPanel Grid.Column="1" Grid.Row="2" Margin="0" VerticalAlignment="Center" >
+                            <Label x:Name="lblGallerySelectionAndOr" Content="AND"   HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0" Foreground="#FF408383" FontSize="12" />
+                        </StackPanel>
+
+                        <Label Content="Tags to include" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="1" Foreground="#FF408383" FontSize="12" />
+
+                        <ScrollViewer x:Name="scrollGalleryTagInclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="2" Grid.Row="2" Background="#FFFFC6C6" Margin="0,0,0,2">
+                            <ListBox Style="{DynamicResource TagListStyle}" 
+                            	x:Name ="lstGalleryTagListInclude" 
+                            	ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                SelectionMode="Multiple" 
+                                ItemContainerStyle="{DynamicResource TagListItem}">
+                            </ListBox>
+                        </ScrollViewer>
+
+                        <Label Content="Tags to exclude" Grid.Column="4" Grid.Row="1" Margin="4" VerticalContentAlignment="Center" Foreground="#FF408383" FontSize="12" />
+
+                        <ScrollViewer x:Name="scrollGalleryTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="2" Margin="0,0,2,2" Background="#FF999898">
+                            <ListBox Style="{DynamicResource TagListStyle}" 
+                            	x:Name ="lstGalleryTagListExclude" 
+                            	ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                SelectionMode="Multiple" 
+                                ItemContainerStyle="{DynamicResource TagListItem}"
+                                >
+                            </ListBox>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+            </TabControl>
 
 
-
-                <ScrollViewer x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="1" Margin="2,0,0,2">
-                    <TreeView x:Name="treeGalleryCategoryView" Background="#FFFFC6C6" BorderThickness="0">
-                    </TreeView>
-                </ScrollViewer>
-
-                <StackPanel Grid.Column="1" Grid.Row="1" Margin="0" VerticalAlignment="Center" >
-                    <Label x:Name="lblGallerySelectionAndOr" Content="AND"   HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0" Foreground="#FF408383" FontSize="12" />
-                </StackPanel>
-
-                <Label Content="Tags to include" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="0" Foreground="#FF408383" FontSize="12" />
-
-                <ScrollViewer x:Name="scrollGalleryTagInclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="2" Grid.Row="1" Background="#FFFFC6C6" Margin="0,0,0,2">
-                    <ListBox Style="{DynamicResource TagListStyle}" 
-                            		x:Name ="lstGalleryTagListInclude" 
-                            		ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                    SelectionMode="Multiple" 
-                                    ItemContainerStyle="{DynamicResource TagListItem}">
-                    </ListBox>
-                </ScrollViewer>
-
-                <Label Content="Tags to exclude" Grid.Column="4" Grid.Row="0" Margin="4" VerticalContentAlignment="Center" Foreground="#FF408383" FontSize="12" />
-
-                <ScrollViewer x:Name="scrollGalleryTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="1" Margin="0,0,2,2" Background="#FF999898">
-                    <ListBox Style="{DynamicResource TagListStyle}" 
-                            		x:Name ="lstGalleryTagListExclude" 
-                            		ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                    SelectionMode="Multiple" 
-                                    ItemContainerStyle="{DynamicResource TagListItem}"
-                                    >
-                    </ListBox>
-                </ScrollViewer>
-
-            </Grid>
-
-            <StackPanel x:Name="panGalleryFormatting" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Left">
-                <Label FontSize="12" Content="Gallery Display Type"  Background="Transparent" Foreground="#FF408383" />
-                <ComboBox x:Name="cmbGalleryPresentationType" Margin="4" Background="{x:Null}" SelectedIndex="0" Width="150" >
-                    <ComboBoxItem Content="Standard"/>
-                    <ComboBoxItem Content="Lightbox"/>
-                </ComboBox>
-                <Label FontSize="12" Content="Gallery Style"  Background="Transparent" Foreground="#FF408383" />
-                <ComboBox x:Name="cmbGalleryStyleType" Margin="4" Background="{x:Null}" SelectedIndex="0" Width="150" >
-                    <ComboBoxItem Content="Dark Grey"/>
-                    <ComboBoxItem Content="Light Grey"/>
-                    <ComboBoxItem Content="Sky Blue"/>
-                    <ComboBoxItem Content="Black and White"/>
-                </ComboBox>
-            </StackPanel>
-            
             <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
                             		    x:Name ="lstImageMainViewerList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource imageMainViewerListKey}}"
@@ -672,7 +745,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <DockPanel x:Name="panUpload" Grid.Column="1" Grid.Row="1" Background="#FF81B0AE" Margin="4">
+            <DockPanel x:Name="panUpload" Grid.Column="1" Grid.Row="1" Background="#FF81B0AE" Margin="4" Visibility="Collapsed">
                 <Grid x:Name="grdUploadImageDetails" DataContext="{StaticResource uploadImagefileListKey}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="0" />
