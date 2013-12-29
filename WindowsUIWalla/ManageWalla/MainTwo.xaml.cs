@@ -15,6 +15,7 @@ using log4net;
 using log4net.Config;
 using System.Configuration;
 using System.IO;
+using System.Collections;
 
 namespace ManageWalla
 {
@@ -66,6 +67,8 @@ namespace ManageWalla
         public GlobalState state = null;
         public ImageList currentImageList = null;
         private bool tagListUploadRefreshing = false;
+        private bool galleryCategoryRefreshing = false;
+
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
 
@@ -2483,6 +2486,11 @@ namespace ManageWalla
                     }
                 }
 
+
+                GalleryCategoryApplyGallerySettings(gallery.Categories);
+                GalleryCategoryApplyRelatedUpdates();
+
+
                 currentGallery = gallery;
 
                 return true;
@@ -2554,33 +2562,164 @@ namespace ManageWalla
             }
         }
 
+
         private void GalleryRefreshCategoryList()
         {
             CategoryListCategoryRef baseCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.parentId == 0);
 
-            galleryCategoriesList.GalleryCategories.Clear();
-
-           
-
-            
-            //treeGalleryCategoryView.Items.Clear();
-            
-
+            treeGalleryCategoryView.Items.Clear();
             GalleryCategoryAddTreeViewLevel(baseCategory.id, null);
-
-            //MultiSelectTreeView simon = multiSelectTreeView;
-
-            BindingOperations.GetBindingExpression(treeGalleryCategoryView, MultiSelectTreeView.ItemsSourceProperty).UpdateTarget();
-            //binding.UpdateSourceTrigger;
-
 
             if (currentPane == PaneMode.GalleryEdit)
             {
-                //TODO Update tag list from XML.
+                GalleryCategoryApplyGallerySettings(currentGallery.Categories);
+            }
+
+            GalleryCategoryApplyRelatedUpdates();
+        }
+
+        private void GalleryCategoryAddTreeViewLevel(long parentId, TreeViewItem currentHeader)
+        {
+            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            {
+                TreeViewItem newItem = GetTreeView(current.id, current.name, current.desc);
+
+                
+                //newItem.Header = current.name;
+                //newItem.ToolTip = current.desc;
+                newItem.Tag = current.id;
+                //newItem.IsExpanded = true;
+                
+
+                //newItem.Style = (Style)FindResource("styleRadioButton");
+                //newItem.Template = (ControlTemplate)FindResource("templateRadioButton");
+                //newItem. += new RoutedEventHandler(FetchCategoryImagesFirstAsync);
+
+                if (currentHeader == null)
+                {
+                    treeGalleryCategoryView.Items.Add(newItem);
+                }
+                else
+                {
+                    currentHeader.Items.Add(newItem);
+                }
+
+                GalleryCategoryAddTreeViewLevel(current.id, newItem);
             }
         }
 
-        private void GalleryCategoryAddTreeViewLevel(long parentId, CategoryItem currentParent)
+        private TreeViewItem GetTreeView(long categoryId, string name, string desc)
+        {
+            /*
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox SelectionChanged="GalleryCategory_SelectionChanged">
+                        <ComboBoxItem> - </ComboBoxItem>
+                        <ComboBoxItem> Y </ComboBoxItem>
+                        <ComboBoxItem>ALL</ComboBoxItem>
+                    </ComboBox>
+                    <TextBlock Text="" ToolTip=""/>
+                </StackPanel>
+             */
+
+            TreeViewItem item = new TreeViewItem();
+            item.IsExpanded = true;
+            item.IsEnabled = true;
+
+
+            // create stack panel
+            StackPanel stack = new StackPanel();
+            stack.Orientation = Orientation.Horizontal;
+
+            ComboBox newCmb = new ComboBox();
+            newCmb.Name = "cmbGalleryCategoryItem" + categoryId.ToString();
+
+            try { this.UnregisterName(newCmb.Name); }
+            catch { }
+
+            this.RegisterName(newCmb.Name, newCmb);
+                        
+
+            newCmb.SelectedIndex = 0;
+            ComboBoxItem entryNone = new ComboBoxItem();
+            entryNone.Content = "-";
+
+            ComboBoxItem entryInclude = new ComboBoxItem();
+            entryInclude.Content = "Y";
+            //entryInclude.Content = "Include";
+
+            ComboBoxItem entryIncludeRecursive = new ComboBoxItem();
+            entryIncludeRecursive.Content = "ALL";
+            //entryIncludeRecursive.Content = "Include sub categories";
+
+            newCmb.Items.Add(entryNone);
+            newCmb.Items.Add(entryInclude);
+            newCmb.Items.Add(entryIncludeRecursive);
+
+            newCmb.SelectionChanged += new SelectionChangedEventHandler(GalleryCategory_SelectionChanged);
+            
+
+            TextBlock newTextBlock = new TextBlock();
+            newTextBlock.Text = name;
+            newTextBlock.ToolTip = desc;
+
+            // Add into stack
+            stack.Children.Add(newCmb);
+            stack.Children.Add(newTextBlock);
+
+            // assign stack to header
+            item.Header = stack;
+            return item;
+        }
+
+/*
+        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is childItem)
+                    return (childItem)child;
+                else
+                {
+                    childItem childOfChild = FindVisualChild<childItem>(child);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
+        }
+
+
+        
+        private void GalleryRefreshCategoryList()
+        {
+            //Using the current category list, build an object list which can is bindable.
+
+            galleryCategoryRefreshing = true;
+
+            //Find highest level category to begin population.
+            CategoryListCategoryRef baseCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.parentId == 0);
+            galleryCategoriesList.CategoryItems.Clear();
+            GalleryCategoryAddChild(baseCategory.id, null);
+
+            BindingOperations.ClearBinding(treeGalleryCategoryView, TreeView.ItemsSourceProperty);
+            Binding binding = new Binding("CategoryItems");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = galleryCategoriesList;
+            BindingOperations.SetBinding(treeGalleryCategoryView, TreeView.ItemsSourceProperty, binding);
+
+            galleryCategoryRefreshing = false;
+
+            if (currentPane == PaneMode.GalleryEdit)
+            {
+                //GalleryCategoryApplyGallerySettings(null);
+            }
+
+
+            //BindingOperations.GetBindingExpression(treeGalleryCategoryView, MultiSelectTreeView.ItemsSourceProperty).UpdateTarget();
+        }
+
+        private void GalleryCategoryAddChild(long parentId, CategoryItem currentParent)
         {
             foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
             {
@@ -2590,22 +2729,28 @@ namespace ManageWalla
                 currentCategory.id = current.id;
                 currentCategory.parentId = current.parentId;
                 currentCategory.imageCount = current.count;
+                currentCategory.selectionIndex = 1;
+                currentCategory.enabled = true;
+
+                //If system owned, then disable.
 
                 //currentParent.Add(currentCategory);
 
                 if (currentParent == null)
                 {
-                    galleryCategoriesList.GalleryCategories.Add(currentCategory);
+                    galleryCategoriesList.CategoryItems.Add(currentCategory);
                 }
                 else
                 {
                     currentParent.Add(currentCategory);
                 }
 
-                GalleryCategoryAddTreeViewLevel(current.id, currentCategory);
+                GalleryCategoryAddChild(current.id, currentCategory);
             }
         }
+ */
 
+          
         private void cmdGalleryView_Click(object sender, RoutedEventArgs e)
         {
             RadioButton checkedButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
@@ -2620,7 +2765,14 @@ namespace ManageWalla
 
         private void cmdGalleryCopyUrl_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("TODO");
+            RadioButton checkedButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            if (checkedButton != null)
+            {
+                GalleryListGalleryRef galleryListGalleryRef = (GalleryListGalleryRef)checkedButton.Tag;
+                string url = controller.GetGalleryUrl(galleryListGalleryRef.name, galleryListGalleryRef.urlComplex);
+                System.Windows.Clipboard.SetText(url);
+            }
+            DisplayMessage("Web site URL copied to the clipboard", MessageSeverity.Info, false);
         }
 
         private void cmdGalleryAdd_Click(object sender, RoutedEventArgs e)
@@ -2676,10 +2828,23 @@ namespace ManageWalla
 
         async private void cmdGallerySave_Click(object sender, RoutedEventArgs e)
         {
-            //TODO check for selected categories....
-            int tagsCount = lstGalleryTagListInclude.SelectedItems.Count + lstGalleryTagListExclude.SelectedItems.Count;
+            GalleryCategoryRef[] galleryCategories = null;
 
-            if (lstGalleryTagListInclude.SelectedItems.Count == 0)
+            if (cmbGallerySelectionType.SelectedIndex != 1)
+                galleryCategories = GalleryCategoryGetUpdateList();
+
+
+            if (cmbGallerySelectionType.SelectedIndex == 0 && galleryCategories.Length == 0)
+            {
+                DisplayMessage("The gallery does not have any catgories associated with it, so cannot be saved.", MessageSeverity.Info, true);
+                return;
+            }
+            else if (cmbGallerySelectionType.SelectedIndex == 1 && lstGalleryTagListInclude.SelectedItems.Count == 0)
+            {
+                DisplayMessage("The gallery does not have any tags associated with it, so cannot be saved.", MessageSeverity.Info, true);
+                return;
+            }
+            else if (lstGalleryTagListInclude.SelectedItems.Count == 0 && galleryCategories.Length == 0)
             {
                 DisplayMessage("The gallery does not have any catgories or tags associated with it, so cannot be saved.", MessageSeverity.Info, true);
                 return;
@@ -2718,39 +2883,12 @@ namespace ManageWalla
             currentGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
             currentGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
 
-
             /* Category add to object ************************************************ */
-            //TODO
-
+            if (currentGallery.SelectionType != 1)
+                currentGallery.Categories = galleryCategories;
 
             /* Tags add to object ************************************************ */
-            currentGallery.Tags = new GalleryTagRef[tagsCount];
-            int currentItemIndex = 0;
-            foreach (ListBoxItem current in lstGalleryTagListInclude.SelectedItems)
-            {
-                TagListTagRef tagRef = (TagListTagRef)current.Tag;
-
-                GalleryTagRef galleryTag = new GalleryTagRef();
-                galleryTag.tagId = tagRef.id;
-                galleryTag.tagIdSpecified = true;
-                galleryTag.exclude = false;
-                galleryTag.excludeSpecified = true;
-                currentGallery.Tags[currentItemIndex] = galleryTag;
-                currentItemIndex++;
-            }
-
-            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
-            {
-                TagListTagRef tagRef = (TagListTagRef)current.Tag;
-
-                GalleryTagRef galleryTag = new GalleryTagRef();
-                galleryTag.tagId = tagRef.id;
-                galleryTag.tagIdSpecified = true;
-                galleryTag.exclude = true;
-                galleryTag.excludeSpecified = true;
-                currentGallery.Tags[currentItemIndex] = galleryTag;
-                currentItemIndex++;
-            }
+            currentGallery.Tags = GalleryTagsUpdateList(currentGallery.SelectionType);
 
             /* Sorts add to object ************************************************ */
             //TODO
@@ -2829,42 +2967,210 @@ namespace ManageWalla
             RefreshPanesAllControls(currentPane);
         }
 
-        private void GalleryCategory_CheckBoxUpdated(object sender, RoutedEventArgs e)
+
+        //private void GalleryCategory_CheckBoxUpdated(object sender, RoutedEventArgs e)
+        //{
+          //  GalleryCategoryApplyRelatedUpdates();
+            //BindingOperations.GetBindingExpression(treeGalleryCategoryView, MultiSelectTreeView.ItemsSourceProperty).UpdateTarget();
+        //}
+
+
+
+        //Method to apply GalleryCategories settings to a clean GalleryCategory object.
+        private void GalleryCategoryApplyGallerySettings(GalleryCategoryRef[] galleryCategories)
         {
-            foreach (CategoryItem current in galleryCategoriesList.GalleryCategories)
+            foreach (GalleryCategoryRef current in galleryCategories)
             {
-                GalleryCategoryRecursiveSelection(current, false);
-            }
-
-
-            TreeViewItem simon = (TreeViewItem)treeGalleryCategoryView.Items[0];
-            simon.IsSelected = true;
-
-
-            BindingOperations.GetBindingExpression(treeGalleryCategoryView, MultiSelectTreeView.ItemsSourceProperty).UpdateTarget();
-
-
-        }
-
-        private void GalleryCategoryRecursiveSelection(CategoryItem header, bool forceSelection)
-        {
-            foreach (CategoryItem current in header.Children)
-            {
-                if (current.recursive == true || forceSelection)
+                //Find category object related.
+                ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + current.categoryId.ToString());
+                if (cmbCurrent != null)
                 {
-                    current.selected = true;
-                    GalleryCategoryRecursiveSelection(current, true);
-                }
-                else if (current.recursive == true)
-                {
-                    if (current.selected)
-                        current.selected = false;
-
-                    GalleryCategoryRecursiveSelection(current, forceSelection);
+                    if (current.recursive)
+                    {
+                        cmbCurrent.SelectedIndex = 2; //ALL
+                    }
+                    else
+                    {
+                        cmbCurrent.SelectedIndex = 1; //Y
+                    }
                 }
             }
+
+            GalleryCategoryApplyRelatedUpdates();
         }
 
+        private GalleryCategoryRef[] GalleryCategoryGetUpdateList()
+        {
+            ArrayList newUpdateList = new ArrayList();
+
+            foreach (TreeViewItem child in treeGalleryCategoryView.Items)
+                GalleryCategoryRecursiveGetUpdateList(child, newUpdateList);
+
+            if (newUpdateList.Count == 0)
+                return null;
+
+            GalleryCategoryRef[] newCategoryRefs = new GalleryCategoryRef[newUpdateList.Count];
+            for (int i = 0; i < newUpdateList.Count; i++)
+            {
+                newCategoryRefs[i] = (GalleryCategoryRef)newUpdateList[i];
+            }
+
+            return newCategoryRefs;
+        }
+
+        private void GalleryCategoryRecursiveGetUpdateList(TreeViewItem currentItem, ArrayList newUpdateList)
+        {
+            long currentId = (long)currentItem.Tag;
+            ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + currentId.ToString());
+
+            if (cmbCurrent.SelectedIndex == 2)
+            {
+                GalleryCategoryRef newRef = new GalleryCategoryRef();
+                newRef.categoryId = currentId;
+                newRef.categoryIdSpecified = true;
+                newRef.recursive = true;
+                newRef.recursiveSpecified = true;
+
+                newUpdateList.Add(newRef);
+                return;
+            }
+            else if (cmbCurrent.SelectedIndex == 1)
+            {
+                GalleryCategoryRef newRef = new GalleryCategoryRef();
+                newRef.categoryId = currentId;
+                newRef.categoryIdSpecified = true;
+                newRef.recursive = false;
+                newRef.recursiveSpecified = true;
+                newUpdateList.Add(newRef);
+            }
+
+            foreach (TreeViewItem child in currentItem.Items)
+                GalleryCategoryRecursiveGetUpdateList(child, newUpdateList);
+        }
+
+        private GalleryTagRef[] GalleryTagsUpdateList(int selectionType)
+        {
+            GalleryTagRef[] newTagUpdates = null;
+            if (selectionType == 0)
+            {
+                //Ignore tags to include.
+                newTagUpdates = new GalleryTagRef[lstGalleryTagListExclude.SelectedItems.Count];
+            }
+            else
+            {
+                newTagUpdates = new GalleryTagRef[lstGalleryTagListInclude.SelectedItems.Count + lstGalleryTagListExclude.SelectedItems.Count];
+            }
+
+            int currentItemIndex = 0;
+
+            if (selectionType != 0)
+            {
+                foreach (ListBoxItem current in lstGalleryTagListInclude.SelectedItems)
+                {
+                    TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                    GalleryTagRef galleryTag = new GalleryTagRef();
+                    galleryTag.tagId = tagRef.id;
+                    galleryTag.tagIdSpecified = true;
+                    galleryTag.exclude = false;
+                    galleryTag.excludeSpecified = true;
+                    newTagUpdates[currentItemIndex] = galleryTag;
+                    currentItemIndex++;
+                }
+            }
+
+            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                GalleryTagRef galleryTag = new GalleryTagRef();
+                galleryTag.tagId = tagRef.id;
+                galleryTag.tagIdSpecified = true;
+                galleryTag.exclude = true;
+                galleryTag.excludeSpecified = true;
+                newTagUpdates[currentItemIndex] = galleryTag;
+                currentItemIndex++;
+            }
+            return newTagUpdates;
+        }
+
+        private GalleryTagRef[] GalleryTagsExclude()
+        {
+            if (lstGalleryTagListExclude.SelectedItems.Count == 0)
+                return null;
+
+            int currentItemIndex = 0;
+            GalleryTagRef[] newTagsExclude = new GalleryTagRef[lstGalleryTagListExclude.SelectedItems.Count];
+
+            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                GalleryTagRef galleryTag = new GalleryTagRef();
+                galleryTag.tagId = tagRef.id;
+                galleryTag.tagIdSpecified = true;
+                galleryTag.exclude = true;
+                galleryTag.excludeSpecified = true;
+                newTagsExclude[currentItemIndex] = galleryTag;
+                currentItemIndex++;
+            }
+            return newTagsExclude;
+        }
+
+        //Method to tweak selectionType and enabled properties.
+        private void GalleryCategoryApplyRelatedUpdates()
+        {
+            galleryCategoryRefreshing = true;
+
+            foreach (TreeViewItem child in treeGalleryCategoryView.Items)
+                GalleryCategoryRecursiveRelatedUpdates(child, false);
+
+            //TreeViewItem baseItem = (TreeViewItem)treeGalleryCategoryView.Items[0];
+            //GalleryCategoryRecursiveRelatedUpdates(baseItem, false);
+
+            galleryCategoryRefreshing = false;
+        }
+
+        private void GalleryCategoryRecursiveRelatedUpdates(TreeViewItem currentItem, bool parentRecursive)
+        {
+            long currentId = (long)currentItem.Tag;
+            ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + currentId.ToString());
+
+            if (parentRecursive)
+            {
+                currentItem.IsEnabled = false;
+                cmbCurrent.SelectedIndex = 0;
+            }
+            else
+            {
+                currentItem.IsEnabled = true;
+                if (cmbCurrent.SelectedIndex == 2)
+                     parentRecursive = true;
+            }
+
+            foreach (TreeViewItem child in currentItem.Items)
+                GalleryCategoryRecursiveRelatedUpdates(child, parentRecursive);
+        }
+
+        private void GalleryCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //if (galleryCategoryRefreshing)
+             //   return;
+
+            GalleryCategoryApplyRelatedUpdates();
+        }
+
+        private void lblFotoWalla_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            //galleryCategoriesList.CategoryItems[0].name = "change1";
+            //galleryCategoriesList.CategoryItems[0].CategoryItems[1].name = "change";
+            
+
+            //GalleryCategoryApplyRelatedUpdates();
+            //BindingOperations.GetBindingExpression(treeGalleryCategoryView, TreeView.ItemsSourceProperty).UpdateTarget();
+
+            
+        }
 
     }
 }

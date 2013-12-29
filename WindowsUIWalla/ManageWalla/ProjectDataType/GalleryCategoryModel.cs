@@ -4,7 +4,7 @@ namespace ManageWalla
 {
     public sealed class GalleryCategoryModel
     {
-        public ObservableCollection<CategoryItem> GalleryCategories { get; set; }
+        public ObservableCollection<CategoryItem> CategoryItems { get; set; }
 
         public GalleryCategoryModel()
         {
@@ -31,7 +31,7 @@ namespace ManageWalla
             fruits.Add(new CategoryItem { name = "Pear" });
             */
 
-            GalleryCategories = new ObservableCollection<CategoryItem> {  };
+            CategoryItems = new ObservableCollection<CategoryItem> { };
         }
 
         public GalleryCategoryModel(string simon)
@@ -46,7 +46,7 @@ namespace ManageWalla
             whiteMeat.Add(new CategoryItem { name = "Chicken" });
             whiteMeat.Add(new CategoryItem { name = "Duck" });
             whiteMeat.Add(new CategoryItem { name = "Pork" });
-            var meats = new CategoryItem { name = "Meats", Children = { redMeat, whiteMeat } };
+            var meats = new CategoryItem { name = "Meats", CategoryItems = { redMeat, whiteMeat } };
 
             var veggies = new CategoryItem { name = "Vegetables" };
             veggies.Add(new CategoryItem { name = "Potato" });
@@ -59,7 +59,7 @@ namespace ManageWalla
             fruits.Add(new CategoryItem { name = "Pear" });
 
 
-            GalleryCategories = new ObservableCollection<CategoryItem> { fruits, veggies, meats };
+            CategoryItems = new ObservableCollection<CategoryItem> { fruits, veggies, meats };
         }
     }
 
@@ -68,29 +68,28 @@ namespace ManageWalla
         public long id { get; set; }
         public string name { get; set; }
         public string desc { get; set; }
-        public bool selected { get; set; }
-        public bool recursive { get; set; }
+        public int selectionIndex { get; set; } //0 - not selected, 1 - selected, 2 - recursive.
+        public bool enabled { get; set; }
         public int imageCount { get; set; }
         public long parentId { get; set; }
-
 
         public string tooltip
         {
             get 
             {
-                return ((desc != null) ? desc + ".  " : "") + "Foto count: " + imageCount.ToString();
+                return ((desc != null) ? desc + ".  " : "") + "Foto count: " + imageCount.ToString() + " isenabled=" + enabled.ToString();
             }
         }
 
-        public ObservableCollection<CategoryItem> Children { get; set; }
+        public ObservableCollection<CategoryItem> CategoryItems { get; set; }
 
         public CategoryItem()
         {
-            Children = new ObservableCollection<CategoryItem>();
+            CategoryItems = new ObservableCollection<CategoryItem>();
         }
         public void Add(CategoryItem item)
         {
-            Children.Add(item);
+            CategoryItems.Add(item);
         }
     }
 }
