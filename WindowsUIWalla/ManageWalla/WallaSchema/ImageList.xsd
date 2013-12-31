@@ -21,7 +21,7 @@ targetNamespace="http://www.example.org/ImageList"
                       <attribute type="string" name="desc" />
                       <attribute type="date" name="uploadDate" />
                       <attribute type="date" name="takenDate" />
-                      <attribute type="string" name="localPath" />
+                      <attribute type="int" name="metaVersion" />
                       </complexType>
               </element>
             </sequence>

@@ -17,6 +17,7 @@ using System.Net.Mime;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using log4net;
+using System.Threading;
 
 namespace ManageWalla
 {
@@ -739,7 +740,7 @@ namespace ManageWalla
         #endregion
 
         #region Images
-        async public Task<BitmapImage> GetImage(long imageId, int width, int height)
+        async public Task<BitmapImage> GetImage(long imageId, int width, int height, CancellationToken cancelToken)
         {
             try
             {
@@ -756,24 +757,30 @@ namespace ManageWalla
                 myBitmapImage.EndInit();
                 //myBitmapImage.Freeze();
 
+                cancelToken.ThrowIfCancellationRequested();
+
                 return myBitmapImage;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GetImage has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 return null;
-                //throw ex;
             }
         }
 
-        async public Task<ImageList> GetImageListAsync(string type, string id, DateTime? lastModified, int cursor, int size, string searchQueryString, long sectionId)
+        async public Task<ImageList> GetImageListAsync(string type, string id, DateTime? lastModified, int cursor, int size, string searchQueryString, long sectionId, CancellationToken cancelToken)
         {
             try
             {
                 /* GET /{userName}/{type}/{identity}/{imageCursor}/{size} */
 
                 string requestUrl = type + "/" + id + "/" + cursor.ToString() + "/" + size.ToString(); // +"?" + searchQueryString ?? "";
-                
+
                 if (sectionId > 0)
                     requestUrl = requestUrl + "?sectionId=" + sectionId.ToString();
 
@@ -785,7 +792,7 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -798,6 +805,11 @@ namespace ManageWalla
                     response.EnsureSuccessStatusCode();
                 }
                 return null;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GetImageListAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {

@@ -21,6 +21,7 @@ using System.Windows.Threading;
 using log4net;
 using log4net.Config;
 using System.Configuration;
+using System.Threading;
 
 namespace ManageWalla
 {
@@ -80,7 +81,9 @@ namespace ManageWalla
 
                 //Setup Server helper.
                 serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, long.Parse(Properties.Settings.Default.WallaWSPort),
-                    Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey, "/WallaHub/v1/web/");
+                    Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.WallaWebPath);
+
+                //"/WallaHub/v1/web/"
 
                 //Initialise state.
                 state = GlobalState.GetState();
@@ -291,20 +294,6 @@ namespace ManageWalla
                         break;
                 }
             }
-
-            /* old code
-            public void LoadImage(object uri)
-            {
-                var decoder = new JpegBitmapDecoder(new Uri(uri.ToString()), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-                decoder.Frames[0].Freeze();
-                this.Dispatcher.Invoke(DispatcherPriority.Send, new Action<ImageSource>(SetImage), decoder.Frames[0]);
-            }
-
-            public void SetImage(ImageSource source)
-            {
-                this.BackgroundImage.Source = source;
-            } 
-            */
         }
 
         async public Task<string> RefreshUploadStatusListAsync()
@@ -396,7 +385,7 @@ namespace ManageWalla
         /// <param name="cursor"></param>
         /// <param name="searchQueryString"></param>
         /// <returns></returns>
-        async public Task<ImageList> TagGetImagesAsync(long id, string tagName, int cursor, string searchQueryString)
+        async public Task<ImageList> TagGetImagesAsync(long id, string tagName, int cursor, string searchQueryString, CancellationToken cancelToken)
         {
             try
             {
@@ -411,7 +400,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localTagList.LastChanged;
-                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.imageFetchSize, searchQueryString, -1);
+                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
                     if (tagImageList != null)
                     {
                         state.tagImageList.Add(tagImageList);
@@ -425,7 +414,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, null, cursor, state.imageFetchSize, searchQueryString, -1);
+                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, null, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
                     if (tagImageList != null)
                     {
                         if (searchQueryString == null)
@@ -438,6 +427,12 @@ namespace ManageWalla
                         return localTagList;
                     }
                 }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("TagGetImagesAsync has been cancelled");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -546,7 +541,7 @@ namespace ManageWalla
             return response;
         }
 
-        async public Task<ImageList> CategoryGetImagesAsync(long categoryId, int cursor, string searchQueryString)
+        async public Task<ImageList> CategoryGetImagesAsync(long categoryId, int cursor, string searchQueryString, CancellationToken cancelToken)
         {
             try
             {
@@ -560,7 +555,7 @@ namespace ManageWalla
                 if (localCategoryList != null && searchQueryString == null)
                 {
                     //With Local version, check with server is a new version is required.
-                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), localCategoryList.LastChanged, cursor, state.imageFetchSize, searchQueryString, -1);
+                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), localCategoryList.LastChanged, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
                     if (categoryImageList != null)
                     {
                         state.categoryImageList.Add(categoryImageList);
@@ -574,7 +569,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), null, cursor, state.imageFetchSize, searchQueryString, -1);
+                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), null, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
                     if (categoryImageList != null)
                     {
                         if (searchQueryString == null)
@@ -587,6 +582,12 @@ namespace ManageWalla
                         return null;
                     }
                 }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("CategoryGetImagesAsync has been cancelled");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -729,7 +730,7 @@ namespace ManageWalla
             return response;
         }
 
-        async public Task<ImageList> GalleryGetImagesAsync(long id, string galleryName, int cursor, long sectionId, string searchQueryString)
+        async public Task<ImageList> GalleryGetImagesAsync(long id, string galleryName, int cursor, long sectionId, string searchQueryString, CancellationToken cancelToken)
         {
             try
             {
@@ -744,7 +745,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localGalleryList.LastChanged;
-                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.imageFetchSize, searchQueryString, sectionId);
+                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.imageFetchSize, searchQueryString, sectionId, cancelToken);
                     if (galleryImageList != null)
                     {
                         state.tagImageList.Add(galleryImageList);
@@ -758,7 +759,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, null, cursor, state.imageFetchSize, searchQueryString, sectionId);
+                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, null, cursor, state.imageFetchSize, searchQueryString, sectionId, cancelToken);
                     if (galleryImageList != null)
                     {
                         if (searchQueryString == null)
@@ -771,6 +772,12 @@ namespace ManageWalla
                         return localGalleryList;
                     }
                 }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("GalleryGetImagesAsync has been cancelled");
+                throw cancelEx;
             }
             catch (Exception ex)
             {

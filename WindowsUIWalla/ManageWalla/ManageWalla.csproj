@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -25,7 +26,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -70,6 +70,12 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DeploymentTest|AnyCPU'">
+    <OutputPath>bin\DeploymentTest\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DeploymentTest|x86'">
+    <OutputPath>bin\x86\DeploymentTest\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
@@ -197,12 +203,6 @@
     <None Include="WallaSchema\UploadStatusList.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ManageWalla.exe.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
@@ -259,7 +259,7 @@
     <Resource Include="Icons\fancy-globe.gif" />
     <Resource Include="Icons\female-user.gif" />
     <Resource Include="Icons\fire.gif" />
-    <Resource Include="Icons\first-aid.gif" />
+    <Resource Include="Icons\ErrorThumbnail.gif" />
     <Resource Include="Icons\flag.gif" />
     <Resource Include="Icons\flower.gif" />
     <Resource Include="Icons\full-screen.gif" />
@@ -336,12 +336,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="ExampleXml\UploadStatusList.xml">
-      <SubType>Designer</SubType>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Icons\loading.gif" />
+    <Resource Include="Icons\LoadingThumbnail.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

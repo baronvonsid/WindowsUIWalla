@@ -515,12 +515,12 @@
             <DockPanel x:Name="panGridRightHeader" Grid.Column="0" Grid.Row="0" Visibility="Collapsed" Grid.ColumnSpan="2" Margin="2,2,2,2" Background="#FFA9C4FF" HorizontalAlignment="Stretch" LastChildFill="True">
 
                 <Slider x:Name="sldImageSize" DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
-                            Value="130"
+                            Value="160"
                             Delay="500"
-                            Interval="1"
+                            Interval="10"
                             TickPlacement="BottomRight"
-                            Minimum="10"
-                            Maximum="250"
+                            Minimum="20"
+                            Maximum="300"
                             Width="100" ></Slider>
 
                 <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="4" Content="|>" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click" />
@@ -771,7 +771,7 @@
                                         Visibility="Visible">
                 <ListBox.ItemTemplate>
                     <DataTemplate >
-                        <Image Source="{Binding Image}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" AllowDrop="True" MouseMove="Image_MouseMove" />
+                        <Image Source="{Binding ThumbnailImage}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" AllowDrop="True" MouseMove="Image_MouseMove" />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

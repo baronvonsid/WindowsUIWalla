@@ -7,21 +7,25 @@ using System.Windows.Media.Imaging;
 using System.IO;
 using System.ComponentModel;
 using Shell32;
+using log4net;
+using System.Threading;
 
 namespace ManageWalla
 {
     public class GeneralImage : INotifyPropertyChanged
     {
         private ServerHelper serverHelper;
-        private BitmapImage image;
+        private BitmapImage thumbnailImage;
 
         public long imageId;
         public long categoryId { get; set; }
-        public String FilePath { get; set; }
-        public BitmapImage Image { get { return image; } }
+        public BitmapImage ThumbnailImage { get { return thumbnailImage; } }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime UploadDate { get; set; }
+        public int MetaVersion { get; set; }
+
+        private static readonly ILog logger = LogManager.GetLogger(typeof(GeneralImage));
 
         //TODO need this extra event plumbing ??
         public event PropertyChangedEventHandler PropertyChanged;
@@ -29,26 +33,35 @@ namespace ManageWalla
         public GeneralImage(ServerHelper serverHelperParam) 
         {
             serverHelper = serverHelperParam;
-            image = LoadingBitmap();
+            thumbnailImage = WorkingBitmapThumbnail("Working");
         }
 
-        async public Task LoadImage()
+        async public Task LoadImage(CancellationToken cancelToken)
         {
-            if (FilePath == null && imageId == 0)
+            if (imageId == 0)
                 return;
 
-            image = await LoadBitmapAsync();
-            OnPropertyChanged("Image");
+            thumbnailImage = await LoadThumbnailAsync(cancelToken);
+
+            if (thumbnailImage != null)
+                OnPropertyChanged("ThumbnailImage");
         }
 
-        private BitmapImage LoadingBitmap()
+        private BitmapImage WorkingBitmapThumbnail(string type)
         {
-            //const string loadingImagePath = @"/Icons/loading.gif";
-            const string loadingImagePath = @"pack://application:,,,/Icons/loading.gif";
-         
+            string loadingImagePath = "";
+            if (type == "Working")
+            {
+                loadingImagePath = @"pack://application:,,,/Icons/LoadingThumbnail.gif";
+            }
+            else
+            {
+                loadingImagePath = @"pack://application:,,,/Icons/ErrorThumbnail.gif";
+            }
+
             BitmapImage loadingImage = new BitmapImage();
             loadingImage.BeginInit();
-            loadingImage.DecodePixelWidth = 250;
+            loadingImage.DecodePixelWidth = 300;
             loadingImage.UriSource = new Uri(loadingImagePath);
             loadingImage.EndInit();
             loadingImage.Freeze();
@@ -56,31 +69,53 @@ namespace ManageWalla
             return loadingImage;
         }
 
-        async private Task<BitmapImage> LoadBitmapAsync()
+        async private Task<BitmapImage> LoadThumbnailAsync(CancellationToken cancelToken)
         {
-            if (File.Exists(FilePath ?? ""))
+            BitmapImage responseImage = null;
+
+            //TODO
+            //Check local cache for thumbnail.  If exists then use.
+            try
             {
-                //Local version exists, nice !
-
-                //FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
-
-                BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
+                if (1 > 2)
                 {
-                    myBitmapImage = new BitmapImage();
-                    myBitmapImage.BeginInit();
-                    myBitmapImage.DecodePixelWidth = 250;
-                    myBitmapImage.UriSource = new Uri(FilePath);
-                    myBitmapImage.EndInit();
-                    myBitmapImage.Freeze();
+                    //Local version exists, nice !
+
+                    //FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+                    /*
+                    BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
+                    {
+                        myBitmapImage = new BitmapImage();
+                        myBitmapImage.BeginInit();
+                        myBitmapImage.DecodePixelWidth = 250;
+                        myBitmapImage.UriSource = new Uri("");
+                        myBitmapImage.EndInit();
+                        myBitmapImage.Freeze();
+
+                        return myBitmapImage;
+                    });
 
                     return myBitmapImage;
-                });
-
-                return myBitmapImage;
+                     * */
+                    return null;
+                }
+                else
+                {
+                    responseImage = await serverHelper.GetImage(imageId, 300, 300, cancelToken);
+                    if (responseImage == null)
+                        throw new Exception("The thumbnail could not be retrieved from the server, an unexpected error occured");
+                }
+                return responseImage;
             }
-            else
+            catch (OperationCanceledException cancelEx)
             {
-                return await serverHelper.GetImage(imageId, 250, 250);
+                logger.Debug("LoadThumbnailAsync has been cancelled");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return WorkingBitmapThumbnail("Error");
             }
         }
 

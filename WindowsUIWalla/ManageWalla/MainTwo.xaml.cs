@@ -16,6 +16,8 @@ using log4net.Config;
 using System.Configuration;
 using System.IO;
 using System.Collections;
+using System.Threading;
+
 
 namespace ManageWalla
 {
@@ -24,6 +26,7 @@ namespace ManageWalla
     /// </summary>
     public partial class MainTwo : Window
     {
+        #region Variables
         private enum PaneMode
         {
             CategoryView = 0,
@@ -68,10 +71,11 @@ namespace ManageWalla
         public ImageList currentImageList = null;
         private bool tagListUploadRefreshing = false;
         private bool galleryCategoryRefreshing = false;
-
-
+        public CancellationTokenSource cancelTokenSource = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
+        #endregion
 
+        #region Window Initialise and control.
         public MainTwo()
         {
             InitializeComponent();
@@ -83,72 +87,67 @@ namespace ManageWalla
             galleryCategoriesList = (GalleryCategoryModel)FindResource("galleryCategoryModelKey");
         }
 
-        #region Pane Control Events
-        private void radCategory_Checked(object sender, RoutedEventArgs e)
+        private void mainTwo_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            cmdCategoryRefresh.Visibility = System.Windows.Visibility.Visible;
-            cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
-
-            RefreshOverallPanesStructure(PaneMode.CategoryView);
-            RefreshPanesAllControls(PaneMode.CategoryView);
-            RefreshAndDisplayCategoryList(false);
+            controller.Dispose();
         }
 
-        private void radUpload_Checked(object sender, RoutedEventArgs e)
+        private void mainTwo_Loaded(object sender, RoutedEventArgs e)
         {
-            cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Visible;
+            controller = new MainController(this);
 
-            RefreshOverallPanesStructure(PaneMode.Upload);
-            RefreshPanesAllControls(PaneMode.Upload);
+            string response = controller.InitApplication();
+            state = controller.GetState();
+
+            switch (state.connectionState)
+            {
+                case GlobalState.ConnectionState.LoggedOn:
+                    DisplayMessage("Account: " + state.userName + " has been connected with FotoWalla", MessageSeverity.Info, false);
+                    radCategory.IsChecked = true;
+                    //cmdCategory.RaiseEvent(new RoutedEventArgs(CheckBox.CheckedEvent));
+                    break;
+                case GlobalState.ConnectionState.Offline:
+                    DisplayMessage("No internet connection could be established with FotoWalla", MessageSeverity.Warning, false);
+                    //cmdCategory.RaiseEvent(new RoutedEventArgs(CheckBox.CheckedEvent));
+                    break;
+                case GlobalState.ConnectionState.NoAccount:
+                    DisplayMessage("There is no account settings saved for this user, you must associate an account", MessageSeverity.Info, false);
+
+                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+                    break;
+                case GlobalState.ConnectionState.FailedLogin:
+                    DisplayMessage("The logon for account: " + state.userName + ", failed with the message: " + response, MessageSeverity.Warning, false);
+                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    break;
+            }
+
+            DisplayConnectionStatus();
         }
 
-        private void radGallery_Checked(object sender, RoutedEventArgs e)
+        public void DisplayMessage(string message, MessageSeverity severity, bool modal)
         {
-            cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Visible;
-            lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
-
-            RefreshOverallPanesStructure(PaneMode.GalleryView);
-            RefreshPanesAllControls(PaneMode.GalleryView);
-            RefreshAndDisplayGalleryList(false);
+            //TODO sort out severity.
+            if (modal)
+            {
+                MessageBox.Show(message);
+            }
+            else
+            {
+                MessageBox.Show(message);
+            }
         }
 
-        private void radTag_Checked(object sender, RoutedEventArgs e)
+        private void DisplayConnectionStatus()
         {
-            cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            cmdTagRefresh.Visibility = System.Windows.Visibility.Visible;
-            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
-
-            RefreshOverallPanesStructure(PaneMode.TagView);
-            RefreshPanesAllControls(PaneMode.TagView);
-            RefreshAndDisplayTagList(false);
-        }
-
-        private void cmdAccount_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshOverallPanesStructure(PaneMode.Account);
-        }
-
-        private void cmdContract_Click(object sender, RoutedEventArgs e)
-        {
-            gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
-            gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
-
-            gridRight.RowDefinitions[0].Height = new GridLength(0);
-        }
-
-        private void cmdExpand_Click(object sender, RoutedEventArgs e)
-        {
-            gridLeft.ColumnDefinitions[0].Width = new GridLength(0);
-            gridLeft.ColumnDefinitions[1].Width = new GridLength(300);
-            gridRight.RowDefinitions[0].Height = new GridLength(40);
+            if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+            {
+                this.Title = "FotoWalla - Connected";
+            }
+            else
+            {
+                this.Title = "FotoWalla - Offline";
+            }
         }
 
         private void RefreshOverallPanesStructure(PaneMode mode)
@@ -264,14 +263,14 @@ namespace ManageWalla
                     gridCategory.RowDefinitions[2].MaxHeight = 0;
                     gridCategory.RowDefinitions[3].MaxHeight = 0;
                     gridCategory.RowDefinitions[4].MaxHeight = 0;
-                    
+
                     treeCategoryView.IsEnabled = true;
                     cmdCategoryAdd.IsEnabled = true;
                     cmdCategoryEdit.IsEnabled = true;
 
                     radTag.IsEnabled = true;
                     radGallery.IsEnabled = true;
-                    
+
                     //radUpload.IsEnabled = true;
                     cmdAccount.IsEnabled = true;
                     break;
@@ -281,9 +280,9 @@ namespace ManageWalla
                     gridCategory.RowDefinitions[2].MaxHeight = 25;
                     gridCategory.RowDefinitions[3].MaxHeight = 75;
                     gridCategory.RowDefinitions[4].MaxHeight = 34;
-                    
+
                     cmdCategoryCancel.Visibility = Visibility.Visible;
-                    
+
                     if (mode == PaneMode.CategoryAdd)
                     {
                         cmdCategorySave.Content = "Save New";
@@ -559,7 +558,7 @@ namespace ManageWalla
                             cmdUploadImportFiles.Visibility = Visibility.Hidden;
                         }
                     }
-                    
+
                     break;
                 #endregion
 
@@ -570,10 +569,462 @@ namespace ManageWalla
 
             currentPane = mode;
         }
-
         #endregion
 
-        #region Category UI Control
+        #region Pane Control Event Handelers
+        private void radCategory_Checked(object sender, RoutedEventArgs e)
+        {
+            cmdCategoryRefresh.Visibility = System.Windows.Visibility.Visible;
+            cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
+            lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
+
+            RefreshOverallPanesStructure(PaneMode.CategoryView);
+            RefreshPanesAllControls(PaneMode.CategoryView);
+            RefreshAndDisplayCategoryList(false);
+        }
+
+        private void radUpload_Checked(object sender, RoutedEventArgs e)
+        {
+            cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
+            lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Visible;
+
+            RefreshOverallPanesStructure(PaneMode.Upload);
+            RefreshPanesAllControls(PaneMode.Upload);
+        }
+
+        private void radGallery_Checked(object sender, RoutedEventArgs e)
+        {
+            cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Visible;
+            lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
+
+            RefreshOverallPanesStructure(PaneMode.GalleryView);
+            RefreshPanesAllControls(PaneMode.GalleryView);
+            RefreshAndDisplayGalleryList(false);
+        }
+
+        private void radTag_Checked(object sender, RoutedEventArgs e)
+        {
+            cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
+            cmdTagRefresh.Visibility = System.Windows.Visibility.Visible;
+            cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
+            lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
+
+            RefreshOverallPanesStructure(PaneMode.TagView);
+            RefreshPanesAllControls(PaneMode.TagView);
+            RefreshAndDisplayTagList(false);
+        }
+
+        private void cmdAccount_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshOverallPanesStructure(PaneMode.Account);
+        }
+
+        private void cmdContract_Click(object sender, RoutedEventArgs e)
+        {
+            gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
+            gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
+
+            gridRight.RowDefinitions[0].Height = new GridLength(0);
+        }
+
+        private void cmdExpand_Click(object sender, RoutedEventArgs e)
+        {
+            gridLeft.ColumnDefinitions[0].Width = new GridLength(0);
+            gridLeft.ColumnDefinitions[1].Width = new GridLength(300);
+            gridRight.RowDefinitions[0].Height = new GridLength(40);
+        }
+
+        private void Image_MouseMove(object sender, MouseEventArgs e)
+        {
+            Image meImage = sender as Image;
+            if (meImage != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragDrop.DoDragDrop(meImage, "dunno", DragDropEffects.Copy);
+            }
+        }
+        #endregion
+
+        #region Image Retrieve Methods and Handlers
+        async private void FetchCategoryImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            cmbGallerySectionVert.Visibility = Visibility.Collapsed;
+            cmbGallerySection.Visibility = Visibility.Collapsed;
+
+            RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            if (checkedTagButton != null)
+                checkedTagButton.IsChecked = false;
+
+            RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            if (checkedGalleryButton != null)
+                checkedGalleryButton.IsChecked = false;
+
+            e.Handled = true;
+
+            TreeViewItem selectedTreeViewItem = (TreeViewItem)sender;
+
+            if (selectedTreeViewItem != null)
+            {
+                try
+                {
+                    if (cancelTokenSource != null)
+                        cancelTokenSource.Cancel();
+
+                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource = newCancelTokenSource;
+
+                    CategoryListCategoryRef categoryRef = (CategoryListCategoryRef)selectedTreeViewItem.Tag;
+                    currentImageList = await controller.CategoryGetImagesAsync(categoryRef.id, 0, GetSearchQueryString(), cancelTokenSource.Token);
+                    await ImageListUpdateControls(cancelTokenSource.Token);
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.Debug("FetchCategoryImagesFirstAsync has been cancelled by a subsequent request.");
+                }
+            }
+        }
+
+        async private void FetchTagImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            cmbGallerySectionVert.Visibility = Visibility.Collapsed;
+            cmbGallerySection.Visibility = Visibility.Collapsed;
+
+            TreeViewItem selectedTreeViewItem = (TreeViewItem)treeCategoryView.SelectedItem;
+            if (selectedTreeViewItem != null)
+                selectedTreeViewItem.IsSelected = false;
+
+            RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            if (checkedGalleryButton != null)
+                checkedGalleryButton.IsChecked = false;
+
+            RadioButton checkedButton = (RadioButton)sender;
+            //RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+
+            /* Refresh tag image state */
+            if (checkedButton != null)
+            {
+                try
+                {
+                    if (cancelTokenSource != null)
+                        cancelTokenSource.Cancel();
+
+                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource = newCancelTokenSource;
+
+                    TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
+                    currentImageList = await controller.TagGetImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetSearchQueryString(), cancelTokenSource.Token);
+
+                    /* Populate tag image list from state */
+                    await ImageListUpdateControls(cancelTokenSource.Token);
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.Debug("FetchTagImagesFirstAsync has been cancelled by a subsequent request. ");
+                }
+            }
+        }
+
+        async private void FetchGalleryImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            //Uncheck any other selected imagelists.
+            TreeViewItem selectedTreeViewItem = (TreeViewItem)treeCategoryView.SelectedItem;
+            if (selectedTreeViewItem != null)
+                selectedTreeViewItem.IsSelected = false;
+
+            RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            if (checkedTagButton != null)
+                checkedTagButton.IsChecked = false;
+
+            RadioButton checkedButton = (RadioButton)sender;
+
+            /* Refresh tag image state */
+            if (checkedButton != null)
+            {
+                GalleryListGalleryRef galleryListRefTemp = (GalleryListGalleryRef)checkedButton.Tag;
+                if (!GalleryPopulateSectionList(galleryListRefTemp))
+                {
+                    try
+                    {
+                        if (cancelTokenSource != null)
+                            cancelTokenSource.Cancel();
+
+                        CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                        cancelTokenSource = newCancelTokenSource;
+
+                        currentImageList = await controller.GalleryGetImagesAsync(galleryListRefTemp.id, galleryListRefTemp.name, 0, -1, GetSearchQueryString(), cancelTokenSource.Token);
+                        await ImageListUpdateControls(cancelTokenSource.Token);
+
+                        if (newCancelTokenSource == cancelTokenSource)
+                            cancelTokenSource = null;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        logger.Debug("FetchGalleryImagesFirstAsync has been cancelled by a subsequent request. ");
+                    }
+                }
+            }
+        }
+
+        async private void FetchGalleryImagesSectionChangeAsync(long sectionId)
+        {
+            RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+            if (checkedGalleryButton != null)
+            {
+                try
+                {
+                    if (cancelTokenSource != null)
+                        cancelTokenSource.Cancel();
+
+                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource = newCancelTokenSource;
+
+                    GalleryListGalleryRef galleryListRefTemp = (GalleryListGalleryRef)checkedGalleryButton.Tag;
+                    currentImageList = await controller.GalleryGetImagesAsync(galleryListRefTemp.id, galleryListRefTemp.name, 0, sectionId, GetSearchQueryString(), cancelTokenSource.Token);
+
+                    /* Populate tag image list from state */
+                    await ImageListUpdateControls(cancelTokenSource.Token);
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.Debug("FetchTagImagesFirstAsync has been cancelled by a subsequent request. ");
+                }
+            }
+        }
+
+        async private Task FetchMoreImagesAsync(FetchDirection direction)
+        {
+            if (currentImageList == null)
+                return;
+
+            /* Update current tag image list */
+            int cursor = 0;
+            switch (direction)
+            {
+                case FetchDirection.Begin:
+                    cursor = 0;
+                    break;
+                case FetchDirection.Next:
+                    if ((currentImageList.imageCursor + state.imageFetchSize) <= currentImageList.totalImageCount)
+                        cursor = currentImageList.imageCursor + state.imageFetchSize;
+                    break;
+                case FetchDirection.Previous:
+                    cursor = Math.Max(currentImageList.imageCursor - state.imageFetchSize, 0);
+                    break;
+                case FetchDirection.Last:
+                    cursor = Math.Abs(currentImageList.totalImageCount / state.imageFetchSize) * state.imageFetchSize;
+                    break;
+            }
+
+            try
+            {
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                switch (currentPane)
+                {
+                    case PaneMode.CategoryView:
+                    case PaneMode.CategoryEdit:
+                    case PaneMode.CategoryAdd:
+                        currentImageList = await controller.CategoryGetImagesAsync(currentImageList.id, cursor, GetSearchQueryString(), cancelTokenSource.Token);
+                        break;
+                    case PaneMode.TagAdd:
+                    case PaneMode.TagEdit:
+                    case PaneMode.TagView:
+                        currentImageList = await controller.TagGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, GetSearchQueryString(), cancelTokenSource.Token);
+                        break;
+                    case PaneMode.GalleryView:
+
+                        long sectionId = -1;
+                        
+
+                        ComboBoxItem cmbItemSection = (ComboBoxItem)cmbGallerySection.SelectedItem;
+                        if (cmbItemSection != null && currentImageList.sectionId > 0)
+                        {
+                            GalleryListGalleryRefSectionRef section = (GalleryListGalleryRefSectionRef)cmbItemSection.Tag;
+                            sectionId = section.id;
+                        }
+                        currentImageList = await controller.GalleryGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, sectionId, GetSearchQueryString(), cancelTokenSource.Token);
+                        break;
+                }
+                /* Populate image list from state */
+                await ImageListUpdateControls(cancelTokenSource.Token);
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("FetchMoreImagesAsync has been cancelled by a subsequent request. ");
+            }
+        }
+
+        async private Task ImageListUpdateControls(CancellationToken cancelToken)
+        {
+            try
+            {
+                imageMainViewerList.Clear();
+
+                if (currentImageList == null)
+                    return;
+
+                if (currentImageList.Images == null)
+                    return;
+
+                lblImageListName.Content = currentImageList.Name;
+                lblImageListNameVert.Text = currentImageList.Name;
+
+                foreach (ImageListImageRef imageRef in currentImageList.Images)
+                {
+                    GeneralImage newImage = new GeneralImage(controller.GetServerHelper());
+                    newImage.imageId = imageRef.id;
+                    newImage.Name = imageRef.name;
+                    newImage.Description = imageRef.desc;
+                    newImage.UploadDate = imageRef.uploadDate;
+                    //newImage.FilePath = imageRef.localPath;
+                    newImage.MetaVersion = imageRef.metaVersion;
+
+                    imageMainViewerList.Add(newImage);
+                }
+
+                if ((currentImageList.sectionId > 0 && currentImageList.imageCount > currentImageList.sectionImageCount)
+                    || (currentImageList.sectionId < 0 && currentImageList.imageCount > currentImageList.totalImageCount))
+                {
+                    cmdImageNavigationBegin.Visibility = Visibility.Hidden;
+                    cmdImageNavigationPrevious.Visibility = Visibility.Hidden;
+                    cmdImageNavigationLast.Visibility = Visibility.Hidden;
+                    cmdImageNavigationNext.Visibility = Visibility.Hidden;
+
+                    cmdImageNavigationBeginVert.Visibility = Visibility.Hidden;
+                    cmdImageNavigationPreviousVert.Visibility = Visibility.Hidden;
+                    cmdImageNavigationLastVert.Visibility = Visibility.Hidden;
+                    cmdImageNavigationNextVert.Visibility = Visibility.Hidden;
+                }
+                else
+                {
+                    cmdImageNavigationBegin.Visibility = Visibility.Visible;
+                    cmdImageNavigationPrevious.Visibility = Visibility.Visible;
+                    cmdImageNavigationLast.Visibility = Visibility.Visible;
+                    cmdImageNavigationNext.Visibility = Visibility.Visible;
+
+                    cmdImageNavigationBeginVert.Visibility = Visibility.Visible;
+                    cmdImageNavigationPreviousVert.Visibility = Visibility.Visible;
+                    cmdImageNavigationLastVert.Visibility = Visibility.Visible;
+                    cmdImageNavigationNextVert.Visibility = Visibility.Visible;
+
+                    if (currentImageList.imageCursor == 0)
+                    {
+                        cmdImageNavigationBegin.IsEnabled = false;
+                        cmdImageNavigationPrevious.IsEnabled = false;
+                        cmdImageNavigationBeginVert.IsEnabled = false;
+                        cmdImageNavigationPreviousVert.IsEnabled = false;
+                    }
+                    else
+                    {
+                        cmdImageNavigationBegin.IsEnabled = true;
+                        cmdImageNavigationPrevious.IsEnabled = true;
+                        cmdImageNavigationBeginVert.IsEnabled = true;
+                        cmdImageNavigationPreviousVert.IsEnabled = true;
+                    }
+
+                    if ((currentImageList.sectionId > 0 && (currentImageList.imageCursor + state.imageFetchSize) > currentImageList.sectionImageCount)
+                        || (currentImageList.sectionId < 0 && (currentImageList.imageCursor + state.imageFetchSize) > currentImageList.totalImageCount))
+                    {
+                        cmdImageNavigationLast.IsEnabled = false;
+                        cmdImageNavigationNext.IsEnabled = false;
+                        cmdImageNavigationLastVert.IsEnabled = false;
+                        cmdImageNavigationNextVert.IsEnabled = false;
+                    }
+                    else
+                    {
+                        cmdImageNavigationLast.IsEnabled = true;
+                        cmdImageNavigationNext.IsEnabled = true;
+                        cmdImageNavigationLastVert.IsEnabled = true;
+                        cmdImageNavigationNextVert.IsEnabled = true;
+                    }
+                }
+
+                int cursor = 0;
+                bool moreToLoad = true;
+                while (moreToLoad)
+                {
+                    if (cancelToken != null)
+                        cancelToken.ThrowIfCancellationRequested();
+
+                    Task[] tasks = new Task[10];
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        if (cursor + i < imageMainViewerList.Count)
+                            tasks[i] = imageMainViewerList[cursor + i].LoadImage(cancelToken);
+                    }
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        if (tasks[i] != null)
+                            await tasks[i];
+                    }
+
+                    cursor = cursor + 10;
+                    if (cursor >= imageMainViewerList.Count)
+                        moreToLoad = false;
+                }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("ImageListUpdateControls has been cancelled.");
+                throw (cancelEx);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw (ex);
+            }
+        }
+
+        //TODO add functionality + server side.
+        private string GetSearchQueryString()
+        {
+            return null;
+        }
+
+        async private void cmdImageNavigationLast_Click(object sender, RoutedEventArgs e)
+        {
+            await FetchMoreImagesAsync(FetchDirection.Last);
+        }
+
+        async private void cmdImageNavigationNext_Click(object sender, RoutedEventArgs e)
+        {
+            await FetchMoreImagesAsync(FetchDirection.Next);
+        }
+
+        async private void cmdImageNavigationPrevious_Click(object sender, RoutedEventArgs e)
+        {
+            await FetchMoreImagesAsync(FetchDirection.Previous);
+        }
+
+        async private void cmdImageNavigationBegin_Click(object sender, RoutedEventArgs e)
+        {
+            await FetchMoreImagesAsync(FetchDirection.Begin);
+        }
+        #endregion
+
+        #region Category Methods
         /// <summary>
         /// Method to load and refresh the category list, based on online status and whether or not a local cache contains a previous version
         /// </summary>
@@ -731,179 +1182,12 @@ namespace ManageWalla
             txtCategoryDescription.Text = category.Desc;
             currentCategory = category;
         }
+        #endregion
 
-        //TODO - ensure that this is called when a search is applied.
-        async private void FetchCategoryImagesFirstAsync(object sender, RoutedEventArgs e)
+        #region Category Event Handlers
+        private void cmdCategoryRefresh_Click(object sender, RoutedEventArgs e)
         {
-            cmbGallerySectionVert.Visibility = Visibility.Collapsed;
-            cmbGallerySection.Visibility = Visibility.Collapsed;
-
-            RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedTagButton != null)
-                checkedTagButton.IsChecked = false;
-
-            RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedGalleryButton != null)
-                checkedGalleryButton.IsChecked = false;
-
-
-            e.Handled = true;
-
-            TreeViewItem selectedTreeViewItem = (TreeViewItem)sender;
-
-            /* Refresh tag image state */
-            if (selectedTreeViewItem != null)
-            {
-                CategoryListCategoryRef categoryRef = (CategoryListCategoryRef)selectedTreeViewItem.Tag;
-                currentImageList = await controller.CategoryGetImagesAsync(categoryRef.id, 0, GetSearchQueryString());
-
-                /* Populate tag image list from state */
-                ImageListUpdateControls();
-            }
-        }
-
-        async private Task FetchMoreImagesAsync(FetchDirection direction)
-        {
-            if (currentImageList == null)
-                return;
-
-            /* Update current tag image list */
-            int cursor = 0;
-            switch (direction)
-            {
-                case FetchDirection.Begin:
-                    cursor = 0;
-                    break;
-                case FetchDirection.Next:
-                    if ((currentImageList.imageCursor + state.imageFetchSize) <= currentImageList.totalImageCount)
-                        cursor = currentImageList.imageCursor + state.imageFetchSize;
-                    break;
-                case FetchDirection.Previous:
-                    cursor = Math.Max(currentImageList.imageCursor - state.imageFetchSize, 0);
-                    break;
-                case FetchDirection.Last:
-                    cursor = Math.Abs(currentImageList.totalImageCount / state.imageFetchSize) * state.imageFetchSize;
-                    break;
-            }
-
-            switch (currentPane)
-            {
-                case PaneMode.CategoryView:
-                case PaneMode.CategoryEdit:
-                case PaneMode.CategoryAdd:
-                    currentImageList = await controller.CategoryGetImagesAsync(currentImageList.id, cursor, GetSearchQueryString());
-                    break;
-                case PaneMode.TagAdd:
-                case PaneMode.TagEdit:
-                case PaneMode.TagView:
-                    currentImageList = await controller.TagGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, GetSearchQueryString());
-                    break;
-                case PaneMode.GalleryView:
-
-                    long sectionId = -1;
-                    ComboBoxItem cmbItemSection = (ComboBoxItem)cmbGallerySection.SelectedItem;
-                    if (cmbItemSection != null)
-                    {
-                        GalleryListGalleryRefSectionRef section = (GalleryListGalleryRefSectionRef)cmbItemSection.Tag;
-                        sectionId = section.id;
-                    }
-                    currentImageList = await controller.GalleryGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, sectionId, GetSearchQueryString());
-                    break;
-            }
-            
-
-            /* Populate tag image list from state */
-            ImageListUpdateControls();
-        }
-
-        async private Task ImageListUpdateControls()
-        {
-            imageMainViewerList.Clear();
-
-            if (currentImageList == null)
-                return;
-
-            if (currentImageList.Images == null)
-                return;
-
-
-
-            lblImageListName.Content = currentImageList.Name;
-            lblImageListNameVert.Text = currentImageList.Name;
-
-            foreach (ImageListImageRef imageRef in currentImageList.Images)
-            {
-                GeneralImage newImage = new GeneralImage(controller.GetServerHelper());
-                newImage.imageId = imageRef.id;
-                newImage.Name = imageRef.name;
-                newImage.Description = imageRef.desc;
-                newImage.UploadDate = imageRef.uploadDate;
-                newImage.FilePath = imageRef.localPath;
-
-                imageMainViewerList.Add(newImage);
-            }
-
-
-            if ((currentImageList.type == "Gallery" && currentImageList.imageCount == currentImageList.sectionImageCount) ||
-                (currentImageList.imageCount == currentImageList.totalImageCount))
-            {
-                cmdImageNavigationBegin.Visibility = Visibility.Hidden;
-                cmdImageNavigationPrevious.Visibility = Visibility.Hidden;
-                cmdImageNavigationLast.Visibility = Visibility.Hidden;
-                cmdImageNavigationNext.Visibility = Visibility.Hidden;
-
-                cmdImageNavigationBeginVert.Visibility = Visibility.Hidden;
-                cmdImageNavigationPreviousVert.Visibility = Visibility.Hidden;
-                cmdImageNavigationLastVert.Visibility = Visibility.Hidden;
-                cmdImageNavigationNextVert.Visibility = Visibility.Hidden;
-            }
-            else
-            {
-                cmdImageNavigationBegin.Visibility = Visibility.Visible;
-                cmdImageNavigationPrevious.Visibility = Visibility.Visible;
-                cmdImageNavigationLast.Visibility = Visibility.Visible;
-                cmdImageNavigationNext.Visibility = Visibility.Visible;
-
-                cmdImageNavigationBeginVert.Visibility = Visibility.Visible;
-                cmdImageNavigationPreviousVert.Visibility = Visibility.Visible;
-                cmdImageNavigationLastVert.Visibility = Visibility.Visible;
-                cmdImageNavigationNextVert.Visibility = Visibility.Visible;
-
-                if (currentImageList.imageCursor == 0)
-                {
-                    cmdImageNavigationBegin.IsEnabled = false;
-                    cmdImageNavigationPrevious.IsEnabled = false;
-                    cmdImageNavigationBeginVert.IsEnabled = false;
-                    cmdImageNavigationPreviousVert.IsEnabled = false;
-                }
-                else
-                {
-                    cmdImageNavigationBegin.IsEnabled = true;
-                    cmdImageNavigationPrevious.IsEnabled = true;
-                    cmdImageNavigationBeginVert.IsEnabled = true;
-                    cmdImageNavigationPreviousVert.IsEnabled = true;
-                }
-
-                if ((currentImageList.imageCursor + state.imageFetchSize) > currentImageList.totalImageCount)
-                {
-                    cmdImageNavigationLast.IsEnabled = false;
-                    cmdImageNavigationNext.IsEnabled = false;
-                    cmdImageNavigationLastVert.IsEnabled = false;
-                    cmdImageNavigationNextVert.IsEnabled = false;
-                }
-                else
-                {
-                    cmdImageNavigationLast.IsEnabled = true;
-                    cmdImageNavigationNext.IsEnabled = true;
-                    cmdImageNavigationLastVert.IsEnabled = true;
-                    cmdImageNavigationNextVert.IsEnabled = true;
-                }
-            }
-
-            foreach (GeneralImage newImage in imageMainViewerList)
-            {
-                await newImage.LoadImage();
-            }
+            RefreshAndDisplayCategoryList(true);
         }
 
         private void cmdCategoryCancel_Click(object sender, RoutedEventArgs e)
@@ -1036,7 +1320,7 @@ namespace ManageWalla
         }
         #endregion
 
-        #region Tag UI Control
+        #region Tag Methods
         /// <summary>
         /// Method to load and refresh the tag list, based on online status and whether or not a local cache contains a previous version
         /// </summary>
@@ -1134,123 +1418,6 @@ namespace ManageWalla
             UploadRefreshTagsList();
         }
 
-        //TODO - ensure that this is called when a search is applied.
-        async private void FetchTagImagesFirstAsync(object sender, RoutedEventArgs e)
-        {
-            cmbGallerySectionVert.Visibility = Visibility.Collapsed;
-            cmbGallerySection.Visibility = Visibility.Collapsed;
-
-            TreeViewItem selectedTreeViewItem = (TreeViewItem)treeCategoryView.SelectedItem;
-            if (selectedTreeViewItem != null)
-                selectedTreeViewItem.IsSelected = false;
-
-            RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedGalleryButton != null)
-                checkedGalleryButton.IsChecked = false;
-
-            RadioButton checkedButton = (RadioButton)sender;
-            //RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-
-            /* Refresh tag image state */
-            if (checkedButton != null)
-            {
-                TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
-                currentImageList = await controller.TagGetImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetSearchQueryString());
-
-                /* Populate tag image list from state */
-                await ImageListUpdateControls();
-            }
-        }
-
-        /*
-        async private Task FetchMoreImagesAsync(FetchDirection direction)
-        {
-            if (currentImageList == null)
-                return;
-
-            //Update current tag image list
-            int cursor = 0;
-            switch (direction)
-            {
-                case FetchDirection.Begin:
-                    cursor = 0;
-                    break;
-                case FetchDirection.Next:
-                    if ((currentImageList.imageCursor + state.imageFetchSize) <= currentImageList.totalImageCount)
-                        cursor = currentImageList.imageCursor + state.imageFetchSize;
-                    break;
-                case FetchDirection.Previous:
-                    cursor = Math.Max(currentImageList.imageCursor - state.imageFetchSize, 0);
-                    break;
-                case FetchDirection.Last:
-                    cursor = Math.Abs(currentImageList.totalImageCount / state.imageFetchSize) * state.imageFetchSize;
-                    break;
-            }
-
-            currentImageList = await controller.TagGetImagesAsync(currentImageList.id, currentImageList.Name, cursor, GetSearchQueryString());
-
-            ImageListUpdateControls();
-        }
-*/
-
-        //TODO add functionality + server side.
-        private string GetSearchQueryString()
-        {
-            return null;
-        }
-
-        /*
-        async private Task TagImageListUpdateControls()
-        {
-            imageMainViewerList.Clear();
-
-            if (currentImageList == null)
-                return;
-
-            if (currentImageList.Images == null)
-                return;
-
-            foreach (ImageListImageRef imageRef in currentImageList.Images)
-            {
-                GeneralImage newImage = new GeneralImage(controller.GetServerHelper());
-                newImage.imageId = imageRef.id;
-                newImage.Name = imageRef.name;
-                newImage.Description = imageRef.desc;
-                newImage.UploadDate = imageRef.uploadDate;
-                newImage.FilePath = imageRef.localPath;
-
-                imageMainViewerList.Add(newImage);
-            }
-
-            if (currentImageList.imageCursor == 0)
-            {
-                cmdImageNavigationBegin.IsEnabled = false;
-                cmdImageNavigationPrevious.IsEnabled = false;
-            }
-            else
-            {
-                cmdImageNavigationBegin.IsEnabled = true;
-                cmdImageNavigationPrevious.IsEnabled = true;
-            }
-
-            if ((currentImageList.imageCursor + state.imageFetchSize) > currentImageList.totalImageCount)
-            {
-                cmdImageNavigationLast.IsEnabled = false;
-                cmdImageNavigationNext.IsEnabled = false;
-            }
-            else
-            {
-                cmdImageNavigationLast.IsEnabled = true;
-                cmdImageNavigationNext.IsEnabled = true;
-            }
-
-            foreach (GeneralImage newImage in imageMainViewerList)
-            {
-                await newImage.LoadImage();
-            }
-        }
-        */
-
         async private Task PopulateTagMetaData()
         {
             RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
@@ -1296,7 +1463,9 @@ namespace ManageWalla
                 }
             }
         }
+        #endregion
 
+        #region Tag Event Handlers
         private void cmdTagRefresh_Click(object sender, RoutedEventArgs e)
         {
             RefreshAndDisplayTagList(true);
@@ -1381,72 +1550,206 @@ namespace ManageWalla
         }
         #endregion
 
-        #region Window init
-        private void mainTwo_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        #region Upload Method and Event Handlers
+        private void UploadRefreshCategoryList()
         {
-            controller.Dispose();
-        }
 
-        private void mainTwo_Loaded(object sender, RoutedEventArgs e)
-        {
-            controller = new MainController(this);
-
-            string response = controller.InitApplication();
-            state = controller.GetState();
-
-            switch (state.connectionState)
+            long categoryId = 0;
+            //Keep a reference to the currently selected category item.
+            TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
+            if (item != null)
             {
-                case GlobalState.ConnectionState.LoggedOn:
-                    DisplayMessage("Account: " + state.userName + " has been connected with FotoWalla", MessageSeverity.Info, false);
-                    radCategory.IsChecked = true;
-                    //cmdCategory.RaiseEvent(new RoutedEventArgs(CheckBox.CheckedEvent));
-                    break;
-                case GlobalState.ConnectionState.Offline:
-                    DisplayMessage("No internet connection could be established with FotoWalla", MessageSeverity.Warning, false);
-                    //cmdCategory.RaiseEvent(new RoutedEventArgs(CheckBox.CheckedEvent));
-                    break;
-                case GlobalState.ConnectionState.NoAccount:
-                    DisplayMessage("There is no account settings saved for this user, you must associate an account", MessageSeverity.Info, false);
-
-                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-
-                    break;
-                case GlobalState.ConnectionState.FailedLogin:
-                    DisplayMessage("The logon for account: " + state.userName + ", failed with the message: " + response, MessageSeverity.Warning, false);
-                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                    break;
-            }
-
-            DisplayConnectionStatus();
-        }
-
-        public void DisplayMessage(string message, MessageSeverity severity, bool modal)
-        {
-            //TODO sort out severity.
-            if (modal)
-            {
-                MessageBox.Show(message);
+                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+                categoryId = category.id;
             }
             else
             {
-                MessageBox.Show(message);
+                CategoryListCategoryRef firstCategoryWithImages = state.categoryList.CategoryRef.First<CategoryListCategoryRef>(r => r.parentId != 0);
+                categoryId = firstCategoryWithImages.id;
+            }
+
+            treeUploadCategoryView.Items.Clear();
+            UploadAddCategoryToTreeView(0, null);
+
+            CategorySelect(categoryId, (TreeViewItem)treeUploadCategoryView.Items[0], treeUploadCategoryView);
+        }
+
+        private void UploadAddCategoryToTreeView(long parentId, TreeViewItem currentHeader)
+        {
+            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            {
+                TreeViewItem newItem = new TreeViewItem();
+                newItem.Header = current.name;
+                newItem.ToolTip = current.desc + " (" + current.count.ToString() + ")";
+                newItem.Tag = current;
+                newItem.IsExpanded = true;
+
+                //newItem.Style = (Style)FindResource("styleRadioButton");
+                //newItem.Template = (ControlTemplate)FindResource("templateRadioButton");
+
+                if (currentHeader == null)
+                {
+                    treeUploadCategoryView.Items.Add(newItem);
+                }
+                else
+                {
+                    currentHeader.Items.Add(newItem);
+                }
+
+                UploadAddCategoryToTreeView(current.id, newItem);
             }
         }
 
-        private void DisplayConnectionStatus()
+        private void UploadRefreshTagsList()
         {
-            if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+            lstUploadTagList.Items.Clear();
+            //Load existing tags into the tag
+            foreach (TagListTagRef tagRef in state.tagList.TagRef)
             {
-                this.Title = "FotoWalla - Connected";
+                ListBoxItem newItem = new ListBoxItem();
+                newItem.Content = tagRef.name;
+                newItem.Tag = tagRef;
+                lstUploadTagList.Items.Add(newItem);
+            }
+        }
+
+        private void ResetUploadState(bool fullReset)
+        {
+            if (fullReset)
+            {
+                uploadUIState.GotSubFolders = false;
+                uploadUIState.CategoryName = "";
+                uploadUIState.CategoryDesc = "";
+                uploadUIState.MapToSubFolders = false;
+                uploadUIState.UploadToNewCategory = false;
+
+                uploadUIState.Mode = UploadUIState.UploadMode.None;
+            }
+
+            uploadUIState.MetaUdfChar1 = null;
+            uploadUIState.MetaUdfChar2 = null;
+            uploadUIState.MetaUdfChar3 = null;
+            uploadUIState.MetaUdfText1 = null;
+            uploadUIState.MetaUdfNum1 = 0;
+            uploadUIState.MetaUdfNum2 = 0;
+            uploadUIState.MetaUdfNum3 = 0;
+            uploadUIState.MetaUdfDate1 = new DateTime(1900, 01, 01);
+            uploadUIState.MetaUdfDate2 = new DateTime(1900, 01, 01);
+            uploadUIState.MetaUdfDate3 = new DateTime(1900, 01, 01);
+
+            uploadUIState.MetaUdfChar1All = false;
+            uploadUIState.MetaUdfChar2All = false;
+            uploadUIState.MetaUdfChar3All = false;
+            uploadUIState.MetaUdfText1All = false;
+            uploadUIState.MetaUdfNum1All = false;
+            uploadUIState.MetaUdfNum2All = false;
+            uploadUIState.MetaUdfNum3All = false;
+            uploadUIState.MetaUdfDate1All = false;
+            uploadUIState.MetaUdfDate2All = false;
+            uploadUIState.MetaUdfDate3All = false;
+            uploadUIState.MetaTagRefAll = false;
+
+            //TODO clear down each images meta data changes.
+        }
+
+        private void UpdateUploadTagCollection()
+        {
+            if (tagListUploadRefreshing)
+                return;
+
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            if (current == null)
+                return;
+
+            //Add all selected items to the tagref collection
+            if (uploadUIState.MetaTagRefAll)
+            {
+                //Re-initialise collection
+                uploadUIState.MetaTagRef = new ImageMetaTagRef[lstUploadTagList.SelectedItems.Count];
+                for (int i = 0; i < lstUploadTagList.SelectedItems.Count; i++)
+                {
+                    ListBoxItem item = (ListBoxItem)lstUploadTagList.SelectedItems[i];
+                    TagListTagRef tagListTagRef = (TagListTagRef)item.Tag;
+
+                    ImageMetaTagRef newTagRef = new ImageMetaTagRef();
+                    newTagRef.id = tagListTagRef.id;
+                    newTagRef.op = "C";
+                    newTagRef.name = tagListTagRef.name;
+                    uploadUIState.MetaTagRef[i] = newTagRef;
+                }
             }
             else
             {
-                this.Title = "FotoWalla - Offline";
+                //Re-initialise collection
+                current.Meta.Tags = new ImageMetaTagRef[lstUploadTagList.SelectedItems.Count];
+                for (int i = 0; i < lstUploadTagList.SelectedItems.Count; i++)
+                {
+                    ListBoxItem item = (ListBoxItem)lstUploadTagList.SelectedItems[i];
+                    TagListTagRef tagListTagRef = (TagListTagRef)item.Tag;
+
+                    ImageMetaTagRef newTagRef = new ImageMetaTagRef();
+                    newTagRef.id = tagListTagRef.id;
+                    newTagRef.op = "C";
+                    newTagRef.name = tagListTagRef.name;
+                    current.Meta.Tags[i] = newTagRef;
+                }
             }
         }
-        #endregion
 
-        #region Upload UI Control
+        private void UploadTagListReload()
+        {
+            tagListUploadRefreshing = true;
+
+            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+            if (current == null)
+                return;
+
+            //Deselect each tag.
+            foreach (ListBoxItem tagItem in lstUploadTagList.Items)
+            {
+                tagItem.IsSelected = false;
+            }
+
+            if (uploadUIState.MetaTagRefAll)
+            {
+                if (uploadUIState.MetaTagRef != null)
+                {
+                    foreach (ImageMetaTagRef tagRef in uploadUIState.MetaTagRef)
+                    {
+                        foreach (ListBoxItem tagItem in lstUploadTagList.Items)
+                        {
+                            TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                            if (currentTagRef.id == tagRef.id)
+                            {
+                                tagItem.IsSelected = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (current.Meta.Tags != null)
+                {
+                    foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
+                    {
+                        foreach (ListBoxItem tagItem in lstUploadTagList.Items)
+                        {
+                            TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                            if (currentTagRef.id == tagRef.id)
+                            {
+                                tagItem.IsSelected = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            tagListUploadRefreshing = false;
+        }
+
         async private void cmdUploadImportFolder_Click(object sender, RoutedEventArgs e)
         {
             var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
@@ -1512,45 +1815,6 @@ namespace ManageWalla
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
-        private void ResetUploadState(bool fullReset)
-        {
-            if (fullReset)
-            {
-                uploadUIState.GotSubFolders = false;
-                uploadUIState.CategoryName = "";
-                uploadUIState.CategoryDesc = "";
-                uploadUIState.MapToSubFolders = false;
-                uploadUIState.UploadToNewCategory = false;
-
-                uploadUIState.Mode = UploadUIState.UploadMode.None;
-            }
-
-            uploadUIState.MetaUdfChar1 = null;
-            uploadUIState.MetaUdfChar2 = null;
-            uploadUIState.MetaUdfChar3 = null;
-            uploadUIState.MetaUdfText1 = null;
-            uploadUIState.MetaUdfNum1 = 0;
-            uploadUIState.MetaUdfNum2 = 0;
-            uploadUIState.MetaUdfNum3 = 0;
-            uploadUIState.MetaUdfDate1 = new DateTime(1900, 01, 01);
-            uploadUIState.MetaUdfDate2 = new DateTime(1900, 01, 01);
-            uploadUIState.MetaUdfDate3 = new DateTime(1900, 01, 01);
-
-            uploadUIState.MetaUdfChar1All = false;
-            uploadUIState.MetaUdfChar2All = false;
-            uploadUIState.MetaUdfChar3All = false;
-            uploadUIState.MetaUdfText1All = false;
-            uploadUIState.MetaUdfNum1All = false;
-            uploadUIState.MetaUdfNum2All = false;
-            uploadUIState.MetaUdfNum3All = false;
-            uploadUIState.MetaUdfDate1All = false;
-            uploadUIState.MetaUdfDate2All = false;
-            uploadUIState.MetaUdfDate3All = false;
-            uploadUIState.MetaTagRefAll = false;
-
-            //TODO clear down each images meta data changes.
-        }
-
         async private void cmdUploadResetMeta_Click(object sender, RoutedEventArgs e)
         {
             ResetUploadState(false);
@@ -1558,320 +1822,15 @@ namespace ManageWalla
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
-        private void UploadRefreshCategoryList()
-        {
-            
-            long categoryId = 0;
-            //Keep a reference to the currently selected category item.
-            TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
-            if (item != null)
-            {
-                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
-                categoryId = category.id;
-            }
-            else
-            {
-                CategoryListCategoryRef firstCategoryWithImages = state.categoryList.CategoryRef.First<CategoryListCategoryRef>(r => r.parentId != 0);
-                categoryId = firstCategoryWithImages.id;
-            }
-
-            treeUploadCategoryView.Items.Clear();
-            UploadAddCategoryToTreeView(0, null);
-
-            CategorySelect(categoryId, (TreeViewItem)treeUploadCategoryView.Items[0], treeUploadCategoryView);
-        }
-
-        private void UploadAddCategoryToTreeView(long parentId, TreeViewItem currentHeader)
-        {
-            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
-            {
-                TreeViewItem newItem = new TreeViewItem();
-                newItem.Header = current.name;
-                newItem.ToolTip = current.desc + " (" + current.count.ToString() + ")";
-                newItem.Tag = current;
-                newItem.IsExpanded = true;
-                
-                //newItem.Style = (Style)FindResource("styleRadioButton");
-                //newItem.Template = (ControlTemplate)FindResource("templateRadioButton");
-
-                if (currentHeader == null)
-                {
-                    treeUploadCategoryView.Items.Add(newItem);
-                }
-                else
-                {
-                    currentHeader.Items.Add(newItem);
-                }
-
-                UploadAddCategoryToTreeView(current.id, newItem);
-            }
-        }
-
-        private void UploadRefreshTagsList()
-        {
-            lstUploadTagList.Items.Clear();
-            //Load existing tags into the tag
-            foreach (TagListTagRef tagRef in state.tagList.TagRef)
-            {
-                ListBoxItem newItem = new ListBoxItem();
-                newItem.Content = tagRef.name;
-                newItem.Tag = tagRef;
-                lstUploadTagList.Items.Add(newItem);
-            }
-        }
-        
         private void lstUploadImageFileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UploadTagListReload();
-        }
-
-        private void UploadTagListReload()
-        {
-            tagListUploadRefreshing = true;
-
-            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-            if (current == null)
-                return;
-
-            //Deselect each tag.
-            foreach (ListBoxItem tagItem in lstUploadTagList.Items)
-            {
-                tagItem.IsSelected = false;
-            }
-
-            if (uploadUIState.MetaTagRefAll)
-            {
-                if (uploadUIState.MetaTagRef != null)
-                {
-                    foreach (ImageMetaTagRef tagRef in uploadUIState.MetaTagRef)
-                    {
-                        foreach (ListBoxItem tagItem in lstUploadTagList.Items)
-                        {
-                            TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
-                            if (currentTagRef.id == tagRef.id)
-                            {
-                                tagItem.IsSelected = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (current.Meta.Tags != null)
-                {
-                    foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
-                    {
-                        foreach (ListBoxItem tagItem in lstUploadTagList.Items)
-                        {
-                            TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
-                            if (currentTagRef.id == tagRef.id)
-                            {
-                                tagItem.IsSelected = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            tagListUploadRefreshing = false;
         }
 
         private void lstUploadTagList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
                UpdateUploadTagCollection();
         }
-
-        private void UpdateUploadTagCollection()
-        {
-            if (tagListUploadRefreshing)
-                return;
-
-            UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-            if (current == null)
-                return;
-
-            //Add all selected items to the tagref collection
-            if (uploadUIState.MetaTagRefAll)
-            {
-                //Re-initialise collection
-                uploadUIState.MetaTagRef = new ImageMetaTagRef[lstUploadTagList.SelectedItems.Count];
-                for (int i = 0; i < lstUploadTagList.SelectedItems.Count; i++)
-                {
-                    ListBoxItem item = (ListBoxItem)lstUploadTagList.SelectedItems[i];
-                    TagListTagRef tagListTagRef = (TagListTagRef)item.Tag;
-
-                    ImageMetaTagRef newTagRef = new ImageMetaTagRef();
-                    newTagRef.id = tagListTagRef.id;
-                    newTagRef.op = "C";
-                    newTagRef.name = tagListTagRef.name;
-                    uploadUIState.MetaTagRef[i] = newTagRef;
-                }
-            }
-            else
-            {
-                //Re-initialise collection
-                current.Meta.Tags = new ImageMetaTagRef[lstUploadTagList.SelectedItems.Count];
-                for (int i = 0; i < lstUploadTagList.SelectedItems.Count; i++)
-                {
-                    ListBoxItem item = (ListBoxItem)lstUploadTagList.SelectedItems[i];
-                    TagListTagRef tagListTagRef = (TagListTagRef)item.Tag;
-
-                    ImageMetaTagRef newTagRef = new ImageMetaTagRef();
-                    newTagRef.id = tagListTagRef.id;
-                    newTagRef.op = "C";
-                    newTagRef.name = tagListTagRef.name;
-                    current.Meta.Tags[i] = newTagRef;
-                }
-            }
-        }
-
-/*
-        private void cmdAssociateTag_Click(object sender, RoutedEventArgs e)
-        {
-            if (currentPane == PaneMode.Upload)
-            {
-                RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-
-                if (checkedTagButton != null)
-                {
-                    TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedTagButton.Tag;
-
-                    ImageMetaTagRef newTagRef = new ImageMetaTagRef();
-                    newTagRef.id = tagListTagRefTemp.id;
-                    newTagRef.op = "C";
-                    newTagRef.name = tagListTagRefTemp.name;
-
-                    UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-                    ImageMetaTagRef[] newTagRefArray;
-
-                    if (chkUploadTagsAll.IsChecked == true)
-                    {
-                        if (uploadUIState.MetaTagRef == null)
-                        {
-                            newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
-                        }
-                        else
-                        {
-                            newTagRefArray = new ImageMetaTagRef[uploadUIState.MetaTagRef.Length + 1];
-                            uploadUIState.MetaTagRef.CopyTo(newTagRefArray, 0);
-                            newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
-                        }
-                        uploadUIState.MetaTagRef = newTagRefArray;
-                    }
-                    else
-                    {
-                        if (current.Meta.Tags == null)
-                        {
-                            newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
-                        }
-                        else
-                        {
-                            newTagRefArray = new ImageMetaTagRef[current.Meta.Tags.Length + 1];
-                            current.Meta.Tags.CopyTo(newTagRefArray, 0);
-                            newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
-                        }
-                        current.Meta.Tags = newTagRefArray;
-                    }
-
-
-                    UploadEnableDisableTags(current);
-                    checkedTagButton.IsChecked = false;
-                    BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
-                }
-            }
-        }
-
-        private void UploadEnableDisableTags(UploadImage current)
-        {
-            //Either check the gloabl tags collection or the image specific collection.
-            ImageMetaTagRef[] tagToCheck = null;
-            try
-            {
-                if (chkUploadTagsAll.IsChecked == true)
-                {
-                    tagToCheck = uploadUIState.MetaTagRef;
-                }
-                else
-                {
-                    tagToCheck = current.Meta.Tags;
-                }
-            }
-            catch (NullReferenceException ex)
-            {
-                //Can be ignored, just leave the method
-            }
-
-            //Loop to enable buttons if they are not currently in the selected list.
-            foreach (RadioButton button in wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsEnabled == false))
-            {
-                bool exists = false;
-                if (tagToCheck != null)
-                {
-                    foreach (ImageMetaTagRef tagRef in tagToCheck)
-                    {
-                        TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
-                        if (tagRef.id == existingTagRef.id)
-                        {
-                            exists = true;
-                        }
-                    }
-                }
-
-                if (!exists)
-                {
-                    button.IsEnabled = true;
-                }
-                exists = false;
-            }
-
-            //Update tags, so ones in use are disabled.
-            if (current != null)
-            {
-                if (tagToCheck != null)
-                {
-                    foreach (ImageMetaTagRef tagRef in tagToCheck)
-                    {
-                        foreach (RadioButton button in wrapMyTags.Children)
-                        {
-                            TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
-                            if (tagRef.id == existingTagRef.id)
-                            {
-                                button.IsEnabled = false;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private void cmdUploadRemoveTag_Click(object sender, RoutedEventArgs e)
-        {
-            ImageMetaTagRef currentTag = (ImageMetaTagRef)lstUploadTagList.SelectedItem;
-            if (currentTag != null)
-            {
-                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-
-                if (chkUploadTagsAll.IsChecked == true)
-                {
-                    ImageMetaTagRef[] newTagListTagRef = uploadUIState.MetaTagRef.Where(r => r.id != currentTag.id).ToArray();
-                    uploadUIState.MetaTagRef = newTagListTagRef;
-                }
-                else
-                {
-                    current = (UploadImage)lstUploadImageFileList.SelectedItem;
-                    ImageMetaTagRef[] newTagListTagRef = current.Meta.Tags.Where(r => r.id != currentTag.id).ToArray();
-                    current.Meta.Tags = newTagListTagRef;
-                }
-
-                BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
-                UploadEnableDisableTags(current);
-                lstUploadTagList.Items.Refresh();
-            }
-        }
-        */
 
         private void chkUploadToNewCategory_Checked(object sender, RoutedEventArgs e)
         {
@@ -2150,12 +2109,7 @@ namespace ManageWalla
         }
         #endregion
 
-        #region Account
-        async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            await RefreshUploadStatusStateAsync(true);
-        }
-
+        #region Account Methods and Handlers
         private void RefreshUploadStatusFromStateList()
         {
             /* Clear list and add local image load errors */
@@ -2221,49 +2175,14 @@ namespace ManageWalla
                 await RefreshUploadStatusStateAsync(false);
             }
         }
+
+        async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            await RefreshUploadStatusStateAsync(true);
+        }
         #endregion
 
-        async private void cmdImageNavigationLast_Click(object sender, RoutedEventArgs e)
-        {
-            await FetchMoreImagesAsync(FetchDirection.Last);
-        }
-
-        async private void cmdImageNavigationNext_Click(object sender, RoutedEventArgs e)
-        {
-            await FetchMoreImagesAsync(FetchDirection.Next);
-        }
-
-        async private void cmdImageNavigationPrevious_Click(object sender, RoutedEventArgs e)
-        {
-            await FetchMoreImagesAsync(FetchDirection.Previous);
-        }
-
-        async private void cmdImageNavigationBegin_Click(object sender, RoutedEventArgs e)
-        {
-            await FetchMoreImagesAsync(FetchDirection.Begin);
-        }
-
-        private void cmdTagAddRemoveImages_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Image_MouseMove(object sender, MouseEventArgs e)
-        {
-            Image meImage = sender as Image;
-            if (meImage != null && e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragDrop.DoDragDrop(meImage, "dunno", DragDropEffects.Copy);
-            }
-        }
-
-        private void cmdCategoryRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshAndDisplayCategoryList(true);
-        }
-
-
-        #region Gallery
+        #region Gallery Methods
         async private void RefreshAndDisplayGalleryList(bool forceRefresh)
         {
             bool redrawList = false;
@@ -2390,45 +2309,6 @@ namespace ManageWalla
                 cmbGallerySection.Visibility = Visibility.Collapsed;
                 cmbGallerySectionVert.Visibility = Visibility.Collapsed;
                 return false;
-            }
-        }
-
-        async private void FetchGalleryImagesFirstAsync(object sender, RoutedEventArgs e)
-        {
-            //Uncheck any other selected imagelists.
-            TreeViewItem selectedTreeViewItem = (TreeViewItem)treeCategoryView.SelectedItem;
-            if (selectedTreeViewItem != null)
-                selectedTreeViewItem.IsSelected = false;
-            
-            RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedTagButton != null)
-                checkedTagButton.IsChecked = false;
-
-
-            RadioButton checkedButton = (RadioButton)sender;
-
-            /* Refresh tag image state */
-            if (checkedButton != null)
-            {
-                GalleryListGalleryRef galleryListRefTemp = (GalleryListGalleryRef)checkedButton.Tag;
-                if (!GalleryPopulateSectionList(galleryListRefTemp))
-                {
-                    currentImageList = await controller.GalleryGetImagesAsync(galleryListRefTemp.id, galleryListRefTemp.name, 0, -1, GetSearchQueryString());
-                    await ImageListUpdateControls();
-                }
-            }
-        }
-
-        async private void FetchGalleryImagesSectionChangeAsync(long sectionId)
-        {
-            RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedGalleryButton != null)
-            {
-                GalleryListGalleryRef galleryListRefTemp = (GalleryListGalleryRef)checkedGalleryButton.Tag;
-                currentImageList = await controller.GalleryGetImagesAsync(galleryListRefTemp.id, galleryListRefTemp.name, 0, sectionId, GetSearchQueryString());
-
-                /* Populate tag image list from state */
-                await ImageListUpdateControls();
             }
         }
 
@@ -2562,7 +2442,6 @@ namespace ManageWalla
             }
         }
 
-
         private void GalleryRefreshCategoryList()
         {
             CategoryListCategoryRef baseCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.parentId == 0);
@@ -2584,7 +2463,6 @@ namespace ManageWalla
             {
                 TreeViewItem newItem = GetTreeView(current.id, current.name, current.desc);
 
-                
                 //newItem.Header = current.name;
                 //newItem.ToolTip = current.desc;
                 newItem.Tag = current.id;
@@ -2671,86 +2549,184 @@ namespace ManageWalla
             return item;
         }
 
-/*
-        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
+        //Method to apply GalleryCategories settings to a clean GalleryCategory object.
+        private void GalleryCategoryApplyGallerySettings(GalleryCategoryRef[] galleryCategories)
         {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            foreach (GalleryCategoryRef current in galleryCategories)
             {
-                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-                if (child != null && child is childItem)
-                    return (childItem)child;
-                else
+                //Find category object related.
+                ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + current.categoryId.ToString());
+                if (cmbCurrent != null)
                 {
-                    childItem childOfChild = FindVisualChild<childItem>(child);
-                    if (childOfChild != null)
-                        return childOfChild;
+                    if (current.recursive)
+                    {
+                        cmbCurrent.SelectedIndex = 2; //ALL
+                    }
+                    else
+                    {
+                        cmbCurrent.SelectedIndex = 1; //Y
+                    }
                 }
             }
-            return null;
+
+            GalleryCategoryApplyRelatedUpdates();
         }
 
-
-        
-        private void GalleryRefreshCategoryList()
+        private GalleryCategoryRef[] GalleryCategoryGetUpdateList()
         {
-            //Using the current category list, build an object list which can is bindable.
+            ArrayList newUpdateList = new ArrayList();
 
+            foreach (TreeViewItem child in treeGalleryCategoryView.Items)
+                GalleryCategoryRecursiveGetUpdateList(child, newUpdateList);
+
+            if (newUpdateList.Count == 0)
+                return null;
+
+            GalleryCategoryRef[] newCategoryRefs = new GalleryCategoryRef[newUpdateList.Count];
+            for (int i = 0; i < newUpdateList.Count; i++)
+            {
+                newCategoryRefs[i] = (GalleryCategoryRef)newUpdateList[i];
+            }
+
+            return newCategoryRefs;
+        }
+
+        private void GalleryCategoryRecursiveGetUpdateList(TreeViewItem currentItem, ArrayList newUpdateList)
+        {
+            long currentId = (long)currentItem.Tag;
+            ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + currentId.ToString());
+
+            if (cmbCurrent.SelectedIndex == 2)
+            {
+                GalleryCategoryRef newRef = new GalleryCategoryRef();
+                newRef.categoryId = currentId;
+                newRef.categoryIdSpecified = true;
+                newRef.recursive = true;
+                newRef.recursiveSpecified = true;
+
+                newUpdateList.Add(newRef);
+                return;
+            }
+            else if (cmbCurrent.SelectedIndex == 1)
+            {
+                GalleryCategoryRef newRef = new GalleryCategoryRef();
+                newRef.categoryId = currentId;
+                newRef.categoryIdSpecified = true;
+                newRef.recursive = false;
+                newRef.recursiveSpecified = true;
+                newUpdateList.Add(newRef);
+            }
+
+            foreach (TreeViewItem child in currentItem.Items)
+                GalleryCategoryRecursiveGetUpdateList(child, newUpdateList);
+        }
+
+        private GalleryTagRef[] GalleryTagsUpdateList(int selectionType)
+        {
+            GalleryTagRef[] newTagUpdates = null;
+            if (selectionType == 0)
+            {
+                //Ignore tags to include.
+                newTagUpdates = new GalleryTagRef[lstGalleryTagListExclude.SelectedItems.Count];
+            }
+            else
+            {
+                newTagUpdates = new GalleryTagRef[lstGalleryTagListInclude.SelectedItems.Count + lstGalleryTagListExclude.SelectedItems.Count];
+            }
+
+            int currentItemIndex = 0;
+
+            if (selectionType != 0)
+            {
+                foreach (ListBoxItem current in lstGalleryTagListInclude.SelectedItems)
+                {
+                    TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                    GalleryTagRef galleryTag = new GalleryTagRef();
+                    galleryTag.tagId = tagRef.id;
+                    galleryTag.tagIdSpecified = true;
+                    galleryTag.exclude = false;
+                    galleryTag.excludeSpecified = true;
+                    newTagUpdates[currentItemIndex] = galleryTag;
+                    currentItemIndex++;
+                }
+            }
+
+            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                GalleryTagRef galleryTag = new GalleryTagRef();
+                galleryTag.tagId = tagRef.id;
+                galleryTag.tagIdSpecified = true;
+                galleryTag.exclude = true;
+                galleryTag.excludeSpecified = true;
+                newTagUpdates[currentItemIndex] = galleryTag;
+                currentItemIndex++;
+            }
+            return newTagUpdates;
+        }
+
+        private GalleryTagRef[] GalleryTagsExclude()
+        {
+            if (lstGalleryTagListExclude.SelectedItems.Count == 0)
+                return null;
+
+            int currentItemIndex = 0;
+            GalleryTagRef[] newTagsExclude = new GalleryTagRef[lstGalleryTagListExclude.SelectedItems.Count];
+
+            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                GalleryTagRef galleryTag = new GalleryTagRef();
+                galleryTag.tagId = tagRef.id;
+                galleryTag.tagIdSpecified = true;
+                galleryTag.exclude = true;
+                galleryTag.excludeSpecified = true;
+                newTagsExclude[currentItemIndex] = galleryTag;
+                currentItemIndex++;
+            }
+            return newTagsExclude;
+        }
+
+        //Method to tweak selectionType and enabled properties.
+        private void GalleryCategoryApplyRelatedUpdates()
+        {
             galleryCategoryRefreshing = true;
 
-            //Find highest level category to begin population.
-            CategoryListCategoryRef baseCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.parentId == 0);
-            galleryCategoriesList.CategoryItems.Clear();
-            GalleryCategoryAddChild(baseCategory.id, null);
+            foreach (TreeViewItem child in treeGalleryCategoryView.Items)
+                GalleryCategoryRecursiveRelatedUpdates(child, false);
 
-            BindingOperations.ClearBinding(treeGalleryCategoryView, TreeView.ItemsSourceProperty);
-            Binding binding = new Binding("CategoryItems");
-            binding.Mode = BindingMode.TwoWay;
-            binding.Source = galleryCategoriesList;
-            BindingOperations.SetBinding(treeGalleryCategoryView, TreeView.ItemsSourceProperty, binding);
+            //TreeViewItem baseItem = (TreeViewItem)treeGalleryCategoryView.Items[0];
+            //GalleryCategoryRecursiveRelatedUpdates(baseItem, false);
 
             galleryCategoryRefreshing = false;
-
-            if (currentPane == PaneMode.GalleryEdit)
-            {
-                //GalleryCategoryApplyGallerySettings(null);
-            }
-
-
-            //BindingOperations.GetBindingExpression(treeGalleryCategoryView, MultiSelectTreeView.ItemsSourceProperty).UpdateTarget();
         }
 
-        private void GalleryCategoryAddChild(long parentId, CategoryItem currentParent)
+        private void GalleryCategoryRecursiveRelatedUpdates(TreeViewItem currentItem, bool parentRecursive)
         {
-            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            long currentId = (long)currentItem.Tag;
+            ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + currentId.ToString());
+
+            if (parentRecursive)
             {
-                CategoryItem currentCategory = new CategoryItem();
-                currentCategory.name = current.name;
-                currentCategory.desc = current.desc;
-                currentCategory.id = current.id;
-                currentCategory.parentId = current.parentId;
-                currentCategory.imageCount = current.count;
-                currentCategory.selectionIndex = 1;
-                currentCategory.enabled = true;
-
-                //If system owned, then disable.
-
-                //currentParent.Add(currentCategory);
-
-                if (currentParent == null)
-                {
-                    galleryCategoriesList.CategoryItems.Add(currentCategory);
-                }
-                else
-                {
-                    currentParent.Add(currentCategory);
-                }
-
-                GalleryCategoryAddChild(current.id, currentCategory);
+                currentItem.IsEnabled = false;
+                cmbCurrent.SelectedIndex = 0;
             }
-        }
- */
+            else
+            {
+                currentItem.IsEnabled = true;
+                if (cmbCurrent.SelectedIndex == 2)
+                    parentRecursive = true;
+            }
 
-          
+            foreach (TreeViewItem child in currentItem.Items)
+                GalleryCategoryRecursiveRelatedUpdates(child, parentRecursive);
+        }
+        #endregion
+
+        #region Gallery Event Handlers
         private void cmdGalleryView_Click(object sender, RoutedEventArgs e)
         {
             RadioButton checkedButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
@@ -2938,8 +2914,6 @@ namespace ManageWalla
             RefreshAndDisplayGalleryList(true);
         }
 
-        #endregion
-
         private void cmbGallerySelectionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RefreshPanesAllControls(currentPane);
@@ -2967,191 +2941,6 @@ namespace ManageWalla
             RefreshPanesAllControls(currentPane);
         }
 
-
-        //private void GalleryCategory_CheckBoxUpdated(object sender, RoutedEventArgs e)
-        //{
-          //  GalleryCategoryApplyRelatedUpdates();
-            //BindingOperations.GetBindingExpression(treeGalleryCategoryView, MultiSelectTreeView.ItemsSourceProperty).UpdateTarget();
-        //}
-
-
-
-        //Method to apply GalleryCategories settings to a clean GalleryCategory object.
-        private void GalleryCategoryApplyGallerySettings(GalleryCategoryRef[] galleryCategories)
-        {
-            foreach (GalleryCategoryRef current in galleryCategories)
-            {
-                //Find category object related.
-                ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + current.categoryId.ToString());
-                if (cmbCurrent != null)
-                {
-                    if (current.recursive)
-                    {
-                        cmbCurrent.SelectedIndex = 2; //ALL
-                    }
-                    else
-                    {
-                        cmbCurrent.SelectedIndex = 1; //Y
-                    }
-                }
-            }
-
-            GalleryCategoryApplyRelatedUpdates();
-        }
-
-        private GalleryCategoryRef[] GalleryCategoryGetUpdateList()
-        {
-            ArrayList newUpdateList = new ArrayList();
-
-            foreach (TreeViewItem child in treeGalleryCategoryView.Items)
-                GalleryCategoryRecursiveGetUpdateList(child, newUpdateList);
-
-            if (newUpdateList.Count == 0)
-                return null;
-
-            GalleryCategoryRef[] newCategoryRefs = new GalleryCategoryRef[newUpdateList.Count];
-            for (int i = 0; i < newUpdateList.Count; i++)
-            {
-                newCategoryRefs[i] = (GalleryCategoryRef)newUpdateList[i];
-            }
-
-            return newCategoryRefs;
-        }
-
-        private void GalleryCategoryRecursiveGetUpdateList(TreeViewItem currentItem, ArrayList newUpdateList)
-        {
-            long currentId = (long)currentItem.Tag;
-            ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + currentId.ToString());
-
-            if (cmbCurrent.SelectedIndex == 2)
-            {
-                GalleryCategoryRef newRef = new GalleryCategoryRef();
-                newRef.categoryId = currentId;
-                newRef.categoryIdSpecified = true;
-                newRef.recursive = true;
-                newRef.recursiveSpecified = true;
-
-                newUpdateList.Add(newRef);
-                return;
-            }
-            else if (cmbCurrent.SelectedIndex == 1)
-            {
-                GalleryCategoryRef newRef = new GalleryCategoryRef();
-                newRef.categoryId = currentId;
-                newRef.categoryIdSpecified = true;
-                newRef.recursive = false;
-                newRef.recursiveSpecified = true;
-                newUpdateList.Add(newRef);
-            }
-
-            foreach (TreeViewItem child in currentItem.Items)
-                GalleryCategoryRecursiveGetUpdateList(child, newUpdateList);
-        }
-
-        private GalleryTagRef[] GalleryTagsUpdateList(int selectionType)
-        {
-            GalleryTagRef[] newTagUpdates = null;
-            if (selectionType == 0)
-            {
-                //Ignore tags to include.
-                newTagUpdates = new GalleryTagRef[lstGalleryTagListExclude.SelectedItems.Count];
-            }
-            else
-            {
-                newTagUpdates = new GalleryTagRef[lstGalleryTagListInclude.SelectedItems.Count + lstGalleryTagListExclude.SelectedItems.Count];
-            }
-
-            int currentItemIndex = 0;
-
-            if (selectionType != 0)
-            {
-                foreach (ListBoxItem current in lstGalleryTagListInclude.SelectedItems)
-                {
-                    TagListTagRef tagRef = (TagListTagRef)current.Tag;
-
-                    GalleryTagRef galleryTag = new GalleryTagRef();
-                    galleryTag.tagId = tagRef.id;
-                    galleryTag.tagIdSpecified = true;
-                    galleryTag.exclude = false;
-                    galleryTag.excludeSpecified = true;
-                    newTagUpdates[currentItemIndex] = galleryTag;
-                    currentItemIndex++;
-                }
-            }
-
-            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
-            {
-                TagListTagRef tagRef = (TagListTagRef)current.Tag;
-
-                GalleryTagRef galleryTag = new GalleryTagRef();
-                galleryTag.tagId = tagRef.id;
-                galleryTag.tagIdSpecified = true;
-                galleryTag.exclude = true;
-                galleryTag.excludeSpecified = true;
-                newTagUpdates[currentItemIndex] = galleryTag;
-                currentItemIndex++;
-            }
-            return newTagUpdates;
-        }
-
-        private GalleryTagRef[] GalleryTagsExclude()
-        {
-            if (lstGalleryTagListExclude.SelectedItems.Count == 0)
-                return null;
-
-            int currentItemIndex = 0;
-            GalleryTagRef[] newTagsExclude = new GalleryTagRef[lstGalleryTagListExclude.SelectedItems.Count];
-
-            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
-            {
-                TagListTagRef tagRef = (TagListTagRef)current.Tag;
-
-                GalleryTagRef galleryTag = new GalleryTagRef();
-                galleryTag.tagId = tagRef.id;
-                galleryTag.tagIdSpecified = true;
-                galleryTag.exclude = true;
-                galleryTag.excludeSpecified = true;
-                newTagsExclude[currentItemIndex] = galleryTag;
-                currentItemIndex++;
-            }
-            return newTagsExclude;
-        }
-
-        //Method to tweak selectionType and enabled properties.
-        private void GalleryCategoryApplyRelatedUpdates()
-        {
-            galleryCategoryRefreshing = true;
-
-            foreach (TreeViewItem child in treeGalleryCategoryView.Items)
-                GalleryCategoryRecursiveRelatedUpdates(child, false);
-
-            //TreeViewItem baseItem = (TreeViewItem)treeGalleryCategoryView.Items[0];
-            //GalleryCategoryRecursiveRelatedUpdates(baseItem, false);
-
-            galleryCategoryRefreshing = false;
-        }
-
-        private void GalleryCategoryRecursiveRelatedUpdates(TreeViewItem currentItem, bool parentRecursive)
-        {
-            long currentId = (long)currentItem.Tag;
-            ComboBox cmbCurrent = (ComboBox)treeGalleryCategoryView.FindName("cmbGalleryCategoryItem" + currentId.ToString());
-
-            if (parentRecursive)
-            {
-                currentItem.IsEnabled = false;
-                cmbCurrent.SelectedIndex = 0;
-            }
-            else
-            {
-                currentItem.IsEnabled = true;
-                if (cmbCurrent.SelectedIndex == 2)
-                     parentRecursive = true;
-            }
-
-            foreach (TreeViewItem child in currentItem.Items)
-                GalleryCategoryRecursiveRelatedUpdates(child, parentRecursive);
-        }
-
         private void GalleryCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //if (galleryCategoryRefreshing)
@@ -3159,6 +2948,9 @@ namespace ManageWalla
 
             GalleryCategoryApplyRelatedUpdates();
         }
+        #endregion
+
+
 
         private void lblFotoWalla_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -3174,3 +2966,229 @@ namespace ManageWalla
 
     }
 }
+
+
+
+/*
+        private void cmdAssociateTag_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentPane == PaneMode.Upload)
+            {
+                RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+
+                if (checkedTagButton != null)
+                {
+                    TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedTagButton.Tag;
+
+                    ImageMetaTagRef newTagRef = new ImageMetaTagRef();
+                    newTagRef.id = tagListTagRefTemp.id;
+                    newTagRef.op = "C";
+                    newTagRef.name = tagListTagRefTemp.name;
+
+                    UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                    ImageMetaTagRef[] newTagRefArray;
+
+                    if (chkUploadTagsAll.IsChecked == true)
+                    {
+                        if (uploadUIState.MetaTagRef == null)
+                        {
+                            newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
+                        }
+                        else
+                        {
+                            newTagRefArray = new ImageMetaTagRef[uploadUIState.MetaTagRef.Length + 1];
+                            uploadUIState.MetaTagRef.CopyTo(newTagRefArray, 0);
+                            newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
+                        }
+                        uploadUIState.MetaTagRef = newTagRefArray;
+                    }
+                    else
+                    {
+                        if (current.Meta.Tags == null)
+                        {
+                            newTagRefArray = new ImageMetaTagRef[1] { newTagRef };
+                        }
+                        else
+                        {
+                            newTagRefArray = new ImageMetaTagRef[current.Meta.Tags.Length + 1];
+                            current.Meta.Tags.CopyTo(newTagRefArray, 0);
+                            newTagRefArray[newTagRefArray.Length - 1] = newTagRef;
+                        }
+                        current.Meta.Tags = newTagRefArray;
+                    }
+
+
+                    UploadEnableDisableTags(current);
+                    checkedTagButton.IsChecked = false;
+                    BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
+                }
+            }
+        }
+
+        private void UploadEnableDisableTags(UploadImage current)
+        {
+            //Either check the gloabl tags collection or the image specific collection.
+            ImageMetaTagRef[] tagToCheck = null;
+            try
+            {
+                if (chkUploadTagsAll.IsChecked == true)
+                {
+                    tagToCheck = uploadUIState.MetaTagRef;
+                }
+                else
+                {
+                    tagToCheck = current.Meta.Tags;
+                }
+            }
+            catch (NullReferenceException ex)
+            {
+                //Can be ignored, just leave the method
+            }
+
+            //Loop to enable buttons if they are not currently in the selected list.
+            foreach (RadioButton button in wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsEnabled == false))
+            {
+                bool exists = false;
+                if (tagToCheck != null)
+                {
+                    foreach (ImageMetaTagRef tagRef in tagToCheck)
+                    {
+                        TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
+                        if (tagRef.id == existingTagRef.id)
+                        {
+                            exists = true;
+                        }
+                    }
+                }
+
+                if (!exists)
+                {
+                    button.IsEnabled = true;
+                }
+                exists = false;
+            }
+
+            //Update tags, so ones in use are disabled.
+            if (current != null)
+            {
+                if (tagToCheck != null)
+                {
+                    foreach (ImageMetaTagRef tagRef in tagToCheck)
+                    {
+                        foreach (RadioButton button in wrapMyTags.Children)
+                        {
+                            TagListTagRef existingTagRef = (TagListTagRef)button.Tag;
+                            if (tagRef.id == existingTagRef.id)
+                            {
+                                button.IsEnabled = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void cmdUploadRemoveTag_Click(object sender, RoutedEventArgs e)
+        {
+            ImageMetaTagRef currentTag = (ImageMetaTagRef)lstUploadTagList.SelectedItem;
+            if (currentTag != null)
+            {
+                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+
+                if (chkUploadTagsAll.IsChecked == true)
+                {
+                    ImageMetaTagRef[] newTagListTagRef = uploadUIState.MetaTagRef.Where(r => r.id != currentTag.id).ToArray();
+                    uploadUIState.MetaTagRef = newTagListTagRef;
+                }
+                else
+                {
+                    current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                    ImageMetaTagRef[] newTagListTagRef = current.Meta.Tags.Where(r => r.id != currentTag.id).ToArray();
+                    current.Meta.Tags = newTagListTagRef;
+                }
+
+                BindingOperations.GetBindingExpressionBase(lstUploadTagList, ListBox.ItemsSourceProperty).UpdateTarget();
+                UploadEnableDisableTags(current);
+                lstUploadTagList.Items.Refresh();
+            }
+        }
+        */
+
+
+
+/*
+        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is childItem)
+                    return (childItem)child;
+                else
+                {
+                    childItem childOfChild = FindVisualChild<childItem>(child);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
+        }
+
+        private void GalleryRefreshCategoryList()
+        {
+            //Using the current category list, build an object list which can is bindable.
+
+            galleryCategoryRefreshing = true;
+
+            //Find highest level category to begin population.
+            CategoryListCategoryRef baseCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.parentId == 0);
+            galleryCategoriesList.CategoryItems.Clear();
+            GalleryCategoryAddChild(baseCategory.id, null);
+
+            BindingOperations.ClearBinding(treeGalleryCategoryView, TreeView.ItemsSourceProperty);
+            Binding binding = new Binding("CategoryItems");
+            binding.Mode = BindingMode.TwoWay;
+            binding.Source = galleryCategoriesList;
+            BindingOperations.SetBinding(treeGalleryCategoryView, TreeView.ItemsSourceProperty, binding);
+
+            galleryCategoryRefreshing = false;
+
+            if (currentPane == PaneMode.GalleryEdit)
+            {
+                //GalleryCategoryApplyGallerySettings(null);
+            }
+
+
+            //BindingOperations.GetBindingExpression(treeGalleryCategoryView, MultiSelectTreeView.ItemsSourceProperty).UpdateTarget();
+        }
+
+        private void GalleryCategoryAddChild(long parentId, CategoryItem currentParent)
+        {
+            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            {
+                CategoryItem currentCategory = new CategoryItem();
+                currentCategory.name = current.name;
+                currentCategory.desc = current.desc;
+                currentCategory.id = current.id;
+                currentCategory.parentId = current.parentId;
+                currentCategory.imageCount = current.count;
+                currentCategory.selectionIndex = 1;
+                currentCategory.enabled = true;
+
+                //If system owned, then disable.
+
+                //currentParent.Add(currentCategory);
+
+                if (currentParent == null)
+                {
+                    galleryCategoriesList.CategoryItems.Add(currentCategory);
+                }
+                else
+                {
+                    currentParent.Add(currentCategory);
+                }
+
+                GalleryCategoryAddChild(current.id, currentCategory);
+            }
+        }
+ */

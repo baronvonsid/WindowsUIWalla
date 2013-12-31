@@ -297,7 +297,9 @@ namespace ManageWalla {
         
         private bool takenDateFieldSpecified;
         
-        private string localPathField;
+        private int metaVersionField;
+        
+        private bool metaVersionFieldSpecified;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
@@ -411,12 +413,23 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string localPath {
+        public int metaVersion {
             get {
-                return this.localPathField;
+                return this.metaVersionField;
             }
             set {
-                this.localPathField = value;
+                this.metaVersionField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool metaVersionSpecified {
+            get {
+                return this.metaVersionFieldSpecified;
+            }
+            set {
+                this.metaVersionFieldSpecified = value;
             }
         }
     }

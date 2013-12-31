@@ -8,11 +8,23 @@
     <Setting Name="WallaAppKey" Type="System.String" Scope="Application">
       <Value Profile="(Default)">1234567890</Value>
     </Setting>
-    <Setting Name="WallaWSPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">/WallaWS/v1/</Value>
-    </Setting>
-    <Setting Name="WallaWSPort" Type="System.String" Scope="User">
+    <Setting Name="WallaWSPort" Type="System.String" Scope="Application">
       <Value Profile="(Default)">8081</Value>
+    </Setting>
+    <Setting Name="WallaWSPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/WallaHub/v1/ws/</Value>
+    </Setting>
+    <Setting Name="WallaWebPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/WallaHub/v1/web/</Value>
+    </Setting>
+    <Setting Name="UserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">simo1n</Value>
+    </Setting>
+    <Setting Name="Password" Type="System.String" Scope="User">
+      <Value Profile="(Default)">hello123</Value>
+    </Setting>
+    <Setting Name="WebServerTest" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">www.google.com</Value>
     </Setting>
   </Settings>
 </SettingsFile>
