@@ -771,7 +771,7 @@
                                         Visibility="Visible">
                 <ListBox.ItemTemplate>
                     <DataTemplate >
-                        <Image Source="{Binding ThumbnailImage}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" AllowDrop="True" MouseMove="Image_MouseMove" />
+                        <Image Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" AllowDrop="True" MouseMove="Image_MouseMove" />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
@@ -789,7 +789,7 @@
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Image Source="{Binding Image}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}"/>
+                        <Image Source="{Binding Image.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}"/>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

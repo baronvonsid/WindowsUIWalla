@@ -18,6 +18,8 @@ using System.IO;
 using System.Collections;
 using System.Threading;
 
+using System.Runtime.Serialization.Formatters.Binary;
+
 
 namespace ManageWalla
 {
@@ -68,6 +70,7 @@ namespace ManageWalla
         public ImageMainViewerList imageMainViewerList = null;
         public GalleryCategoryModel galleryCategoriesList = null;
         public GlobalState state = null;
+        private ThumbState thumbState = null;
         public ImageList currentImageList = null;
         private bool tagListUploadRefreshing = false;
         private bool galleryCategoryRefreshing = false;
@@ -98,6 +101,8 @@ namespace ManageWalla
 
             string response = controller.InitApplication();
             state = controller.GetState();
+
+            thumbState = controller.GetThumbState();
 
             switch (state.connectionState)
             {
@@ -971,7 +976,7 @@ namespace ManageWalla
                     for (int i = 0; i < 10; i++)
                     {
                         if (cursor + i < imageMainViewerList.Count)
-                            tasks[i] = imageMainViewerList[cursor + i].LoadImage(cancelToken);
+                            tasks[i] = imageMainViewerList[cursor + i].LoadImage(cancelToken, thumbState);
                     }
 
                     for (int i = 0; i < 10; i++)
@@ -1790,7 +1795,8 @@ namespace ManageWalla
         async private void cmdUploadImportFiles_Click(object sender, RoutedEventArgs e)
         {
             var openDialog = new System.Windows.Forms.OpenFileDialog();
-            openDialog.DefaultExt = @"*.JPG;*.BMP;*.JPEG;*.TIF;*.TIFF;*.PSD;*.PNG;*.GIF;*.CR2;*.ARW;*.NEF;";
+
+            openDialog.Filter = @"Image Files (*.JPG;*.JPEG;*.TIF;*.TIFF;*.PNG;*.GIF;*.PSD;*.CR2;*.ARW;*.NEF;*.BMP)|*.JPG;*.JPEG;*.TIF;*.TIFF;*.PNG;*.GIF;*.PSD;*.CR2;*.ARW;*.NEF;*.BMP";
 
             openDialog.Multiselect = true;
             System.Windows.Forms.DialogResult result = openDialog.ShowDialog();
@@ -2950,8 +2956,6 @@ namespace ManageWalla
         }
         #endregion
 
-
-
         private void lblFotoWalla_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //galleryCategoriesList.CategoryItems[0].name = "change1";
@@ -2961,7 +2965,69 @@ namespace ManageWalla
             //GalleryCategoryApplyRelatedUpdates();
             //BindingOperations.GetBindingExpression(treeGalleryCategoryView, TreeView.ItemsSourceProperty).UpdateTarget();
 
+
+            // Create Image Element
+            //Image myImage = new Image();
+            //myImage.Width = 200;
+
+            BitmapImage myBitmapImageOne = new BitmapImage();
+            myBitmapImageOne.BeginInit();
+            myBitmapImageOne.UriSource = new Uri(@"C:\Users\FastEddy\Desktop\fots\IMG_424.JPG");
+            myBitmapImageOne.DecodePixelWidth = 200;
+            myBitmapImageOne.EndInit();
+
+            BitmapImage myBitmapImageTwo = new BitmapImage();
+            myBitmapImageTwo.BeginInit();
+            myBitmapImageTwo.UriSource = new Uri(@"C:\Users\FastEddy\Desktop\fots\IMG_4060.JPG");
+            myBitmapImageTwo.DecodePixelWidth = 200;
+            myBitmapImageTwo.EndInit();
+
+            /*
+            //set image source
+            myImage.Source = myBitmapImage;
+
+            ThumbnailCache meCache = new ThumbnailCache();
+            meCache.imageId = 12345;
+            meCache.lastAccessed = DateTime.Now;
+            meCache.image = new Image();
+            meCache.image.Source = myBitmapImage;
+
+            BinaryFormatter formatter = new BinaryFormatter();
+            FileStream stream = new FileStream(@"C:\temp\simon.txt", FileMode.Create);
+            formatter.Serialize(stream, meCache);
+            stream.Close();
+
+            BinaryFormatter formatter2 = new BinaryFormatter();
+            FileStream stream2 = new FileStream(@"C:\temp\simon.txt", FileMode.Open);
+            ThumbnailCache test = formatter2.Deserialize(stream2) as ThumbnailCache;
+            stream2.Close();
+
+            long simonss = test.imageId;
+            Image sisiss = test.image;
+            */
+
             
+
+
+            ThumbState thumbs = ThumbState.GetThumbs();
+            ThumbnailCache imageOne = new ThumbnailCache();
+            imageOne.imageId = 12345;
+            imageOne.lastAccessed = DateTime.Now;
+            imageOne.image = new Image();
+            imageOne.image.Source = myBitmapImageOne;
+
+            ThumbnailCache imageTwo = new ThumbnailCache();
+            imageTwo.imageId = 4321;
+            imageTwo.lastAccessed = DateTime.Now;
+            imageTwo.image = new Image();
+            imageTwo.image.Source = myBitmapImageTwo;
+
+            thumbs.thumbList.Add(imageOne);
+            thumbs.thumbList.Add(imageTwo);
+
+            thumbs.SaveState();
+
+
         }
 
     }

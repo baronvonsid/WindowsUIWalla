@@ -30,6 +30,7 @@ namespace ManageWalla
         #region ClassSetup
         private MainTwo currentMain;
         private GlobalState state = null;
+        private ThumbState thumbState = null;
         private ServerHelper serverHelper = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainController));
 
@@ -55,9 +56,15 @@ namespace ManageWalla
             return serverHelper;
         }
 
+        public ThumbState GetThumbState()
+        {
+            return thumbState;
+        }
+
         public void Dispose()
         {
             state.SaveState();
+            thumbState.SaveState();
         }
         #endregion
 
@@ -92,6 +99,8 @@ namespace ManageWalla
                     state.connectionState = GlobalState.ConnectionState.NoAccount;
                     return "";
                 }
+
+                thumbState = ThumbState.GetThumbs();
 
                 return Logon(state.userName, state.password);
             }

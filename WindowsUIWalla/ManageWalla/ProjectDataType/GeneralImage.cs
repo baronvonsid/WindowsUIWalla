@@ -9,17 +9,18 @@ using System.ComponentModel;
 using Shell32;
 using log4net;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace ManageWalla
 {
     public class GeneralImage : INotifyPropertyChanged
     {
         private ServerHelper serverHelper;
-        private BitmapImage thumbnailImage;
+        //private Image thumbnailImage;
 
         public long imageId;
         public long categoryId { get; set; }
-        public BitmapImage ThumbnailImage { get { return thumbnailImage; } }
+        public Image thumbnailImage { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime UploadDate { get; set; }
@@ -36,18 +37,26 @@ namespace ManageWalla
             thumbnailImage = WorkingBitmapThumbnail("Working");
         }
 
-        async public Task LoadImage(CancellationToken cancelToken)
+        async public Task LoadImage(CancellationToken cancelToken, ThumbState thumbState)
         {
             if (imageId == 0)
                 return;
 
-            thumbnailImage = await LoadThumbnailAsync(cancelToken);
+            Image newThumb = ThumbState.GetImage(imageId);
+            if (newThumb == null)
+            {
+                newThumb = await LoadThumbnailAsync(cancelToken);
+                if (newThumb != null)
+                    ThumbState.SaveImage(imageId, newThumb);
+            }
+
+            thumbnailImage = newThumb;
 
             if (thumbnailImage != null)
-                OnPropertyChanged("ThumbnailImage");
+                OnPropertyChanged("thumbnailImage");
         }
 
-        private BitmapImage WorkingBitmapThumbnail(string type)
+        private Image WorkingBitmapThumbnail(string type)
         {
             string loadingImagePath = "";
             if (type == "Working")
@@ -66,10 +75,12 @@ namespace ManageWalla
             loadingImage.EndInit();
             loadingImage.Freeze();
 
-            return loadingImage;
+            Image newImage = new Image();
+            newImage.Source = loadingImage;
+            return newImage;
         }
 
-        async private Task<BitmapImage> LoadThumbnailAsync(CancellationToken cancelToken)
+        async private Task<Image> LoadThumbnailAsync(CancellationToken cancelToken)
         {
             BitmapImage responseImage = null;
 
@@ -105,9 +116,12 @@ namespace ManageWalla
                     if (responseImage == null)
                         throw new Exception("The thumbnail could not be retrieved from the server, an unexpected error occured");
                 }
-                return responseImage;
+
+                Image newImage = new Image();
+                newImage.Source = responseImage;
+                return newImage;
             }
-            catch (OperationCanceledException cancelEx)
+            catch (OperationCanceledException)
             {
                 logger.Debug("LoadThumbnailAsync has been cancelled");
                 return null;

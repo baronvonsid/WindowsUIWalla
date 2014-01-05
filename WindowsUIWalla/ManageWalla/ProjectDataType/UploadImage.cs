@@ -7,13 +7,15 @@ using System.Windows.Media.Imaging;
 using System.IO;
 using System.ComponentModel;
 using Shell32;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace ManageWalla
 {
     public class UploadImage : INotifyPropertyChanged
     {
         private string filePath;
-        private BitmapImage image;
+        private Image image;
         private ImageMeta meta;
 
         public enum UploadState
@@ -36,19 +38,23 @@ namespace ManageWalla
             UploadError = "";
             filePath = value;
             FolderPath = Path.GetDirectoryName(filePath);
+            image = new Image();
 
             string format = GetFormat(filePath);
             if (format == null)
-            { 
+            {
                 UploadError = "Format is not supported (" + Path.GetExtension(filePath).ToUpper().Substring(1) + "), image is excluded from Upload";
                 State = UploadState.Error;
-                return;
+                image.Source = UnavailableBitmapThumbnail(false);
+            }
+            else
+            {
+                image.Source = await LoadBitmapAsync(filePath, format);
             }
 
-            image = await LoadBitmapAsync(filePath);
+            meta = new ImageMeta();
 
             FileInfo fileInfo = new FileInfo(filePath);
-            meta = new ImageMeta();
             meta.OriginalFileName = Path.GetFileName(filePath);
             meta.Name = Path.GetFileNameWithoutExtension(filePath);
             meta.Format = format;
@@ -98,50 +104,164 @@ namespace ManageWalla
             }
         }
 
-        async private Task<BitmapImage> LoadBitmapAsync(string filePath)
+        private BitmapImage UnavailableBitmapThumbnail(bool unavailable)
         {
-            //BitmapImage myBitmapImage; // = new BitmapImage();
-
-            FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
-
-            BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() => 
+            string loadingImagePath = "";
+            if (unavailable)
             {
+                loadingImagePath = @"pack://application:,,,/Icons/UnavailableThumbnail.gif";
+            }
+            else
+            {
+                loadingImagePath = @"pack://application:,,,/Icons/ErrorThumbnail.gif";
+            }
+
+            BitmapImage loadingImage = new BitmapImage();
+            loadingImage.BeginInit();
+            loadingImage.DecodePixelWidth = 300;
+            loadingImage.UriSource = new Uri(loadingImagePath);
+            loadingImage.EndInit();
+            loadingImage.Freeze();
+
+            return loadingImage;
+        }
+
+
+        async private Task<BitmapImage> LoadBitmapAsync(string filePath, string format)
+        {
+            //FileStream fileStream = null;
+            MemoryStream memoryStream = null;
+
+            try
+            {
+                switch (format)
+                {
+                    case "JPG":
+                    case "TIF":
+                    case "PNG":
+                    case "BMP":
+                    case "GIF":
+                        break;
+                    default:
+                        return UnavailableBitmapThumbnail(true);
+                }
+
+                FileInfo fileInfo = new FileInfo(filePath);
+
+                //10 MB.
+                if (fileInfo.Length > 10485760)
+                    return UnavailableBitmapThumbnail(true);
+
+                //fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+                BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
+                {
+                    myBitmapImage = new BitmapImage();
+                    myBitmapImage.BeginInit();
+
+                    //myBitmapImage.DecodePixelWidth = 300;
+                    //myBitmapImage.DecodePixelHeight = 300;
+                    //myBitmapImage.CacheOption = BitmapCacheOption.OnLoad; 
+                    myBitmapImage.UriSource = new Uri(filePath);
+                    myBitmapImage.EndInit();
+                    myBitmapImage.Freeze();
+
+                    return myBitmapImage;
+                });
+                //fileStream.Close();
+
+                int startX = 0;
+                int startY = 0;
+                int width = 0;
+                int height = 0;
+
+                if (myBitmapImage.PixelHeight > myBitmapImage.PixelWidth)
+                {
+                    //Portrait, so crop the tops and bottoms.
+                    double remainder = myBitmapImage.PixelHeight - myBitmapImage.PixelWidth;
+
+                    startX = 0;
+                    startY = Convert.ToInt32(remainder / 2.0);
+                    width = Convert.ToInt32(myBitmapImage.PixelWidth);
+                    height = Convert.ToInt32(myBitmapImage.PixelWidth);
+                }
+                else
+                {
+                    double remainder = myBitmapImage.PixelWidth - myBitmapImage.PixelHeight;
+
+                    startX = Convert.ToInt32(remainder / 2.0);
+                    startY = 0;
+                    width = Convert.ToInt32(myBitmapImage.PixelHeight);
+                    height = Convert.ToInt32(myBitmapImage.PixelHeight);
+                }
+
+                CroppedBitmap croppedBitmap = new CroppedBitmap(myBitmapImage, new Int32Rect(startX, startY, width, height));
+                //CroppedBitmap cb2 = cb.Clone();
+
+
+
+                /*
+                myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
+                {
+                    myBitmapImage = new BitmapImage();
+                    myBitmapImage.BeginInit();
+
+                    myBitmapImage.DecodePixelWidth = 300;
+                    //myBitmapImage.DecodePixelHeight = 300;
+                    //myBitmapImage.CacheOption = BitmapCacheOption.OnLoad; 
+                    myBitmapImage.UriSource = new Uri(filePath);
+                    myBitmapImage.EndInit();
+                    myBitmapImage.Freeze();
+
+                    return myBitmapImage;
+                });
+
+                 */
+                BmpBitmapEncoder encoder = new BmpBitmapEncoder();
+                memoryStream = new MemoryStream();
                 myBitmapImage = new BitmapImage();
-                //BitmapImage myBitmapImage = new BitmapImage(); 
-                myBitmapImage.BeginInit(); 
+
+                encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
+                encoder.Save(memoryStream);
+
+                //myBitmapImage = null;
+                myBitmapImage.BeginInit();
                 myBitmapImage.DecodePixelWidth = 300;
-                //myBitmapImage.StreamSource = fileStream;
-               // myBitmapImage.CacheOption = BitmapCacheOption.OnLoad; 
-                //myBitmapImage.StreamSource = fileStream;
-                myBitmapImage.UriSource = new Uri(filePath);
+                myBitmapImage.StreamSource = new MemoryStream(memoryStream.ToArray());
                 myBitmapImage.EndInit();
                 myBitmapImage.Freeze();
 
+                //memoryStream.Close();
+
+
+
+
                 return myBitmapImage;
-            });
 
-            return myBitmapImage;
-         //A custom class that reads the bytes of off the HD and shoves them into the MemoryStream. You could just replace the MemoryStream with something like this: FileStream fs = File.Open(@"C:\ImageFileName.jpg", FileMode.Open);
-            /*
-            myBitmapImage.BeginInit();
-            myBitmapImage.DecodePixelWidth = 200;
-            myBitmapImage.StreamSource = fileStream;
-            //myBitmapImage.UriSource = new Uri(filePath);
-            myBitmapImage.EndInit();
-            myBitmapImage.Freeze();
-
-            return new Task<myBitmapImage>;
-             */ 
+            }
+            catch (Exception ex)
+            {
+                UploadError = "Error converting image to Thumbnail." + ex.Message;
+                State = UploadState.Error;
+                return UnavailableBitmapThumbnail(false);
+            }
+            finally
+            {
+                //if (fileStream != null) { fileStream.Close(); }
+                if (memoryStream != null) { memoryStream.Close(); }
+            }
         }
+
+
+
 
         //TODO delete
         private void MapFileProperties()
         {
             
-            FileInfo file = new FileInfo(filePath);
-            meta.Width = image.PixelWidth;
-            meta.Height = image.PixelHeight;
-            meta.Size = file.Length;
+            //FileInfo file = new FileInfo(filePath);
+            //meta.Width = image.
+            //meta.Height = image.PixelHeight;
+            //meta.Size = file.Length;
 
             /*
             List<string> arrHeaders = new List<string>();
@@ -197,8 +317,8 @@ namespace ManageWalla
         }
 
         public String FilePath { get { return filePath; } }
-        public BitmapImage Image { get { return image; } }
-        public string FolderPath { get; set; }
+        public Image Image { get { return image; } }
+        public string FolderPath { get; set; } 
         public UploadState State { get; set; }
         public String UploadError { get; set; }
 

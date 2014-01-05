@@ -13,7 +13,7 @@ using System.Xml;
 
 namespace ManageWalla
 {
-    using System.Xml.Serialization;
+    
 
     [System.SerializableAttribute()]
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/GlobalState", IsNullable = false)]
