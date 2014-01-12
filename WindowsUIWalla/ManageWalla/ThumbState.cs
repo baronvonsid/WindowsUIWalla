@@ -19,7 +19,7 @@ namespace ManageWalla
         //Infra Properties
         static ThumbState thumbState = null;
 
-        private const long cacheSize = 3072000;
+        private const long cacheSize = 1000000; //3072000;
 
         //Business Objects
         public List<ThumbnailCache> thumbList { get; set; }

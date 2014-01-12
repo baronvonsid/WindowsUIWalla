@@ -22,6 +22,8 @@ targetNamespace="http://www.example.org/ImageList"
                       <attribute type="date" name="uploadDate" />
                       <attribute type="date" name="takenDate" />
                       <attribute type="int" name="metaVersion" />
+                      <attribute type="string" name="shotSummary" />
+                      <attribute type="string" name="fileSummary" />
                       </complexType>
               </element>
             </sequence>

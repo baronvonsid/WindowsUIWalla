@@ -354,14 +354,28 @@ namespace ManageWalla
                     if (state.tagList != null)
                     {
                         tagList = await serverHelper.TagGetListAsync(state.tagList.lastChanged);
+                        if (tagList != null)
+                        {
+                            state.tagList = tagList;
+                        }
+                        state.tagLoadState = GlobalState.DataLoadState.Loaded;
+                        return "OK";
                     }
                     else
                     {
                         tagList = await serverHelper.TagGetListAsync(null);
+                        if (tagList != null)
+                        {
+                            state.tagList = tagList;
+                            state.tagLoadState = GlobalState.DataLoadState.Loaded;
+                            return "OK";
+                        }
+                        else
+                        {
+                            state.tagLoadState = GlobalState.DataLoadState.Unavailable;
+                            return "No local tag list is available to show.";
+                        }
                     }
-                    state.tagList = tagList;
-                    state.tagLoadState = GlobalState.DataLoadState.Loaded;
-                    return "OK";
                 }
                 else
                 {
@@ -616,14 +630,28 @@ namespace ManageWalla
                     if (state.categoryList != null)
                     {
                         categoryList = await serverHelper.CategoryGetListAsync(state.categoryList.lastChanged);
+                        if (categoryList != null)
+                        {
+                            state.categoryList = categoryList;
+                        }
+                        state.categoryLoadState = GlobalState.DataLoadState.Loaded;
+                        return "OK";
                     }
                     else
                     {
                         categoryList = await serverHelper.CategoryGetListAsync(null);
+                        if (categoryList != null)
+                        {
+                            state.categoryList = categoryList;
+                            state.categoryLoadState = GlobalState.DataLoadState.Loaded;
+                            return "OK";
+                        }
+                        else
+                        {
+                            state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
+                            return "No local Category list is available to show.";
+                        }
                     }
-                    state.categoryList = categoryList;
-                    state.categoryLoadState = GlobalState.DataLoadState.Loaded;
-                    return "OK";
                 }
                 else
                 {
@@ -667,14 +695,28 @@ namespace ManageWalla
                     if (state.galleryList != null)
                     {
                         galleryList = await serverHelper.GalleryGetListAsync(state.galleryList.lastChanged);
+                        if (galleryList != null)
+                        {
+                            state.galleryList = galleryList;
+                        }
+                        state.galleryLoadState = GlobalState.DataLoadState.Loaded;
+                        return "OK";
                     }
                     else
                     {
                         galleryList = await serverHelper.GalleryGetListAsync(null);
+                        if (galleryList != null)
+                        {
+                            state.galleryList = galleryList;
+                            state.galleryLoadState = GlobalState.DataLoadState.Loaded;
+                            return "OK";
+                        }
+                        else
+                        {
+                            state.galleryLoadState = GlobalState.DataLoadState.Unavailable;
+                            return "No local gallery list is available to show.";
+                        }
                     }
-                    state.galleryList = galleryList;
-                    state.galleryLoadState = GlobalState.DataLoadState.Loaded;
-                    return "OK";
                 }
                 else
                 {
@@ -808,5 +850,15 @@ namespace ManageWalla
             }
         }
         #endregion
+
+        async public Task<string> DeleteImagesAsync(ImageList imageList)
+        {
+            string response = await serverHelper.DeleteImagesAsync(imageList);
+            if (response != "OK")
+                response = "Images could not be deleted, there was an error on the server:" + response;
+
+            return response;
+        }
+        
     }
 }

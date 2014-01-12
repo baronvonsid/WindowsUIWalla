@@ -301,6 +301,10 @@ namespace ManageWalla {
         
         private bool metaVersionFieldSpecified;
         
+        private string shotSummaryField;
+        
+        private string fileSummaryField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
         public long id {
@@ -430,6 +434,28 @@ namespace ManageWalla {
             }
             set {
                 this.metaVersionFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string shotSummary {
+            get {
+                return this.shotSummaryField;
+            }
+            set {
+                this.shotSummaryField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string fileSummary {
+            get {
+                return this.fileSummaryField;
+            }
+            set {
+                this.fileSummaryField = value;
             }
         }
     }

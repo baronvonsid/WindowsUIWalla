@@ -1,0 +1,217 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:walla="clr-namespace:ManageWalla"
+                    xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary">
+
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+    <walla:UploadImageFileList x:Key="uploadImagefileListKey" />
+    <walla:UploadUIState x:Key="uploadUIStateKey"  />
+    <walla:UploadStatusListBind x:Key="uploadStatusListBindKey"  />
+    <walla:ImageMainViewerList x:Key="imageMainViewerListKey" />
+    <walla:GalleryCategoryModel x:Key="galleryCategoryModelKey" />
+
+    <walla:WallaUploadStatusConverter x:Key="wallaUploadStatusConverterKey"  />
+
+    <XmlNamespaceMappingCollection x:Key="wallaNamespaceMappingKey">
+        <XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
+    </XmlNamespaceMappingCollection>
+
+    <XmlDataProvider x:Key="uploadStatusListXmlKey"  XmlNamespaceManager="{StaticResource wallaNamespaceMappingKey}" />
+
+
+
+    <ImageSource x:Key="loadingImageSrc">resources/anim/loading.gif</ImageSource>
+    <ImageSource x:Key="infoImageSrc">resources/icons/info.gif</ImageSource>
+    <ImageSource x:Key="errorImageSrc">resources/icons/error.gif</ImageSource>
+    <ImageSource x:Key="warningImageSrc">resources/icons/warning.gif</ImageSource>
+    <ImageSource x:Key="menuItemImageSrc">resources/icons/menuItem.gif</ImageSource>
+
+    <ImageSource x:Key="categoryImageSrc">resources/icons/category.gif</ImageSource>
+    <ImageSource x:Key="tagImageSrc">resources/icons/tag.gif</ImageSource>
+    <ImageSource x:Key="galleryImageSrc">resources/icons/gallery.gif</ImageSource>
+    <ImageSource x:Key="uploadImageSrc">resources/icons/upload.gif</ImageSource>
+    <ImageSource x:Key="fotoWallaImageSrc">resources/icons/fotoWalla.gif</ImageSource>
+
+
+    <ImageSource x:Key="reloadImageSrc">resources/icons/reload.gif</ImageSource>
+    <ImageSource x:Key="accountImageSrc">resources/icons/account.gif</ImageSource>
+    <ImageSource x:Key="expandImageSrc">resources/icons/expand.gif</ImageSource>
+    <ImageSource x:Key="contractImageSrc">resources/icons/contract.gif</ImageSource>
+ 
+    <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.gif</ImageSource>
+    <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notSelected.gif</ImageSource>
+
+    <ImageSource x:Key="imageDetailImageSrc">resources/icons/imageDetail.gif</ImageSource>
+    <ImageSource x:Key="imageSummaryImageSrc">resources/icons/imageSummary.gif</ImageSource>
+
+    <ImageSource x:Key="navFirstImageSrc">resources/icons/navFirst.gif</ImageSource>
+    <ImageSource x:Key="navNextImageSrc">resources/icons/navNext.gif</ImageSource>
+    <ImageSource x:Key="navPreviousImageSrc">resources/icons/navPrevious.gif</ImageSource>
+    <ImageSource x:Key="navLastImageSrc">resources/icons/navLast.gif</ImageSource>
+
+    <ImageSource x:Key="dropDownMenuImageSrc">resources/icons/dropDownMenu.gif</ImageSource>
+    <ImageSource x:Key="removeFromTagImageSrc">resources/icons/removeFromTag.gif</ImageSource>
+    <ImageSource x:Key="deleteImagesImageSrc">resources/icons/deleteImages.gif</ImageSource>
+    <ImageSource x:Key="downloadOriginalsImageSrc">resources/icons/downloadOriginals.gif</ImageSource>
+
+    <ImageSource x:Key="privateImageSrc">resources/icons/private.gif</ImageSource>
+    <ImageSource x:Key="sharedSecureImageSrc">resources/icons/sharedSecure.gif</ImageSource>
+    <ImageSource x:Key="sharedOpenImageSrc">resources/icons/sharedOpen.gif</ImageSource>
+
+
+    <!--Control colors.-->
+
+
+    <!--<Color x:Key="cmbHeaderButtonSelected">White</Color>
+    <Color x:Key="cmbHeaderButtonMouseOver">White</Color>
+    
+    <Color x:Key="cmbHeaderBorder">#FF444444</Color>
+    <Color x:Key="cmbHeaderBackground">#FFC5CBF9</Color>
+    <Color x:Key="cmbHeaderArrowColor">#FF444444</Color>
+-->
+
+    <!-- General Window and Panes -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#FFFFFFFA" />
+    <SolidColorBrush x:Key="ImageViewBackgroundBrush" Color="DarkGray" />
+    <SolidColorBrush x:Key="WallaBannerBackgroundBrush" Color="#FFEEEEEE" />
+
+    <SolidColorBrush x:Key="PaneHeaderBackgroundSelectedBrush" Color="#FFB0D1BF" />
+    <SolidColorBrush x:Key="PaneHeaderNotSelectedBrush" Color="#FFDEECE4" />
+    <SolidColorBrush x:Key="PaneBodyBackgroundBrush" Color="#FFE8EAE9" />
+    
+    
+    <!-- Font and Border -->
+    <SolidColorBrush x:Key="FontBorderBrush" Color="#FF424242" />
+    <Color x:Key="FontBorderColour">#FF424242</Color>
+    <SolidColorBrush x:Key="FontBorderDisabledBrush" Color="#FFA0A0A0" />
+    <Color x:Key="FontBorderDisabledColour">#FFA0A0A0</Color>
+    
+    <!-- Controls -->
+    <SolidColorBrush x:Key="EntryControlBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="EntryControlBackgroundDisabledBrush" Color="LightGray" />
+
+    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="#FFF9FDB9" />
+    <SolidColorBrush x:Key="ControlBackgroundDisabledBrush" Color="#FFE8EAE9" />
+
+    <SolidColorBrush x:Key="ControlBackgroundMouseOverBrush" Color="#FFA5BBEA" />
+    <Color x:Key="ControlBackgroundMouseOverColour">#FFA5BBEA</Color>
+
+    <SolidColorBrush x:Key="ControlSelectedItemBackgroundBrush" Color="#FFB4CCFF" />
+    <Color x:Key="ControlSelectedItemBackgroundColour">#FFB4CCFF</Color>
+
+    <SolidColorBrush x:Key="AlertBackgroundBrush" Color="#FFE6B9A4" />
+  
+    
+    <!--
+    <Color x:Key="SelectedBackgroundColour">Yellow</Color>
+    <Color x:Key="FontBorderColour">Yellow</Color>
+        <Color x:Key="FontBorderColourDisabled">Brown</Color>
+    <Color x:Key="FontBorderColourMouseOver">Yellow</Color>
+        <Color x:Key="ControlBackgroundColour">Brown</Color>
+    
+    <Color x:Key="ControlBackgroundColourDisabled">#FFE0E0E0</Color>
+        
+    
+
+
+    <Color x:Key="GlyphColor">#FF444444</Color>
+    <Color x:Key="GlyphMouseOver">sc#1, 0.004391443, 0.002428215, 0.242281124</Color>
+
+
+    <Color x:Key="WindowColor">#FFE8EDF9</Color>
+    <Color x:Key="ContentAreaColorLight">#FFC5CBF9</Color>
+    <Color x:Key="ContentAreaColorDark">#FF7381F9</Color>
+
+    <Color x:Key="DisabledControlLightColor">#FFE8EDF9</Color>
+    <Color x:Key="DisabledControlDarkColor">#FFC5CBF9</Color>
+    <Color x:Key="DisabledForegroundColor">#FF888888</Color>
+
+    <Color x:Key="SelectedBackgroundColor">#FFC5CBF9</Color>
+    <Color x:Key="SelectedUnfocusedColor">#FFDDDDDD</Color>
+
+    <Color x:Key="ControlLightColor">White</Color>
+    <Color x:Key="ControlMediumColor">#FF7381F9</Color>
+    <Color x:Key="ControlDarkColor">#FF211AA9</Color>
+
+    <Color x:Key="ControlMouseOverColor">#FF3843C4</Color>
+    <Color x:Key="ControlPressedColor">#FF211AA9</Color>
+-->
+    
+
+
+    <!--
+    <Color x:Key="WindowColor">#FFE8EDF9</Color>
+    <Color x:Key="ContentAreaColorLight">#FFC5CBF9</Color>
+    <Color x:Key="ContentAreaColorDark">#FF7381F9</Color>
+
+    <Color x:Key="DisabledControlLightColor">#FFE8EDF9</Color>
+    <Color x:Key="DisabledControlDarkColor">#FFC5CBF9</Color>
+    <Color x:Key="DisabledForegroundColor">#FF888888</Color>
+
+    <Color x:Key="SelectedBackgroundColor">#FFC5CBF9</Color>
+    <Color x:Key="SelectedUnfocusedColor">#FFDDDDDD</Color>
+
+    <Color x:Key="ControlLightColor">White</Color>
+    <Color x:Key="ControlMediumColor">#FF7381F9</Color>
+    <Color x:Key="ControlDarkColor">#FF211AA9</Color>
+
+    <Color x:Key="ControlMouseOverColor">#FF3843C4</Color>
+    <Color x:Key="ControlPressedColor">#FF211AA9</Color>
+
+
+    <Color x:Key="BorderLightColor">#FFCCCCCC</Color>
+    <Color x:Key="BorderMediumColor">#FF888888</Color>
+    <Color x:Key="BorderDarkColor">#FF444444</Color>
+
+    <Color x:Key="PressedBorderLightColor">#FF888888</Color>
+    <Color x:Key="PressedBorderDarkColor">#FF444444</Color>
+
+    <Color x:Key="DisabledBorderLightColor">#FFAAAAAA</Color>
+    <Color x:Key="DisabledBorderDarkColor">#FF888888</Color>
+
+    <Color x:Key="DefaultBorderBrushDarkColor">Black</Color>
+
+    <Color x:Key="HeaderTopColor">#FFC5CBF9</Color>
+    <Color x:Key="DatagridCurrentCellBorderColor">Black</Color>
+    <Color x:Key="SliderTrackDarkColor">#FFC5CBF9</Color>
+
+    <Color x:Key="NavButtonFrameColor">#FF3843C4</Color>
+
+    <LinearGradientBrush x:Key="MenuPopupBrush"
+                     EndPoint="0.5,1"
+                     StartPoint="0.5,0">
+        <GradientStop Color="{DynamicResource ControlLightColor}"
+                Offset="0" />
+        <GradientStop Color="{DynamicResource ControlMediumColor}"
+                Offset="0.5" />
+        <GradientStop Color="{DynamicResource ControlLightColor}"
+                Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ProgressBarIndicatorAnimatedFill"
+                     StartPoint="0,0"
+                     EndPoint="1,0">
+        <LinearGradientBrush.GradientStops>
+            <GradientStopCollection>
+                <GradientStop Color="#000000FF"
+                    Offset="0" />
+                <GradientStop Color="#600000FF"
+                    Offset="0.4" />
+                <GradientStop Color="#600000FF"
+                    Offset="0.6" />
+                <GradientStop Color="#000000FF"
+                    Offset="1" />
+            </GradientStopCollection>
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+
+-->
+
+
+
+
+
+
+
+</ResourceDictionary>

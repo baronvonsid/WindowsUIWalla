@@ -1,0 +1,427 @@
+﻿<Window x:Class="MeBlendTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
+        Title="MainWindow" Height="450" Width="1000" Loaded="Window_Loaded">
+
+    <!--
+    <Window.Resources>
+        <ResourceDictionary Source="WallaControlTemplates.xaml" />
+    </Window.Resources>
+    -->
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+
+
+
+
+        <!--  -->
+
+        <Border x:Name="paneBusy" BorderThickness="0" Panel.ZIndex="998"  Visibility="Collapsed" Opacity="100.0" Background="White" >
+
+        </Border>
+
+
+
+        <Grid Panel.ZIndex="999" Opacity="100.0" x:Name="gridAlertDialog" Visibility="Visible" Background="{StaticResource AlertBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="35" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240" />
+            </Grid.ColumnDefinitions>
+
+            <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" StrokeThickness="2" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0">
+                <!--<Image gif:ImageBehavior.AnimatedSource="{DynamicResource loadingImageSrc}"  Height="32" Width="32" />-->
+                <TextBlock x:Name="lblAlertDialogHeader"  Margin="20,0,0,0" TextWrapping="Wrap" Text="loading" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock x:Name="lblAlertDialogMessage" Margin="5" TextWrapping="Wrap" HorizontalAlignment="Center" Text="some random message" Foreground="{StaticResource FontBorderBrush}" Grid.Column="0" Grid.Row="1"/>
+            <Button x:Name="cmdAlertDialogResponse" Grid.Column="0" Grid.Row="2" Content="Cancel" Width="80" Click="cmdAlertDialogResponse_Click"  Template="{StaticResource templateButton}" Style="{StaticResource styleButton}" />
+        </Grid>
+
+        <Grid Panel.ZIndex="999" Opacity="100.0" x:Name="gridInfoAlert" Visibility="Visible" Background="{StaticResource AlertBackgroundBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,20,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240" />
+            </Grid.ColumnDefinitions>
+
+            <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Stroke="{StaticResource FontBorderBrush}" StrokeThickness="1"></Rectangle>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0">
+                <!--<Image gif:ImageBehavior.AnimatedSource="{DynamicResource loadingImageSrc}"  Height="32" Width="32" />-->
+                <TextBlock Margin="20,0,0,0" TextWrapping="Wrap" Text="Info alert" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock x:Name="lblInfoDialogMessage" Margin="5" TextWrapping="Wrap" HorizontalAlignment="Center" Text="some random message" Foreground="{StaticResource FontBorderBrush}" Grid.Column="0" Grid.Row="1"/>
+        </Grid>
+
+
+        <StackPanel Orientation="Vertical" Margin="626,10,226,21" Width="140" HorizontalAlignment="Center">
+            <RadioButton Content="Me button 2" Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}" GroupName="radGroupOne"/>
+            <RadioButton Content="Me button 3" Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}" GroupName="radGroupOne"/>
+            <RadioButton Content="Me button 4" Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}" GroupName="radGroupOne" IsChecked="True"/>
+            <RadioButton Content="Disabled btn" Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}" GroupName="radGroupOne" IsEnabled="False"/>
+
+            <Button x:Name="cmdShowIt" Content="Start loading it" HorizontalAlignment="Center" VerticalAlignment="Top" Width="74" Click="cmdShowIt_Click" Foreground="#FFA0A0A0" Background="#FFB4CCFF"/>
+
+            <Slider x:Name="sldLength" HorizontalAlignment="Left" VerticalAlignment="Top" Width="140" Maximum="10000" Minimum="100" SmallChange="50" TickFrequency="50" Value="5000"/>
+
+        </StackPanel>
+        <!-- <TextBlock Margin="0" TextWrapping="Wrap" Text="... loading" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" FontWeight="Bold" Foreground="Black"/>-->
+
+        <StackPanel Orientation="Vertical" Margin="0,10,0,-10">
+            <DockPanel  LastChildFill="True" Width="220" Height="40" Background="{StaticResource WallaBannerBackgroundBrush}" >
+                <Button x:Name="cmdContract" DockPanel.Dock="Right" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                    <Button.Content>
+                        <Image Source="{StaticResource fotoWallaImageSrc}" Height="28" />
+                    </Button.Content>
+                </Button>
+                <Button x:Name="cmdAccount" DockPanel.Dock="Left" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}">
+                    <Button.Content>
+                        <Image Source="{StaticResource fotoWallaImageSrc}" Height="28" />
+                    </Button.Content>
+                </Button>
+                <Label x:Name="lblFotoWalla" FontSize="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Foreground="{StaticResource FontBorderBrush}">
+                    <Label.Content>
+                        <TextBlock>foto<Italic>walla</Italic></TextBlock>
+                    </Label.Content>
+                </Label>
+            </DockPanel>
+
+
+            <RadioButton x:Name="radTag" GroupName="MainSection" Template="{StaticResource templateRadioButtonPaneHeader}" Style="{StaticResource styleMainSectionRadioButton}" Height="40" Width="150">
+                <DockPanel>
+                    <Button x:Name="cmdTagRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Padding="0">
+                        <Button.Content>
+                            <Image Source="{StaticResource categoryImageSrc}" Height="28" />
+                        </Button.Content>
+                    </Button>
+                    <Image Source="{StaticResource categoryImageSrc}" Height="28" DockPanel.Dock="Left"/>
+                    <Label Content="Tag" VerticalContentAlignment="Center" />
+                </DockPanel>
+            </RadioButton>
+            <RadioButton x:Name="radCategory" GroupName="MainSection" IsChecked="True" Template="{StaticResource templateRadioButtonPaneHeader}" Style="{StaticResource styleMainSectionRadioButton}" Height="40" Width="150">
+                <DockPanel>
+                    <Button x:Name="cmdCatRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Padding="0">
+                        <Button.Content>
+                            <Image Source="{StaticResource categoryImageSrc}" Height="28" />
+                        </Button.Content>
+                    </Button>
+                    <Image Source="{StaticResource categoryImageSrc}" Height="28" DockPanel.Dock="Left"/>
+                    <Label Content="Category" VerticalContentAlignment="Center" />
+                </DockPanel>
+            </RadioButton>
+            <ListBox Height="46" Margin="376,0" Background="{StaticResource PaneBodyBackgroundBrush}"/>
+
+            <Button Template="{StaticResource templateButton}" Style="{StaticResource styleButton}" Click="ButtonInfo_Click" >
+                <Button.Content>Show info</Button.Content>
+            </Button>
+
+            <Button Template="{StaticResource templateButton}" Style="{StaticResource styleButton}" Click="ButtonError_Click" >
+                <Button.Content>Show error</Button.Content>
+            </Button>
+
+            <Button IsEnabled="False" Template="{StaticResource templateButton}" Style="{StaticResource styleButton}" >
+                <Button.Content>Disabled btn</Button.Content>
+            </Button>
+
+            <ComboBox Height="32" Width="120" IsDropDownOpen="True" IsEnabled="True" SelectedIndex="0" >
+                <ComboBoxItem>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                        <TextBlock Margin="4">Option 1</TextBlock>
+                    </StackPanel>
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                        <TextBlock Margin="4">Option 2</TextBlock>
+                    </StackPanel>
+                </ComboBoxItem>
+                <ComboBoxItem>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                        <TextBlock Margin="4">Option 3</TextBlock>
+                    </StackPanel>
+                </ComboBoxItem>
+            </ComboBox>
+
+
+        </StackPanel>
+
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="2" FontFamily="Tahoma" FontWeight="Medium" Width="200" Height="300" Margin="782,10,10,60">
+            <TreeView x:Name="treeCategoryView">
+                <TreeViewItem Header="Barons Photo Album" IsExpanded="True">
+                        <TreeViewItem IsExpanded="True" Padding="2">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Albania (30)"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+
+                        <TreeViewItem Padding="2" IsSelected="True">
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Uzbekki (40)"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+                            </TreeViewItem>
+
+                        <TreeViewItem IsExpanded="True"  Padding="2">
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="USA (200)"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+
+                            <TreeViewItem IsExpanded="True"  Padding="2">
+                                    <TreeViewItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="China (5)"/>
+                                        </StackPanel>
+                                    </TreeViewItem.Header>
+                                </TreeViewItem>
+                        </TreeViewItem>
+                    </TreeViewItem>
+
+
+                    </TreeViewItem>
+                <TreeViewItem IsExpanded="True"  Padding="2">
+                        <TreeViewItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="London life (400)"/>
+                            </StackPanel>
+                        </TreeViewItem.Header>
+
+                    <TreeViewItem  Padding="2">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Around town (30)"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+                        </TreeViewItem>
+                    </TreeViewItem>
+            </TreeView>
+
+            
+        </ScrollViewer>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="2" FontFamily="Tahoma" FontWeight="Medium" Width="200" Height="300" Margin="40,35,752,85">
+            <TreeView x:Name="treeCategoryView2">
+                <TreeViewItem IsExpanded="True" Padding="2" Style="{StaticResource styleTreeViewItemWithCombo}">
+                    <TreeViewItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox Width="45" Height="25" IsDropDownOpen="False" IsEnabled="True" SelectedIndex="0" BorderThickness="4" Style="{StaticResource styleComboBoxInTreeView}">
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
+                                        <TextBlock Margin="4">N</TextBlock>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                        <TextBlock Margin="4">Y</TextBlock>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                        <TextBlock Margin="4">ALL</TextBlock>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                            </ComboBox>
+                            <TextBlock Text="The album" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TreeViewItem.Header>
+
+                    <TreeViewItem IsExpanded="True" Padding="2" Style="{StaticResource styleTreeViewItemWithCombo}">
+                        <TreeViewItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox Width="45" Height="25" IsDropDownOpen="False" IsEnabled="True" SelectedIndex="0" BorderThickness="4" Style="{StaticResource styleComboBoxInTreeView}">
+                                    <ComboBoxItem>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
+                                            <TextBlock Margin="4">N</TextBlock>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                            <TextBlock Margin="4">Y</TextBlock>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                            <TextBlock Margin="4">ALL</TextBlock>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+                                </ComboBox>
+                                <TextBlock Text="Albania" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TreeViewItem.Header>
+
+                        <TreeViewItem IsExpanded="True" Padding="2" Style="{StaticResource styleTreeViewItemWithCombo}">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ComboBox Width="45" Height="25" IsDropDownOpen="False" IsEnabled="True" SelectedIndex="0" BorderThickness="4" Style="{StaticResource styleComboBoxInTreeView}">
+                                        <ComboBoxItem>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
+                                                <TextBlock Margin="4">N</TextBlock>
+                                            </StackPanel>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                                <TextBlock Margin="4">Y</TextBlock>
+                                            </StackPanel>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                                <TextBlock Margin="4">ALL</TextBlock>
+                                            </StackPanel>
+                                        </ComboBoxItem>
+                                    </ComboBox>
+                                    <TextBlock Text="Uzbeki" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+                        </TreeViewItem>
+
+                        <TreeViewItem IsExpanded="True" Padding="2" Style="{StaticResource styleTreeViewItemWithCombo}">
+                            <TreeViewItem.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <ComboBox Width="45" Height="25" IsDropDownOpen="False" IsEnabled="True" SelectedIndex="0" BorderThickness="4" Style="{StaticResource styleComboBoxInTreeView}">
+                                        <ComboBoxItem>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
+                                                <TextBlock Margin="4">N</TextBlock>
+                                            </StackPanel>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                                <TextBlock Margin="4">Y</TextBlock>
+                                            </StackPanel>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                                <TextBlock Margin="4">ALL</TextBlock>
+                                            </StackPanel>
+                                        </ComboBoxItem>
+                                    </ComboBox>
+                                    <TextBlock Text="USA" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </TreeViewItem.Header>
+
+                            <TreeViewItem IsExpanded="True" Padding="2" Style="{StaticResource styleTreeViewItemWithCombo}">
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ComboBox Width="45" Height="25" IsDropDownOpen="False" IsEnabled="True" SelectedIndex="0" BorderThickness="4" Style="{StaticResource styleComboBoxInTreeView}">
+                                            <ComboBoxItem>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
+                                                    <TextBlock Margin="4">N</TextBlock>
+                                                </StackPanel>
+                                            </ComboBoxItem>
+                                            <ComboBoxItem>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                                    <TextBlock Margin="4">Y</TextBlock>
+                                                </StackPanel>
+                                            </ComboBoxItem>
+                                            <ComboBoxItem>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                                    <TextBlock Margin="4">ALL</TextBlock>
+                                                </StackPanel>
+                                            </ComboBoxItem>
+                                        </ComboBox>
+                                        <TextBlock Text="China" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                            </TreeViewItem>
+                        </TreeViewItem>
+                    </TreeViewItem>
+
+
+                </TreeViewItem>
+                <TreeViewItem IsExpanded="True" Padding="2" Style="{StaticResource styleTreeViewItemWithCombo}">
+                    <TreeViewItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox Width="45" Height="25" IsDropDownOpen="False" IsEnabled="True" SelectedIndex="0" BorderThickness="4" Style="{StaticResource styleComboBoxInTreeView}">
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
+                                        <TextBlock Margin="4">N</TextBlock>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                        <TextBlock Margin="4">Y</TextBlock>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                        <TextBlock Margin="4">ALL</TextBlock>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                            </ComboBox>
+                            <TextBlock Text="London life (400)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TreeViewItem.Header>
+
+                    <TreeViewItem IsExpanded="True" Padding="2" Style="{StaticResource styleTreeViewItemWithCombo}">
+                        <TreeViewItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox Width="45" Height="25" IsDropDownOpen="False" IsEnabled="True" SelectedIndex="0" BorderThickness="4" Style="{StaticResource styleComboBoxInTreeView}">
+                                    <ComboBoxItem>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
+                                            <TextBlock Margin="4">N</TextBlock>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                            <TextBlock Margin="4">Y</TextBlock>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
+                                            <TextBlock Margin="4">ALL</TextBlock>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+                                </ComboBox>
+                                <TextBlock Text="Around town (400)" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TreeViewItem.Header>
+                    </TreeViewItem>
+                </TreeViewItem>
+            </TreeView>
+
+
+        </ScrollViewer>
+
+
+
+        <StackPanel Margin="376,360,-376,-360">
+            <TextBox Height="30" Width="100" TextWrapping="Wrap" Text="TextBox"/>
+        </StackPanel>
+        
+    </Grid>
+
+
+
+</Window>

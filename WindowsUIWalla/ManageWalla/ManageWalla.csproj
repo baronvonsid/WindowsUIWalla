@@ -120,12 +120,18 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WpfAnimatedGif">
+      <HintPath>..\..\..\..\ThirdParty\WpfAnimatedGif-1.4.4\WpfAnimatedGif-1.4.4\WpfAnimatedGif.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ThumbState.cs" />
     <Compile Include="ProjectDataType\GalleryCategoryModel.cs" />
     <Compile Include="GlobalState.cs" />
@@ -155,17 +161,29 @@
     <Compile Include="ProjectDataType\UploadImageFileList.cs" />
     <Compile Include="WallaDataType\UploadStatusList.cs" />
     <Compile Include="WallaUploadStatusConverter.cs" />
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
     <Page Include="MainTwo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="WallaControlTemplates.xaml">
+    <Page Include="MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WallaControlTemplates.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WallaResourceDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WallaStyleDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -342,6 +360,91 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\UnavailableThumbnail.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\LoadingMain.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\ErrorMain.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\error.gif" />
+    <Resource Include="resources\icons\info.gif" />
+    <Resource Include="resources\icons\menuItem.gif" />
+    <Resource Include="resources\icons\notSelected.gif" />
+    <Resource Include="resources\icons\warning.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\anim\loading.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\account.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\expand.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\contract.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\category.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\reload.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\gallery.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\fotoWalla.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\upload.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\selected.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\imageDetail.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\navNext.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\navPrevious.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\navFirst.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\navLast.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\dropDownMenu.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\imageSummary.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\tag.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\removeFromTag.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\deleteImages.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\downloadOriginals.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\sharedOpen.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\private.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\sharedSecure.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
