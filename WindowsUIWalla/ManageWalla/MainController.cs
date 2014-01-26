@@ -30,7 +30,10 @@ namespace ManageWalla
         #region ClassSetup
         private MainTwo currentMain;
         private GlobalState state = null;
-        private ThumbState thumbState = null;
+        private List<ThumbCache> thumbCacheList = null;
+        private List<MainCopyCache> mainCopyCacheList = null;
+
+        //private ThumbState thumbState = null;
         private ServerHelper serverHelper = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainController));
 
@@ -56,15 +59,21 @@ namespace ManageWalla
             return serverHelper;
         }
 
-        public ThumbState GetThumbState()
+        public List<ThumbCache> GetThumbCacheList()
         {
-            return thumbState;
+            return thumbCacheList;
+        }
+
+        public List<MainCopyCache> GetMainCopyCacheList()
+        {
+            return mainCopyCacheList;
         }
 
         public void Dispose()
         {
-            state.SaveState();
-            thumbState.SaveState();
+            CacheHelper.SaveGlobalState(state);
+            CacheHelper.SaveThumbCacheList(thumbCacheList);
+            CacheHelper.SaveMainCopyCacheList(mainCopyCacheList);
         }
         #endregion
 
@@ -80,34 +89,24 @@ namespace ManageWalla
         /// </summary>
         /// <param name="currentMainParam"></param>
         /// <returns></returns>
-        public string InitApplication()
+        public void InitApplication()
         {
             try
             {
-                //Properties.Settings.Default.WallaWebPath
 
                 //Setup Server helper.
-                serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, long.Parse(Properties.Settings.Default.WallaWSPort),
+                serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, Properties.Settings.Default.WallaWSPort,
                     Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.WallaWebPath);
 
-                //"/WallaHub/v1/web/"
-
                 //Initialise state.
-                state = GlobalState.GetState();
-                if (state.userName == null || state.password == null)
-                {
-                    state.connectionState = GlobalState.ConnectionState.NoAccount;
-                    return "";
-                }
-
-                thumbState = ThumbState.GetThumbs();
-
-                return Logon(state.userName, state.password);
+                state = CacheHelper.GetGlobalState();
+                thumbCacheList = CacheHelper.GetThumbCacheList();
+                mainCopyCacheList = CacheHelper.GetMainCopyCacheList();
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
@@ -115,6 +114,8 @@ namespace ManageWalla
         private int GetPlatformId()
         {
             System.OperatingSystem osInfo = System.Environment.OSVersion;
+
+            
 
             switch (osInfo.Version.Major)
             {
@@ -129,24 +130,19 @@ namespace ManageWalla
             }
         }
 
-        //Used if initially there wa no user credentials or if the logon failed.
-        public string Logon(string userName, string password)
+        async public Task<string> Logon(string email, string password)
         {
             //Verify if online
-            if (!serverHelper.isOnline())
+            if (!await serverHelper.isOnline(Properties.Settings.Default.WebServerTest))
             {
                 state.connectionState = GlobalState.ConnectionState.Offline;
                 return "";
             }
 
-            //Perform login
-            string logonResponse = serverHelper.Logon(userName, password);
+            string logonResponse = await serverHelper.Logon(email, password);
             if (logonResponse == "OK")
             {
                 state.connectionState = GlobalState.ConnectionState.LoggedOn;
-                state.userName = userName;
-                state.password = password;
-                state.lastLoggedIn = DateTime.Now;
             }
             else
             {
@@ -154,9 +150,55 @@ namespace ManageWalla
                 return logonResponse;
             }
 
-            //Set MachineId server side and client side.
-            state.machineId = serverHelper.SetSessionMachineId(System.Environment.MachineName, GetPlatformId());
             return "OK";
+        }
+
+        async public Task AccountDetailsGet(CancellationToken cancelToken)
+        {
+            try
+            {
+                Account account = await serverHelper.AccountGet(cancelToken);
+                state.account = account;
+            }
+            catch (OperationCanceledException)
+            {
+                //Suppress exception
+                logger.Debug("AccountDetailsGet has been cancelled");
+            }
+        }
+
+        async public Task MachineSetIdentity(CancellationToken cancelToken)
+        {
+            //Get current platformId and machine name.
+            int platformId = GetPlatformId();
+            string machineName = System.Environment.MachineName;
+            bool found = false;
+
+            foreach (AccountMachine current in state.account.Machines)
+            {
+                if (platformId == current.platformId && machineName == current.name)
+                {
+                    state.machineId = current.id;
+                    found = true;
+                }
+            }
+            try
+            {
+                if (found)
+                {
+                    await serverHelper.MachineMarkSession(state.machineId, cancelToken);
+                }
+                else
+                {
+                    long machineId = await serverHelper.MachineRegisterNew(machineName, platformId, cancelToken);
+                    state.machineId = machineId;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                //Suppress exception
+                logger.Debug("AccountDetailsGet has been cancelled");
+            }
         }
         #endregion
 
@@ -426,6 +468,7 @@ namespace ManageWalla
                     ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
                     if (tagImageList != null)
                     {
+                        state.tagImageList.Remove(tagImageList);
                         state.tagImageList.Add(tagImageList);
                         return tagImageList;
                     }
@@ -581,6 +624,7 @@ namespace ManageWalla
                     ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), localCategoryList.LastChanged, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
                     if (categoryImageList != null)
                     {
+                        state.categoryImageList.Remove(localCategoryList);
                         state.categoryImageList.Add(categoryImageList);
                         return categoryImageList;
                     }
@@ -799,6 +843,7 @@ namespace ManageWalla
                     ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.imageFetchSize, searchQueryString, sectionId, cancelToken);
                     if (galleryImageList != null)
                     {
+                        state.tagImageList.Remove(localGalleryList);
                         state.tagImageList.Add(galleryImageList);
                         return galleryImageList;
                     }

@@ -42,8 +42,9 @@ namespace ManageWalla
             GalleryAdd = 8,
             Upload = 9,
             Account = 10,
-            ImageView = 11,
-            ImageEdit = 12
+            AccountEdit = 11,
+            ImageView = 12,
+            ImageEdit = 13
         }
 
         private enum FetchDirection
@@ -73,10 +74,11 @@ namespace ManageWalla
         public ImageMainViewerList imageMainViewerList = null;
         public GalleryCategoryModel galleryCategoriesList = null;
         public GlobalState state = null;
-        private ThumbState thumbState = null;
+        public List<ThumbCache> thumbCacheList = null;
+        public List<MainCopyCache> mainCopyCacheList = null;
+         
         public ImageList currentImageList = null;
         private bool tagListUploadRefreshing = false;
-        private bool galleryCategoryRefreshing = false;
         public CancellationTokenSource cancelTokenSource = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
         #endregion
@@ -98,39 +100,39 @@ namespace ManageWalla
             controller.Dispose();
         }
 
-        private void mainTwo_Loaded(object sender, RoutedEventArgs e)
+        async private void mainTwo_Loaded(object sender, RoutedEventArgs e)
         {
             controller = new MainController(this);
 
-            string response = controller.InitApplication();
-            state = controller.GetState();
-
-            thumbState = controller.GetThumbState();
-
-            switch (state.connectionState)
+            try
             {
-                case GlobalState.ConnectionState.LoggedOn:
-                    DisplayMessage("Account: " + state.userName + " has been connected with FotoWalla", MessageSeverity.Info, false);
-                    radCategory.IsChecked = true;
-                    //cmdCategory.RaiseEvent(new RoutedEventArgs(CheckBox.CheckedEvent));
-                    break;
-                case GlobalState.ConnectionState.Offline:
-                    DisplayMessage("No internet connection could be established with FotoWalla", MessageSeverity.Warning, false);
-                    //cmdCategory.RaiseEvent(new RoutedEventArgs(CheckBox.CheckedEvent));
-                    break;
-                case GlobalState.ConnectionState.NoAccount:
-                    DisplayMessage("There is no account settings saved for this user, you must associate an account", MessageSeverity.Info, false);
+                controller.InitApplication();
+                state = controller.GetState();
+                thumbCacheList = controller.GetThumbCacheList();
+                mainCopyCacheList = controller.GetMainCopyCacheList();
 
-                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                if (state.connectionState != GlobalState.ConnectionState.NoAccount)
+                {
+                    await Login(false);
+                }
 
-                    break;
-                case GlobalState.ConnectionState.FailedLogin:
-                    DisplayMessage("The logon for account: " + state.userName + ", failed with the message: " + response, MessageSeverity.Warning, false);
+                
+                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                {
+                    radGallery.IsChecked = true;
+                }
+                else
+                {
+                    currentPane = PaneMode.GalleryView;
                     cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                    break;
+                }
             }
-
-            DisplayConnectionStatus();
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                DisplayMessage("There was an unexpected error starting the application and must now close.  Error was: " + ex.Message, MessageSeverity.Error, true);
+                //TODO close the application.
+            }
         }
 
         public void DisplayMessage(string message, MessageSeverity severity, bool modal)
@@ -164,6 +166,7 @@ namespace ManageWalla
             gridLeft.ColumnDefinitions[0].Width = new GridLength(0); //Sidebar
             gridLeft.ColumnDefinitions[1].Width = new GridLength(300); //Main control
             gridLeft.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star); //Image display grid
+            gridLeft.ColumnDefinitions[3].Width = new GridLength(0);
             gridRight.RowDefinitions[0].Height = new GridLength(40); //Working Pane
             gridRight.ColumnDefinitions[1].Width = new GridLength(0);
             grdImageView.Visibility = Visibility.Collapsed;
@@ -582,9 +585,36 @@ namespace ManageWalla
                     break;
                 #endregion
 
+                #region Account
                 case PaneMode.Account:
-
+                    if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                    {
+                        //tabAccount.IsEnabled = true;
+                        cmdAccountClose.IsEnabled = true;
+                        cmdAccountEdit.Visibility = Visibility.Visible;
+                        cmdAccountSave.Visibility = Visibility.Collapsed;
+                        cmdAccountCancel.Visibility = Visibility.Collapsed;
+                        cmdAccountLogin.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        //tabAccount.IsEnabled = false;
+                        cmdAccountClose.IsEnabled = false;
+                        cmdAccountEdit.Visibility = Visibility.Collapsed;
+                        cmdAccountCancel.Visibility = Visibility.Collapsed;
+                        cmdAccountSave.Visibility = Visibility.Collapsed;
+                        cmdAccountLogin.Visibility = Visibility.Visible;
+                    }
                     break;
+                case PaneMode.AccountEdit:
+                    //tabAccount.IsEnabled = false;
+                    cmdAccountClose.IsEnabled = false;
+                    cmdAccountEdit.Visibility = Visibility.Collapsed;
+                    cmdAccountCancel.Visibility = Visibility.Visible;
+                    cmdAccountSave.Visibility = Visibility.Collapsed;
+                    cmdAccountLogin.Visibility = Visibility.Collapsed;
+                    break;
+                #endregion
 
                 case PaneMode.ImageView:
                 case PaneMode.ImageEdit:
@@ -674,7 +704,16 @@ namespace ManageWalla
 
         private void cmdAccount_Click(object sender, RoutedEventArgs e)
         {
+            previousPane = currentPane;
             RefreshOverallPanesStructure(PaneMode.Account);
+            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+
+        private void cmdAccountClose_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshOverallPanesStructure(previousPane);
+            RefreshPanesAllControls(previousPane);
         }
 
         private void cmdContract_Click(object sender, RoutedEventArgs e)
@@ -749,7 +788,7 @@ namespace ManageWalla
         {
             GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
             cancelTokenSource = new CancellationTokenSource();
-            current.LoadMainImage(cancelTokenSource.Token);
+            current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.mainCopyFolder);
             current.LoadMeta(false, cancelTokenSource.Token);
 
             if (lstImageMainViewerList.SelectedIndex == 0)
@@ -759,7 +798,7 @@ namespace ManageWalla
             else
             {
                 GeneralImage previous = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex - 1];
-                previous.LoadMainImage(cancelTokenSource.Token);
+                previous.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.mainCopyFolder);
                 previous.LoadMeta(false, cancelTokenSource.Token);
 
                 cmdImageViewPrevious.IsEnabled = true;
@@ -772,7 +811,7 @@ namespace ManageWalla
             else
             {
                 GeneralImage next = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex + 1];
-                next.LoadMainImage(cancelTokenSource.Token);
+                next.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.mainCopyFolder);
                 next.LoadMeta(false, cancelTokenSource.Token);
                 cmdImageViewNext.IsEnabled = true;
             }
@@ -1178,7 +1217,7 @@ namespace ManageWalla
                     for (int i = 0; i < 10; i++)
                     {
                         if (cursor + i < imageMainViewerList.Count)
-                            tasks[i] = imageMainViewerList[cursor + i].LoadThumb(cancelToken, thumbState);
+                            tasks[i] = imageMainViewerList[cursor + i].LoadThumb(cancelToken, thumbCacheList);
                     }
 
                     for (int i = 0; i < 10; i++)
@@ -2519,6 +2558,94 @@ namespace ManageWalla
         {
             await RefreshUploadStatusStateAsync(true);
         }
+
+        private void cmdAccountCancel_Click(object sender, RoutedEventArgs e)
+        {
+            AccountRefreshFromState();
+            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+        async private void cmdAccountSave_Click(object sender, RoutedEventArgs e)
+        {
+            await AccountSave();
+            AccountRefreshFromState();
+            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+        private void cmdAccountEdit_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshPanesAllControls(PaneMode.AccountEdit);
+        }
+
+        async private void cmdAccountLogin_Click(object sender, RoutedEventArgs e)
+        {
+            //TODO loading message to be shown.
+            await Login(true);
+            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+        private void AccountRefreshFromState()
+        {
+            txtAccountEmail.Text = state.account.Email;
+            txtAccountPassword.Text = state.account.Password;
+            lblAccountProfileName.Content = state.account.ProfileName;
+        }
+
+        async private Task AccountSave()
+        {
+            Account newAccount = new Account();
+            newAccount.Email = txtAccountEmail.Text;
+            newAccount.Password = txtAccountPassword.Text;
+            newAccount.ProfileName = (string)lblAccountProfileName.Content;
+        }
+
+        async private Task Login(bool onAccountForm)
+        {
+            //TODO Show Working Message.
+
+            try
+            {
+                string email = (onAccountForm) ? txtAccountEmail.Text : state.account.Email;
+                string password = (onAccountForm) ? txtAccountPassword.Text : state.account.Password;
+                string logonResponse = await controller.Logon(email, password);
+
+                //Hide Working Message.
+
+                switch (state.connectionState)
+                {
+                    case GlobalState.ConnectionState.LoggedOn:
+                        cancelTokenSource = new CancellationTokenSource();
+                        await controller.AccountDetailsGet(cancelTokenSource.Token);
+                        await controller.MachineSetIdentity(cancelTokenSource.Token);
+                        AccountRefreshFromState();
+                        DisplayMessage("Account: " + state.account.ProfileName + " has been connected with FotoWalla", MessageSeverity.Info, false);
+                        break;
+                    case GlobalState.ConnectionState.Offline:
+                        DisplayMessage("No internet connection could be established with FotoWalla", MessageSeverity.Info, false);
+                        break;
+                    case GlobalState.ConnectionState.FailedLogin:
+                        DisplayMessage("The logon for: " + email + ", failed with the message: " + logonResponse, MessageSeverity.Info, false);
+                        cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                DisplayMessage("The logon failed with an uunexpected problem: " + ex.Message, MessageSeverity.Error, true);
+            }
+            finally
+            {
+                //Double check working message is closed.
+                DisplayConnectionStatus();
+            }
+            
+
+
+            //Display outcome.
+
+        }
+
         #endregion
 
         #region Gallery Methods
@@ -3083,7 +3210,7 @@ namespace ManageWalla
         //Method to tweak selectionType and enabled properties.
         private void GalleryCategoryApplyRelatedUpdates()
         {
-            galleryCategoryRefreshing = true;
+            //galleryCategoryRefreshing = true;
 
             foreach (TreeViewItem child in treeGalleryCategoryView.Items)
                 GalleryCategoryRecursiveRelatedUpdates(child, false);
@@ -3091,7 +3218,7 @@ namespace ManageWalla
             //TreeViewItem baseItem = (TreeViewItem)treeGalleryCategoryView.Items[0];
             //GalleryCategoryRecursiveRelatedUpdates(baseItem, false);
 
-            galleryCategoryRefreshing = false;
+            //galleryCategoryRefreshing = false;
         }
 
         private void GalleryCategoryRecursiveRelatedUpdates(TreeViewItem currentItem, bool parentRecursive)
@@ -3346,7 +3473,7 @@ namespace ManageWalla
             GeneralImage current = (GeneralImage)lstImageMainViewerList.SelectedItem;
             CancellationToken cancel = new CancellationToken();
 
-            current.LoadMainImage(cancel);
+            current.LoadMainCopyImage(cancel, mainCopyCacheList, state.mainCopyFolder);
 
             //imageInlineDetailPane.V
 
@@ -3421,6 +3548,8 @@ namespace ManageWalla
 
  */
         }
+
+
 
 
 

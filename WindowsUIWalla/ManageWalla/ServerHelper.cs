@@ -30,11 +30,10 @@ namespace ManageWalla
         private long port;
         private string wsPath;
         private string appKey;
-        private string username;
-        private string password;
+        private long userId;
         private string webPath;
 
-        public ServerHelper(string hostNameParam, long portParam, string wsPathParam, string appKeyParam, string webPathParam)
+        public ServerHelper(string hostNameParam, int portParam, string wsPathParam, string appKeyParam, string webPathParam)
         {
             hostName = hostNameParam;
             port = portParam;
@@ -43,17 +42,11 @@ namespace ManageWalla
             webPath = webPathParam;
         }
 
-        /// <summary>
-        /// Simple test for the Walla hostname being online, uses GetHostaddresses method.
-        /// </summary>
-        /// <returns></returns>
-        public bool isOnline()
+        async public Task<bool> isOnline(string webServerTest)
         {
             try
             {
-                string myAddress = "www.google.com";
-                IPAddress[] addresslist = Dns.GetHostAddresses(myAddress);
-
+                IPAddress[] addresslist = await Dns.GetHostAddressesAsync(webServerTest);
                 if (addresslist[0].ToString().Length > 6)
                 {
                     return true;
@@ -69,15 +62,16 @@ namespace ManageWalla
             }
         }
 
-        public string Logon(string usernameParam, string passwordParam)
+        async public Task<string> Logon(string emailParam, string passwordParam)
         {
-            username = usernameParam;
-            password = passwordParam;
+
+            //Logon sends back userId.
+            userId = 100001;
 
             if (http == null)
             {
                 http = new HttpClient();
-                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + username + "/");
+                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userId.ToString() + "/");
             }
 
             //Do logon
@@ -88,18 +82,112 @@ namespace ManageWalla
             return "OK";
         }
 
-        public string GetWebUrl()
+        //public long GetUserId()
+        //{
+        //    return userId;
+        //}
+
+
+        async public Task<Account> AccountGet(CancellationToken cancelToken)
         {
-            return "http://" + hostName + ":" + port.ToString() + webPath + username + "/";
+            try
+            {
+                Account account = new Account();
+                account.id = 100001;
+                account.ProfileName = "ProfileName";
+                account.Machines = new AccountMachine[1];
+                account.Machines[0] = new AccountMachine();
+                account.Machines[0].id = 500001;
+                account.Machines[0].platformId = 200;
+                account.Machines[0].name = System.Environment.MachineName;
+                return account;
+
+                /*
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                response.EnsureSuccessStatusCode();
+
+                XmlSerializer serialKiller = new XmlSerializer(typeof(Account));
+                Account account = (Account)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+
+                return account;
+                */
+
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("AccountGet has been cancelled.");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
-        //The web server needs to know what machine id is using this connection, so relevant
-        //Additional details can be returned in XML.
-        //Also held locally for new uploads to associate images with.
-        public long SetSessionMachineId(string machineName, int platformId)
+        public string GetWebUrl()
         {
-            return 100001;
+            return "http://" + hostName + ":" + port.ToString() + webPath + userId.ToString() + "/";
         }
+
+        async public Task MachineMarkSession(long machineId, CancellationToken cancelToken)
+        {
+            try
+            {
+                return;
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "machine/" + machineId.ToString());
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("MarkMachineSession has been cancelled.");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+            }
+
+        }
+
+        async public Task<long> MachineRegisterNew(string machineName, int platformId, CancellationToken cancelToken)
+        {
+            try
+            {
+                return 0;
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "machine/" + platformId.ToString() + "/" + Uri.EscapeUriString(machineName));
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                response.EnsureSuccessStatusCode();
+
+                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                reader.MoveToContent();
+                long machineId = reader.ReadElementContentAsLong();
+
+                return machineId;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GetByteArray has been cancelled.");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return 0;
+            }
+        }
+
+
         #endregion
 
         #region Tag
@@ -752,30 +840,23 @@ namespace ManageWalla
         #endregion
 
         #region Images
-        async public Task<BitmapImage> GetImage(long imageId, int width, int height, CancellationToken cancelToken)
+        async public Task<Byte[]> GetByteArray(string requestUrl, CancellationToken cancelToken)
         {
             try
             {
-                /* GET /{userName}/image/{imageId}/{size}/ */
-                string requestUrl = "image/" + imageId.ToString() + "/" + width.ToString() + "/" + height.ToString() + "/";
-                //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                //request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-                BitmapImage myBitmapImage = new BitmapImage();
-                myBitmapImage.BeginInit();
-                myBitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                myBitmapImage.DecodePixelHeight = height;
-                myBitmapImage.StreamSource = await http.GetStreamAsync(requestUrl);
-                myBitmapImage.EndInit();
-                //myBitmapImage.Freeze();
+                MemoryStream memory;
+                var stream = await http.GetStreamAsync(requestUrl);
+                using (memory = new MemoryStream())
+                {
+                    stream.CopyTo(memory);
+                }
 
                 cancelToken.ThrowIfCancellationRequested();
-
-                return myBitmapImage;
+                return memory.ToArray();
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GetImage has been cancelled.");
+                logger.Debug("GetByteArray has been cancelled.");
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -785,6 +866,7 @@ namespace ManageWalla
             }
         }
 
+        /*
         async public Task<BitmapImage> GetMainImage(long imageId, CancellationToken cancelToken)
         {
             try
@@ -816,6 +898,8 @@ namespace ManageWalla
             }
         }
 
+         */
+ 
         async public Task<ImageList> GetImageListAsync(string type, string id, DateTime? lastModified, int cursor, int size, string searchQueryString, long sectionId, CancellationToken cancelToken)
         {
             try

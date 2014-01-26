@@ -4,46 +4,52 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography;
+//using System.IO;
+//using System.Runtime.Serialization.Formatters.Binary;
+//using System.Security.Cryptography;
 using System.Runtime.Serialization;
 using System.Windows.Media.Imaging;
 using System.Xml;
 
 namespace ManageWalla
 {
-    
-
     [System.SerializableAttribute()]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/GlobalState", IsNullable = false)]
+    //[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/GlobalState", IsNullable = false)]
     public class GlobalState
     {
         //Infra Properties
-        static GlobalState state = null;
-        public string userName { get; set; }
-        public string password { get; set; }
-        //public bool online { get; set; }
-        public int platformId { get; set; }
-        public string machineName { get; set; }
+        //static GlobalState state = null;
+        //public long userId { get; set; }
+        //public string email { get; set; }
+        //public string password { get; set; }
+        //public int platformId { get; set; }
+        //public string machineName { get; set; }
         public long machineId { get; set; }
         public int imageFetchSize { get; set; }
         public DateTime lastLoggedIn { get; set; }
+        public int mainCopyCacheSizeMB { get; set; }
+        public int thumbCacheSizeMB { get; set; }
+        public string mainCopyFolder { get; set; }
+        public Account account { get; set; }
+
+
 
         //Complex-ify !!!
-        private static byte[] key = { 1, 2, 3, 4, 5, 6, 7, 8 };
-        private static byte[] iv = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        //private static byte[] key = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        //private static byte[] iv = { 1, 2, 3, 4, 5, 6, 7, 8 };
 
         //Business Objects
         public TagList tagList { get; set; }
         public CategoryList categoryList { get; set; }
         public GalleryList galleryList { get; set; }
 
-        public String categoryXml { get; set; }
+        //public String categoryXml { get; set; }
         public UploadStatusList uploadStatusList { get; set; }
         public List<ImageList> tagImageList { get; set; }
         public List<ImageList> categoryImageList { get; set; }
         public List<ImageList> galleryImageList { get; set; }
+        public List<ImageMeta> imageMetaList { get; set; }
+        public List<MainCopyCache> mainCopyCacheList { get; set; }
 
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }
@@ -68,9 +74,9 @@ namespace ManageWalla
             Unavailable = 4
         }
 
-        #region InfraCodes
         public GlobalState() { }
 
+        /*
         public static GlobalState GetState()
         {
             // Try to load from File
@@ -82,12 +88,15 @@ namespace ManageWalla
                 state.tagImageList = new List<ImageList>();
                 state.categoryImageList = new List<ImageList>();
                 state.galleryImageList = new List<ImageList>();
+                state.imageMetaList = new List<ImageMeta>();
+                state.mainCopyCacheList = new List<MainCopyCache>();
             }
 
             //TODO - delete
             state.userName = "Simon";
             state.password = "simon";
             state.imageFetchSize = 50;
+            state.mainCopyCacheSizeMB = 100;
 
             state.categoryLoadState = GlobalState.DataLoadState.No;
             state.tagLoadState = GlobalState.DataLoadState.No;
@@ -134,13 +143,6 @@ namespace ManageWalla
                 cryptoStream.FlushFinalBlock();
             }
         }
-        #endregion
-
-        /*
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            throw new NotImplementedException();
-        }
-         */ 
+        */
     }
 }

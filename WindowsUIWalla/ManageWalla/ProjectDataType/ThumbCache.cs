@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-using System.Windows.Controls;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Xml;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -16,34 +17,32 @@ namespace ManageWalla
 {
     [System.SerializableAttribute()]
     //[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/ThumbnailCache", IsNullable = false)]
-    public class ThumbnailCache : ISerializable
+    public class ThumbCache
     {
         public DateTime lastAccessed { get; set; }
         public long imageId { get; set; }
-        public long imageSize { get; set; }
-        public byte[] serializedImage { get; set; }
-        public Image image { get; set; }
+        public byte[] imageArray { get; set; }
+        public long imageSize { get { return imageArray.LongLength; } }
 
-        /*
+/*        
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("SerializedImage", serializedImage);
         }
-        */
+        
 
-        public ThumbnailCache() { }
+        public ThumbCache() { }
 
-        protected ThumbnailCache(SerializationInfo info, StreamingContext context)
+        protected ThumbCache(SerializationInfo info, StreamingContext context)
         {
-            serializedImage = (byte[])info.GetValue("serializedImage", typeof(byte[]));
+            imageArray = (byte[])info.GetValue("serializedImage", typeof(byte[]));
             imageId = (long)info.GetValue("imageId", typeof(long));
             lastAccessed = (DateTime)info.GetValue("lastAccessed", typeof(DateTime));
-            imageSize = (long)info.GetValue("imageSize", typeof(long));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("serializedImage", serializedImage);
+            info.AddValue("serializedImage", imageArray);
             info.AddValue("imageId", imageId);
             info.AddValue("lastAccessed", lastAccessed);
             info.AddValue("imageSize", imageSize);
@@ -52,32 +51,79 @@ namespace ManageWalla
         [OnSerializing]
         private void OnSerializing(StreamingContext sc)
         {
-            BitmapImage bitmapImage = image.Source as BitmapImage;
+            
+            //BitmapImage bitmapImage = image.Source as BitmapImage;
 
-            if (bitmapImage == null)
-                return;
+            //if (bitmapImage == null)
+            //    return;
+               /*
+            MemoryStream memory = new MemoryStream();
+            image.Save(memory,ImageFormat.Jpeg);
+
+
+
+            var encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(
+            encoder.Frames.Add(BitmapFrame.Create(image.Source));
+            encoder.Save(ms);
+
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                var encoder = new JpegBitmapEncoder();
+                //encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                encoder.Save(ms);
+
+                return ms.GetBuffer();
+            }
+
 
             MemoryStream stream = new MemoryStream();
+         
+            
+            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(
+            encoder.Save(stream);
+            
+
             BmpBitmapEncoder encoder = new BmpBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
             encoder.Save(stream);
             serializedImage = stream.ToArray();
             stream.Close();
 
-            imageSize = serializedImage.LongLength;
+            //imageSize = serializedImage.LongLength;
         }
 
 
         [OnDeserialized]
         private void OnDeserialized(StreamingContext sc)
         {
+            
             MemoryStream stream = new MemoryStream(serializedImage);
             image = new Image
             {
                 Source = BitmapFrame.Create(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad)
             };
             stream.Close();
+            
         }
 
+
+        
+
+        
+        byte[] SaveImage(BitmapSource bitmap)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                var encoder = new JpegBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                encoder.Save(ms);
+
+                return ms.GetBuffer();
+            }
+        }
+        */
     }
 }

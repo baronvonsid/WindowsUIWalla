@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.example.org/Account"
+	xmlns:tns="http://www.example.org/Account" 
+	elementFormDefault="qualified">
+
+  <element name="Account">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="0">
+        <element type="string" name="ProfileName"/>
+        <element type="string" name="Email"/>
+        <element type="string" name="Password"/>
+        <element type="string" name="Description"/>
+        <element type="string" name="AccountType" />
+        <element type="string" name="AccountCondition" />
+        <element type="int" name="StorageGB" />
+        <element type="int" name="CurrentGB" />
+        <element type="long" name="ImageCount" />
+        <element name="Machines">
+          <complexType>
+            <sequence>
+              <element name="Machine" maxOccurs="unbounded" minOccurs="0">
+                <complexType>
+                  <attribute type="long" name="id" default="0" />
+                  <attribute type="int" name="platformId" />
+                  <attribute type="string" name="name" />
+                  <attribute type="date" name="lastUsed" />
+                  <attribute type="long" name="tagId" default="0" />
+                  <attribute type="long" name="categoryId" default="0" />
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+        
+       </sequence>
+      <attribute type="long" name="id" default="0"/>
+      <attribute type="int" name="version" default="0"/>
+    </complexType>
+  </element>
+</schema>

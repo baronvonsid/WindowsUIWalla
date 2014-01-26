@@ -21,7 +21,7 @@ namespace ManageWalla
         public long imageId { get; set; }
         public long categoryId { get; set; }
         public Image thumbnailImage { get; set; }
-        private Image mainImageStore;
+        public Image mainCopyImage {get; set; }
         public ImageMeta Meta { get; set; }
         public string name { get; set; }
         public string description { get; set; }
@@ -29,7 +29,7 @@ namespace ManageWalla
         public string fileSummary { get; set; }
         public DateTime uploadDate { get; set; }
         public int metaVersion { get; set; }
-        private LoadState mainImageLoadState;
+        //private LoadState mainImageLoadState;
         private LoadState metaLoadState;
 
 
@@ -43,48 +43,92 @@ namespace ManageWalla
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(GeneralImage));
 
-        //TODO need this extra event plumbing ??
         public event PropertyChangedEventHandler PropertyChanged;
 
         public GeneralImage(ServerHelper serverHelperParam) 
         {
             serverHelper = serverHelperParam;
-            thumbnailImage = WorkingBitmapThumbnail("Working");
-            mainImageStore = WorkingBitmapMain("Working");
+            thumbnailImage = GetTempBitmap("Working", true);
+            mainCopyImage = GetTempBitmap("Working", false);
             metaLoadState = LoadState.NotLoaded;
         }
 
-        async public Task LoadThumb(CancellationToken cancelToken, ThumbState thumbState)
+        #region Thumb
+        async public Task LoadThumb(CancellationToken cancelToken, List<ThumbCache> thumbCacheList)
         {
             if (imageId == 0)
                 return;
 
-            Image newThumb = ThumbState.GetImage(imageId);
-            if (newThumb == null)
+            try
             {
-                newThumb = await LoadThumbnailAsync(cancelToken);
-                if (newThumb != null)
-                    ThumbState.SaveImage(imageId, newThumb);
+                byte[] thumbArray = CacheHelper.GetImageArray(imageId, thumbCacheList);
+                if (thumbArray == null)
+                {
+                    /* GET /{userName}/image/{imageId}/{size}/ */
+                    string requestUrl = "image/" + imageId.ToString() + "/300/300/";
+                    thumbArray = await LoadImageArrayAsync(requestUrl, cancelToken);
+                    if (thumbArray != null)
+                        CacheHelper.SaveImageArray(imageId, thumbArray, thumbCacheList);
+                }
+
+                thumbnailImage = ConvertByteArrayToImage(thumbArray);
             }
-
-            thumbnailImage = newThumb;
-
-            if (thumbnailImage != null)
-                OnPropertyChanged("thumbnailImage");
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                thumbnailImage = GetTempBitmap("Error", true);
+            }
+            finally
+            {
+                if (thumbnailImage != null)
+                    OnPropertyChanged("thumbnailImage");
+            }
         }
 
-        async public Task LoadMainImage(CancellationToken cancelToken)
+
+        #endregion
+
+        #region MainCopy
+        async public Task LoadMainCopyImage(CancellationToken cancelToken, List<MainCopyCache> mainCopyCacheList, string folder)
         {
             if (imageId == 0)
                 return;
 
-            if (mainImageLoadState != LoadState.Loaded && mainImageLoadState != LoadState.Requested)
-                mainImageStore = await LoadImageMainAsync(cancelToken);
+            try
+            {
+                string fileName = CacheHelper.GetMainCopyFileName(imageId, mainCopyCacheList, folder);
 
-            if (mainImageStore != null)
-                OnPropertyChanged("mainImage");
+                if (fileName.Length > 0)
+                {
+                    mainCopyImage = CreateImageFromFileName(fileName);
+                }
+                else
+                {
+                    string requestUrl = "image/" + imageId.ToString() + "/maincopy";
+                    byte[] mainImageArray = await LoadImageArrayAsync(requestUrl, cancelToken);
+                    if (mainImageArray != null)
+                    {
+                        CacheHelper.SaveMainCopyToCache(imageId, mainImageArray, mainCopyCacheList, folder);
+                        mainCopyImage = ConvertByteArrayToImage(mainImageArray);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                mainCopyImage = GetTempBitmap("Error", false);
+            }
+            finally
+            {
+                if (mainCopyImage != null)
+                    OnPropertyChanged("mainCopyImage");
+            }
         }
 
+
+        #endregion
+
+        #region Meta
         async public Task LoadMeta(bool forceReload, CancellationToken cancelToken)
         {
             if (imageId == 0)
@@ -105,123 +149,6 @@ namespace ManageWalla
             await SaveImageMetaAsync(Meta, cancelToken);
 
             await LoadMeta(true, cancelToken);
-        }
-
-        private Image WorkingBitmapThumbnail(string type)
-        {
-            string loadingImagePath = "";
-            if (type == "Working")
-            {
-                loadingImagePath = @"pack://application:,,,/Icons/LoadingThumbnail.gif";
-            }
-            else
-            {
-                loadingImagePath = @"pack://application:,,,/Icons/ErrorThumbnail.gif";
-            }
-
-            BitmapImage loadingImage = new BitmapImage();
-            loadingImage.BeginInit();
-            loadingImage.DecodePixelWidth = 300;
-            loadingImage.UriSource = new Uri(loadingImagePath);
-            loadingImage.EndInit();
-            loadingImage.Freeze();
-
-            Image newImage = new Image();
-            newImage.Source = loadingImage;
-            return newImage;
-        }
-
-        async private Task<Image> LoadThumbnailAsync(CancellationToken cancelToken)
-        {
-            try
-            {
-                BitmapImage responseImage = await serverHelper.GetImage(imageId, 300, 300, cancelToken);
-                if (responseImage == null)
-                    throw new Exception("The thumbnail could not be retrieved from the server, an unexpected error occured");
-
-                Image newImage = new Image();
-                newImage.Source = responseImage;
-                return newImage;
-            }
-            catch (OperationCanceledException)
-            {
-                logger.Debug("LoadThumbnailAsync has been cancelled");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                return WorkingBitmapThumbnail("Error");
-            }
-        }
-
-        private Image WorkingBitmapMain(string type)
-        {
-            string loadingImagePath = "";
-            if (type == "Working")
-            {
-                loadingImagePath = @"pack://application:,,,/Icons/LoadingMain.gif";
-                mainImageLoadState = LoadState.NotLoaded;
-            }
-            else
-            {
-                loadingImagePath = @"pack://application:,,,/Icons/ErrorMain.gif";
-                mainImageLoadState = LoadState.Error;
-            }
-
-            BitmapImage loadingImage = new BitmapImage();
-            loadingImage.BeginInit();
-            loadingImage.UriSource = new Uri(loadingImagePath);
-            loadingImage.EndInit();
-            loadingImage.Freeze();
-
-            Image newImage = new Image();
-            newImage.Source = loadingImage;
-            return newImage;
-        }
-
-        public Image mainImage
-        {
-            get
-            {
-                if (mainImageLoadState == LoadState.NotLoaded)
-                {
-                    //CancellationToken cancelToken = new CancellationToken();
-                    //mainImageStore = LoadImageMainAsync(cancelToken).Result;
-                }
-                return mainImageStore;
-            }
-        }
-
-
-        async private Task<Image> LoadImageMainAsync(CancellationToken cancelToken)
-        {
-            try
-            {
-                mainImageLoadState = LoadState.Requested;
-
-                BitmapImage responseImage = await serverHelper.GetMainImage(imageId, cancelToken);
-                if (responseImage == null)
-                    throw new Exception("The image could not be retrieved from the server, an unexpected error occured");
-
-                Image newImage = new Image();
-                newImage.Source = responseImage;
-
-                mainImageLoadState = LoadState.Loaded;
-                return newImage;
-            }
-            catch (OperationCanceledException)
-            {
-                mainImageLoadState = LoadState.Error;
-                logger.Debug("LoadImageMainAsync has been cancelled");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                mainImageLoadState = LoadState.Error;
-                logger.Error(ex);
-                return WorkingBitmapMain("Error");
-            }
         }
 
         async private Task<ImageMeta> LoadImageMetaAsync(CancellationToken cancelToken)
@@ -267,8 +194,77 @@ namespace ManageWalla
                 logger.Error(ex);
             }
         }
+        #endregion
 
-        #region Propery Events
+        #region Utility Methods
+        private Image GetTempBitmap(string type, bool isThumb)
+        {
+            //TODO isThumb when new images are available.
+
+            string loadingImagePath = "";
+            if (type == "Working")
+            {
+                loadingImagePath = @"pack://application:,,,/Icons/LoadingMain.gif";
+                //mainImageLoadState = LoadState.NotLoaded;
+            }
+            else
+            {
+                loadingImagePath = @"pack://application:,,,/Icons/ErrorMain.gif";
+                //mainImageLoadState = LoadState.Error;
+            }
+
+            BitmapImage loadingImage = new BitmapImage();
+            loadingImage.BeginInit();
+            loadingImage.UriSource = new Uri(loadingImagePath);
+            loadingImage.EndInit();
+            loadingImage.Freeze();
+
+            Image newImage = new Image();
+            newImage.Source = loadingImage;
+            return newImage;
+        }
+
+        private Image CreateImageFromFileName(string fileName)
+        {
+            BitmapImage loadingImage = new BitmapImage();
+            loadingImage.BeginInit();
+            loadingImage.UriSource = new Uri(fileName);
+            loadingImage.EndInit();
+            loadingImage.Freeze();
+
+            Image newImage = new Image();
+            newImage.Source = loadingImage;
+            return newImage;
+        }
+
+        async private Task<byte[]> LoadImageArrayAsync(string requestUrl, CancellationToken cancelToken)
+        {
+            try
+            {
+                byte[] responseArray = await serverHelper.GetByteArray(requestUrl, cancelToken);
+                if (responseArray == null)
+                    throw new Exception("The image could not be retrieved from the server, an unexpected error occured");
+
+                return responseArray;
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("LoadImageArrayAsync has been cancelled");
+                return null;
+            }
+        }
+
+        private Image ConvertByteArrayToImage(byte[] imageArray)
+        {
+            Image newImage = new Image();
+            using (MemoryStream ms = new MemoryStream(imageArray))
+            {
+                var decoder = JpegBitmapDecoder.Create(ms, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                newImage.Source = decoder.Frames[0];
+            }
+            return newImage;
+        }
+
         protected void OnPropertyChanged(string name)
         {
             PropertyChangedEventHandler handler = PropertyChanged;
@@ -280,3 +276,39 @@ namespace ManageWalla
         #endregion
     }
 }
+
+
+
+
+
+/*
+async private Task<Image> LoadImageMainAsync(CancellationToken cancelToken)
+{
+    try
+    {
+        //mainImageLoadState = LoadState.Requested;
+
+        BitmapImage responseImage = await serverHelper.GetMainImage(imageId, cancelToken);
+        if (responseImage == null)
+            throw new Exception("The image could not be retrieved from the server, an unexpected error occured");
+
+        Image newImage = new Image();
+        newImage.Source = responseImage;
+
+        //mainImageLoadState = LoadState.Loaded;
+        return newImage;
+    }
+    catch (OperationCanceledException)
+    {
+        //mainImageLoadState = LoadState.Error;
+        logger.Debug("LoadImageMainAsync has been cancelled");
+        return null;
+    }
+    catch (Exception ex)
+    {
+        //mainImageLoadState = LoadState.Error;
+        logger.Error(ex);
+        return GetTempBitmap("Error");
+    }
+}
+*/

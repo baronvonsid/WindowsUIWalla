@@ -5,10 +5,7 @@
     <Setting Name="WallaWSHostname" Type="System.String" Scope="Application">
       <Value Profile="(Default)">localhost</Value>
     </Setting>
-    <Setting Name="WallaAppKey" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">1234567890</Value>
-    </Setting>
-    <Setting Name="WallaWSPort" Type="System.String" Scope="Application">
+    <Setting Name="WallaWSPort" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">8081</Value>
     </Setting>
     <Setting Name="WallaWSPath" Type="System.String" Scope="Application">
@@ -17,14 +14,29 @@
     <Setting Name="WallaWebPath" Type="System.String" Scope="Application">
       <Value Profile="(Default)">/WallaHub/v1/web/</Value>
     </Setting>
-    <Setting Name="UserName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">simo1n</Value>
-    </Setting>
-    <Setting Name="Password" Type="System.String" Scope="User">
-      <Value Profile="(Default)">hello123</Value>
-    </Setting>
     <Setting Name="WebServerTest" Type="System.String" Scope="Application">
       <Value Profile="(Default)">www.google.com</Value>
+    </Setting>
+    <Setting Name="ThumbCacheSizeMB" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">50</Value>
+    </Setting>
+    <Setting Name="MainCopyCacheSizeMB" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">400</Value>
+    </Setting>
+    <Setting Name="ImageFetchSize" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">50</Value>
+    </Setting>
+    <Setting Name="GlobalStateCacheFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Walla-LocalGlobalState.db</Value>
+    </Setting>
+    <Setting Name="WallaAppKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">12345678901234567890</Value>
+    </Setting>
+    <Setting Name="ThumbCacheFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Walla-LocalThumbCache.db</Value>
+    </Setting>
+    <Setting Name="MainCopyCacheFileName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Walla-LocalMainCopyCache.db</Value>
     </Setting>
   </Settings>
 </SettingsFile>

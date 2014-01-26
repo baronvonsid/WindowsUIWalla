@@ -991,7 +991,7 @@
                 </Grid.ColumnDefinitions>
 
 
-                <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" DataContext="{StaticResource imageMainViewerListKey}" Source="{Binding mainImage.Source}" MouseUp="RevertFromImageView_MouseUp" />
+                <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" DataContext="{StaticResource imageMainViewerListKey}" Source="{Binding mainCopyImage.Source}" MouseUp="RevertFromImageView_MouseUp" />
 
                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
 
@@ -1104,6 +1104,39 @@
             <DockPanel x:Name="panAccount" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2">
                 <TabControl x:Name="tabAccount" Margin="4">
                     <TabItem x:Name="tabAccountSettings" Header="Account Details" >
+                        <Grid x:Name="gridAccountSettings" Background="{StaticResource PaneBodyBackgroundBrush}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="34" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="250" />
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Column="0" Grid.Row="0" Content="Email Address"/>
+                            <TextBox x:Name="txtAccountEmail" Grid.Column="1" Grid.Row="0" MaxLength="100" Margin="2" />
+
+                            <Label Grid.Column="0" Grid.Row="1" Content="Password"/>
+                            <TextBox x:Name="txtAccountPassword" Grid.Column="1" Grid.Row="1" MaxLength="20" Margin="2" />
+
+                            <Label Grid.Column="0" Grid.Row="2" Content="Profile Name"/>
+                            <Label x:Name="lblAccountProfileName" Grid.Column="1" Grid.Row="2" Content=""/>
+                            
+                            <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+                                <Button x:Name="cmdAccountLogin" Content="Login" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountLogin_Click" />
+                                <Button x:Name="cmdAccountEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountEdit_Click" />
+                                <Button x:Name="cmdAccountSave" Content="Save" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountSave_Click" />
+                                <Button x:Name="cmdAccountCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountCancel_Click" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
+                                <Button x:Name="cmdAccountClose" Content="Close" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountClose_Click" />
+                            </StackPanel>
+                        </Grid>
                     </TabItem>
 
                     <TabItem x:Name="tabUploadStatusList" Header="Upload Status" >

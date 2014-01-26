@@ -132,18 +132,20 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ThumbState.cs" />
+    <Compile Include="ProjectDataType\MainCopyCache.cs" />
+    <Compile Include="CacheHelper.cs" />
     <Compile Include="ProjectDataType\GalleryCategoryModel.cs" />
-    <Compile Include="GlobalState.cs" />
+    <Compile Include="ProjectDataType\GlobalState.cs" />
     <Compile Include="MainTwo.xaml.cs">
       <DependentUpon>MainTwo.xaml</DependentUpon>
     </Compile>
     <Compile Include="MultiSelectTreeView.cs" />
     <Compile Include="ProjectDataType\GeneralImage.cs" />
     <Compile Include="ProjectDataType\ImageMainViewerList.cs" />
-    <Compile Include="ProjectDataType\ThumbnailCache.cs" />
+    <Compile Include="ProjectDataType\ThumbCache.cs" />
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="WallaDataType\Account.cs" />
     <Compile Include="WallaDataType\Category.cs" />
     <Compile Include="WallaDataType\CategoryList.cs" />
     <Compile Include="WallaDataType\Gallery.cs" />
@@ -211,6 +213,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <None Include="WallaSchema\Account.xsd" />
     <None Include="WallaSchema\Category.xsd" />
     <None Include="WallaSchema\CategoryList.xsd" />
     <None Include="WallaSchema\Gallery.xsd" />
