@@ -45,11 +45,11 @@ namespace ManageWalla
             {
                 UploadError = "Format is not supported (" + Path.GetExtension(filePath).ToUpper().Substring(1) + "), image is excluded from Upload";
                 State = UploadState.Error;
-                image.Source = UnavailableBitmapThumbnail(false);
+                image = UnavailableBitmapThumbnail(false);
             }
             else
             {
-                image.Source = await LoadBitmapAsync(filePath, format);
+                image = await LoadBitmapAsync(filePath, format);
             }
 
             meta = new ImageMeta();
@@ -104,7 +104,7 @@ namespace ManageWalla
             }
         }
 
-        private BitmapImage UnavailableBitmapThumbnail(bool unavailable)
+        private Image UnavailableBitmapThumbnail(bool unavailable)
         {
             string loadingImagePath = "";
             if (unavailable)
@@ -123,14 +123,41 @@ namespace ManageWalla
             loadingImage.EndInit();
             loadingImage.Freeze();
 
-            return loadingImage;
+            Image newImage = new Image();
+            newImage.Source = loadingImage;
+
+
+            return newImage;
+        }
+
+        async private Task<bool> IsLandscape(string filePath)
+        {
+            BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
+            {
+                myBitmapImage = new BitmapImage();
+                myBitmapImage.BeginInit();
+
+                myBitmapImage.DecodePixelWidth = 10;
+                myBitmapImage.UriSource = new Uri(filePath);
+                myBitmapImage.EndInit();
+                myBitmapImage.Freeze();
+
+                return myBitmapImage;
+            });
+
+           
+
+            if (myBitmapImage.PixelHeight > myBitmapImage.PixelWidth)
+                return false;
+            else
+                return true;
         }
 
 
-        async private Task<BitmapImage> LoadBitmapAsync(string filePath, string format)
+        async private Task<Image> LoadBitmapAsync(string filePath, string format)
         {
             //FileStream fileStream = null;
-            MemoryStream memoryStream = null;
+            //MemoryStream memoryStream = null;
 
             try
             {
@@ -152,70 +179,74 @@ namespace ManageWalla
                 if (fileInfo.Length > 10485760)
                     return UnavailableBitmapThumbnail(true);
 
-                //fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+                bool isLandscape = await IsLandscape(filePath);
+
                 BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
                 {
                     myBitmapImage = new BitmapImage();
                     myBitmapImage.BeginInit();
 
-                    //myBitmapImage.DecodePixelWidth = 300;
-                    //myBitmapImage.DecodePixelHeight = 300;
-                    //myBitmapImage.CacheOption = BitmapCacheOption.OnLoad; 
+                    if (isLandscape)
+                        myBitmapImage.DecodePixelHeight = 300;
+                    else
+                        myBitmapImage.DecodePixelWidth = 300;
+                    
                     myBitmapImage.UriSource = new Uri(filePath);
                     myBitmapImage.EndInit();
                     myBitmapImage.Freeze();
 
                     return myBitmapImage;
                 });
-                //fileStream.Close();
 
                 int startX = 0;
                 int startY = 0;
                 int width = 0;
                 int height = 0;
 
-                if (myBitmapImage.PixelHeight > myBitmapImage.PixelWidth)
-                {
-                    //Portrait, so crop the tops and bottoms.
-                    double remainder = myBitmapImage.PixelHeight - myBitmapImage.PixelWidth;
-
-                    startX = 0;
-                    startY = Convert.ToInt32(remainder / 2.0);
-                    width = Convert.ToInt32(myBitmapImage.PixelWidth);
-                    height = Convert.ToInt32(myBitmapImage.PixelWidth);
-                }
-                else
+                if (isLandscape)
                 {
                     double remainder = myBitmapImage.PixelWidth - myBitmapImage.PixelHeight;
-
                     startX = Convert.ToInt32(remainder / 2.0);
                     startY = 0;
                     width = Convert.ToInt32(myBitmapImage.PixelHeight);
                     height = Convert.ToInt32(myBitmapImage.PixelHeight);
                 }
+                else
+                {
+                    //Portrait, so crop the tops and bottoms.
+                    double remainder = myBitmapImage.PixelHeight - myBitmapImage.PixelWidth;
+                    startX = 0;
+                    startY = Convert.ToInt32(remainder / 2.0);
+                    width = Convert.ToInt32(myBitmapImage.PixelWidth);
+                    height = Convert.ToInt32(myBitmapImage.PixelWidth);
+                }
 
                 CroppedBitmap croppedBitmap = new CroppedBitmap(myBitmapImage, new Int32Rect(startX, startY, width, height));
-                //CroppedBitmap cb2 = cb.Clone();
+                Image image = new Image();
+                image.Source = croppedBitmap;
 
 
+                return image;
+/*
+                myBitmapImage = new BitmapImage();
+                myBitmapImage.BeginInit();
 
+                myBitmapImage.DecodePixelWidth = 300;
+                //myBitmapImage.DecodePixelHeight = 300;
+                //myBitmapImage.CacheOption = BitmapCacheOption.OnLoad; 
+                myBitmapImage.SourceRect = croppedBitmap.SourceRect;
+                myBitmapImage.EndInit();
+                myBitmapImage.Freeze();
+                
                 /*
                 myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
                 {
-                    myBitmapImage = new BitmapImage();
-                    myBitmapImage.BeginInit();
 
-                    myBitmapImage.DecodePixelWidth = 300;
-                    //myBitmapImage.DecodePixelHeight = 300;
-                    //myBitmapImage.CacheOption = BitmapCacheOption.OnLoad; 
-                    myBitmapImage.UriSource = new Uri(filePath);
-                    myBitmapImage.EndInit();
-                    myBitmapImage.Freeze();
 
                     return myBitmapImage;
                 });
 
-                 */
+                 
                 BmpBitmapEncoder encoder = new BmpBitmapEncoder();
                 memoryStream = new MemoryStream();
                 myBitmapImage = new BitmapImage();
@@ -232,11 +263,11 @@ namespace ManageWalla
 
                 //memoryStream.Close();
 
-
+                
 
 
                 return myBitmapImage;
-
+                */
             }
             catch (Exception ex)
             {
@@ -247,7 +278,7 @@ namespace ManageWalla
             finally
             {
                 //if (fileStream != null) { fileStream.Close(); }
-                if (memoryStream != null) { memoryStream.Close(); }
+                //if (memoryStream != null) { memoryStream.Close(); }
             }
         }
 

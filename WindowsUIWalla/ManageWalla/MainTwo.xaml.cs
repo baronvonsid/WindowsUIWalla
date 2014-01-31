@@ -17,7 +17,7 @@ using System.Configuration;
 using System.IO;
 using System.Collections;
 using System.Threading;
-
+using System.Windows.Media.Animation; 
 using System.Runtime.Serialization.Formatters.Binary;
 
 
@@ -55,11 +55,12 @@ namespace ManageWalla
             Previous = 3
         }
 
-        public enum MessageSeverity
+        public enum MessageType
         {
-            Info = 0,
-            Warning = 1,
-            Error = 2
+            Busy = 0,
+            Info = 1,
+            Warning = 2,
+            Error = 3
         }
 
         private PaneMode currentPane;
@@ -81,6 +82,8 @@ namespace ManageWalla
         private bool tagListUploadRefreshing = false;
         public CancellationTokenSource cancelTokenSource = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
+        private bool tweakImageSize = true;
+
         #endregion
 
         #region Window Initialise and control.
@@ -130,21 +133,131 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                DisplayMessage("There was an unexpected error starting the application and must now close.  Error was: " + ex.Message, MessageSeverity.Error, true);
+                ShowMessage(MessageType.Error, "There was an unexpected error starting the application and must now close.  Error was: " + ex.Message);
                 //TODO close the application.
             }
         }
 
-        public void DisplayMessage(string message, MessageSeverity severity, bool modal)
+
+        public void CancelProcess()
         {
-            //TODO sort out severity.
-            if (modal)
+
+            Dispatcher.Invoke(FinishBusyApply);
+        }
+
+        public void ShowMessage(MessageType messageType, string message)
+        {
+
+            Dispatcher.Invoke(new Action(() => { UpdateDialogsAndShow(messageType, message); }));
+
+
+            //cmdAlertDialogResponse.Click += cmdDialogResponse_Click;
+            /*
+            if (messageType == MessageType.Info)
             {
-                MessageBox.Show(message);
+                
             }
             else
             {
-                MessageBox.Show(message);
+                Dispatcher.Invoke(new Action(() => { UpdateAlertDialog(messageType, message); }));
+            }
+            Dispatcher.Invoke(new Action(() => { ShowBusyApply(messageType); }));
+             */
+        }
+
+        private void FinishBusyApply()
+        {
+            //Call cancel on async tokens.
+            cancelTokenSource.Cancel();
+
+            gridAlertDialog.Visibility = Visibility.Collapsed;
+            paneBusy.Visibility = Visibility.Collapsed;
+        }
+
+        private void UpdateDialogsAndShow(MessageType messageType, string message)
+        {
+            switch (messageType)
+            {
+                case MessageType.Info:
+                    if (gridInfoAlert.Visibility == Visibility.Visible) { return; }
+                    lblInfoDialogMessage.Text = message;
+
+                    gridInfoAlert.BeginAnimation(Grid.OpacityProperty, null);
+                    gridInfoAlert.BeginAnimation(Grid.VisibilityProperty, null);
+                    gridInfoAlert.Opacity = 0.0;
+                    gridInfoAlert.Visibility = Visibility.Collapsed;
+
+                    DoubleAnimationUsingKeyFrames opacityFrameAnimInfo = new DoubleAnimationUsingKeyFrames();
+                    opacityFrameAnimInfo.FillBehavior = FillBehavior.HoldEnd;
+                    opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(2.0)));
+                    opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(6.0)));
+                    opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(7.0)));
+                    gridInfoAlert.BeginAnimation(Border.OpacityProperty, opacityFrameAnimInfo);
+
+                    ObjectAnimationUsingKeyFrames visibilityAnimInfo = new ObjectAnimationUsingKeyFrames();
+                    visibilityAnimInfo.KeyFrames.Add(new DiscreteObjectKeyFrame(Visibility.Visible, TimeSpan.FromSeconds(0.1)));
+                    visibilityAnimInfo.KeyFrames.Add(new DiscreteObjectKeyFrame(Visibility.Collapsed, TimeSpan.FromSeconds(7.0)));
+                    gridInfoAlert.BeginAnimation(Grid.VisibilityProperty, visibilityAnimInfo);
+
+                    break;
+                case MessageType.Busy:
+                case MessageType.Warning:
+                case MessageType.Error:
+                    if (gridAlertDialog.Visibility == Visibility.Visible) { return; }
+                    lblAlertDialogMessage.Text = message;
+
+                    if (messageType == MessageType.Busy)
+                    {
+                        lblAlertDialogHeader.Text = "..loading";
+                        cmdAlertDialogResponse.Content = "Cancel";
+                    }
+                    else if (messageType == MessageType.Warning)
+                    {
+                        lblAlertDialogHeader.Text = "Warning";
+                        cmdAlertDialogResponse.Content = "OK";
+                    }
+                    else
+                    {
+                        lblAlertDialogHeader.Text = "Error";
+                        cmdAlertDialogResponse.Content = "OK";
+                    }
+
+                    paneBusy.BeginAnimation(Border.OpacityProperty, null);
+                    paneBusy.Opacity = 0.0;
+                    paneBusy.Visibility = Visibility.Visible;
+
+                    gridAlertDialog.BeginAnimation(Grid.OpacityProperty, null);
+                    gridAlertDialog.Opacity = 0.0;
+                    gridAlertDialog.Visibility = Visibility.Visible;
+
+                    if (messageType == MessageType.Busy)
+                    {
+                        DoubleAnimationUsingKeyFrames opacityFrameAnim = new DoubleAnimationUsingKeyFrames();
+                        opacityFrameAnim.FillBehavior = FillBehavior.HoldEnd;
+                        opacityFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
+                        opacityFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(4.0)));
+                        paneBusy.BeginAnimation(Border.OpacityProperty, opacityFrameAnim);
+
+                        DoubleAnimationUsingKeyFrames opacityActionsAnim = new DoubleAnimationUsingKeyFrames();
+                        //opacityActionsAnim.Duration = TimeSpan.FromSeconds(2.0);
+                        opacityActionsAnim.FillBehavior = FillBehavior.HoldEnd;
+                        opacityActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
+                        opacityActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(2.5)));
+                        gridAlertDialog.BeginAnimation(Grid.OpacityProperty, opacityActionsAnim);
+                    }
+                    else
+                    {
+                        DoubleAnimationUsingKeyFrames opacityFrameAnim = new DoubleAnimationUsingKeyFrames();
+                        opacityFrameAnim.FillBehavior = FillBehavior.HoldEnd;
+                        opacityFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(0.5)));
+                        paneBusy.BeginAnimation(Border.OpacityProperty, opacityFrameAnim);
+
+                        DoubleAnimationUsingKeyFrames opacityActionsAnim = new DoubleAnimationUsingKeyFrames();
+                        opacityActionsAnim.FillBehavior = FillBehavior.HoldEnd;
+                        opacityActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(0.5)));
+                        gridAlertDialog.BeginAnimation(Grid.OpacityProperty, opacityActionsAnim);
+                    }
+                    break;
             }
         }
 
@@ -158,6 +271,11 @@ namespace ManageWalla
             {
                 this.Title = "FotoWalla - Offline";
             }
+        }
+
+        private void cmdAlertDialogResponse_Click(object sender, RoutedEventArgs e)
+        {
+            CancelProcess();
         }
 
         private void RefreshOverallPanesStructure(PaneMode mode)
@@ -850,7 +968,7 @@ namespace ManageWalla
             {
                 if (txtImageViewName.Text.Length < 1)
                 {
-                    DisplayMessage("You must enter a name to continue saving", MessageSeverity.Error, true);
+                    ShowMessage(MessageType.Warning, "You must enter a name to continue saving");
                     return;
                 }
                 
@@ -862,7 +980,7 @@ namespace ManageWalla
             {
                 if (current.Meta == null)
                 {
-                    DisplayMessage("The image meta data has not been retreived from the server, please wait", MessageSeverity.Error, true);
+                    ShowMessage(MessageType.Info, "The image meta data has not been retreived from the server, please wait...");
                 }
                 else
                 {
@@ -1119,10 +1237,59 @@ namespace ManageWalla
             }
         }
 
+        private void TweakImageSize()
+        {
+            double imageMargin = 12.0;
+
+            bool isDetail = (bool)cmdShowInlineImageDetail.IsChecked;
+
+            if (isDetail)
+                imageMargin = imageMargin + 154.0;
+
+            double currentPaneWidth = gridRight.ColumnDefinitions[0].ActualWidth;
+            double currentWidth = sldImageSize.Value + imageMargin;
+            
+
+            double numberOfImagesInWidth = Math.Floor(currentPaneWidth / currentWidth);
+            double currentResidual = (currentPaneWidth - (currentWidth*numberOfImagesInWidth));
+            double newImageSize = 0.0;
+
+            //(currentWidth / 2.0) > currentResidual || 
+
+            if (isDetail)
+            {
+                //Indicates that the residual would be best used by decreasing the image size.
+                newImageSize = Math.Floor(currentPaneWidth / (numberOfImagesInWidth + 1)) - imageMargin;
+            }
+            else
+            {
+                //Increase the image size to fill the gap.
+                newImageSize = Math.Floor(currentPaneWidth / numberOfImagesInWidth) - imageMargin;
+            }
+
+
+            sldImageSize.Value = Math.Max(Math.Min(newImageSize, 300.0), 75.0);
+
+            tweakImageSize = false;
+        }
+
+        private void mainTwo_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            //TweakImageSize();
+        }
+
+        private void cmdShowInlineImageDetail_CheckedOrUnChecked(object sender, RoutedEventArgs e)
+        {
+            TweakImageSize();
+        }
+
         async private Task ImageListUpdateControls(CancellationToken cancelToken)
         {
             try
             {
+                if (tweakImageSize)
+                    TweakImageSize();
+
                 imageMainViewerList.Clear();
 
                 if (currentImageList == null)
@@ -1307,13 +1474,13 @@ namespace ManageWalla
                     string response = await controller.DeleteImagesAsync(deleteList);
                     if (response != "OK")
                     {
-                        DisplayMessage(response, MessageSeverity.Error, true);
+                        ShowMessage(MessageType.Error, response);
                         return;
                     }
                     else
                     {
                         string message = count.ToString() + " images were successfully deleted";
-                        DisplayMessage(message, MessageSeverity.Info, false);
+                        ShowMessage(MessageType.Info, message);
                     }
 
                     foreach (GeneralImage current in toRemoveList)
@@ -1327,7 +1494,7 @@ namespace ManageWalla
             }
             else
             {
-                DisplayMessage("You must select at least one image to perform a deletion", MessageSeverity.Warning, true);
+                ShowMessage(MessageType.Warning, "You must select at least one image to perform a deletion");
             }
 
 
@@ -1354,7 +1521,7 @@ namespace ManageWalla
                 string response = await controller.CategoryRefreshListAsync();
                 if (response != "OK")
                 {
-                    DisplayMessage(response, MessageSeverity.Error, false);
+                    ShowMessage(MessageType.Error, response);
                 }
                 redrawList = true;
             }
@@ -1563,7 +1730,7 @@ namespace ManageWalla
 
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error, false);
+                ShowMessage(MessageType.Error, response);
                 return;
             }
 
@@ -1576,7 +1743,7 @@ namespace ManageWalla
             string response = await controller.CategoryDeleteAsync(currentCategory);
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error, false);
+                ShowMessage(MessageType.Error, response);
                 return;
             }
 
@@ -1624,7 +1791,7 @@ namespace ManageWalla
                     string response = await controller.CategoryMoveImagesAsync(meToCategory.id, moveList);
                     if (response != "OK")
                     {
-                        DisplayMessage(response, MessageSeverity.Error, false);
+                        ShowMessage(MessageType.Error, response);
                         return;
                     }
 
@@ -1654,7 +1821,7 @@ namespace ManageWalla
                 string response = await controller.TagRefreshListAsync();
                 if (response != "OK")
                 {
-                    DisplayMessage(response, MessageSeverity.Error, false);
+                    ShowMessage(MessageType.Error, response);
                 }
                 redrawList = true;
             }
@@ -1760,13 +1927,13 @@ namespace ManageWalla
                     string response = await AddRemoveImagesFromTag(true, meTag.name);
                     if (response != "OK")
                     {
-                        DisplayMessage(response, MessageSeverity.Error, true);
+                        ShowMessage(MessageType.Error, response);
                         return;
                     }
                     else
                     {
                         string message = count.ToString() + " were successfully added to the tag: " + meTag.name;
-                        DisplayMessage(message, MessageSeverity.Info, false);
+                        ShowMessage(MessageType.Info, message);
                     }
 
                     RefreshAndDisplayTagList(true);
@@ -1790,13 +1957,13 @@ namespace ManageWalla
                             string response = await AddRemoveImagesFromTag(false, tagListTagRefTemp.name);
                             if (response != "OK")
                             {
-                                DisplayMessage(response, MessageSeverity.Error, true);
+                                ShowMessage(MessageType.Error, response);
                                 return;
                             }
                             else
                             {
                                 string message = count.ToString() + " were successfully removed from the tag: " + tagListTagRefTemp.name;
-                                DisplayMessage(message, MessageSeverity.Info, false);
+                                ShowMessage(MessageType.Info, message);
                             }
 
                             RefreshAndDisplayTagList(true);
@@ -1804,17 +1971,17 @@ namespace ManageWalla
                     }
                     else
                     {
-                        DisplayMessage("You must select at least one image to remove it from the tag: " + tagListTagRefTemp.name, MessageSeverity.Warning, true);
+                        ShowMessage(MessageType.Warning, "You must select at least one image to remove it from the tag: " + tagListTagRefTemp.name);
                     }
                 }
                 else
                 {
-                    DisplayMessage("You can only remove images from a tag when you have selected a tag.", MessageSeverity.Warning, true);
+                    ShowMessage(MessageType.Warning, "You can only remove images from a tag when you have selected a tag.");
                 }
             }
             else
             {
-                DisplayMessage("You can only remove images from a tag when you have selected a tag.", MessageSeverity.Warning, true);
+                ShowMessage(MessageType.Warning, "You can only remove images from a tag when you have selected a tag.");
             }
         }
 
@@ -1859,7 +2026,7 @@ namespace ManageWalla
             string response = await controller.TagDeleteAsync(currentTag);
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error, false);
+                ShowMessage(MessageType.Error, response);
                 return;
             }
 
@@ -1915,7 +2082,7 @@ namespace ManageWalla
 
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error, false);
+                ShowMessage(MessageType.Error, response);
                 return;
             }
 
@@ -2527,7 +2694,7 @@ namespace ManageWalla
                 string response = await controller.RefreshUploadStatusListAsync();
                 if (response != "OK")
                 {
-                    DisplayMessage(response, MessageSeverity.Error, false);
+                    ShowMessage(MessageType.Error, response);
                 }
             }
 
@@ -2546,7 +2713,7 @@ namespace ManageWalla
             }
         }
 
-        async private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        async private void tabAccount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (tabAccount.SelectedIndex == 1)
             {
@@ -2618,13 +2785,13 @@ namespace ManageWalla
                         await controller.AccountDetailsGet(cancelTokenSource.Token);
                         await controller.MachineSetIdentity(cancelTokenSource.Token);
                         AccountRefreshFromState();
-                        DisplayMessage("Account: " + state.account.ProfileName + " has been connected with FotoWalla", MessageSeverity.Info, false);
+                        ShowMessage(MessageType.Info, "Account: " + state.account.ProfileName + " has been connected with FotoWalla");
                         break;
                     case GlobalState.ConnectionState.Offline:
-                        DisplayMessage("No internet connection could be established with FotoWalla", MessageSeverity.Info, false);
+                        ShowMessage(MessageType.Info, "No internet connection could be established with FotoWalla, working in Offline mode");
                         break;
                     case GlobalState.ConnectionState.FailedLogin:
-                        DisplayMessage("The logon for: " + email + ", failed with the message: " + logonResponse, MessageSeverity.Info, false);
+                        ShowMessage(MessageType.Info, "The logon for: " + email + ", failed with the message: " + logonResponse);
                         cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                         break;
                 }
@@ -2632,7 +2799,8 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                DisplayMessage("The logon failed with an uunexpected problem: " + ex.Message, MessageSeverity.Error, true);
+                ShowMessage(MessageType.Error, "The logon process failed with an unexpected problem: " + ex.Message);
+                cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             }
             finally
             {
@@ -2664,7 +2832,7 @@ namespace ManageWalla
                 string response = await controller.GalleryRefreshListAsync();
                 if (response != "OK")
                 {
-                    DisplayMessage(response, MessageSeverity.Error, false);
+                    ShowMessage(MessageType.Error, response);
                 }
                 redrawList = true;
             }
@@ -3265,7 +3433,7 @@ namespace ManageWalla
                 string url = controller.GetGalleryUrl(galleryListGalleryRef.name, galleryListGalleryRef.urlComplex);
                 System.Windows.Clipboard.SetText(url);
             }
-            DisplayMessage("Web site URL copied to the clipboard", MessageSeverity.Info, false);
+            ShowMessage(MessageType.Info, "Web site URL copied to the clipboard");
         }
 
         private void cmdGalleryAdd_Click(object sender, RoutedEventArgs e)
@@ -3327,31 +3495,31 @@ namespace ManageWalla
                 galleryCategories = GalleryCategoryGetUpdateList();
 
 
-            if (cmbGallerySelectionType.SelectedIndex == 0 && galleryCategories.Length == 0)
+            if (cmbGallerySelectionType.SelectedIndex == 0 && (galleryCategories == null) || galleryCategories.Length == 0)
             {
-                DisplayMessage("The gallery does not have any catgories associated with it, so cannot be saved.", MessageSeverity.Info, true);
+                ShowMessage(MessageType.Warning, "The gallery does not have any catgories associated with it, so cannot be saved.");
                 return;
             }
             else if (cmbGallerySelectionType.SelectedIndex == 1 && lstGalleryTagListInclude.SelectedItems.Count == 0)
             {
-                DisplayMessage("The gallery does not have any tags associated with it, so cannot be saved.", MessageSeverity.Info, true);
+                ShowMessage(MessageType.Warning, "The gallery does not have any tags associated with it, so cannot be saved.");
                 return;
             }
             else if (lstGalleryTagListInclude.SelectedItems.Count == 0 && galleryCategories.Length == 0)
             {
-                DisplayMessage("The gallery does not have any catgories or tags associated with it, so cannot be saved.", MessageSeverity.Info, true);
+                ShowMessage(MessageType.Warning, "The gallery does not have any catgories or tags associated with it, so cannot be saved.");
                 return;
             }
 
             if (cmbGalleryAccessType.SelectedIndex == 1 && txtGalleryPassword.Text.Length == 0)
             {
-                DisplayMessage("This gallery has been marked as password protected, but the password does not meet the minumimum criteria of being 8 charactors long.", MessageSeverity.Info, true);
+                ShowMessage(MessageType.Warning, "This gallery has been marked as password protected, but the password does not meet the minumimum criteria of being 8 charactors long.");
                 return;
             }
 
             if (txtGalleryName.Text.Length == 0)
             {
-                DisplayMessage("You must select a name for your Gallery to continue.", MessageSeverity.Info, true);
+                ShowMessage(MessageType.Warning, "You must select a name for your Gallery to continue.");
                 return;
             }
 
@@ -3398,7 +3566,7 @@ namespace ManageWalla
 
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error, false);
+                ShowMessage(MessageType.Error, response);
                 return;
             }
 
@@ -3418,7 +3586,7 @@ namespace ManageWalla
             string response = await controller.GalleryDeleteAsync(currentGallery);
             if (response != "OK")
             {
-                DisplayMessage(response, MessageSeverity.Error, false);
+                ShowMessage(MessageType.Error, response);
                 return;
             }
 
@@ -3548,6 +3716,13 @@ namespace ManageWalla
 
  */
         }
+
+
+
+
+
+
+
 
 
 

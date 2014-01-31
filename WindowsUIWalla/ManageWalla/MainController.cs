@@ -503,7 +503,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
+                currentMain.ShowMessage(MainTwo.MessageType.Error,"There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.Message);
                 return null;
             }
         }
@@ -517,7 +517,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the tag meta data: " + tagRef.name + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
+                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the tag meta data: " + tagRef.name + ".  Error: " + ex.Message);
                 return null;
             }
             
@@ -570,7 +570,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the Category meta data: " + categoryRef.id.ToString() + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
+                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the Category meta data: " + categoryRef.id.ToString() + ".  Error: " + ex.Message);
                 return null;
             }
 
@@ -659,7 +659,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Category: " + categoryId.ToString() + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
+                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the images associated with the Category: " + categoryId.ToString() + ".  Error: " + ex.Message);
                 return null;
             }
         }
@@ -792,7 +792,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the tag meta data: " + galleryRef.name + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
+                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the tag meta data: " + galleryRef.name + ".  Error: " + ex.Message);
                 return null;
             }
 
@@ -878,7 +878,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.DisplayMessage("There was a problem retrieving the images associated with the Gallery: " + galleryName + ".  Error: " + ex.Message, MainTwo.MessageSeverity.Error, false);
+                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the images associated with the Gallery: " + galleryName + ".  Error: " + ex.Message);
                 return null;
             }
         }

@@ -121,16 +121,12 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WpfAnimatedGif">
-      <HintPath>..\..\..\..\ThirdParty\WpfAnimatedGif-1.4.4\WpfAnimatedGif-1.4.4\WpfAnimatedGif.dll</HintPath>
+      <HintPath>..\..\..\WindowsUIWalla-Dependencies\WpfAnimatedGif.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="ProjectDataType\MainCopyCache.cs" />
     <Compile Include="CacheHelper.cs" />
@@ -139,7 +135,6 @@
     <Compile Include="MainTwo.xaml.cs">
       <DependentUpon>MainTwo.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MultiSelectTreeView.cs" />
     <Compile Include="ProjectDataType\GeneralImage.cs" />
     <Compile Include="ProjectDataType\ImageMainViewerList.cs" />
     <Compile Include="ProjectDataType\ThumbCache.cs" />
@@ -168,10 +163,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="MainTwo.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
