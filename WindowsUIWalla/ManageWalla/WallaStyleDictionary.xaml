@@ -58,24 +58,7 @@
                             <Setter TargetName="innerImage" Property="Source" Value="{DynamicResource radioSelectedImageSrc}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
-                    <!-- Margin="{TemplateBinding Padding}"
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="outerRectangle" Property="Stroke">
-                                    <Setter.Value>
-                                        <SolidColorBrush Color="Black" />
-                                    </Setter.Value>
-                                </Setter>
-                                <Setter TargetName="outerRectangle" Property="Fill">
-                                    <Setter.Value>
-                                        <SolidColorBrush Color="Black" />
-                                    </Setter.Value>
-                                </Setter>                                
-                            </Trigger>                            
-                        </ControlTemplate.Triggers>
-                        -->
                 </ControlTemplate>
-
             </Setter.Value>
         </Setter>
         <Style.Triggers>
@@ -128,19 +111,22 @@
     </Style>
 
     <Style x:Key="PhotoListItem" TargetType="{x:Type ListBoxItem}">
-        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Margin" Value="2" />
         <!--
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="MaxHeight" Value="100" />
         <Setter Property="MinHeight" Value="100" />
+
         -->
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="HorizontalAlignment" Value="Center" />
-        <Setter Property="BorderBrush" Value="#FF6C8DD0" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Margin" Value="2" />
+        <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0.5" />
+        
         <Setter Property="Padding" Value="0" />
 
         <Style.Triggers>
+            <!--
             <Trigger Property="IsMouseOver" Value="true">
                 <Setter Property="Effect">
                     <Setter.Value>
@@ -166,7 +152,7 @@
                     </Setter.Value>
                 </Setter>
             </Trigger>
-
+-->
         </Style.Triggers>
     </Style>
 
@@ -186,7 +172,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TreeView">
-                    <Border Name="Border" CornerRadius="1" BorderThickness="1" 
+                    <Border Name="Border" CornerRadius="1" BorderThickness="0" 
                             BorderBrush="{StaticResource FontBorderBrush}"
                             Background="{StaticResource PaneBodyBackgroundBrush}">
                         <ScrollViewer Focusable="False" CanContentScroll="False" Padding="4">
@@ -445,32 +431,44 @@
     </Style>
 
     <Style x:Key="styleMainSectionRadioButton" TargetType="{x:Type RadioButton}">
-        <Setter Property="Margin" Value="2" />
-        <Setter Property="Background" Value="{StaticResource PaneHeaderNotSelectedBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource FontBorderDisabledBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
-        <Setter Property="TextBlock.FontSize" Value="16" />
 
+        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+        <Setter Property="Margin" Value="8,4,4,4" />
+        <Setter Property="Background" Value="{StaticResource PaneHeaderNotSelectedBrush}" />
+        <!--<Setter Property="BorderBrush" Value="{StaticResource FontBorderDisabledBrush}" />-->
+        <Setter Property="TextBlock.FontSize" Value="20" />
+
+        <!--
         <Style.Triggers>
             <Trigger Property="IsChecked" Value="true">
-                <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
                 <Setter Property="Background" Value="{StaticResource PaneHeaderBackgroundSelectedBrush}" />
             </Trigger>
-            <Trigger Property="IsMouseOver" Value="true">
-                <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
-            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsChecked" Value="false" />
+                    <Condition Property="IsMouseOver" Value="true" />
+                </MultiTrigger.Conditions>
+                <MultiTrigger.Setters>
+                    <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+                </MultiTrigger.Setters>
+            </MultiTrigger>
         </Style.Triggers>
+        -->
     </Style>
 
     <Style x:Key="styleButton" TargetType="{x:Type Button}">
-        <Setter Property="Margin" Value="2" />
-        <Setter Property="Padding" Value="6" />
+        <Setter Property="Margin" Value="4" />
+        <Setter Property="Padding" Value="6,2,6,2" />
         <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+        <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrushSelected}" />
+        <Setter Property="BorderThickness" Value="0.5" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="true">
                 <Setter Property="Background" Value="{StaticResource ControlBackgroundMouseOverBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Background" Value="{StaticResource ControlBackgroundDisabledBrush}" />
@@ -482,31 +480,18 @@
     <Style x:Key="styleToggleButton" TargetType="{x:Type ToggleButton}">
         <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}" />
         <Setter Property="Margin" Value="2" />
-        <Setter Property="Padding" Value="0" />
+        <Setter Property="Padding" Value="3" />
+        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="true">
                 <Setter Property="Background" Value="{StaticResource ControlBackgroundMouseOverBrush}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="true">
                 <Setter Property="Background" Value="{StaticResource ControlSelectedItemBackgroundBrush}" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-
-    <Style x:Key="styleRadioButton" TargetType="{x:Type RadioButton}">
-        <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}" />
-        <Setter Property="Margin" Value="2" />
-        <Setter Property="Padding" Value="6" />
-        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="true">
-                <Setter Property="Background" Value="{StaticResource ControlBackgroundMouseOverBrush}" />
-            </Trigger>
-            <Trigger Property="IsChecked" Value="true">
-                <Setter Property="Background" Value="{StaticResource ControlSelectedItemBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrushSelected}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Background" Value="{StaticResource ControlBackgroundDisabledBrush}" />
@@ -515,6 +500,31 @@
         </Style.Triggers>
     </Style>
 
+
+    <Style x:Key="styleRadioButton" TargetType="{x:Type RadioButton}">
+        <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}" />
+        <Setter Property="Margin" Value="2" />
+        <Setter Property="Padding" Value="3" />
+        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="true">
+                <Setter Property="Background" Value="{StaticResource ControlBackgroundMouseOverBrush}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="true">
+                <Setter Property="Background" Value="{StaticResource ControlSelectedItemBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrushSelected}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Background" Value="{StaticResource ControlBackgroundDisabledBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderDisabledBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!---->
     <Style TargetType="{x:Type CheckBox}" >
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -529,7 +539,7 @@
     <Style TargetType="{x:Type TextBlock}" >
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+        <!--<Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />-->
         <Setter Property="TextAlignment" Value="Left" />
     </Style>
 

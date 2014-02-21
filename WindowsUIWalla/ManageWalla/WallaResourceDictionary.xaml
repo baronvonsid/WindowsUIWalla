@@ -12,7 +12,8 @@
     <walla:GalleryCategoryModel x:Key="galleryCategoryModelKey" />
 
     <walla:WallaUploadStatusConverter x:Key="wallaUploadStatusConverterKey"  />
-
+    <walla:WallaByteToMBConverter x:Key="WallaByteToMBConverterKey" />
+    
     <XmlNamespaceMappingCollection x:Key="wallaNamespaceMappingKey">
         <XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
     </XmlNamespaceMappingCollection>
@@ -27,20 +28,27 @@
     <ImageSource x:Key="warningImageSrc">resources/icons/warning.gif</ImageSource>
     <ImageSource x:Key="menuItemImageSrc">resources/icons/menuItem.gif</ImageSource>
 
-    <ImageSource x:Key="categoryImageSrc">resources/icons/category.gif</ImageSource>
-    <ImageSource x:Key="tagImageSrc">resources/icons/tag.gif</ImageSource>
-    <ImageSource x:Key="galleryImageSrc">resources/icons/gallery.gif</ImageSource>
-    <ImageSource x:Key="uploadImageSrc">resources/icons/upload.gif</ImageSource>
+    <ImageSource x:Key="categoryImageSrc">resources/icons/category.png</ImageSource>
+    <ImageSource x:Key="categoryImageSelectedSrc">resources/icons/category_selected.png</ImageSource>
+    <ImageSource x:Key="tagImageSrc">resources/icons/tag.png</ImageSource>
+    <ImageSource x:Key="tagImageSelectedSrc">resources/icons/tag_selected.png</ImageSource>
+    <ImageSource x:Key="galleryImageSrc">resources/icons/gallery.png</ImageSource>
+    <ImageSource x:Key="galleryImageSelectedSrc">resources/icons/gallery_selected.png</ImageSource>    
+    <ImageSource x:Key="uploadImageSrc">resources/icons/upload.png</ImageSource>
+    <ImageSource x:Key="uploadImageSelectedSrc">resources/icons/upload_selected.png</ImageSource>
+    
     <ImageSource x:Key="fotoWallaImageSrc">resources/icons/fotoWalla.gif</ImageSource>
 
-
-    <ImageSource x:Key="reloadImageSrc">resources/icons/reload.gif</ImageSource>
-    <ImageSource x:Key="accountImageSrc">resources/icons/account.gif</ImageSource>
+    <ImageSource x:Key="refreshImageSrc">resources/icons/refresh.gif</ImageSource>
+    <ImageSource x:Key="refreshImageSelectedSrc">resources/icons/refresh_selected.gif</ImageSource>
+    <ImageSource x:Key="refreshImageRotatingSrc">resources/anim/refresh_rotating.gif</ImageSource>
+    <ImageSource x:Key="accountImageSrc">resources/icons/fotowallaLogo31x146.png</ImageSource>
+    <ImageSource x:Key="accountImageSelectedSrc">resources/icons/fotowallaLogoSelected31x146.png</ImageSource>
     <ImageSource x:Key="expandImageSrc">resources/icons/expand.gif</ImageSource>
     <ImageSource x:Key="contractImageSrc">resources/icons/contract.gif</ImageSource>
  
-    <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.gif</ImageSource>
-    <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notSelected.gif</ImageSource>
+    <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.png</ImageSource>
+    <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notSelected.png</ImageSource>
 
     <ImageSource x:Key="imageDetailImageSrc">resources/icons/imageDetail.gif</ImageSource>
     <ImageSource x:Key="imageSummaryImageSrc">resources/icons/imageSummary.gif</ImageSource>
@@ -50,7 +58,9 @@
     <ImageSource x:Key="navPreviousImageSrc">resources/icons/navPrevious.gif</ImageSource>
     <ImageSource x:Key="navLastImageSrc">resources/icons/navLast.gif</ImageSource>
 
-    <ImageSource x:Key="dropDownMenuImageSrc">resources/icons/dropDownMenu.gif</ImageSource>
+    <ImageSource x:Key="dropDownMenuImageSrc">resources/icons/menu.png</ImageSource>
+    <ImageSource x:Key="dropDownMenuSelectedImageSrc">resources/icons/menu_selected.png</ImageSource>
+    
     <ImageSource x:Key="removeFromTagImageSrc">resources/icons/removeFromTag.gif</ImageSource>
     <ImageSource x:Key="deleteImagesImageSrc">resources/icons/deleteImages.gif</ImageSource>
     <ImageSource x:Key="downloadOriginalsImageSrc">resources/icons/downloadOriginals.gif</ImageSource>
@@ -72,6 +82,46 @@
 -->
 
     <!-- General Window and Panes -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="ImageViewBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="WallaBannerBackgroundBrush" Color="White" />
+
+    <SolidColorBrush x:Key="PaneHeaderBackgroundSelectedBrush" Color="#00A7BF" />
+    <SolidColorBrush x:Key="PaneHeaderNotSelectedBrush" Color="White" />
+    <SolidColorBrush x:Key="PaneBodyBackgroundBrush" Color="White" />
+    
+    
+    <!-- Font and Border -->
+    <SolidColorBrush x:Key="FontBorderBrush" Color="#374A5D" />
+    <Color x:Key="FontBorderColour">#374A5D</Color>
+    <SolidColorBrush x:Key="FontBorderBrushSelected" Color="#00A7BF" />
+    <Color x:Key="FontBorderColourSelected">#00A7BF</Color>
+    
+    <SolidColorBrush x:Key="FontBorderDisabledBrush" Color="#FFA0A0A0" />
+    <Color x:Key="FontBorderDisabledColour">#FFA0A0A0</Color>
+    
+    <!-- Controls -->
+    <SolidColorBrush x:Key="EntryControlBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="EntryControlBackgroundDisabledBrush" Color="LightGray" />
+    
+    <!-- #FFF9FDB9-->
+    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="ControlBackgroundDisabledBrush" Color="White" />
+
+    <SolidColorBrush x:Key="ControlBackgroundMouseOverBrush" Color="White" />
+    <Color x:Key="ControlBackgroundMouseOverColour">White</Color>
+
+    <SolidColorBrush x:Key="ControlSelectedItemBackgroundBrush" Color="White" />
+    <Color x:Key="ControlSelectedItemBackgroundColour">White</Color>
+
+    <SolidColorBrush x:Key="AlertBackgroundBrush" Color="White" />
+  
+    
+    
+    
+    
+    <!--
+
     <SolidColorBrush x:Key="BackgroundBrush" Color="#FFFFFFFA" />
     <SolidColorBrush x:Key="ImageViewBackgroundBrush" Color="DarkGray" />
     <SolidColorBrush x:Key="WallaBannerBackgroundBrush" Color="#FFEEEEEE" />
@@ -79,20 +129,20 @@
     <SolidColorBrush x:Key="PaneHeaderBackgroundSelectedBrush" Color="#FFB0D1BF" />
     <SolidColorBrush x:Key="PaneHeaderNotSelectedBrush" Color="#FFDEECE4" />
     <SolidColorBrush x:Key="PaneBodyBackgroundBrush" Color="#FFE8EAE9" />
-    
-    
-    <!-- Font and Border -->
-    <SolidColorBrush x:Key="FontBorderBrush" Color="#FF424242" />
-    <Color x:Key="FontBorderColour">#FF424242</Color>
+
+
+    <SolidColorBrush x:Key="FontBorderBrush" Color="#FF6E6B6B" />
+    <Color x:Key="FontBorderColour">#FF6E6B6B</Color>
     <SolidColorBrush x:Key="FontBorderDisabledBrush" Color="#FFA0A0A0" />
     <Color x:Key="FontBorderDisabledColour">#FFA0A0A0</Color>
-    
-    <!-- Controls -->
+
+
     <SolidColorBrush x:Key="EntryControlBackgroundBrush" Color="White" />
     <SolidColorBrush x:Key="EntryControlBackgroundDisabledBrush" Color="LightGray" />
 
-    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="#FFF9FDB9" />
-    <SolidColorBrush x:Key="ControlBackgroundDisabledBrush" Color="#FFE8EAE9" />
+
+    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="ControlBackgroundDisabledBrush" Color="White" />
 
     <SolidColorBrush x:Key="ControlBackgroundMouseOverBrush" Color="#FFA5BBEA" />
     <Color x:Key="ControlBackgroundMouseOverColour">#FFA5BBEA</Color>
@@ -101,7 +151,9 @@
     <Color x:Key="ControlSelectedItemBackgroundColour">#FFB4CCFF</Color>
 
     <SolidColorBrush x:Key="AlertBackgroundBrush" Color="#FFE6B9A4" />
-  
+
+    -->
+    
     
     <!--
     <Color x:Key="SelectedBackgroundColour">Yellow</Color>

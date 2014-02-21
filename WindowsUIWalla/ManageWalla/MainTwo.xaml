@@ -1,23 +1,25 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:walla="clr-namespace:ManageWalla"
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
+        xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary"
         x:Name="mainTwo" x:Class="ManageWalla.MainTwo"
-        Title="FotoWalla"  FontFamily="Tahoma" FontWeight="Light" Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" SizeChanged="mainTwo_SizeChanged" >
+        Title="FotoWalla"  FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" SizeChanged="mainTwo_SizeChanged" FontSize="18" >
 
     <Grid>
-        <Grid x:Name="gridLeft" Margin="2,2,0,0" Background="{StaticResource BackgroundBrush}">
+        <Grid x:Name="gridLeft" Margin="5,15,2,5" Background="{StaticResource BackgroundBrush}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
+                <RowDefinition Height="60" />
+                <RowDefinition Height="50" />
                 <RowDefinition Height="0"/>
-                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
                 <RowDefinition Height="0"/>
-                <RowDefinition Height="40" />
-                <RowDefinition Height="0"/>
-                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="0"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40" />
@@ -110,7 +112,7 @@
                         </ComboBox.ItemContainerStyle>
 
                     </ComboBox>
-                    <TextBlock x:Name="lblImageListNameVert" Text="Gallery Name" FontSize="16" HorizontalAlignment="Left" Margin="0,20,0,0">
+                    <TextBlock x:Name="lblImageListNameVert" Text="Gallery Name" HorizontalAlignment="Left" Margin="0,20,0,0">
                         <TextBlock.LayoutTransform>
                             <RotateTransform Angle="-90"></RotateTransform>
                         </TextBlock.LayoutTransform>
@@ -126,156 +128,92 @@
 
             </DockPanel>
 
-            <DockPanel Grid.Column="1" Grid.Row="0" Margin="2,2,2,2" LastChildFill="True" Background="{StaticResource WallaBannerBackgroundBrush}">
-                <Button x:Name="cmdContract" DockPanel.Dock="Right" Margin="0,0,4,0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdContract_Click" Padding="0">
-                    <Button.Content>
-                        <Image Source="{StaticResource contractImageSrc}" Height="28" />
-                    </Button.Content>
-                </Button>
-                <Button x:Name="cmdAccount" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccount_Click" Padding="0">
-                    <Button.Content>
-                        <Image Source="{StaticResource accountImageSrc}" Height="28" />
-                    </Button.Content>
-                </Button>
-                <Label x:Name="lblFotoWalla" FontSize="16" VerticalContentAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="{StaticResource FontBorderBrush}" MouseUp="lblFotoWalla_MouseUp">
-                    <Label.Content>
-                        <TextBlock>foto<Italic>walla</Italic></TextBlock>
-                    </Label.Content>
-                </Label>
-            </DockPanel>
+            <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Vertical">
+                <DockPanel Margin="12,0,10,0" LastChildFill="True" Background="{StaticResource WallaBannerBackgroundBrush}" VerticalAlignment="Center">
 
-            <RadioButton x:Name="radCategory" GroupName="MainSection" Grid.Column="1" Grid.Row="1" Checked="radCategory_Checked" Template="{StaticResource templateRadioButtonPaneHeader}" Style="{StaticResource styleMainSectionRadioButton}">
-                <DockPanel LastChildFill="True">
-                    <Button x:Name="cmdCategoryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategoryRefresh_Click" Padding="0">
-                        <Button.Content>
-                            <Image Source="{StaticResource reloadImageSrc}" Height="28" />
-                        </Button.Content>
+                    <Button x:Name="cmdContract" FontSize="30" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdContract_Click" Padding="0" Margin="0" BorderThickness="0">
+                        <Button.Content>&lt;</Button.Content>
                     </Button>
 
-                    <Image Source="{StaticResource categoryImageSrc}" Height="28" DockPanel.Dock="Left"/>
-                    <Label Content="Category" VerticalContentAlignment="Center" />
-                </DockPanel>
-            </RadioButton>
-
-            <DockPanel x:Name="panCategoryUnavailable" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" Margin="2" Background="{StaticResource PaneBodyBackgroundBrush}">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="Categories not loaded..." TextAlignment="Center" />
-                </StackPanel>
-            </DockPanel>
-
-            <Grid x:Name="gridCategory" Grid.Column="1" Grid.Row="2" Background="{StaticResource PaneBodyBackgroundBrush}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="34" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="80" />
-                    <RowDefinition Height="34" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2">
-                    <TreeView x:Name="treeCategoryView">
-                        <!-- filled out with code behind -->
-                    </TreeView>
-                </ScrollViewer>
-
-                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                    <Button x:Name="cmdCategoryAdd" Content="Add New" Click="cmdCategoryAdd_Click" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
-                    <Button x:Name="cmdCategoryEdit" Content="Edit Existing" Click="cmdCategoryEdit_Click" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
-                </StackPanel>
-
-                <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-                <TextBox x:Name="txtCategoryName" Grid.Column="1" Grid.Row="2" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" Margin="2" />
-                <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
-                <TextBox x:Name="txtCategoryDescription" Grid.Column="1" Grid.Row="3" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" MaxLines="1" MaxLength="200" Margin="2"/>
-
-                <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
-                    <Button x:Name="cmdCategorySave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategorySave_Click" />
-                    <Button x:Name="cmdCategoryCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategoryCancel_Click" />
-                    <Button x:Name="cmdCategoryDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategoryDelete_Click" />
-                </StackPanel>
-
-            </Grid>
-
-            <RadioButton x:Name="radTag" GroupName="MainSection" Grid.Column="1" Grid.Row="3" Checked="radTag_Checked" Template="{StaticResource templateRadioButtonPaneHeader}" Style="{StaticResource styleMainSectionRadioButton}">
-                <DockPanel LastChildFill="True">
-                    <Button x:Name="cmdTagRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagRefresh_Click" Padding="0">
-                        <Button.Content>
-                            <Image Source="{StaticResource reloadImageSrc}" Height="28" />
-                        </Button.Content>
+                    <!-- <Image Source="{StaticResource contractImageSrc}" Height="28" /> -->
+                    <Button x:Name="cmdAccount" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Click="cmdAccount_Click" Padding="0" BorderThickness="0">
+                        <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Image x:Name="imageContent" Source="{StaticResource accountImageSrc}" SnapsToDevicePixels="True" Height="31" />
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="imageContent" Property="Source" Value="{StaticResource accountImageSelectedSrc}" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="imageContent" Property="Source" Value="{StaticResource accountImageSrc}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter TargetName="imageContent" Property="Opacity" Value="0.7" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                     </Button>
-                    <Image Source="{StaticResource tagImageSrc}" Height="28" DockPanel.Dock="Left"/>
-                    <Label Content="Tag" VerticalContentAlignment="Center" />
+                    <Label x:Name="lblFotoWalla" FontSize="24" VerticalContentAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="{StaticResource FontBorderBrush}">
+                    </Label>
                 </DockPanel>
+
+
+                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="500" Y2="5" StrokeThickness="0.5" Margin="0,8,0,0" />
+
+            </StackPanel>
+
+            <RadioButton x:Name="radGallery" GroupName="MainSection" Tag="false" Grid.Column="1" Grid.Row="1" Checked="radGallery_Checked" Style="{StaticResource styleMainSectionRadioButton}">
+                <RadioButton.Template>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <Grid>
+                            <Rectangle x:Name="outerRectangle" StrokeThickness="0">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Background.Color}" Opacity="0.5" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
+                                <Button x:Name="cmdGalleryRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Hidden" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdGalleryRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
+
+                                <Image x:Name="imgGallery" Source="{StaticResource galleryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Label Content="Gallery" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
+                            </DockPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+                                <Setter Property="Background" Value="{StaticResource PaneHeaderBackgroundSelectedBrush}" />
+                                <Setter TargetName="imgGallery" Property="Source" Value="{StaticResource galleryImageSelectedSrc}" />
+                                <Setter TargetName="cmdGalleryRefresh" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsChecked" Value="false" />
+                                    <Condition Property="IsMouseOver" Value="true" />
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+                                    <Setter TargetName="imgGallery" Property="Source" Value="{StaticResource galleryImageSelectedSrc}" />
+                                </MultiTrigger.Setters>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </RadioButton.Template>
             </RadioButton>
 
-            <DockPanel x:Name="panTagUnavailable" Grid.Column="1" Grid.Row="4" VerticalAlignment="Stretch" Background="{StaticResource PaneBodyBackgroundBrush}" Margin="2" Visibility="Collapsed">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="Tags not loaded..." TextAlignment="Center" />
-                </StackPanel>
-            </DockPanel>
-
-            <Grid x:Name="gridTag" Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="1" Grid.Row="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="34" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="80" />
-                    <RowDefinition Height="34" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100" />
-                    <ColumnDefinition Width="200" />
-                </Grid.ColumnDefinitions>
-
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Disabled">
-                    <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal">
-                    </WrapPanel>
-                </ScrollViewer>
-
-                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                    <Button x:Name="cmdTagAdd" Content="Add Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagAdd_Click"  />
-                    <Button x:Name="cmdTagEdit" Content="Edit Tag" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagEdit_Click" />
-                </StackPanel>
-
-                <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-                <TextBox x:Name="txtTagName"  Grid.Column="1" Grid.Row="2" Margin="2" MaxLines="1" MaxLength="30" CharacterCasing="Upper" PreviewTextInput="txtTagName_PreviewTextInput" />
-                <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
-                <TextBox x:Name="txtTagDescription" Margin="2" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
-
-                <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
-                    <Button x:Name="cmdTagSave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagSave_Click" />
-                    <Button x:Name="cmdTagCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagCancel_Click"  />
-                    <Button x:Name="cmdTagDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagDelete_Click" />
-                </StackPanel>
-            </Grid>
-
-            <RadioButton x:Name="radGallery" GroupName="MainSection" Grid.Column="1" Grid.Row="5" Checked="radGallery_Checked"  Template="{StaticResource templateRadioButtonPaneHeader}" Style="{StaticResource styleMainSectionRadioButton}">
-                <DockPanel LastChildFill="True">
-                    <Button x:Name="cmdGalleryRefresh" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryRefresh_Click" Padding="0">
-                        <Button.Content>
-                            <Image Source="{StaticResource reloadImageSrc}" Height="28" />
-                        </Button.Content>
-                    </Button>
-                    <Image Source="{StaticResource galleryImageSrc}" Height="28" DockPanel.Dock="Left"/>
-                    <Label Content="Gallery" VerticalContentAlignment="Center" />
-                </DockPanel>
-            </RadioButton>
-
-            <DockPanel x:Name="panGalleryUnavailable" Grid.Column="1" Grid.Row="6" VerticalAlignment="Stretch" Background="{StaticResource PaneBodyBackgroundBrush}" Margin="2" Visibility="Collapsed">
+            <DockPanel x:Name="panGalleryUnavailable" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" Background="{StaticResource PaneBodyBackgroundBrush}" Margin="2" Visibility="Collapsed">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock Text="Galleries not loaded..." TextAlignment="Center" />
                 </StackPanel>
             </DockPanel>
 
-            <Grid x:Name="gridGallery" Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="1" Grid.Row="6" Margin="2">
+            <Grid x:Name="gridGallery" Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="1" Grid.Row="2"  Margin="8,4,4,4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <!-- wrap galleries -->
-                    <RowDefinition Height="34" />
+                    <RowDefinition Height="48" />
                     <!-- add edit buttons -->
                     <RowDefinition Height="30" />
                     <!-- Name -->
@@ -285,7 +223,7 @@
                     <!-- Access Type -->
                     <RowDefinition Height="30" />
                     <!-- Password -->
-                    <RowDefinition Height="34" />
+                    <RowDefinition Height="48" />
                     <!-- Save buttons -->
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -298,11 +236,14 @@
                     </WrapPanel>
                 </ScrollViewer>
 
-                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                    <Button x:Name="cmdGalleryView" Content="View" ToolTip="Open Gallery in your Browser" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryView_Click"  />
-                    <Button x:Name="cmdGalleryCopyUrl" Content="Copy Url" ToolTip="Copy Url to your Clipboard" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCopyUrl_Click"  />
-                    <Button x:Name="cmdGalleryAdd" Content="Add" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryAdd_Click"  />
-                    <Button x:Name="cmdGalleryEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryEdit_Click" />
+                <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
+                    <StackPanel Orientation="Horizontal" >
+                        <Button x:Name="cmdGalleryView" Content="View" ToolTip="Open Gallery in your Browser" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryView_Click"  />
+                        <Button x:Name="cmdGalleryCopyUrl" Content="Copy Url" ToolTip="Copy Url to your Clipboard" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCopyUrl_Click"  />
+                        <Button x:Name="cmdGalleryAdd" Content="Add" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryAdd_Click"  />
+                        <Button x:Name="cmdGalleryEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryEdit_Click" />
+                    </StackPanel>
                 </StackPanel>
 
                 <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
@@ -338,46 +279,257 @@
                 <TextBox x:Name="txtGalleryPassword" Margin="2" Grid.Column="1" Grid.Row="5" MaxLines="1" MaxLength="30"/>
 
 
-
-                <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
-                    <Button x:Name="cmdGallerySave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGallerySave_Click" />
-                    <Button x:Name="cmdGalleryCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCancel_Click"  />
-                    <Button x:Name="cmdGalleryDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryDelete_Click" />
+                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
+                    <StackPanel Orientation="Horizontal"  VerticalAlignment="Bottom">
+                        <Button x:Name="cmdGallerySave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGallerySave_Click" />
+                        <Button x:Name="cmdGalleryCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCancel_Click"  />
+                        <Button x:Name="cmdGalleryDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryDelete_Click" />
+                    </StackPanel>
                 </StackPanel>
+
+
             </Grid>
 
-            <RadioButton x:Name="radUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Checked="radUpload_Checked"  Template="{StaticResource templateRadioButtonPaneHeader}" Style="{StaticResource styleMainSectionRadioButton}">
-                <DockPanel LastChildFill="True">
-                    <Image Source="Icons/heart.gif" Height="28" DockPanel.Dock="Left"/>
-                    <Label x:Name="lblUploadProposedImageCount" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" DockPanel.Dock="Right" FontSize="12" VerticalContentAlignment="Center">
-                        <Label.Content>
-                            <TextBlock>
-                                <TextBlock.Text>
-                                    <Binding Path="Count" Source="{StaticResource uploadImagefileListKey}">
-                                        <Binding.StringFormat>{0} Fotos</Binding.StringFormat>
-                                    </Binding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </Label.Content>
-                    </Label>
-                    <Label Content="Upload" VerticalContentAlignment="Center" />
-                </DockPanel>
+            <RadioButton x:Name="radCategory" GroupName="MainSection" Tag="false" Grid.Column="1" Grid.Row="3" Checked="radCategory_Checked" Style="{StaticResource styleMainSectionRadioButton}">
+                <RadioButton.Template>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <Grid>
+                            <Rectangle x:Name="outerRectangle" StrokeThickness="0">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Background.Color}" Opacity="0.5" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
+                                <Button x:Name="cmdCategoryRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Hidden" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdCategoryRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
+
+                                <Image x:Name="imgCategory" Source="{StaticResource categoryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Label Content="Category" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
+                            </DockPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+                                <Setter Property="Background" Value="{StaticResource PaneHeaderBackgroundSelectedBrush}" />
+                                <Setter TargetName="imgCategory" Property="Source" Value="{StaticResource categoryImageSelectedSrc}" />
+                                <Setter TargetName="cmdCategoryRefresh" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsChecked" Value="false" />
+                                    <Condition Property="IsMouseOver" Value="true" />
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+                                    <Setter TargetName="imgCategory" Property="Source" Value="{StaticResource categoryImageSelectedSrc}" />
+                                </MultiTrigger.Setters>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </RadioButton.Template>
             </RadioButton>
 
-            <Grid x:Name="grdUploadSettings" Grid.Column="1" Grid.Row="8" DataContext="{StaticResource uploadUIStateKey}" Background="{StaticResource PaneBodyBackgroundBrush}" >
+            <DockPanel x:Name="panCategoryUnavailable" Grid.Column="1" Grid.Row="4" VerticalAlignment="Stretch" Margin="2" Background="{StaticResource PaneBodyBackgroundBrush}">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="Categories not loaded..." TextAlignment="Center" />
+                </StackPanel>
+            </DockPanel>
+
+            <Grid x:Name="gridCategory" Grid.Column="1" Grid.Row="4" Background="{StaticResource PaneBodyBackgroundBrush}" Margin="8,5,5,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="48" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="80" />
+                    <RowDefinition Height="48" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition MinWidth="100" />
+                </Grid.ColumnDefinitions>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2">
+                    <TreeView x:Name="treeCategoryView">
+                        <!-- filled out with code behind -->
+                    </TreeView>
+                </ScrollViewer>
+
+                <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
+                    <StackPanel Orientation="Horizontal" >
+                        <Button x:Name="cmdCategoryAdd" Content="Add" Click="cmdCategoryAdd_Click" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                        <Button x:Name="cmdCategoryEdit" Content="Edit" Click="cmdCategoryEdit_Click" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                    </StackPanel>
+                </StackPanel>
+                
+                <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
+                <TextBox x:Name="txtCategoryName" Grid.Column="1" Grid.Row="2" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" Margin="2" />
+                <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+                <TextBox x:Name="txtCategoryDescription" Grid.Column="1" Grid.Row="3" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" MaxLines="1" MaxLength="200" Margin="2"/>
+
+                <StackPanel Orientation="Vertical" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
+                    <StackPanel Orientation="Horizontal" >
+                        <Button x:Name="cmdCategorySave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategorySave_Click" />
+                        <Button x:Name="cmdCategoryCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategoryCancel_Click" />
+                        <Button x:Name="cmdCategoryDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdCategoryDelete_Click" />
+                    </StackPanel>
+                </StackPanel>
+                
+
+
+            </Grid>
+
+            <RadioButton x:Name="radTag" GroupName="MainSection" Tag="False" Grid.Column="1" Grid.Row="5" Checked="radTag_Checked" Style="{StaticResource styleMainSectionRadioButton}">
+                <RadioButton.Template>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <Grid>
+                            <Rectangle x:Name="outerRectangle" StrokeThickness="0">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Background.Color}" Opacity="0.5" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
+                                <Button x:Name="cmdTagRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Hidden" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdTagRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
+
+                                <Image x:Name="imgTag" Source="{StaticResource tagImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Label Content="Tag" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
+                            </DockPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+                                <Setter Property="Background" Value="{StaticResource PaneHeaderBackgroundSelectedBrush}" />
+                                <Setter TargetName="imgTag" Property="Source" Value="{StaticResource tagImageSelectedSrc}" />
+                                <Setter TargetName="cmdTagRefresh" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsChecked" Value="false" />
+                                    <Condition Property="IsMouseOver" Value="true" />
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+                                    <Setter TargetName="imgTag" Property="Source" Value="{StaticResource tagImageSelectedSrc}" />
+                                </MultiTrigger.Setters>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </RadioButton.Template>
+            </RadioButton>
+
+            <DockPanel x:Name="panTagUnavailable" Grid.Column="1" Grid.Row="6" VerticalAlignment="Stretch" Background="{StaticResource PaneBodyBackgroundBrush}" Margin="2" Visibility="Collapsed">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="Tags not loaded..." TextAlignment="Center" />
+                </StackPanel>
+            </DockPanel>
+
+            <Grid x:Name="gridTag" Background="{StaticResource PaneBodyBackgroundBrush}"  Margin="8,5,5,5" Grid.Column="1" Grid.Row="6">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="48" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="80" />
+                    <RowDefinition Height="48" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition MinWidth="100" />
+                </Grid.ColumnDefinitions>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Disabled">
+                    <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal">
+                    </WrapPanel>
+                </ScrollViewer>
+
+                <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
+                    <StackPanel Orientation="Horizontal" >
+                        <Button x:Name="cmdTagAdd" Content="Add" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagAdd_Click"  />
+                        <Button x:Name="cmdTagEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagEdit_Click" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
+                <TextBox x:Name="txtTagName"  Grid.Column="1" Grid.Row="2" Margin="2" MaxLines="1" MaxLength="30" CharacterCasing="Upper" PreviewTextInput="txtTagName_PreviewTextInput" />
+                <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+                <TextBox x:Name="txtTagDescription" Margin="2" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
+
+                <StackPanel Orientation="Vertical" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
+                    <StackPanel Orientation="Horizontal" >
+                        <Button x:Name="cmdTagSave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagSave_Click" />
+                        <Button x:Name="cmdTagCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagCancel_Click"  />
+                        <Button x:Name="cmdTagDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagDelete_Click" />
+                    </StackPanel>
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="300" Y2="1" StrokeThickness="0.5" Margin="0,4,0,4" />
+                </StackPanel>
+                
+
+            </Grid>
+
+            <RadioButton x:Name="radUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Tag="False"  Margin="8,5,5,5" Checked="radUpload_Checked" Style="{StaticResource styleMainSectionRadioButton}">
+                <RadioButton.Template>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <Grid>
+                            <Rectangle x:Name="outerRectangle" StrokeThickness="0">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Background.Color}" Opacity="0.5" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
+                                <Label x:Name="lblUploadProposedImageCount" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" DockPanel.Dock="Right" VerticalContentAlignment="Center" >
+                                    <Label.Content>
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <Binding Path="Count" Source="{StaticResource uploadImagefileListKey}">
+                                                    <Binding.StringFormat>{0} Fotos</Binding.StringFormat>
+                                                </Binding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </Label.Content>
+                                </Label>
+                                
+                                <Image x:Name="imgUpload" Source="{StaticResource tagImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Label Content="Upload" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
+                            </DockPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+                                <Setter Property="Background" Value="{StaticResource PaneHeaderBackgroundSelectedBrush}" />
+                                <Setter TargetName="imgUpload" Property="Source" Value="{StaticResource uploadImageSelectedSrc}" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsChecked" Value="false" />
+                                    <Condition Property="IsMouseOver" Value="true" />
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+                                    <Setter TargetName="imgUpload" Property="Source" Value="{StaticResource uploadImageSelectedSrc}" />
+                                </MultiTrigger.Setters>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </RadioButton.Template>
+            </RadioButton>
+
+            <Grid x:Name="grdUploadSettings" Grid.Column="1" Grid.Row="8" DataContext="{StaticResource uploadUIStateKey}" Background="{StaticResource PaneBodyBackgroundBrush}"  Margin="8,5,5,5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="30" />
                     <RowDefinition Height="30" />
                     <RowDefinition Height="80" />
-                    <RowDefinition Height="34" />
+                    <RowDefinition Height="50" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100" />
-                    <ColumnDefinition Width="200" />
+                    <ColumnDefinition MinWidth="100" />
                 </Grid.ColumnDefinitions>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2">
+
                     <TreeView x:Name="treeUploadCategoryView" >
 
                     </TreeView>
@@ -397,19 +549,21 @@
                 <Label Content="Description" Grid.Column="0" Grid.Row="3" />
                 <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="3" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
 
-                <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
-                    <Button x:Name="cmdUploadAll" Content="Upload" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadAll_Click"/>
-                    <Button x:Name="cmdUploadClear" Content="Clear" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
-                    <Button x:Name="cmdUploadImportFolder" Content="Add Folder" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFolder_Click" />
-                    <Button x:Name="cmdUploadImportFiles" Content="Add Images"  Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFiles_Click" />
+                <StackPanel Orientation="Vertical" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="300" Y2="1" StrokeThickness="0.5" Margin="0,10,0,4" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="cmdUploadAll" Content="Upload" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadAll_Click" />
+                        <Button x:Name="cmdUploadClear" Content="Clear" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
+                        <Button x:Name="cmdUploadImportFolder" Content="Add Folder" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFolder_Click" />
+                        <Button x:Name="cmdUploadImportFiles" Content="Add Images"  Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFiles_Click" />
+                    </StackPanel>
                 </StackPanel>
 
             </Grid>
 
-
             <Grid x:Name="gridRight" Margin="0,0,0,0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="9">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="40" />
+                    <RowDefinition Height="60" />
                     <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -417,82 +571,109 @@
                     <ColumnDefinition Width="0"/>
                 </Grid.ColumnDefinitions>
 
-                <DockPanel x:Name="panGridRightHeader" Grid.Column="0" Grid.Row="0" Visibility="Visible" Grid.ColumnSpan="2" Margin="2,2,2,2" Background="{StaticResource WallaBannerBackgroundBrush}" HorizontalAlignment="Stretch" LastChildFill="True">
+                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" x:Name="panGridRightHeader" Visibility="Visible" Orientation="Vertical">
+                    <DockPanel Margin="6,0,6,0" Background="{StaticResource WallaBannerBackgroundBrush}" HorizontalAlignment="Stretch" LastChildFill="True">
 
-                    <ToggleButton x:Name="cmdShowActionsMenu" DockPanel.Dock="Left" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" IsChecked="False" Click="cmdShowActionsMenu_Click">
-                        <ToggleButton.Content>
-                            <Image Source="{StaticResource dropDownMenuImageSrc}" Height="28" />
-                        </ToggleButton.Content>
-                        <ToggleButton.ContextMenu>
-                            <ContextMenu x:Name="menuImageActions" Opacity="0.9" StaysOpen="True" IsOpen="{Binding ElementName=cmdShowActionsMenu, Path=IsChecked}">
-                                <MenuItem Header="Remove from Tag" Click="TagRemoveImages_Click">
-                                    <MenuItem.Icon>
-                                        <Image Source="{StaticResource removeFromTagImageSrc}" Height="20" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Delete Images" Click="DeleteImages_Click" ToolTip="Permanently deletes the selected image from fotowalla">
-                                    <MenuItem.Icon>
-                                        <Image Source="{StaticResource deleteImagesImageSrc}" Height="20" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Download Originals" ToolTip="Requests a download of the originals, available in the downloads section.">
-                                    <MenuItem.Icon>
-                                        <Image Source="{StaticResource downloadOriginalsImageSrc}" Height="20" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
+                        <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="0,0,6,0" />
 
-                        </ToggleButton.ContextMenu>
-                    </ToggleButton>
-
-                    <ToggleButton x:Name="cmdShowInlineImageDetail" IsChecked="False" DockPanel.Dock="Left" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Padding="0" Checked="cmdShowInlineImageDetail_CheckedOrUnChecked" Unchecked="cmdShowInlineImageDetail_CheckedOrUnChecked" >
-                        <ToggleButton.Content>
-                            <Image Source="{StaticResource imageSummaryImageSrc}" Height="28" />
-                        </ToggleButton.Content>
-                    </ToggleButton>
-
-                    <Slider x:Name="sldImageSize" DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
+                        <Slider x:Name="sldImageSize" DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
                             Value="187"
                             Delay="500"
                             Interval="10"
                             TickPlacement="BottomRight"
                             Minimum="75"
                             Maximum="300"
-                            Width="100" ></Slider>
+                            Width="100" Margin="6" ValueChanged="sldImageSize_ValueChanged" ></Slider>
+
+                        <ToggleButton x:Name="cmdShowActionsMenu" DockPanel.Dock="Right" ContextMenuService.IsEnabled="False" IsChecked="{Binding Path=ContextMenu.IsOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="imageMenuContent" Source="{StaticResource dropDownMenuImageSrc}" SnapsToDevicePixels="True" Height="28" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="imageMenuContent" Property="Source" Value="{StaticResource dropDownMenuSelectedImageSrc}" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="imageMenuContent" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                            
+                            <ToggleButton.ContextMenu>
+                                <!-- IsOpen="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.IsChecked}"> -->
+                                <ContextMenu x:Name="menuImageActions" Opacity="0.9" StaysOpen="True">
+
+                                    <MenuItem x:Name="cmdShowInlineImageDetail" Header="Show image details" IsCheckable="True" IsChecked="False" Checked="cmdShowInlineImageDetail_CheckedUnChecked" Unchecked="cmdShowInlineImageDetail_CheckedUnChecked">
+                                        <MenuItem.Icon>
+                                            <Image Source="{StaticResource imageSummaryImageSrc}" Height="20" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <MenuItem x:Name="cmdMultiSelectionMode" Header="Select images" IsCheckable="True" IsChecked="False" Checked="cmdMultiSelectionMode_Checked" Unchecked="cmdMultiSelectionMode_Unchecked">
+                                        <MenuItem.Icon>
+                                            <Image Source="{StaticResource imageSummaryImageSrc}" Height="20" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    
+                                    <Separator />
+                                    <MenuItem Header="Remove from Tag" Click="TagRemoveImages_Click">
+                                        <MenuItem.Icon>
+                                            <Image Source="{StaticResource removeFromTagImageSrc}" Height="20" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Delete Images" Click="DeleteImages_Click" ToolTip="Permanently deletes the selected image from fotowalla">
+                                        <MenuItem.Icon>
+                                            <Image Source="{StaticResource deleteImagesImageSrc}" Height="20" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Download Originals" ToolTip="Requests a download of the originals, available in the downloads section.">
+                                        <MenuItem.Icon>
+                                            <Image Source="{StaticResource downloadOriginalsImageSrc}" Height="20" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </ToggleButton.ContextMenu>
+                        </ToggleButton>
+
+                        <Line x:Name="lineActionsMenu" Visibility="Visible" DockPanel.Dock="Right" Stroke="{StaticResource FontBorderBrushSelected}" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="6,0,6,0" />
+
+                        <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="0" Margin="0" BorderThickness="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click">
+                            <Button.Content>
+                                <Image Source="{StaticResource navFirstImageSrc}" Height="28" />
+                            </Button.Content>
+                        </Button>
+                        <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Padding="0" Margin="0" BorderThickness="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click">
+                            <Button.Content>
+                                <Image Source="{StaticResource navPreviousImageSrc}" Height="28" />
+                            </Button.Content>
+                        </Button>
+                        <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Padding="0" Margin="0" BorderThickness="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click">
+                            <Button.Content>
+                                <Image Source="{StaticResource navNextImageSrc}" Height="28" />
+                            </Button.Content>
+                        </Button>
+                        <Button x:Name="cmdImageNavigationBegin" DockPanel.Dock="Right" Padding="0" Margin="0" BorderThickness="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click">
+                            <Button.Content>
+                                <Image Source="{StaticResource navLastImageSrc}" Height="28" />
+                            </Button.Content>
+                        </Button>
 
 
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Label x:Name="lblImageListName" Content="Gallery Name"  Background="Transparent" FontSize="20" />
+                            <ComboBox x:Name="cmbGallerySection" Margin="0" MinWidth="100" SelectionChanged="cmbGallerySection_SelectionChanged" >
 
-                    <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click">
-                        <Button.Content>
-                            <Image Source="{StaticResource navFirstImageSrc}" Height="28" />
-                        </Button.Content>
-                    </Button>
-                    <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click">
-                        <Button.Content>
-                            <Image Source="{StaticResource navPreviousImageSrc}" Height="28" />
-                        </Button.Content>
-                    </Button>
-                    <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click">
-                        <Button.Content>
-                            <Image Source="{StaticResource navNextImageSrc}" Height="28" />
-                        </Button.Content>
-                    </Button>
-                    <Button x:Name="cmdImageNavigationBegin" DockPanel.Dock="Right" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click">
-                        <Button.Content>
-                            <Image Source="{StaticResource navLastImageSrc}" Height="28" />
-                        </Button.Content>
-                    </Button>
+                            </ComboBox>
+                        </StackPanel>
 
+                    </DockPanel>
 
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Label x:Name="lblImageListName" FontSize="16" Content="Gallery Name"  Background="Transparent" />
-                        <ComboBox x:Name="cmbGallerySection" Margin="2" MinWidth="100" SelectionChanged="cmbGallerySection_SelectionChanged" >
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="2000" Y2="5" StrokeThickness="0.5" Margin="0,5,0,0" />
 
-                        </ComboBox>
-                    </StackPanel>
-
-                </DockPanel>
-
+                </StackPanel>
                 <TabControl Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Collapsed" x:Name="tabGalleryConfiguration" Background="{StaticResource ImageViewBackgroundBrush}">
                     <TabItem Header="Gallery Presentation">
                         <Grid>
@@ -771,37 +952,65 @@
                     </TabItem>
                 </TabControl>
 
-
                 <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
                             		    x:Name ="lstImageMainViewerList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource imageMainViewerListKey}}"
                             		    ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                        SelectionMode="Multiple"
+                                        SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
                                         Visibility="Collapsed" 
                                         ItemContainerStyle="{DynamicResource PhotoListItem}"
-                                        >
+                                        Margin="2,2,0,0">
 
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <!--   <ContentControl Visibility="{Binding Path=IsControlVisible, Converter={StaticResource BooleanToVisibilityConverter}}"></ContentControl>-->
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" AllowDrop="True" MouseMove="Image_MouseMove" />
-                                <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane" Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="150">
-                                    <TextBlock Text="{Binding name}" FontSize="12" Padding="2"/>
-                                    <TextBlock Text="{Binding description}" FontSize="10" Padding="2"/>
-                                    <TextBlock Text="{Binding shotSummary}" FontSize="10" Padding="2" TextWrapping="Wrap" />
-                                    <TextBlock Text="{Binding fileSummary}" FontSize="10" Padding="2" TextWrapping="Wrap" />
+                                <Grid>
+                                    <Image x:Name="imageThumb" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" AllowDrop="True" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" />
+                                    <StackPanel x:Name="paneSelectedPane" Visibility="{Binding ElementName=cmdMultiSelectionMode, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource radioNotSelectedImageSrc}" MaxHeight="11" />
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane" Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140">
+                                    <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2"/>
+                                    <TextBlock Text="{Binding description}" FontWeight="Light" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="2"/>
+                                    <TextBlock Text="{Binding shotSummary}" TextWrapping="Wrap" FontWeight="Light" HorizontalAlignment="Left" Margin="2" />
+                                    <TextBlock Text="{Binding fileSummary}" TextWrapping="Wrap" Margin="2" FontWeight="Light" />
 
+                                    <!--
                                     <Button Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"  
-                                        Content="View" FontSize="10" Padding="2" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"
-                                        Click="ImageView_Click"  />
+                                        Content="View" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"
+                                        Click="ImageView_Click"  />-->
                                 </StackPanel>
                             </StackPanel>
+                            <DataTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter TargetName="imageThumb" Property="Effect">
+                                        <Setter.Value>
+                                            <ShaderEffectLibrary:BloomEffect BaseIntensity="1" BaseSaturation="1" BloomIntensity="1" BloomSaturation="1" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                                    <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+
+
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter  TargetName="imageThumb" Property="Effect">
+                                        <Setter.Value>
+                                            <ShaderEffectLibrary:ContrastAdjustEffect Contrast="0.5"  />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-
+                
+                
                 <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
                             		    x:Name ="lstUploadImageFileList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadImagefileListKey}}"
@@ -815,109 +1024,99 @@
 
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Image Source="{Binding Image.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}"/>
+                            <Image Source="{Binding Image.Source}" MaxHeight="140"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <DockPanel x:Name="panUpload" Grid.Column="1" Grid.Row="1" Background="{StaticResource PaneBodyBackgroundBrush}" Margin="4" Visibility="Collapsed">
+                <DockPanel x:Name="panUpload" Grid.Column="1" Grid.Row="1" Background="{StaticResource PaneBodyBackgroundBrush}" Visibility="Collapsed">
                     <Grid x:Name="grdUploadImageDetails" DataContext="{StaticResource uploadImagefileListKey}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="0" />
-                            <RowDefinition Height="30"/>
+                            <!-- File name, name, desc, -->
+                            <RowDefinition Height="22"/>
+                            <RowDefinition Height="22"/>
+                            <RowDefinition Height="22"/>
                             <RowDefinition Height="30" />
                             <RowDefinition Height="80" />
-                            <RowDefinition Height="30" />
-                            <RowDefinition Height="30" />
 
                             <!-- Spacer -->
-                            <RowDefinition Height="4"/>
+                            <RowDefinition Height="10"/>
 
                             <!-- Tags -->
-                            <RowDefinition Height="30" />
-                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="*" />
 
                             <!-- Spacer -->
-                            <RowDefinition Height="4" />
+                            <RowDefinition Height="10" />
 
                             <!-- Additional Fields -->
                             <RowDefinition Height="0" />
-                            <RowDefinition Height="34"/>
+                            <RowDefinition Height="34" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition MaxWidth="180"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="170"/>
                             <ColumnDefinition Width="20"/>
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Grid.Row="0" Content="Category"/>
-                        <Label x:Name="lblUploadTargetCat"  Grid.Column="1" Grid.Row="0" Content=""/>
+                        <Line Grid.Column="0" Grid.Row="0" Grid.RowSpan="18" Stroke="{StaticResource FontBorderBrushSelected}" X1="2.5" Y1="0" X2="2.5" Y2="3000" StrokeThickness="0.5" Margin="0" />
+                        
+                        <Label Grid.Column="1" Grid.Row="0" Content="File" FontWeight="SemiBold" />
+                        <Label x:Name="lblUploadImageFileName" Grid.Column="2" Grid.Row="0" Grid.ColumnSpan="2" Content="{Binding Mode=OneWay, Path=/Meta.OriginalFileName}" />
 
-                        <Label Grid.Column="0" Grid.Row="1" Content="File name" />
-                        <Label x:Name="lblUploadImageFileName" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Content="{Binding Mode=OneWay, Path=/Meta.OriginalFileName}" />
+                        <Label Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2">
+                            <Label.Content>
+                                <TextBlock VerticalAlignment="Center" Foreground="{StaticResource FontBorderBrush}">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Format: {0} Size: {1}">
+                                            <Binding Path="/Meta.Format" />
+                                            <Binding Path="/Meta.Size" Converter="{StaticResource WallaByteToMBConverterKey}" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Label.Content>
+                        </Label>
 
-                        <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-                        <TextBox x:Name="txtUploadImageName" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Name}"/>
+                        <Label Grid.Column="2" Grid.Row="2" Grid.ColumnSpan="2" >
+                            <Label.Content>
+                                <TextBlock VerticalAlignment="Center" Foreground="{StaticResource FontBorderBrush}">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Width: {0} Height: {1}">
+                                            <Binding Path="/Meta.Width" />
+                                            <Binding Path="/Meta.Height" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Label.Content>
+                        </Label>
 
-                        <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
-                        <TextBox x:Name="txtUploadImageDescription" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" TextWrapping="Wrap" Height="75"  Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Desc}" MaxLines="1" MaxLength="100"/>
+                        <Label Grid.Column="1" Grid.Row="3" Content="Name" FontWeight="SemiBold"/>
+                        <TextBox x:Name="txtUploadImageName" Grid.Column="2" Grid.Row="3" Grid.ColumnSpan="2" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Name}"/>
 
-                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3">
-                            <Label Content="Format:"/>
-                            <Label x:Name="lblUploadFormat" Content="{Binding Mode=OneWay, Path=/Meta.Format}" TextElement.FontWeight="Bold"/>
-                            <Label Content="Size:"/>
-                            <Label x:Name="lblUploadSize" Content="{Binding Mode=OneWay, Path=/Meta.Size}" TextElement.FontWeight="Bold"/>
-                            <Label Content="KB"/>
-                        </StackPanel>
+                        <Label Grid.Column="1" Grid.Row="4" Content="Desc" FontWeight="SemiBold"/>
+                        <TextBox x:Name="txtUploadImageDescription" Grid.Column="2" Grid.Row="4" Grid.ColumnSpan="2" TextWrapping="Wrap" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Desc}" MaxLines="3" MaxLength="100"/>
 
-                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3">
-                            <Label Content="Width:"/>
-                            <Label x:Name="lblUploadWidth" Content="{Binding Mode=OneWay, Path=/Meta.Width}" TextElement.FontWeight="Bold"/>
-                            <Label Content="Height:"/>
-                            <Label x:Name="lblUploadHeight" Content="{Binding Mode=OneWay, Path=/Meta.Height}" TextElement.FontWeight="Bold"/>
-                        </StackPanel>
+                        <Line Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="2" Stroke="{StaticResource FontBorderBrushSelected}" X1="4" Y1="4" X2="300" Y2="4" StrokeThickness="0.5" Margin="0" />
 
-                        <TextBlock Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" TextAlignment="Center" Background="{StaticResource BackgroundBrush}" />
+                        <Label Grid.Column="1" Grid.Row="6" Content="Tags"/>
+                        <Label Content="All Fotos"  Grid.Column="2" Grid.Row="6" Grid.ColumnSpan="2" HorizontalContentAlignment="Right" ToolTip="Check this so the same Tags are associated with every Foto"></Label>
+                        
+                        <CheckBox x:Name="chkUploadTagsAll" Grid.Column="3" Grid.Row="6"  IsChecked="{Binding Source={StaticResource uploadUIStateKey}, Mode=TwoWay, Path=MetaTagRefAll}" Checked="chkUploadTagsAll_Checked" Unchecked="chkUploadTagsAll_Unchecked"  />
 
-                        <Label Content="All Fotos"  Grid.Column="1" Grid.Row="7" HorizontalContentAlignment="Right" ToolTip="Check this so the same Tags are associated with every Foto"></Label>
-                        <Label Grid.Column="0" Grid.Row="7" Content="Tags"/>
-                        <CheckBox x:Name="chkUploadTagsAll" Grid.Column="2" Grid.Row="7"  IsChecked="{Binding Source={StaticResource uploadUIStateKey}, Mode=TwoWay, Path=MetaTagRefAll}" Checked="chkUploadTagsAll_Checked" Unchecked="chkUploadTagsAll_Unchecked"  />
-
-                        <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3">
+                        <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="1" Grid.Row="7" Grid.ColumnSpan="3">
                             <ListBox Style="{DynamicResource TagListStyle}" 
                             		        x:Name ="lstUploadTagList" 
                             		        ScrollViewer.VerticalScrollBarVisibility="Visible"
                                             SelectionMode="Multiple" 
                                             ItemContainerStyle="{DynamicResource TagListItem}" SelectionChanged="lstUploadTagList_SelectionChanged" >
-                                <!--
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <ListBoxItem Content="{Binding Path=name, Mode=OneWay}"></ListBoxItem>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>-->
                             </ListBox>
                         </ScrollViewer>
 
-                        <!--
-                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="3">
-                        <ListBox Style="{DynamicResource TagListStyle}" 
-                            		        x:Name ="lstUploadTagList" 
-                            		        ItemsSource="{Binding Mode=TwoWay, Source={StaticResource uploadImagefileListKey}, Path=/Meta.Tags}"
-                            		        ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                            SelectionMode="Single" 
-                                                    IsSynchronizedWithCurrentItem="True"
-                                            ItemContainerStyle="{DynamicResource TagListItem}" >
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <ListBoxItem Content="{Binding Path=name, Mode=OneWay}"></ListBoxItem>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </ScrollViewer>
--->
-                        <TextBlock Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="3" TextAlignment="Center" Background="{StaticResource BackgroundBrush}" />
+                        <Line Grid.Column="1" Grid.Row="8" Grid.ColumnSpan="2" Stroke="{StaticResource FontBorderBrushSelected}" X1="4" Y1="4" X2="300" Y2="4" StrokeThickness="0.5" Margin="0" />
 
-                        <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="3">
+
+                        <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" Grid.Column="1" Grid.Row="9" Grid.ColumnSpan="3">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition x:Name="rowUploadUdfChar1" Height="30" />
@@ -978,38 +1177,49 @@
                                 <CheckBox x:Name="chkUploadUdfDate3All" Grid.Column="3" Grid.Row="9"  Checked="chkUploadUdfDate3All_Checked" Unchecked="chkUploadUdfDate3All_Unchecked" Margin="3,6"/>
                             </Grid>
                         </ScrollViewer>
-                        <Button x:Name="cmdUploadResetMeta" Content="Reset all image info" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadResetMeta_Click" Grid.Column="1" Grid.Row="11" Grid.ColumnSpan="2" HorizontalAlignment="Right" />
+                        <Button x:Name="cmdUploadResetMeta" Content="Reset all image info" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadResetMeta_Click" Grid.Column="1" Grid.Row="10" Grid.ColumnSpan="3" HorizontalAlignment="Right" />
                     </Grid>
                 </DockPanel>
 
-                <Grid x:Name="grdImageView" Grid.Column="0" Grid.Row="1" Visibility="Visible" Background="{StaticResource ImageViewBackgroundBrush}">
+                <Grid x:Name="grdImageView" Grid.Column="0" Grid.Row="1" Visibility="Visible" Margin="0" Background="{StaticResource ImageViewBackgroundBrush}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="32"/>
-                        <RowDefinition Height="125"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="240"/>
                     </Grid.ColumnDefinitions>
 
-
-                    <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" DataContext="{StaticResource imageMainViewerListKey}" Source="{Binding mainCopyImage.Source}" MouseUp="RevertFromImageView_MouseUp" />
+                    <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="0" DataContext="{StaticResource imageMainViewerListKey}" Source="{Binding mainCopyImage.Source}" MouseUp="RevertFromImageView_MouseUp" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
                     <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
 
-                        <Button x:Name="cmdImageViewPrevious" Padding="0" Opacity="0.6" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewPrevious_Click">
+                        <Button x:Name="cmdImageViewPrevious" Opacity="0.8" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewPrevious_Click" Padding="0" Margin="2" BorderThickness="0">
                             <Button.Content>
                                 <Image Source="{StaticResource navPreviousImageSrc}" Height="28" />
                             </Button.Content>
                         </Button>
 
-                        <ToggleButton x:Name="cmdImageViewDetailToggle" Opacity="0.6" IsChecked="False" Style="{StaticResource styleToggleButton}" Template="{StaticResource templateToggleButton}" Checked="ImageViewDetails_Click" Unchecked="ImageViewDetails_Click" >
-                            <ToggleButton.Content>
-                                <Image Source="{StaticResource imageDetailImageSrc}" Height="28" />
-                            </ToggleButton.Content>
+                        <ToggleButton x:Name="cmdImageViewDetailToggle" Opacity="0.8" IsChecked="False" Style="{StaticResource styleToggleButton}" Checked="ImageViewDetails_Click" Unchecked="ImageViewDetails_Click" Padding="0" Margin="2" BorderThickness="0" >
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="imageMenuContent" Source="{StaticResource dropDownMenuImageSrc}" SnapsToDevicePixels="True" Height="28" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="imageMenuContent" Property="Source" Value="{StaticResource dropDownMenuSelectedImageSrc}" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="imageMenuContent" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
                         </ToggleButton>
 
-                        <Button x:Name="cmdImageViewNext" FontSize="10" Padding="2" Opacity="0.6" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewNext_Click">
+                        <Button x:Name="cmdImageViewNext" Opacity="0.8" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewNext_Click" Padding="0" Margin="2" BorderThickness="0">
                             <Button.Content>
                                 <Image Source="{StaticResource navNextImageSrc}" Height="28" />
                             </Button.Content>
@@ -1017,77 +1227,140 @@
 
                     </StackPanel>
 
-                    <Grid x:Name="grdImageViewDetails" DataContext="{StaticResource imageMainViewerListKey}" Grid.Column="0" Grid.Row="2" Margin="4" HorizontalAlignment="Center" Background="{StaticResource PaneBodyBackgroundBrush}">
+                    
+                    
+                    <Grid x:Name="grdImageViewDetails" DataContext="{StaticResource imageMainViewerListKey}" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Margin="2" HorizontalAlignment="Left" Background="{StaticResource PaneBodyBackgroundBrush}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="25" />
-                            <RowDefinition Height="25" />
-                            <RowDefinition Height="25" />
-                            <RowDefinition Height="25" />
-                            <RowDefinition Height="25" />
+                            <!-- Name, desc, file name, date -->
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="80" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="22" />
+                            
+                            <!-- Spacer -->
+                            <RowDefinition Height="10"/>
+
+                            <!-- Camera maker, model -->
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="22" /> <!-- 12 -->
+
+                            <!-- Spacer -->
+                            <RowDefinition Height="10"/>
+                            
+                            <!-- Tags -->
+                            <RowDefinition Height="22" />
+                            <RowDefinition Height="*" />
+
+                            <!-- Spacer -->
+                            <RowDefinition Height="10"/>
+
+                            <!-- Buttons -->
+                            <RowDefinition Height="30" />
 
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition MinWidth="60"  MaxWidth="60" />
-                            <ColumnDefinition MinWidth="150" MaxWidth="150" />
-                            <ColumnDefinition MinWidth="60" MaxWidth="60" />
-                            <ColumnDefinition MinWidth="80" MaxWidth="100" />
-                            <ColumnDefinition MinWidth="60" MaxWidth="60" />
-                            <ColumnDefinition MinWidth="80" MaxWidth="100 "/>
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="60" />
+                            <ColumnDefinition MinWidth="170" />
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Grid.Row="0" Content="Name"/>
-                        <TextBox x:Name="txtImageViewName" Grid.Column="1" Grid.Row="0" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Name}"/>
+                        <Line Grid.Column="0" Grid.Row="0" Grid.RowSpan="18" Stroke="{StaticResource FontBorderBrushSelected}" X1="2" Y1="0" X2="2" Y2="3000" StrokeThickness="0.5" Margin="0" />
 
-                        <Label Grid.Column="0" Grid.Row="1" Content="Desc"/>
-                        <TextBox x:Name="txtImageViewDescription" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" TextWrapping="Wrap"  Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Desc}" MaxLines="3" MaxLength="100" VerticalScrollBarVisibility="Visible"/>
+                        <Label Grid.Column="1" Grid.Row="0" Content="Name" FontWeight="SemiBold"/>
+                        <TextBox x:Name="txtImageViewName" Grid.Column="2" Grid.Row="0" MaxLines="1" MaxLength="20" Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Name}"/>
 
-                        <Label Grid.Column="0" Grid.Row="3" Content="File" />
-                        <Label x:Name="lblImageViewFileName" Grid.Column="1" Grid.Row="3" Content="{Binding Mode=OneWay, Path=/Meta.OriginalFileName}" />
+                        <Label Grid.Column="1" Grid.Row="1" Content="Desc" FontWeight="SemiBold"/>
+                        <TextBox x:Name="txtImageViewDescription" Grid.Column="2" Grid.Row="1" TextWrapping="Wrap"  Margin="2" Text="{Binding Mode=TwoWay, Path=/Meta.Desc}" MaxLines="3" MaxLength="100" VerticalScrollBarVisibility="Visible"/>
 
-                        <Label Content="Camera" Grid.Column="0" Grid.Row="4" />
-                        <TextBlock Grid.Column="1" Grid.Row="4" VerticalAlignment="Center">
-                         <Run Text="{Binding Mode=OneWay, Path=/Meta.CameraMaker}"/>
-                         <Run Text=" "/>
-                         <Run Text="{Binding Mode=OneWay, Path=/Meta.CameraModel}"/>
+                        <Label Grid.Column="1" Grid.Row="2" Content="Date" FontWeight="SemiBold">
+                            <Label.ToolTip>
+                                <TextBlock TextWrapping="Wrap">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}Date Taken: {0:d}{3}File Date: {1:d}{3}Upload Date: {2:d}">
+                                            <Binding Path="/Meta.TakenDateMeta" />
+                                            <Binding Path="/Meta.TakenDateFile" />
+                                            <Binding Path="/Meta.UploadDate"  />
+                                            <Binding Source="{x:Static sys:Environment.NewLine}"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>  
+                            </Label.ToolTip>
+                        </Label>
+                        <DatePicker x:Name="datImageViewDate" Grid.Column="2" Grid.Row="2" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.TakenDateMeta}" Grid.ColumnSpan="2">
+                            <DatePicker.ToolTip>
+                                <TextBlock TextWrapping="Wrap">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}Date Taken: {0:d}{3}File Date: {1:d}{3}Upload Date: {2:d}">
+                                            <Binding Path="/Meta.TakenDateMeta" />
+                                            <Binding Path="/Meta.TakenDateFile" />
+                                            <Binding Path="/Meta.UploadDate"  />
+                                            <Binding Source="{x:Static sys:Environment.NewLine}"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DatePicker.ToolTip>
+                        </DatePicker>
+
+                        <Label Grid.Column="1" Grid.Row="3" Content="File" FontWeight="SemiBold"/>
+                        <Label x:Name="lblImageViewFileName" Grid.Column="3" Grid.Row="3" Content="{Binding Mode=OneWay, Path=/Meta.OriginalFileName}" />
+
+                        <Line Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Stroke="{StaticResource FontBorderBrushSelected}" X1="4" Y1="4" X2="300" Y2="4" StrokeThickness="0.5" Margin="0" />
+
+                        <Label Content="Camera" Grid.Column="1" Grid.Row="5" FontWeight="SemiBold"/>
+                        <Label Grid.Column="2" Grid.Row="5" VerticalAlignment="Center" Content="{Binding Mode=OneWay, Path=/Meta.CameraMaker}" />
+
+                        <Label Content="Model" Grid.Column="1" Grid.Row="6" FontWeight="SemiBold" />
+                        <Label Grid.Column="2" Grid.Row="6" VerticalAlignment="Center" Content="{Binding Mode=OneWay, Path=/Meta.CameraModel}" />
+
+                        <Label Content="Format" Grid.Column="1" Grid.Row="7" FontWeight="SemiBold"/>
+                        <Label x:Name="lblImageViewFormat" Grid.Column="2" Grid.Row="7" Content="{Binding Mode=OneWay, Path=/Meta.Format}" />
+
+                        <Label Content="Size" Grid.Column="1" Grid.Row="8" FontWeight="SemiBold"/>
+                        <Label x:Name="lblImageViewSize" Grid.Column="2" Grid.Row="8" Content="{Binding Mode=OneWay, Path=/Meta.Size, Converter={StaticResource WallaByteToMBConverterKey}}" />
+
+                        <Label Content="Pixels" Grid.Column="1" Grid.Row="9" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="2" Grid.Row="9" VerticalAlignment="Center" Foreground="{StaticResource FontBorderBrush}">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Width: {0} Height: {1}">
+                                    <Binding Path="/Meta.Width" />
+                                    <Binding Path="/Meta.Height" />
+                                </MultiBinding>
+                            </TextBlock.Text>
                         </TextBlock>
 
+                        <Label Content="Aperture" Grid.Column="1" Grid.Row="10" FontWeight="SemiBold"/>
+                        <Label x:Name="lblImageViewAperture" Grid.Column="2" Grid.Row="10" Content="{Binding Mode=OneWay, Path=/Meta.Aperture}" />
 
-                        <Label Content="Upload" Grid.Column="2" Grid.Row="0"/>
-                        <Label x:Name="lblImageViewUploadDate" Grid.Column="3" Grid.Row="0" Content="{Binding Mode=OneWay, Path=/Meta.UploadDate}" />
+                        <Label Content="ISO" Grid.Column="1" Grid.Row="11" FontWeight="SemiBold"/>
+                        <Label x:Name="lblImageViewISO" Grid.Column="2" Grid.Row="11" Content="{Binding Mode=OneWay, Path=/Meta.ISO}" />
 
-                        <Label Content="Taken" Grid.Column="2" Grid.Row="1"/>
-                        <Label x:Name="lblImageViewMetaDate" Grid.Column="3" Grid.Row="1" Content="{Binding Mode=OneWay, Path=/Meta.TakenDateMeta}" />
+                        <Label Content="Shutter" Grid.Column="1" Grid.Row="12" FontWeight="SemiBold"/>
+                        <Label x:Name="lblImageViewShutter" Grid.Column="2" Grid.Row="12" Content="{Binding Mode=OneWay, Path=/Meta.ShutterSpeed}" />
 
-                        <Label Content="File" Grid.Column="2" Grid.Row="2"/>
-                        <Label x:Name="lblImageViewFileDate" Grid.Column="3" Grid.Row="2" Content="{Binding Mode=OneWay, Path=/Meta.TakenDateFile}" />
+                        <Line Grid.Column="1" Grid.Row="13" Grid.ColumnSpan="2" Stroke="{StaticResource FontBorderBrushSelected}" X1="4" Y1="4" X2="300" Y2="4" StrokeThickness="0.5" Margin="0" />
+                        
+                        <Label Content="Tags" Grid.Column="1" Grid.Row="14" FontWeight="SemiBold"/>
+                        <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="1" Grid.Row="15" Grid.ColumnSpan="2">
+                            <ListBox Style="{DynamicResource TagListStyle}" 
+                            		        x:Name ="lstImageViewTagList" 
+                            		        ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                            SelectionMode="Multiple" 
+                                            ItemContainerStyle="{DynamicResource TagListItem}">
+                            </ListBox>
+                            
+                        </ScrollViewer>
 
-                        <Label Content="Format" Grid.Column="2" Grid.Row="3"/>
-                        <Label x:Name="lblImageViewFormat" Grid.Column="3" Grid.Row="3" Content="{Binding Mode=OneWay, Path=/Meta.Format}" />
-
-                        <Label Content="Size" Grid.Column="2" Grid.Row="4"/>
-                        <Label x:Name="lblImageViewSize" Grid.Column="3" Grid.Row="4" Content="{Binding Mode=OneWay, Path=/Meta.Size, StringFormat='\{0\} KB'}" />
-
-
-                        <Label Content="Pixels" Grid.Column="4" Grid.Row="0" />
-                        <TextBlock Grid.Column="5" Grid.Row="0" VerticalAlignment="Center">
-                         <Run Text="{Binding Mode=OneWay, Path=/Meta.Width}"/>
-                         <Run Text="W "/>
-                         <Run Text="{Binding Mode=OneWay, Path=/Meta.Height}"/>
-                         <Run Text="H"/>
-                        </TextBlock>
-
-                        <Label Content="Aperture" Grid.Column="4" Grid.Row="1"/>
-                        <Label x:Name="lblImageViewAperture" Grid.Column="5" Grid.Row="1" Content="{Binding Mode=OneWay, Path=/Meta.Aperture}" />
-
-                        <Label Content="ISO" Grid.Column="4" Grid.Row="2"/>
-                        <Label x:Name="lblImageViewISO" Grid.Column="5" Grid.Row="2" Content="{Binding Mode=OneWay, Path=/Meta.ISO}" />
-
-                        <Label Content="Shutter" Grid.Column="4" Grid.Row="3"/>
-                        <Label x:Name="lblImageViewShutter" Grid.Column="5" Grid.Row="3" Content="{Binding Mode=OneWay, Path=/Meta.ShutterSpeed}" />
-
-                        <StackPanel Orientation="Horizontal" Grid.Column="4" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Right">
-                            <Button x:Name="cmdImageViewEdit" FontSize="10" Content="Edit" Padding="2" Opacity="100" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewEditSave_Click" />
-                            <Button x:Name="cmdImageViewCancel" FontSize="10" Content="Cancel"  Padding="2" Opacity="100" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewEditCancel_Click" />
+                        <Line Grid.Column="1" Grid.Row="16" Grid.ColumnSpan="2" Stroke="{StaticResource FontBorderBrushSelected}" X1="4" Y1="4" X2="300" Y2="4" StrokeThickness="0.5" Margin="0" />
+                        
+                        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="17" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+                            <Button x:Name="cmdImageViewEdit" Content="Edit" Padding="2" Opacity="100" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewEditSave_Click" />
+                            <Button x:Name="cmdImageViewCancel" Content="Cancel"  Padding="2" Opacity="100" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewEditCancel_Click" />
                         </StackPanel>
                     </Grid>
 

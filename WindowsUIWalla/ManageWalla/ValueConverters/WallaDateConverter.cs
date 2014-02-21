@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace ManageWalla
 {
-    public class WallaDateConverter : IValueConverter
+    public class WallaDateConverter1 : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

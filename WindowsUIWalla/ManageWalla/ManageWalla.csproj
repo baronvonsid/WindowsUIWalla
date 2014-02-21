@@ -140,6 +140,7 @@
     <Compile Include="ProjectDataType\ThumbCache.cs" />
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="ValueConverters\WallaByteToMBConverter.cs" />
     <Compile Include="WallaDataType\Account.cs" />
     <Compile Include="WallaDataType\Category.cs" />
     <Compile Include="WallaDataType\CategoryList.cs" />
@@ -148,7 +149,6 @@
     <Compile Include="WallaDataType\ImageList.cs" />
     <Compile Include="WallaDataType\ImageMoveList.cs" />
     <Compile Include="WallaDataType\Tag.cs" />
-    <Compile Include="WallaDateConverter.cs" />
     <Compile Include="MainController.cs" />
     <Compile Include="ProjectDataType\UploadUIState.cs" />
     <Compile Include="ServerHelper.cs" />
@@ -157,7 +157,7 @@
     <Compile Include="ProjectDataType\UploadImage.cs" />
     <Compile Include="ProjectDataType\UploadImageFileList.cs" />
     <Compile Include="WallaDataType\UploadStatusList.cs" />
-    <Compile Include="WallaUploadStatusConverter.cs" />
+    <Compile Include="ValueConverters\WallaUploadStatusConverter.cs" />
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -439,6 +439,35 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\sharedSecure.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\fotowallaLogoSelected31x146.png" />
+    <Resource Include="resources\icons\fotowallaLogo31x146.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\tag.png" />
+    <Resource Include="resources\icons\tag_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\category.png" />
+    <Resource Include="resources\icons\category_selected.png" />
+    <Resource Include="resources\icons\gallery.png" />
+    <Resource Include="resources\icons\gallery_selected.png" />
+    <Resource Include="resources\icons\menu.png" />
+    <Resource Include="resources\icons\menu_selected.png" />
+    <Resource Include="resources\icons\upload.png" />
+    <Resource Include="resources\icons\upload_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\notSelected.png" />
+    <Resource Include="resources\icons\selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\refresh.gif" />
+    <Resource Include="resources\icons\refresh_selected.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\anim\refresh_rotating.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

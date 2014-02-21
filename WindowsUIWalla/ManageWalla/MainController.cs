@@ -36,6 +36,7 @@ namespace ManageWalla
         //private ThumbState thumbState = null;
         private ServerHelper serverHelper = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainController));
+        private CancellationTokenSource cancelTokenSourceToDel = new CancellationTokenSource(); //TODO delete this.
 
         public MainController() 
         {//MainWindow currentMainParam
@@ -236,7 +237,7 @@ namespace ManageWalla
                 category.parentId = categoryId;
                 category.Name = uploadState.CategoryName;
                 category.Desc = uploadState.CategoryDesc;
-                categoryId = await serverHelper.CategoryCreateAsync(category);
+                categoryId = await serverHelper.CategoryCreateAsync(category, cancelTokenSourceToDel.Token);
                 //rootCategoryId = serverHelper.CreateCategory(uploadState.CategoryName, uploadState.CategoryDesc, uploadState.CategoryId);
             }
 
@@ -276,7 +277,7 @@ namespace ManageWalla
             {
                 UploadImage currentUpload = meFots.Where(r => r.State == UploadImage.UploadState.None).First();
 
-                string response = await serverHelper.UploadImageAsync(currentUpload);
+                string response = await serverHelper.UploadImageAsync(currentUpload, cancelTokenSourceToDel.Token);
                 if (response == null)
                 {
                     //meFots.RemoveAt(0);
@@ -347,36 +348,40 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> RefreshUploadStatusListAsync()
+        async public Task RefreshUploadStatusListAsync(CancellationToken cancelToken)
         {
             try
             {
-
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
-                    state.uploadStatusList = await serverHelper.UploadGetStatusListAsync();
+                    state.uploadStatusList = await serverHelper.UploadGetStatusListAsync(cancelToken);
                     state.uploadStatusListState = GlobalState.DataLoadState.Loaded;
-                    return "OK";
                 }
                 else
                 {
                     if (state.uploadStatusList != null)
                     {
                         state.uploadStatusListState = GlobalState.DataLoadState.LocalCache;
-                        return "OK";
                     }
                     else
                     {
                         state.uploadStatusListState = GlobalState.DataLoadState.Unavailable;
-                        return "No local upload status list is available to show.";
                     }
                 }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("RefreshUploadStatusListAsync has been cancelled");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
                 state.uploadStatusListState = GlobalState.DataLoadState.Unavailable;
-                return ex.Message;
+                logger.Error(ex);
+                throw ex;
             }
+
         }
         #endregion
 
@@ -386,7 +391,7 @@ namespace ManageWalla
         /// refreshes the cached object and sets the status of the load state used.
         /// </summary>
         /// <returns>OK or error</returns>
-        async public Task<string> TagRefreshListAsync()
+        async public Task TagRefreshListAsync(CancellationToken cancelToken)
         {
             try
             {
@@ -395,27 +400,24 @@ namespace ManageWalla
                     TagList tagList;
                     if (state.tagList != null)
                     {
-                        tagList = await serverHelper.TagGetListAsync(state.tagList.lastChanged);
+                        tagList = await serverHelper.TagGetListAsync(state.tagList.lastChanged, cancelToken);
                         if (tagList != null)
                         {
                             state.tagList = tagList;
                         }
                         state.tagLoadState = GlobalState.DataLoadState.Loaded;
-                        return "OK";
                     }
                     else
                     {
-                        tagList = await serverHelper.TagGetListAsync(null);
+                        tagList = await serverHelper.TagGetListAsync(null, cancelToken);
                         if (tagList != null)
                         {
                             state.tagList = tagList;
                             state.tagLoadState = GlobalState.DataLoadState.Loaded;
-                            return "OK";
                         }
                         else
                         {
                             state.tagLoadState = GlobalState.DataLoadState.Unavailable;
-                            return "No local tag list is available to show.";
                         }
                     }
                 }
@@ -424,19 +426,21 @@ namespace ManageWalla
                     if (state.tagList != null)
                     {
                         state.tagLoadState = GlobalState.DataLoadState.LocalCache;
-                        return "OK";
                     }
                     else
                     {
                         state.tagLoadState = GlobalState.DataLoadState.Unavailable;
-                        return "No local tag list is available to show.";
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("TagRefreshListAsync has been cancelled.");
             }
             catch (Exception ex)
             {
                 state.tagLoadState = GlobalState.DataLoadState.Unavailable;
-                return ex.Message;
+                throw (ex);
             }
         }
 
@@ -468,7 +472,7 @@ namespace ManageWalla
                     ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
                     if (tagImageList != null)
                     {
-                        state.tagImageList.Remove(tagImageList);
+                        state.tagImageList.Remove(localTagList);
                         state.tagImageList.Add(tagImageList);
                         return tagImageList;
                     }
@@ -512,7 +516,7 @@ namespace ManageWalla
         {
             try
             {
-                return await serverHelper.TagGetMeta(tagRef.name);
+                return await serverHelper.TagGetMeta(tagRef.name, cancelTokenSourceToDel.Token);
             }
             catch (Exception ex)
             {
@@ -525,7 +529,7 @@ namespace ManageWalla
 
         async public Task<string> TagUpdateAsync(Tag newTag, string oldTagName)
         {
-            string response = await serverHelper.TagUpdateAsync(newTag, oldTagName);
+            string response = await serverHelper.TagUpdateAsync(newTag, oldTagName, cancelTokenSourceToDel.Token);
             if (response != "OK")
                 response = "Tag could not be updated, there was an error on the server:" + response;
 
@@ -534,7 +538,7 @@ namespace ManageWalla
 
         async public Task<string> TagCreateAsync(Tag tag)
         {
-            string response = await serverHelper.TagCreateAsync(tag);
+            string response = await serverHelper.TagCreateAsync(tag, cancelTokenSourceToDel.Token);
             if (response != "OK")
                 response = "Tag could not be created, there was an error on the server:" + response;
 
@@ -543,7 +547,7 @@ namespace ManageWalla
 
         async public Task<string> TagDeleteAsync(Tag tag)
         {
-            string response = await serverHelper.TagDeleteAsync(tag);
+            string response = await serverHelper.TagDeleteAsync(tag, cancelTokenSourceToDel.Token);
             if (response != "OK")
                 response = "Tag could not be deleted, there was an error on the server:" + response;
 
@@ -552,7 +556,7 @@ namespace ManageWalla
 
         async public Task<string> TagAddRemoveImagesAsync(string tagName, ImageMoveList moveList, bool add)
         {
-            string response = await serverHelper.TagAddRemoveImagesAsync(tagName, moveList, add);
+            string response = await serverHelper.TagAddRemoveImagesAsync(tagName, moveList, add, cancelTokenSourceToDel.Token);
             if (response != "OK")
                 response = "Images could not be add\removed from the Tag, there was an error on the server:" + response;
 
@@ -565,7 +569,7 @@ namespace ManageWalla
         {
             try
             {
-                return await serverHelper.CategoryGetMeta(categoryRef.id);
+                return await serverHelper.CategoryGetMeta(categoryRef.id, cancelTokenSourceToDel.Token);
             }
             catch (Exception ex)
             {
@@ -578,7 +582,7 @@ namespace ManageWalla
 
         async public Task<string> CategoryUpdateAsync(Category existingCategory)
         {
-            string response = await serverHelper.CategoryUpdateAsync(existingCategory);
+            string response = await serverHelper.CategoryUpdateAsync(existingCategory, cancelTokenSourceToDel.Token);
             if (response != "OK")
                 response = "Category could not be updated, there was an error on the server:" + response;
 
@@ -589,7 +593,7 @@ namespace ManageWalla
         {
             try
             {
-                long categoryId = await serverHelper.CategoryCreateAsync(category);
+                long categoryId = await serverHelper.CategoryCreateAsync(category, cancelTokenSourceToDel.Token);
                 return "OK";
             }
             catch (Exception ex)
@@ -600,7 +604,7 @@ namespace ManageWalla
 
         async public Task<string> CategoryDeleteAsync(Category category)
         {
-            string response = await serverHelper.CategoryDeleteAsync(category);
+            string response = await serverHelper.CategoryDeleteAsync(category, cancelTokenSourceToDel.Token);
             if (response != "OK")
                 response = "Category could not be deleted, there was an error on the server:" + response;
 
@@ -664,7 +668,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> CategoryRefreshListAsync()
+        async public Task CategoryRefreshListAsync(CancellationToken cancelToken)
         {
             try
             {
@@ -673,54 +677,53 @@ namespace ManageWalla
                     CategoryList categoryList;
                     if (state.categoryList != null)
                     {
-                        categoryList = await serverHelper.CategoryGetListAsync(state.categoryList.lastChanged);
+                        categoryList = await serverHelper.CategoryGetListAsync(state.categoryList.lastChanged, cancelToken);
                         if (categoryList != null)
                         {
                             state.categoryList = categoryList;
                         }
                         state.categoryLoadState = GlobalState.DataLoadState.Loaded;
-                        return "OK";
                     }
                     else
                     {
-                        categoryList = await serverHelper.CategoryGetListAsync(null);
+                        categoryList = await serverHelper.CategoryGetListAsync(null, cancelToken);
                         if (categoryList != null)
                         {
                             state.categoryList = categoryList;
                             state.categoryLoadState = GlobalState.DataLoadState.Loaded;
-                            return "OK";
                         }
                         else
                         {
                             state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
-                            return "No local Category list is available to show.";
                         }
                     }
                 }
                 else
                 {
-                    if (state.tagList != null)
+                    if (state.categoryList != null)
                     {
                         state.categoryLoadState = GlobalState.DataLoadState.LocalCache;
-                        return "OK";
                     }
                     else
                     {
                         state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
-                        return "No local Category list is available.";
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("CategoryRefreshListAsync has been cancelled.");
             }
             catch (Exception ex)
             {
                 state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
-                return ex.Message;
+                throw (ex);
             }
         }
 
         async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageMoveList moveList)
         {
-            string response = await serverHelper.CategoryMoveImagesAsync(categoryId, moveList);
+            string response = await serverHelper.CategoryMoveImagesAsync(categoryId, moveList, cancelTokenSourceToDel.Token);
             if (response != "OK")
                 response = "Images could not be moved category, there was an error on the server:" + response;
 
@@ -729,7 +732,7 @@ namespace ManageWalla
         #endregion
 
         #region Gallery
-        async public Task<string> GalleryRefreshListAsync()
+        async public Task GalleryRefreshListAsync(CancellationToken cancelToken)
         {
             try
             {
@@ -738,27 +741,24 @@ namespace ManageWalla
                     GalleryList galleryList;
                     if (state.galleryList != null)
                     {
-                        galleryList = await serverHelper.GalleryGetListAsync(state.galleryList.lastChanged);
+                        galleryList = await serverHelper.GalleryGetListAsync(state.galleryList.lastChanged, cancelToken);
                         if (galleryList != null)
                         {
                             state.galleryList = galleryList;
                         }
                         state.galleryLoadState = GlobalState.DataLoadState.Loaded;
-                        return "OK";
                     }
                     else
                     {
-                        galleryList = await serverHelper.GalleryGetListAsync(null);
+                        galleryList = await serverHelper.GalleryGetListAsync(null, cancelToken);
                         if (galleryList != null)
                         {
                             state.galleryList = galleryList;
                             state.galleryLoadState = GlobalState.DataLoadState.Loaded;
-                            return "OK";
                         }
                         else
                         {
                             state.galleryLoadState = GlobalState.DataLoadState.Unavailable;
-                            return "No local gallery list is available to show.";
                         }
                     }
                 }
@@ -767,62 +767,42 @@ namespace ManageWalla
                     if (state.galleryList != null)
                     {
                         state.galleryLoadState = GlobalState.DataLoadState.LocalCache;
-                        return "OK";
                     }
                     else
                     {
                         state.galleryLoadState = GlobalState.DataLoadState.Unavailable;
-                        return "No local gallery list is available to show.";
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("GalleryRefreshListAsync has been cancelled.");
             }
             catch (Exception ex)
             {
                 state.galleryLoadState = GlobalState.DataLoadState.Unavailable;
-                return ex.Message;
+                throw (ex);
             }
         }
 
-        async public Task<Gallery> GalleryGetMetaAsync(GalleryListGalleryRef galleryRef)
+        async public Task<Gallery> GalleryGetMetaAsync(GalleryListGalleryRef galleryRef, CancellationToken cancelToken)
         {
-            try
-            {
-                return await serverHelper.GalleryGetMeta(galleryRef.name);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the tag meta data: " + galleryRef.name + ".  Error: " + ex.Message);
-                return null;
-            }
-
+            return await serverHelper.GalleryGetMeta(galleryRef.name, cancelToken);
         }
 
-        async public Task<string> GalleryUpdateAsync(Gallery gallery, string oldGalleryName)
+        async public Task GalleryUpdateAsync(Gallery gallery, string oldGalleryName, CancellationToken cancelToken)
         {
-            string response = await serverHelper.GalleryUpdateAsync(gallery, oldGalleryName);
-            if (response != "OK")
-                response = "Gallery could not be updated, there was an error on the server:" + response;
-
-            return response;
+            await serverHelper.GalleryUpdateAsync(gallery, oldGalleryName, cancelToken);
         }
 
-        async public Task<string> GalleryCreateAsync(Gallery gallery)
+        async public Task GalleryCreateAsync(Gallery gallery, CancellationToken cancelToken)
         {
-            string response = await serverHelper.GalleryCreateAsync(gallery);
-            if (response != "OK")
-                response = "Gallery could not be created, there was an error on the server:" + response;
-
-            return response;
+            await serverHelper.GalleryCreateAsync(gallery, cancelToken);
         }
 
-        async public Task<string> GalleryDeleteAsync(Gallery gallery)
+        async public Task GalleryDeleteAsync(Gallery gallery, CancellationToken cancelToken)
         {
-            string response = await serverHelper.GalleryDeleteAsync(gallery);
-            if (response != "OK")
-                response = "Gallery could not be deleted, there was an error on the server:" + response;
-
-            return response;
+            await serverHelper.GalleryDeleteAsync(gallery, cancelToken);
         }
 
         async public Task<ImageList> GalleryGetImagesAsync(long id, string galleryName, int cursor, long sectionId, string searchQueryString, CancellationToken cancelToken)
@@ -830,7 +810,7 @@ namespace ManageWalla
             try
             {
                 //Find a locally cached version,  ignore query string. 
-                ImageList localGalleryList = state.galleryImageList.Where(r => (r.id == id && r.imageCursor == cursor)).FirstOrDefault();
+                ImageList localGalleryList = state.galleryImageList.Where(r => (r.id == id && r.imageCursor == cursor  && r.sectionId == sectionId)).FirstOrDefault();
                 if (state.connectionState != GlobalState.ConnectionState.LoggedOn)
                 {
                     return localGalleryList;
@@ -843,8 +823,8 @@ namespace ManageWalla
                     ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.imageFetchSize, searchQueryString, sectionId, cancelToken);
                     if (galleryImageList != null)
                     {
-                        state.tagImageList.Remove(localGalleryList);
-                        state.tagImageList.Add(galleryImageList);
+                        state.galleryImageList.Remove(localGalleryList);
+                        state.galleryImageList.Add(galleryImageList);
                         return galleryImageList;
                     }
                     else
@@ -859,7 +839,7 @@ namespace ManageWalla
                     if (galleryImageList != null)
                     {
                         if (searchQueryString == null)
-                            state.tagImageList.Add(galleryImageList);
+                            state.galleryImageList.Add(galleryImageList);
 
                         return galleryImageList;
                     }
@@ -896,14 +876,30 @@ namespace ManageWalla
         }
         #endregion
 
-        async public Task<string> DeleteImagesAsync(ImageList imageList)
+        #region  Images Processing
+        async public Task<string> DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
         {
-            string response = await serverHelper.DeleteImagesAsync(imageList);
-            if (response != "OK")
-                response = "Images could not be deleted, there was an error on the server:" + response;
+            try
+            {
+                string response = await serverHelper.DeleteImagesAsync(imageList, cancelToken);
+                if (response != "OK")
+                    throw new Exception(response);
 
-            return response;
+                return response;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("DeleteImagesAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                currentMain.ShowMessage(MainTwo.MessageType.Error, "Images could not be deleted, there was an error on the server:" + ex.Message);
+                return null;
+            }
         }
-        
+        #endregion
     }
 }

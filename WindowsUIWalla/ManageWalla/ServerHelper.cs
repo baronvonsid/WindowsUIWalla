@@ -191,7 +191,7 @@ namespace ManageWalla
         #endregion
 
         #region Tag
-        async public Task<TagList> TagGetListAsync(DateTime? lastModified)
+        async public Task<TagList> TagGetListAsync(DateTime? lastModified, CancellationToken cancelToken)
         {
             try
             {
@@ -204,12 +204,15 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     XmlSerializer serialKiller = new XmlSerializer(typeof(TagList));
                     TagList tagList = (TagList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+
+                    cancelToken.ThrowIfCancellationRequested();
+
                     return tagList;
                 }
                 else if (response.StatusCode != HttpStatusCode.NotModified)
@@ -218,6 +221,11 @@ namespace ManageWalla
                 }
                 return null;
             }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagGetListAsync has been cancelled.");
+                throw cancelEx;
+            }
             catch (Exception ex)
             {
                 logger.Error(ex);
@@ -225,7 +233,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> TagUpdateAsync(Tag newTag, string oldTagName)
+        async public Task<string> TagUpdateAsync(Tag newTag, string oldTagName, CancellationToken cancelToken)
         {
             try
             {
@@ -237,10 +245,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(newTag, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagUpdateAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -249,7 +262,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> TagCreateAsync(Tag tag)
+        async public Task<string> TagCreateAsync(Tag tag, CancellationToken cancelToken)
         {
             try
             {
@@ -261,10 +274,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagCreateAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -273,20 +291,27 @@ namespace ManageWalla
             }
         }
 
-        async public Task<Tag> TagGetMeta(string tagName)
+        async public Task<Tag> TagGetMeta(string tagName, CancellationToken cancelToken)
         {
             try
             {
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tag/" + Uri.EscapeUriString(tagName));
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 XmlSerializer serialKiller = new XmlSerializer(typeof(Tag));
                 Tag tag = (Tag)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
 
+                cancelToken.ThrowIfCancellationRequested();
+
                 return tag;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagGetMeta has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -295,7 +320,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> TagDeleteAsync(Tag tag)
+        async public Task<string> TagDeleteAsync(Tag tag, CancellationToken cancelToken)
         {
             try
             {
@@ -306,10 +331,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagDeleteAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -318,44 +348,7 @@ namespace ManageWalla
             }
         }
 
-        /*
-        async public Task<ImageList> DeleteMeTagGetImageListAsync(string tagName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
-        {
-            try
-            {
-                string requestUrl = "tag/" + tagName + "/" + cursor.ToString() + "/" + size.ToString() + "?" + searchQueryString ?? "";
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-                if (useDate)
-                {
-                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified);
-                }
-
-                HttpResponseMessage response = await http.SendAsync(request);
-                
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
-                    ImageList tagImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    return tagImageList;
-                }
-                else if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
-        }
-*/
-
-        async public Task<string> TagAddRemoveImagesAsync(string tagName, ImageMoveList imagesToMove, bool add)
+        async public Task<string> TagAddRemoveImagesAsync(string tagName, ImageMoveList imagesToMove, bool add, CancellationToken cancelToken)
         {
             try
             {
@@ -376,10 +369,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<ImageMoveList>(imagesToMove, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagAddRemoveImagesAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -390,7 +388,7 @@ namespace ManageWalla
         #endregion
 
         #region Gallery
-        async public Task<GalleryList> GalleryGetListAsync(DateTime? lastModified)
+        async public Task<GalleryList> GalleryGetListAsync(DateTime? lastModified, CancellationToken cancelToken)
         {
             try
             {
@@ -403,7 +401,7 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -417,6 +415,11 @@ namespace ManageWalla
                 }
                 return null;
             }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryGetListAsync has been cancelled.");
+                throw cancelEx;
+            }
             catch (Exception ex)
             {
                 logger.Error(ex);
@@ -424,7 +427,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> GalleryUpdateAsync(Gallery gallery, string oldGalleryName)
+        async public Task<string> GalleryUpdateAsync(Gallery gallery, string oldGalleryName, CancellationToken cancelToken)
         {
             try
             {
@@ -436,10 +439,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryUpdateAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -448,7 +456,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> GalleryCreateAsync(Gallery gallery)
+        async public Task<string> GalleryCreateAsync(Gallery gallery, CancellationToken cancelToken)
         {
             try
             {
@@ -460,10 +468,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryCreateAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -472,20 +485,25 @@ namespace ManageWalla
             }
         }
 
-        async public Task<Gallery> GalleryGetMeta(string galleryName)
+        async public Task<Gallery> GalleryGetMeta(string galleryName, CancellationToken cancelToken)
         {
             try
             {
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "gallery/" + Uri.EscapeUriString(galleryName));
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 XmlSerializer serialKiller = new XmlSerializer(typeof(Gallery));
                 Gallery gallery = (Gallery)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
 
                 return gallery;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryGetMeta has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -494,7 +512,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> GalleryDeleteAsync(Gallery gallery)
+        async public Task GalleryDeleteAsync(Gallery gallery, CancellationToken cancelToken)
         {
             try
             {
@@ -505,46 +523,12 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
-            catch (Exception ex)
+            catch (OperationCanceledException)
             {
-                logger.Error(ex);
-                return ex.Message;
-            }
-        }
-
-        /*
-        async public Task<ImageList> DeleteMeGalleryGetImageListAsync(string galleryName, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
-        {
-            try
-            {
-                string requestUrl = "gallery/" + galleryName + "/" + cursor.ToString() + "/" + size.ToString() + "?" + searchQueryString ?? "";
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-                if (useDate)
-                {
-                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified);
-                }
-
-                HttpResponseMessage response = await http.SendAsync(request);
-
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
-                    ImageList tagImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    return tagImageList;
-                }
-                else if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                return null;
+                logger.Debug("GalleryDeleteAsync has been cancelled.");
             }
             catch (Exception ex)
             {
@@ -552,11 +536,10 @@ namespace ManageWalla
                 throw ex;
             }
         }
-        */
         #endregion
 
         #region Upload
-        async public Task<string> UploadImageAsync(UploadImage image)
+        async public Task<string> UploadImageAsync(UploadImage image, CancellationToken cancelToken)
         {
             try
             {
@@ -577,7 +560,7 @@ namespace ManageWalla
                 //Upload file + image.Meta.Name
                 
                 //Upload file asynchronously and check response.
-                HttpResponseMessage response = await http.SendAsync(requestImage);
+                HttpResponseMessage response = await http.SendAsync(requestImage, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
@@ -595,7 +578,7 @@ namespace ManageWalla
 
                 HttpContent content = new ObjectContent<ImageMeta>(image.Meta, xmlFormatter);
                 requestMeta.Content = content;
-                HttpResponseMessage responseMeta = await http.SendAsync(requestMeta);
+                HttpResponseMessage responseMeta = await http.SendAsync(requestMeta, cancelToken);
                 responseMeta.EnsureSuccessStatusCode();
 
                 //System.Threading.Thread.Sleep(1000);
@@ -608,10 +591,10 @@ namespace ManageWalla
                 logger.Error(httpEx);
                 return httpEx.Message;
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException cancelEx)
             {
-                //rootPage.NotifyUser("Request canceled.", NotifyType.ErrorMessage);
-                return null;
+                logger.Debug("UploadImageAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -620,14 +603,14 @@ namespace ManageWalla
             }
         }
 
-        async public Task<UploadStatusList> UploadGetStatusListAsync()
+        async public Task<UploadStatusList> UploadGetStatusListAsync(CancellationToken cancelToken)
         {
             try
             {
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "image/uploadstatus");
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -638,6 +621,11 @@ namespace ManageWalla
                 }
                 return null;
             }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("UploadGetStatusListAsync has been cancelled.");
+                throw cancelEx;
+            }
             catch (Exception ex)
             {
                 logger.Error(ex);
@@ -647,7 +635,7 @@ namespace ManageWalla
         #endregion
 
         #region Category
-        async public Task<long> CategoryCreateAsync(Category category)
+        async public Task<long> CategoryCreateAsync(Category category, CancellationToken cancelToken)
         {
             try
             {
@@ -658,14 +646,18 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
                 reader.MoveToContent();
-                long categoryId = reader.ReadElementContentAsLong();
 
-                return categoryId;
+                return reader.ReadElementContentAsLong();
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryCreateAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -674,7 +666,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<CategoryList> CategoryGetListAsync(DateTime? lastModified)
+        async public Task<CategoryList> CategoryGetListAsync(DateTime? lastModified, CancellationToken cancelToken)
         {
             try
             {
@@ -686,7 +678,7 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -701,6 +693,11 @@ namespace ManageWalla
 
                 return null;
             }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryGetListAsync has been cancelled.");
+                throw cancelEx;
+            }
             catch (Exception ex)
             {
                 logger.Error(ex);
@@ -708,7 +705,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> CategoryUpdateAsync(Category category)
+        async public Task<string> CategoryUpdateAsync(Category category, CancellationToken cancelToken)
         {
             try
             {
@@ -719,10 +716,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryUpdateAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -731,20 +733,25 @@ namespace ManageWalla
             }
         }
 
-        async public Task<Category> CategoryGetMeta(long categoryId)
+        async public Task<Category> CategoryGetMeta(long categoryId, CancellationToken cancelToken)
         {
             try
             {
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "category/" + Uri.EscapeUriString(categoryId.ToString()));
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 XmlSerializer serialKiller = new XmlSerializer(typeof(Category));
                 Category category = (Category)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
 
                 return category;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryGetMeta has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -753,7 +760,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> CategoryDeleteAsync(Category category)
+        async public Task<string> CategoryDeleteAsync(Category category, CancellationToken cancelToken)
         {
             try
             {
@@ -764,10 +771,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryDeleteAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -776,43 +788,7 @@ namespace ManageWalla
             }
         }
 
-        /*
-        async public Task<ImageList> DeleteMeCategorGetImageListAsync(long categoryId, bool useDate, DateTime lastModified, int cursor, int size, string searchQueryString)
-        {
-            try
-            {
-                string requestUrl = "category/" + categoryId.ToString() + "/" + cursor.ToString() + "/" + size.ToString() + "?" + searchQueryString ?? "";
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-                if (useDate)
-                {
-                    request.Headers.IfModifiedSince = new DateTimeOffset(lastModified);
-                }
-
-                HttpResponseMessage response = await http.SendAsync(request);
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
-                    ImageList categoryImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    return categoryImageList;
-                }
-                else if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
-        }
-        */
-
-        async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageMoveList imagesToMove)
+        async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageMoveList imagesToMove, CancellationToken cancelToken)
         {
             try
             {
@@ -826,10 +802,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<ImageMoveList>(imagesToMove, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryMoveImagesAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -865,40 +846,6 @@ namespace ManageWalla
                 return null;
             }
         }
-
-        /*
-        async public Task<BitmapImage> GetMainImage(long imageId, CancellationToken cancelToken)
-        {
-            try
-            {
-                string requestUrl = "image/" + imageId.ToString() + "/maincopy";
-                //HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-                //request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-                BitmapImage myBitmapImage = new BitmapImage();
-                myBitmapImage.BeginInit();
-                myBitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                myBitmapImage.StreamSource = await http.GetStreamAsync(requestUrl);
-                myBitmapImage.EndInit();
-                //myBitmapImage.Freeze();
-
-                cancelToken.ThrowIfCancellationRequested();
-
-                return myBitmapImage;
-            }
-            catch (OperationCanceledException cancelEx)
-            {
-                logger.Debug("GetMainImage has been cancelled.");
-                throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                return null;
-            }
-        }
-
-         */
  
         async public Task<ImageList> GetImageListAsync(string type, string id, DateTime? lastModified, int cursor, int size, string searchQueryString, long sectionId, CancellationToken cancelToken)
         {
@@ -945,7 +892,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> DeleteImagesAsync(ImageList imageList)
+        async public Task<string> DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
         {
             try
             {
@@ -957,15 +904,20 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<ImageList>(imageList, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 return "OK";
             }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("DeleteImagesAsync has been cancelled.");
+                throw cancelEx;
+            }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
