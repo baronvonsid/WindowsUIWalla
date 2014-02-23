@@ -22,61 +22,61 @@
         </Setter>
     </Style>
 
+
     <Style x:Key="TagListItem" TargetType="{x:Type ListBoxItem}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}" />
         <Setter Property="Margin" Value="2" />
-        <Setter Property="Padding" Value="6" />
+        <Setter Property="Padding" Value="3" />
         <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
                     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Rectangle x:Name="outerRectangle" StrokeThickness="0.5">
-
+                        <Rectangle x:Name="outerRectangle" StrokeThickness="0.5" Opacity="0.6">
                             <Rectangle.Stroke>
-                                <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
+                                <SolidColorBrush x:Name="innerStrokeBrush" Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
                             </Rectangle.Stroke>
 
                             <Rectangle.Fill>
                                 <SolidColorBrush Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=Background.Color}" />
                             </Rectangle.Fill>
-
                         </Rectangle>
 
-                        <StackPanel Orientation="Horizontal" Margin="{TemplateBinding Margin}">
-                            <Image x:Name="innerImage" Source="{DynamicResource radioNotSelectedImageSrc}" Height="20" Width="20" />
-                            <ContentPresenter Margin="{TemplateBinding Margin}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Margin="{TemplateBinding Margin}" VerticalAlignment="Center">
+                            <Image x:Name="innerImage" Source="{DynamicResource radioNotSelectedImageSrc}" Height="10" Width="10" Margin="2" />
+                            <ContentPresenter Margin="2" />
                         </StackPanel>
-
-                        <!--<ContentPresenter Margin="{TemplateBinding Padding}" SnapsToDevicePixels="true" />-->
-
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="innerImage" Property="Source" Value="{DynamicResource radioSelectedImageSrc}" />
+                            <Setter TargetName="outerRectangle" Property="Opacity" Value="1.0" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="outerRectangle" Property="Opacity" Value="1.0" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
         <Style.Triggers>
-            <Trigger Property="IsEnabled" Value="false">
-                <Setter Property="Background" Value="{StaticResource ControlBackgroundDisabledBrush}" />
-            </Trigger>
             <Trigger Property="IsMouseOver" Value="true">
                 <Setter Property="Background" Value="{StaticResource ControlBackgroundMouseOverBrush}" />
             </Trigger>
-            <Trigger Property="IsSelected" Value="true">
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
                 <Setter Property="Background" Value="{StaticResource ControlSelectedItemBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrushSelected}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+            </DataTrigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Background" Value="{StaticResource ControlBackgroundDisabledBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderDisabledBrush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
-
-    <!--<Setter Property="FocusVisualStyle" Value="{x:Null}" /> -->
-
-
 
     <Style x:Key="styleImageThumb" TargetType="{x:Type Image}" >
         <Setter Property="Margin" Value="2" />
@@ -111,18 +111,21 @@
     </Style>
 
     <Style x:Key="PhotoListItem" TargetType="{x:Type ListBoxItem}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+        </Style.Resources>
+        
         <Setter Property="Margin" Value="2" />
         <!--
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="MaxHeight" Value="100" />
         <Setter Property="MinHeight" Value="100" />
-
         -->
+        
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
         <Setter Property="BorderThickness" Value="0.5" />
-        
         <Setter Property="Padding" Value="0" />
 
         <Style.Triggers>
@@ -155,9 +158,6 @@
 -->
         </Style.Triggers>
     </Style>
-
-
-
 
     <!-- Standard treeview setyle\templates -->
     <Style x:Key="{x:Type TreeView}" TargetType="TreeView">
@@ -238,6 +238,7 @@
         <Setter Property="Padding" Value="1,0,0,0" />
         <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource TreeViewItemFocusVisual}" />
+        <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TreeViewItem}">
@@ -254,7 +255,9 @@
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="SelectionStates">
                                 <VisualState x:Name="Selected">
+                                    
                                     <Storyboard>
+                                        <!--<ColorAnimation Storyboard.TargetName="PART_Header" Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)" To="Red" Duration="0:0:0.1"/>-->
                                         <ColorAnimationUsingKeyFrames Storyboard.TargetName="Bd" Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)">
                                             <EasingColorKeyFrame KeyTime="0" Value="{StaticResource ControlSelectedItemBackgroundColour}" />
                                         </ColorAnimationUsingKeyFrames>
@@ -282,13 +285,17 @@
                         </VisualStateManager.VisualStateGroups>
                         <ToggleButton x:Name="Expander" Style="{StaticResource ExpandCollapseToggleStyle}" ClickMode="Press"
                             IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"/>
-                        <Border x:Name="Bd" Grid.Column="1" Background="{TemplateBinding Background}" 
+                        <Border x:Name="Bd" Grid.Column="1" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
                             <ContentPresenter x:Name="PART_Header" ContentSource="Header" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
                         </Border>
                         <ItemsPresenter x:Name="ItemsHost" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Visibility="Collapsed" />
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="true">
+                            <Setter Property="Foreground"  Value="{StaticResource FontBorderBrushSelected}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
                         <Trigger Property="HasItems" Value="false">
                             <Setter TargetName="Expander" Property="Visibility" Value="Hidden" />
                         </Trigger>

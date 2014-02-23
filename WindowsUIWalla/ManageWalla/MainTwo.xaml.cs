@@ -81,10 +81,11 @@ namespace ManageWalla
         public ImageList currentImageList = null;
         private bool tagListUploadRefreshing = false;
         public CancellationTokenSource cancelTokenSource = null;
+        public CancellationTokenSource cancelUploadTokenSource = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
         private double previousImageSize = 0.0;
         private bool tweakImageSize = true;
-
+        private bool startingApplication = true;
         private DateTime lastMarginTweakTime = DateTime.Now;
 
         private MessageType currentDialogType = MessageType.None;
@@ -138,7 +139,7 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "There was an unexpected error starting the application and must now close.  Error was: " + ex.Message);
-                //TODO close the application.
+                Application.Current.Shutdown();
             }
         }
 
@@ -563,7 +564,7 @@ namespace ManageWalla
                 case PaneMode.GalleryEdit:
                 case PaneMode.GalleryAdd:
                     gridGallery.RowDefinitions[0].Height = new GridLength(0);
-                    gridGallery.RowDefinitions[1].MaxHeight = 0;
+                    gridGallery.RowDefinitions[1].Height = new GridLength(0);
                     gridGallery.RowDefinitions[2].Height = new GridLength(30.0);
                     gridGallery.RowDefinitions[3].MaxHeight = 80;
                     gridGallery.RowDefinitions[4].MaxHeight = 50;
@@ -672,13 +673,13 @@ namespace ManageWalla
 
                     if (uploadUIState.UploadToNewCategory)
                     {
-                        grdUploadSettings.RowDefinitions[2].MaxHeight = 30; //Category Name
-                        grdUploadSettings.RowDefinitions[3].MaxHeight = 80; //Category Description
+                        grdUploadSettings.RowDefinitions[4].MaxHeight = 30; //Category Name
+                        grdUploadSettings.RowDefinitions[5].MaxHeight = 80; //Category Description
                     }
                     else
                     {
-                        grdUploadSettings.RowDefinitions[2].MaxHeight = 0;
-                        grdUploadSettings.RowDefinitions[3].MaxHeight = 0;
+                        grdUploadSettings.RowDefinitions[4].MaxHeight = 0;
+                        grdUploadSettings.RowDefinitions[5].MaxHeight = 0;
                     }
 
                     //Initialise upload controls, no state to consider.
@@ -724,9 +725,10 @@ namespace ManageWalla
 
                         if (uploadUIState.Mode == UploadUIState.UploadMode.Images)
                         {
-                            grdUploadImageDetails.RowDefinitions[0].MaxHeight = 0; //Sub category marker
-                            //grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
-                            //chkUploadMapToSubFolders.IsEnabled = false;
+                            //grdUploadImageDetails.RowDefinitions[0].Height = 0; //Sub category marker
+                            grdUploadSettings.RowDefinitions[1].Height = new GridLength(0); //Map to sub folders
+                            grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                            chkUploadMapToSubFolders.IsChecked = false;
 
                             cmdUploadImportFolder.Visibility = Visibility.Hidden;
                         }
@@ -736,14 +738,15 @@ namespace ManageWalla
                             if (uploadUIState.GotSubFolders)
                             {
                                 //grdUploadImageDetails.RowDefinitions[0].MaxHeight = 25; //Sub category marker
-                                //grdUploadSettings.RowDefinitions[2].MaxHeight = 25; //Maintain sub folders.
-                                //chkUploadMapToSubFolders.IsEnabled = true;
+                                grdUploadSettings.RowDefinitions[1].Height = new GridLength(30);
+                                grdUploadSettings.RowDefinitions[2].Height = new GridLength(30); //Maintain sub folders.
+                                //chkUploadMapToSubFolders.IsChecked = true;
                             }
                             else
                             {
-                                //grdUploadImageDetails.RowDefinitions[0].MaxHeight = 0; //Sub category marker
-                                //grdUploadSettings.RowDefinitions[2].MaxHeight = 0; //Map to sub folders
-                                //chkUploadMapToSubFolders.IsEnabled = false;
+                                grdUploadSettings.RowDefinitions[1].Height = new GridLength(0); //Map to sub folders
+                                grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                                chkUploadMapToSubFolders.IsChecked = false;
                             }
                             cmdUploadImportFiles.Visibility = Visibility.Hidden;
                         }
@@ -863,7 +866,7 @@ namespace ManageWalla
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
-        private void radGallery_Checked(object sender, RoutedEventArgs e)
+        async private void radGallery_Checked(object sender, RoutedEventArgs e)
         {
             //cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
             //cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
@@ -877,7 +880,25 @@ namespace ManageWalla
 
             RefreshOverallPanesStructure(PaneMode.GalleryView);
             RefreshPanesAllControls(PaneMode.GalleryView);
-            RefreshAndDisplayGalleryList(false);
+            await RefreshAndDisplayGalleryList(false);
+            await RefreshAndDisplayTagList(false);
+            await RefreshAndDisplayCategoryList(false);
+
+            if (startingApplication)
+            {
+                foreach (RadioButton button in wrapMyGalleries.Children.OfType<RadioButton>())
+                {
+                    GalleryListGalleryRef galleryRef = (GalleryListGalleryRef)button.Tag;
+                    long tempGalleryId = 400001;
+                    if (galleryRef.id == tempGalleryId)
+                    {
+                        button.IsChecked = true;
+                    }
+                    continue;
+                }
+
+                startingApplication = false;
+            }
         }
 
         private void radTag_Checked(object sender, RoutedEventArgs e)
@@ -1410,7 +1431,7 @@ namespace ManageWalla
 
             double currentPaneWidth = gridRight.ColumnDefinitions[0].ActualWidth - 17.0;
             if (IsScrollBarVisible())
-                currentPaneWidth = currentPaneWidth - 17.0;
+                currentPaneWidth = currentPaneWidth - 23.0;
 
             double imageWidth = sldImageSize.Value;
             double imageWidthWithMargin = imageWidth + 4.0;
@@ -1466,7 +1487,7 @@ namespace ManageWalla
             else
             {
                 if (IsScrollBarVisible())
-                    currentPaneWidth = currentPaneWidth - 17.0;
+                    currentPaneWidth = currentPaneWidth - 23.0;
 
                 double imageWidth = sldImageSize.Value;
                 double imageWidthWithMargin = imageWidth + 4.0;
@@ -1775,7 +1796,7 @@ namespace ManageWalla
         /// Method to load and refresh the category list, based on online status and whether or not a local cache contains a previous version
         /// </summary>
         /// <param name="forceRefresh"></param>
-        async private void RefreshAndDisplayCategoryList(bool forceRefresh)
+        async private Task RefreshAndDisplayCategoryList(bool forceRefresh)
         {
             try
             {
@@ -1842,7 +1863,7 @@ namespace ManageWalla
         public void CategoryListReloadFromState()
         {
             long categoryId = 0;
-            //Keep a reference to the currently selected tag list.
+            //Keep a reference to the currently selected category item list.
             TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
             if (item != null)
             {
@@ -1851,34 +1872,41 @@ namespace ManageWalla
             }
             else
             {
-                CategoryListCategoryRef firstCategoryWithImages = state.categoryList.CategoryRef.FirstOrDefault<CategoryListCategoryRef>(r => r.count > 0);
-                if (firstCategoryWithImages == null)
-                {
-                    categoryId = 0;
-                }
-                else
-                {
-                    categoryId = firstCategoryWithImages.id;
-                }
+                categoryId = 0;
             }
+                //CategoryListCategoryRef firstCategoryWithImages = state.categoryList.CategoryRef.FirstOrDefault<CategoryListCategoryRef>(r => r.count > 0);
+                //if (firstCategoryWithImages == null)
+                //{
+                    
+                //}
+                //else
+                //{
+                //    categoryId = firstCategoryWithImages.id;
+                //}
+
 
             CategoryListCategoryRef baseCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.parentId == 0);
 
             treeCategoryView.Items.Clear();
             CategoryAddTreeViewLevel(baseCategory.id, null);
 
-            TreeViewItem baseItem = (TreeViewItem)treeCategoryView.Items[0];
-            CategoryListCategoryRef baseCategoryObj = (CategoryListCategoryRef)baseItem.Tag;
-            if (baseCategoryObj.id == categoryId || categoryId == 0)
-            {
-                baseItem.IsSelected = true;
-                treeCategoryView.Items.MoveCurrentTo(baseItem);
-
-            }
-            else
+            if (categoryId > 0)
             {
                 CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
             }
+
+            //TreeViewItem baseItem = (TreeViewItem)treeCategoryView.Items[0];
+            //CategoryListCategoryRef baseCategoryObj = (CategoryListCategoryRef)baseItem.Tag;
+            //if (baseCategoryObj.id == categoryId || categoryId == 0)
+            //{
+            //    baseItem.IsSelected = true;
+            //    treeCategoryView.Items.MoveCurrentTo(baseItem);
+
+            //}
+            //else
+            //{
+            //    CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
+            //}
 
             UploadRefreshCategoryList();
         }
@@ -2101,7 +2129,7 @@ namespace ManageWalla
         /// Method to load and refresh the tag list, based on online status and whether or not a local cache contains a previous version
         /// </summary>
         /// <param name="forceRefresh"></param>
-        async private void RefreshAndDisplayTagList(bool forceRefresh)
+        async private Task RefreshAndDisplayTagList(bool forceRefresh)
         {
             try
             {
@@ -2620,12 +2648,12 @@ namespace ManageWalla
             System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
             if (folderDialog.SelectedPath.Length > 0)
             {
-                uploadUIState.MapToSubFolders = false; ;
+                uploadUIState.MapToSubFolders = false;
                 DirectoryInfo folder = new DirectoryInfo(folderDialog.SelectedPath);
                 if (folder.GetDirectories().Length > 0)
                 {
                     uploadUIState.GotSubFolders = true;
-
+                    uploadUIState.RootFolder = folderDialog.SelectedPath;
                     if (MessageBox.Show("Do you want to add images from the sub folders too ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
                         await controller.LoadImagesFromFolder(folder, true, uploadFots);
@@ -2638,6 +2666,7 @@ namespace ManageWalla
                 }
                 else
                 {
+                    uploadUIState.RootFolder = "";
                     await controller.LoadImagesFromFolder(folder, false, uploadFots);
                 }
 
@@ -2675,8 +2704,16 @@ namespace ManageWalla
 
         private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
         {
-            uploadFots.Clear();
-            ResetUploadState(true);
+            if (uploadUIState.Uploading)
+            {
+                cancelUploadTokenSource.Cancel();
+                ShowMessage(MessageType.Info, "Uploading has been cancelled.");
+            }
+            else
+            {
+                uploadFots.Clear();
+                ResetUploadState(true);
+            }
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
@@ -2709,44 +2746,63 @@ namespace ManageWalla
 
         async private void cmdUploadAll_Click(object sender, RoutedEventArgs e)
         {
-            TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
-            if (item == null)
+            try
             {
-                MessageBox.Show("You must select a Category for your uploaded images to be stored in.");
-                return;
+                TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
+                if (item == null)
+                {
+                    ShowMessage(MessageType.Warning, "You must select a Category for your uploaded images to be stored in.");
+                    return;
+                }
+
+                if (uploadUIState.UploadToNewCategory && uploadUIState.CategoryName.Length < 1)
+                {
+                    ShowMessage(MessageType.Warning, "You have selected to add a new category, you must enter a name to continue.");
+                    return;
+                }
+
+                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+                long categoryId = category.id;
+
+                uploadUIState.Uploading = true;
+                RefreshPanesAllControls(PaneMode.Upload);
+
+                if (cancelUploadTokenSource != null)
+                    cancelUploadTokenSource.Cancel();
+
+                CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
+                cancelUploadTokenSource = newCancelUploadTokenSource;
+
+                await controller.DoUploadAsync(uploadFots, uploadUIState, categoryId, cancelUploadTokenSource.Token);
+
+                if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                    cancelTokenSource = null;
+
+                uploadUIState.Uploading = false;
+
+                if (lstUploadImageFileList.Items.Count > 0)
+                {
+                    lstUploadImageFileList.IsEnabled = true;
+                }
+                else
+                {
+                    ResetUploadState(true);
+                }
             }
-
-            if (uploadUIState.UploadToNewCategory && uploadUIState.CategoryName.Length < 1)
+            catch (OperationCanceledException)
             {
-                MessageBox.Show("You have selected to add a new category, you must enter a name to continue.");
-                return;
+                logger.Debug("cmdUploadAll_Click has been cancelled.");
             }
-
-            CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
-            long categoryId = category.id;
-
-            uploadUIState.Uploading = true;
-            RefreshPanesAllControls(PaneMode.Upload);
-
-            string response = await controller.DoUploadAsync(uploadFots, uploadUIState, categoryId);
-            if (response != null)
+            catch (Exception ex)
             {
-                MessageBox.Show("The upload encountered an error.  Message: " + response);
-            }
-
-            //TODO - Remove Images which were successfully uploaded.
-            uploadUIState.Uploading = false;
-
-            if (lstUploadImageFileList.Items.Count > 0)
-            {
-                lstUploadImageFileList.IsEnabled = true;
-            }
-            else
-            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "During the upload there was an unexpected error: " + ex.Message + "  Please check the upload status window for details.");
                 ResetUploadState(true);
             }
-
-            RefreshPanesAllControls(PaneMode.Upload);
+            finally
+            {
+                RefreshPanesAllControls(PaneMode.Upload);
+            }
         }
         #endregion
 
@@ -3193,7 +3249,7 @@ namespace ManageWalla
         #endregion
 
         #region Gallery Methods
-        async private void RefreshAndDisplayGalleryList(bool forceRefresh)
+        async private Task RefreshAndDisplayGalleryList(bool forceRefresh)
         {
             try
             {
@@ -3339,6 +3395,7 @@ namespace ManageWalla
                 return false;
             }
         }
+
 
         async private Task PopulateGalleryMetaData(GalleryListGalleryRef galleryListGalleryRef)
         {

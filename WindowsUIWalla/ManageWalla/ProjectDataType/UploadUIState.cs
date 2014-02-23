@@ -15,7 +15,7 @@ namespace ManageWalla
         private bool gotSubFolders = false;
         private bool uploading = false;
         private long categoryId = 1;
-        private string categoryPath = null;
+        private string rootFolder = null;
         private bool uploadToNewCategory = false;
         private string categoryName = null;
         private string categoryDesc = null;
@@ -84,13 +84,13 @@ namespace ManageWalla
             }
         }
 
-        public string CategoryPath
+        public string RootFolder
         {
-            get { return categoryPath; }
+            get { return rootFolder; }
             set
             {
-                categoryPath = value;
-                OnPropertyChanged("CategoryPath");
+                rootFolder = value;
+                OnPropertyChanged("RootFolder");
             }
         }
 
@@ -125,8 +125,6 @@ namespace ManageWalla
         }
 
         public UploadMode Mode { get; set; }
-
-        public string RootFolder { get; set; }
 
         public bool Uploading {
             get { return uploading; }

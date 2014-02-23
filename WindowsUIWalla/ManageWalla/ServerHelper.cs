@@ -100,6 +100,7 @@ namespace ManageWalla
                 account.Machines[0].id = 500001;
                 account.Machines[0].platformId = 200;
                 account.Machines[0].name = System.Environment.MachineName;
+                account.Machines[0].tagId = 200004;
                 return account;
 
                 /*

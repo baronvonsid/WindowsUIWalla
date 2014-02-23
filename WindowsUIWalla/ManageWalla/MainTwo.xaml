@@ -165,7 +165,7 @@
 
             </StackPanel>
 
-            <RadioButton x:Name="radGallery" GroupName="MainSection" Tag="false" Grid.Column="1" Grid.Row="1" Checked="radGallery_Checked" Style="{StaticResource styleMainSectionRadioButton}">
+            <RadioButton x:Name="radGallery"  GroupName="MainSection" Tag="false" Grid.Column="1" Grid.Row="1" Checked="radGallery_Checked" Style="{StaticResource styleMainSectionRadioButton}">
                 <RadioButton.Template>
                     <ControlTemplate TargetType="{x:Type RadioButton}">
                         <Grid>
@@ -520,6 +520,8 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="30" />
                     <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
                     <RowDefinition Height="80" />
                     <RowDefinition Height="50" />
                 </Grid.RowDefinitions>
@@ -529,27 +531,26 @@
                 </Grid.ColumnDefinitions>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2">
-
                     <TreeView x:Name="treeUploadCategoryView" >
 
                     </TreeView>
                 </ScrollViewer>
 
-                <!-- <Label x:Name="lblRootCalegory" Content="{Binding Mode=OneWay, Path=CategoryPath}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" /> 
+                <Label x:Name="lblRootCalegory" Content="{Binding Mode=OneWay, Path=RootFolder}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" /> 
 
-            <Label Content="Map sub folders as categories" Grid.Column="0" Grid.Row="1" />
-            <CheckBox x:Name="chkUploadMapToSubFolders" Grid.Row="1" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=MapToSubFolders}" HorizontalAlignment="Center" VerticalAlignment="Center" />
--->
-                <Label Content="New category" Grid.Column="0" Grid.Row="1" />
-                <CheckBox x:Name="chkUploadToNewCategory" Grid.Row="1" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=UploadToNewCategory}" Checked="chkUploadToNewCategory_Checked" Unchecked="chkUploadToNewCategory_Unchecked" />
+                <Label Content="Map sub folders as categories" Grid.Column="0" Grid.Row="2" />
+                <CheckBox x:Name="chkUploadMapToSubFolders" Grid.Row="2" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=MapToSubFolders}" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-                <Label Content="Category Name" Grid.Column="0" Grid.Row="2" />
-                <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
+                <Label Content="New category" Grid.Column="0" Grid.Row="3" />
+                <CheckBox x:Name="chkUploadToNewCategory" Grid.Row="3" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=UploadToNewCategory}" Checked="chkUploadToNewCategory_Checked" Unchecked="chkUploadToNewCategory_Unchecked" />
 
-                <Label Content="Description" Grid.Column="0" Grid.Row="3" />
-                <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="3" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
+                <Label Content="Category Name" Grid.Column="0" Grid.Row="4" />
+                <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="4" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
 
-                <StackPanel Orientation="Vertical" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                <Label Content="Description" Grid.Column="0" Grid.Row="5" />
+                <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="5" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
+
+                <StackPanel Orientation="Vertical" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
                     <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="300" Y2="1" StrokeThickness="0.5" Margin="0,10,0,4" />
                     <StackPanel Orientation="Horizontal">
                         <Button x:Name="cmdUploadAll" Content="Upload" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadAll_Click" />
@@ -972,11 +973,11 @@
                                         <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource radioNotSelectedImageSrc}" MaxHeight="11" />
                                     </StackPanel>
                                 </Grid>
-                                <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane" Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140">
-                                    <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2"/>
-                                    <TextBlock Text="{Binding description}" FontWeight="Light" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="2"/>
-                                    <TextBlock Text="{Binding shotSummary}" TextWrapping="Wrap" FontWeight="Light" HorizontalAlignment="Left" Margin="2" />
-                                    <TextBlock Text="{Binding fileSummary}" TextWrapping="Wrap" Margin="2" FontWeight="Light" />
+                                <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane"  Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140">
+                                    <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2" Foreground="{StaticResource FontBorderBrush}"/>
+                                    <TextBlock Text="{Binding description}" MaxHeight="60" FontWeight="Light" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="2" Foreground="{StaticResource FontBorderBrush}" />
+                                    <TextBlock Text="{Binding shotSummary}" TextWrapping="Wrap" FontWeight="Light" HorizontalAlignment="Left" Margin="2" Foreground="{StaticResource FontBorderBrush}" />
+                                    <TextBlock Text="{Binding fileSummary}" TextWrapping="Wrap" Margin="2" FontWeight="Light" Foreground="{StaticResource FontBorderBrush}" />
 
                                     <!--
                                     <Button Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"  
@@ -995,7 +996,6 @@
                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
                                     <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
                                 </DataTrigger>
-
 
                                 <Trigger Property="IsEnabled" Value="false">
                                     <Setter  TargetName="imageThumb" Property="Effect">
@@ -1043,7 +1043,7 @@
                             <RowDefinition Height="10"/>
 
                             <!-- Tags -->
-                            <RowDefinition Height="22" />
+                            <RowDefinition Height="30" />
                             <RowDefinition Height="*" />
 
                             <!-- Spacer -->

@@ -160,6 +160,7 @@ namespace ManageWalla
             {
                 Account account = await serverHelper.AccountGet(cancelToken);
                 state.account = account;
+
             }
             catch (OperationCanceledException)
             {
@@ -215,9 +216,31 @@ namespace ManageWalla
 
         }
 
-        public void CreateCategoryFromFolder(DirectoryInfo currentFolder, UploadImageFileList meFots, long parentCategoryId)
+        async public void CreateCategoryFromFolder(DirectoryInfo currentFolder, UploadImageFileList meFots, long parentCategoryId, CancellationToken cancelToken)
         {
-            long categoryId = 0; //serverHelper.CreateCategory(currentFolder.Name, "", parentCategoryId);
+            string folderName = currentFolder.Name;
+            if (folderName.Length > 30)
+                folderName = currentFolder.Name.Substring(0, 30);
+
+            CategoryListCategoryRef existingCategory = state.categoryList.CategoryRef.Where
+                (r => r.parentId == parentCategoryId && r.name.ToUpper() == folderName.ToUpper()).FirstOrDefault<CategoryListCategoryRef>();
+
+            long categoryId;
+
+
+            if (existingCategory == null)
+            {
+                Category category = new Category();
+                category.parentId = parentCategoryId;
+                category.Name = folderName;
+                category.Desc = "";
+                categoryId = await serverHelper.CategoryCreateAsync(category, cancelToken);
+            }
+            else
+            {
+                categoryId = existingCategory.id;
+            }
+
             foreach (UploadImage currentImage in meFots.OfType<UploadImage>().Where(r => r.FolderPath == currentFolder.FullName))
             {
                 currentImage.Meta.categoryId = categoryId;
@@ -225,84 +248,97 @@ namespace ManageWalla
 
             foreach (DirectoryInfo subFolder in currentFolder.GetDirectories())
             {
-                CreateCategoryFromFolder(subFolder, meFots, categoryId);
+                CreateCategoryFromFolder(subFolder, meFots, categoryId, cancelToken);
             }
         }
 
-        async public Task<string> DoUploadAsync(UploadImageFileList meFots, UploadUIState uploadState, long categoryId)
+        async public Task DoUploadAsync(UploadImageFileList meFots, UploadUIState uploadState, long categoryId, CancellationToken cancelToken)
         {
-            if (uploadState.UploadToNewCategory)
-            {
-                Category category = new Category();
-                category.parentId = categoryId;
-                category.Name = uploadState.CategoryName;
-                category.Desc = uploadState.CategoryDesc;
-                categoryId = await serverHelper.CategoryCreateAsync(category, cancelTokenSourceToDel.Token);
-                //rootCategoryId = serverHelper.CreateCategory(uploadState.CategoryName, uploadState.CategoryDesc, uploadState.CategoryId);
-            }
-
-            //TODO - Implement, taken out of GUI.
-            if (uploadState.MapToSubFolders)
+            try
             {
                 if (uploadState.UploadToNewCategory)
                 {
-                    //Assumption being that all sub categories will now need to be created.
+                    Category category = new Category();
+                    category.parentId = categoryId;
+                    category.Name = uploadState.CategoryName;
+                    category.Desc = uploadState.CategoryDesc;
+                    categoryId = await serverHelper.CategoryCreateAsync(category, cancelToken);
+                }
+
+                if (uploadState.MapToSubFolders)
+                {
                     DirectoryInfo rootFolder = new DirectoryInfo(uploadState.RootFolder);
-                    CreateCategoryFromFolder(rootFolder, meFots, categoryId);
+                    CreateCategoryFromFolder(rootFolder, meFots, categoryId, cancelToken);
                 }
                 else
                 {
-                    //Check local category xml for matches or create new.
-                    //TODO after categories have been developed.
+                    foreach (UploadImage currentImage in meFots)
+                    {
+                        currentImage.Meta.categoryId = categoryId;
+                    }
                 }
+
+                //Check for each chkAll box set to true, then replace respective values.
+                if (uploadState.MetaTagRefAll)
+                {
+                    foreach (UploadImage currentImage in meFots)
+                    {
+                        currentImage.Meta.Tags = uploadState.MetaTagRef;
+                    }
+                }
+
+                while (meFots.Where(r => r.State == UploadImage.UploadState.None).Count() > 0)
+                {
+                    cancelToken.ThrowIfCancellationRequested();
+
+                    UploadImage currentUpload = meFots.Where(r => r.State == UploadImage.UploadState.None).First();
+
+                    AddMachineTag(currentUpload);
+
+                    string response = await serverHelper.UploadImageAsync(currentUpload, cancelToken);
+                    if (response == null)
+                    {
+                        currentMain.uploadFots.Remove(currentUpload);
+                    }
+                    else
+                    {
+                        currentUpload.State = UploadImage.UploadState.Error;
+                        currentUpload.UploadError = response;
+                    }
+                }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("DoUploadAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the images associated with the Category: " + categoryId.ToString() + ".  Error: " + ex.Message);
+            }
+        }
+
+        private void AddMachineTag(UploadImage current)
+        {
+            ImageMetaTagRef newTagRef = new ImageMetaTagRef();
+            newTagRef.id = state.account.Machines.Single(r => r.id == state.machineId).tagId;
+
+            ImageMetaTagRef[] newTagArray;
+
+            if (current.Meta.Tags == null)
+            {
+                newTagArray = new ImageMetaTagRef[1];
+                newTagArray[0] = newTagRef;
             }
             else
             {
-                foreach (UploadImage currentImage in meFots)
-                {
-                    currentImage.Meta.categoryId = categoryId;
-                }
+                newTagArray = new ImageMetaTagRef[current.Meta.Tags.Length + 1];
+                current.Meta.Tags.CopyTo(newTagArray, 0);
+                newTagArray[newTagArray.Length - 1] = newTagRef;
             }
-
-            //Check for each chkAll box set to true, then replace respective values.
-            if (uploadState.MetaTagRefAll)
-            {
-                foreach (UploadImage currentImage in meFots)
-                {
-                    currentImage.Meta.Tags = uploadState.MetaTagRef;
-                }
-            }
-
-            while (meFots.Where(r => r.State == UploadImage.UploadState.None).Count() > 0)
-            {
-                UploadImage currentUpload = meFots.Where(r => r.State == UploadImage.UploadState.None).First();
-
-                string response = await serverHelper.UploadImageAsync(currentUpload, cancelTokenSourceToDel.Token);
-                if (response == null)
-                {
-                    //meFots.RemoveAt(0);
-                    //Dispatcher.Invoke(DispatcherPriority.Send,
-
-                    //theLabel.Invoke(new Action(() => theLabel.Text = "hello world from worker thread!"));
-
-                    currentMain.uploadFots.Remove(currentUpload);
-
-                    /*
-                    Action UpdateFotsAction = delegate()
-                    {
-                        currentMain.uploadFots.RemoveAt(0);
-                    };
-                    
-                    Application.Current.MainWindow.Dispatcher.Invoke(DispatcherPriority.Send, UpdateFotsAction);
-                    */
-                }
-                else
-                {
-                    currentUpload.State = UploadImage.UploadState.Error;
-                    currentUpload.UploadError = response;
-                }
-            }
-            return null;
+            current.Meta.Tags = newTagArray;
         }
 
         async public Task ResetMeFotsMeta(UploadImageFileList metFots)
