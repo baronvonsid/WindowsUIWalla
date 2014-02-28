@@ -1060,7 +1060,7 @@ namespace ManageWalla
             ImageViewUpdateNextPrevious();
         }
 
-        private void ImageViewEditSave_Click(object sender, RoutedEventArgs e)
+        async private void ImageViewEditSave_Click(object sender, RoutedEventArgs e)
         {
             GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
             if (currentPane == PaneMode.ImageEdit)
@@ -1070,10 +1070,34 @@ namespace ManageWalla
                     ShowMessage(MessageType.Warning, "You must enter a name to continue saving");
                     return;
                 }
-                
-                current.SaveMeta(cancelTokenSource.Token);
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                try
+                {
+                    ShowMessage(MessageType.Busy, "Saving image data updates");
+
+                    await current.SaveMeta(cancelTokenSource.Token);
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+
+                    ConcludeBusyProcess();
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.Debug("cmdGallerySave_Click has been cancelled.");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MessageType.Error, "Image data could not be saved, there was an error on the server:" + ex.Message);
+                }
                 RefreshPanesAllControls(PaneMode.ImageView);
-                //current.LoadMeta(true, cancelTokenSource.Token);
             }
             else
             {
@@ -1111,7 +1135,7 @@ namespace ManageWalla
         }
         #endregion
 
-        #region Image Retrieve Methods and Handlers
+        #region Image and menu andlers
         async private void FetchCategoryImagesFirstAsync(object sender, RoutedEventArgs e)
         {
             cmbGallerySectionVert.Visibility = Visibility.Collapsed;
@@ -1225,7 +1249,12 @@ namespace ManageWalla
 
                         currentImageList = await controller.GalleryGetImagesAsync(galleryListRefTemp.id, galleryListRefTemp.name, 0, -1, GetSearchQueryString(), cancelTokenSource.Token);
                         if (currentImageList != null)
+                        {
+                            newCancelTokenSource = new CancellationTokenSource();
+                            cancelTokenSource = newCancelTokenSource;
+
                             await ImageListUpdateControls(cancelTokenSource.Token);
+                        }
 
                         if (newCancelTokenSource == cancelTokenSource)
                             cancelTokenSource = null;
@@ -1744,44 +1773,57 @@ namespace ManageWalla
             {
                 if (MessageBox.Show("Do you want to delete the " + count.ToString() + " selected images permanently from fotowalla ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    ImageList deleteList = new ImageList();
-                    deleteList.Images = new ImageListImageRef[lstImageMainViewerList.SelectedItems.Count];
-
-                    List<GeneralImage> toRemoveList = new List<GeneralImage>();
-
-                    int i = 0;
-                    foreach (GeneralImage image in lstImageMainViewerList.SelectedItems)
-                    {
-                        deleteList.Images[i] = new ImageListImageRef();
-                        deleteList.Images[i].id = image.imageId;
-                        deleteList.Images[i].idSpecified = true;
-                        i++;
-
-                        toRemoveList.Add(image);
-                    }
-
                     ShowMessage(MessageType.Busy, "Deleting Images");
-                    string response = await controller.DeleteImagesAsync(deleteList, cancelTokenSource.Token);
-                    if (response != "OK")
+
+                    try
                     {
+                        ImageList deleteList = new ImageList();
+                        deleteList.Images = new ImageListImageRef[lstImageMainViewerList.SelectedItems.Count];
+
+                        List<GeneralImage> toRemoveList = new List<GeneralImage>();
+
+                        int i = 0;
+                        foreach (GeneralImage image in lstImageMainViewerList.SelectedItems)
+                        {
+                            deleteList.Images[i] = new ImageListImageRef();
+                            deleteList.Images[i].id = image.imageId;
+                            deleteList.Images[i].idSpecified = true;
+                            i++;
+
+                            toRemoveList.Add(image);
+                        }
+
+                        if (cancelTokenSource != null)
+                            cancelTokenSource.Cancel();
+
+                        CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                        cancelTokenSource = newCancelTokenSource;
+
+                        await controller.DeleteImagesAsync(deleteList, cancelTokenSource.Token);
+
+                        foreach (GeneralImage current in toRemoveList)
+                        {
+                            imageMainViewerList.Remove(current);
+                        }
+
                         ConcludeBusyProcess();
-                        ShowMessage(MessageType.Error, response);
-                        return;
-                    }
-                    else
-                    {
-                        ConcludeBusyProcess();
+
                         string message = count.ToString() + " images were successfully deleted";
                         ShowMessage(MessageType.Info, message);
+
+                        if (newCancelTokenSource == cancelTokenSource)
+                            cancelTokenSource = null;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        logger.Debug("DeleteImages_Click has been cancelled");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error(ex);
+                        ShowMessage(MainTwo.MessageType.Error, "There was a problem deleting the images on the server.  Error: " + ex.Message);
                     }
 
-                    foreach (GeneralImage current in toRemoveList)
-                    {
-                        imageMainViewerList.Remove(current);
-                        //lstImageMainViewerList.Items.Remove(current);
-                    }
-                    //TODO - refresh current view.
-                    //RefreshAndDisplayTagList(true);
                 }
             }
             else
@@ -1789,6 +1831,37 @@ namespace ManageWalla
                 ShowMessage(MessageType.Warning, "You must select at least one image to perform a deletion");
             }
         }
+
+        private void cmdMultiSelectionMode_Checked(object sender, RoutedEventArgs e)
+        {
+            while (lstImageMainViewerList.SelectedItems.Count > 0)
+            {
+                ListBoxItem listBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
+                listBoxItem.IsSelected = false;
+            }
+
+            lstImageMainViewerList.SelectionMode = SelectionMode.Multiple;
+        }
+
+        private void cmdMultiSelectionMode_Unchecked(object sender, RoutedEventArgs e)
+        {
+            lstImageMainViewerList.SelectionMode = SelectionMode.Single;
+        }
+
+        private void Image_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (lstImageMainViewerList.SelectionMode == SelectionMode.Single)
+            {
+                previousPane = currentPane;
+                cmdImageViewDetailToggle.IsChecked = false;
+
+                RefreshPanesAllControls(PaneMode.ImageView);
+                RefreshOverallPanesStructure(currentPane);
+
+                ImageViewUpdateNextPrevious();
+            }
+        }
+
         #endregion
 
         #region Category Methods
@@ -1841,7 +1914,6 @@ namespace ManageWalla
                         gridCategory.Visibility = Visibility.Collapsed;
                         break;
                 }
-                radCategory.Tag = false;
             }
             catch (OperationCanceledException)
             {
@@ -1854,6 +1926,10 @@ namespace ManageWalla
                 state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "Category list could not be loaded, there was an error: " + ex.Message);
+            }
+            finally
+            {
+                radCategory.Tag = false;
             }
         }
 
@@ -1976,15 +2052,87 @@ namespace ManageWalla
         async private Task CategoryPopulateMetaData()
         {
             TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
-            if (item == null)
+            if (item != null)
             {
-                return;
+                ShowMessage(MessageType.Busy, "Retrieving Category");
+
+                try
+                {
+                    if (cancelTokenSource != null)
+                        cancelTokenSource.Cancel();
+
+                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource = newCancelTokenSource;
+
+                    Category category = await controller.CategoryGetMetaAsync((CategoryListCategoryRef)item.Tag, cancelTokenSource.Token);
+                    txtCategoryName.Text = category.Name;
+                    txtCategoryDescription.Text = category.Desc;
+                    currentCategory = category;
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+
+                    RefreshPanesAllControls(PaneMode.CategoryEdit);
+                    ConcludeBusyProcess();
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.Debug("CategoryPopulateMetaData has been cancelled");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the category.  Error: " + ex.Message);
+                }
+            }
+        }
+
+        async private Task MoveImagesToCategory(long categoryId)
+        {
+            ImageMoveList moveList = new ImageMoveList();
+            moveList.ImageRef = new long[lstImageMainViewerList.SelectedItems.Count];
+
+            int i = 0;
+            foreach (GeneralImage image in lstImageMainViewerList.SelectedItems)
+            {
+                moveList.ImageRef[i] = image.imageId;
+                if (image.categoryId == categoryId)
+                {
+                    MessageBox.Show("The update cannot be done, you have selected images which are already in the category.");
+                    return;
+                }
+                i++;
             }
 
-            Category category = await controller.CategoryGetMetaAsync((CategoryListCategoryRef)item.Tag);
-            txtCategoryName.Text = category.Name;
-            txtCategoryDescription.Text = category.Desc;
-            currentCategory = category;
+            try
+            {
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                ShowMessage(MessageType.Busy, "Updating images in category");
+                await controller.CategoryMoveImagesAsync(categoryId, moveList, cancelTokenSource.Token);
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                ConcludeBusyProcess();
+                await RefreshAndDisplayCategoryList(true);
+
+                string message = moveList.ImageRef.Length.ToString() + " were successfully moved to the category.";
+                ShowMessage(MessageType.Info, message);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("MoveImagesToCategory has been cancelled");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "Images could not be moved to the category, there was an error on the server: " + ex.Message);
+            }
         }
         #endregion
 
@@ -2009,68 +2157,113 @@ namespace ManageWalla
         async private void cmdCategoryEdit_Click(object sender, RoutedEventArgs e)
         {
             await CategoryPopulateMetaData();
-            RefreshPanesAllControls(PaneMode.CategoryEdit);
         }
 
         async private void cmdCategorySave_Click(object sender, RoutedEventArgs e)
         {
-            string response = null;
-
-            CategoryListCategoryRef currentSelectedCategory = null;
-            TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
-            if (item != null)
+            if (txtCategoryName.Text.Length < 1)
             {
-                currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
-            }
-
-            if (currentPane == PaneMode.CategoryAdd)
-            {
-                Category category = new Category();
-                category.Name = txtCategoryName.Text;
-                category.Desc = txtCategoryDescription.Text;
-                if (currentSelectedCategory == null)
-                {
-                    category.parentId = 0;
-                }
-                else
-                {
-                    category.parentId = currentSelectedCategory.id;
-                }
-                response = await controller.CategoryCreateAsync(category);
-            }
-            else
-            {
-                currentCategory.Name = txtCategoryName.Text;
-                currentCategory.Desc = txtCategoryDescription.Text;
-                if (currentSelectedCategory != null && currentCategory.id != currentSelectedCategory.id)
-                {
-                    currentCategory.parentId = currentSelectedCategory.id;
-                }
-
-                response = await controller.CategoryUpdateAsync(currentCategory);
-            }
-
-            if (response != "OK")
-            {
-                ShowMessage(MessageType.Error, response);
+                ShowMessage(MessageType.Warning, "You must enter a category name to continue.");
                 return;
             }
 
-            RefreshPanesAllControls(PaneMode.CategoryView);
-            RefreshAndDisplayCategoryList(true);
+            try
+            {
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                ShowMessage(MessageType.Busy, "Updating server with category info");
+
+                CategoryListCategoryRef currentSelectedCategory = null;
+                TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
+                if (item != null)
+                {
+                    currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+                }
+
+                if (currentPane == PaneMode.CategoryAdd)
+                {
+                    Category category = new Category();
+                    category.Name = txtCategoryName.Text;
+                    category.Desc = txtCategoryDescription.Text;
+                    if (currentSelectedCategory == null)
+                    {
+                        category.parentId = 0;
+                    }
+                    else
+                    {
+                        category.parentId = currentSelectedCategory.id;
+                    }
+                    await controller.CategoryCreateAsync(category, cancelTokenSource.Token);
+                }
+                else
+                {
+                    currentCategory.Name = txtCategoryName.Text;
+                    currentCategory.Desc = txtCategoryDescription.Text;
+                    if (currentSelectedCategory != null && currentCategory.id != currentSelectedCategory.id)
+                    {
+                        currentCategory.parentId = currentSelectedCategory.id;
+                    }
+
+                    await controller.CategoryUpdateAsync(currentCategory, cancelTokenSource.Token);
+                }
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("cmdCategorySave_Click has been cancelled");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem updating category data on the server.  Error: " + ex.Message);
+            }
+            finally
+            {
+                RefreshPanesAllControls(PaneMode.CategoryView);
+                RefreshAndDisplayCategoryList(true);
+            }
         }
 
         async private void cmdCategoryDelete_Click(object sender, RoutedEventArgs e)
         {
-            string response = await controller.CategoryDeleteAsync(currentCategory);
-            if (response != "OK")
+            try
             {
-                ShowMessage(MessageType.Error, response);
-                return;
-            }
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
 
-            RefreshPanesAllControls(PaneMode.CategoryView);
-            RefreshAndDisplayCategoryList(true);
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                ShowMessage(MessageType.Busy, "Deleting category");
+
+                await controller.CategoryDeleteAsync(currentCategory, cancelTokenSource.Token);
+
+                imageMainViewerList.Clear();
+                ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("cmdCategoryDelete_Click has been cancelled");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem deleting the category.  Error: " + ex.Message);
+            }
+            finally
+            {
+                RefreshPanesAllControls(PaneMode.CategoryView);
+                RefreshAndDisplayCategoryList(true);
+            }
         }
 
         async private void CategoryDroppedImages(object sender, DragEventArgs e)
@@ -2080,47 +2273,14 @@ namespace ManageWalla
             TreeViewItem meTreeviewNode = sender as TreeViewItem;
             CategoryListCategoryRef meToCategory = (CategoryListCategoryRef)meTreeviewNode.Tag;
 
-            //TreeViewItem meFromTreeviewNode = (TreeViewItem)treeCategoryView.SelectedItem;
-            //CategoryListCategoryRef meFromCategory = (CategoryListCategoryRef)meFromTreeviewNode.Tag;
-            //meFromCategory == null || 
-
-            if (meToCategory == null)
-            {
-                MessageBox.Show("Unexpected error, selected category could not be established.");
-                return;
-            }
-
             int count = lstImageMainViewerList.SelectedItems.Count;
             if (count > 0)
             {
                 if (MessageBox.Show("Do you want to move the " + count.ToString() + " selected images to the category: " + meToCategory.name + "?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    ImageMoveList moveList = new ImageMoveList();
-                    moveList.ImageRef = new long[count];
-                    int i = 0;
-                    foreach (GeneralImage image in lstImageMainViewerList.SelectedItems)
-                    {
-                        //GeneralImage image = (GeneralImage)lstImageMainViewerList.Items[i];
-                        if (image.categoryId == meToCategory.id)
-                        {
-                            MessageBox.Show("The update cannot be done, you have selected images which are already in the category: " + meToCategory.name);
-                            return;
-                        }
-                        moveList.ImageRef[i] = image.imageId;
-                        i++;
-                    }
-
-                    string response = await controller.CategoryMoveImagesAsync(meToCategory.id, moveList);
-                    if (response != "OK")
-                    {
-                        ShowMessage(MessageType.Error, response);
-                        return;
-                    }
-
-                    RefreshAndDisplayCategoryList(true);
+                    await MoveImagesToCategory(meToCategory.id);
                 }
             }
-
         }
         #endregion
 
@@ -2174,7 +2334,6 @@ namespace ManageWalla
                         gridTag.Visibility = Visibility.Collapsed;
                         break;
                 }
-                radTag.Tag = false;
             }
             catch (OperationCanceledException)
             {
@@ -2187,6 +2346,10 @@ namespace ManageWalla
                 state.tagLoadState = GlobalState.DataLoadState.Unavailable;
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "Tag list could not be loaded, there was an error: " + ex.Message);
+            }
+            finally
+            {
+                radTag.Tag = false;
             }
         }
 
@@ -2243,22 +2406,47 @@ namespace ManageWalla
                     recheckButton.IsChecked = true;
             }
 
-
-
             UploadRefreshTagsList();
         }
 
         async private Task PopulateTagMetaData()
         {
             RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-
             if (checkedButton != null)
             {
+                ShowMessage(MessageType.Busy, "Retrieving Tag");
+
                 TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
-                Tag tag = await controller.TagGetMetaAsync((TagListTagRef)checkedButton.Tag);
-                txtTagName.Text = tag.Name;
-                txtTagDescription.Text = tag.Desc;
-                currentTag = tag;
+                try
+                {
+
+                    if (cancelTokenSource != null)
+                        cancelTokenSource.Cancel();
+
+                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource = newCancelTokenSource;
+
+                    Tag tag = await controller.TagGetMetaAsync((TagListTagRef)checkedButton.Tag, cancelTokenSource.Token);
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+
+                    txtTagName.Text = tag.Name;
+                    txtTagDescription.Text = tag.Desc;
+                    currentTag = tag;
+
+                    RefreshPanesAllControls(PaneMode.TagEdit);
+                    ConcludeBusyProcess();
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.Debug("PopulateTagMetaData has been cancelled");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the tag meta data.  Error: " + ex.Message);
+                }
             }
         }
 
@@ -2272,19 +2460,7 @@ namespace ManageWalla
             {
                 if (MessageBox.Show("Do you want to add the " + count.ToString() + " selected images to the tag: " + meTag.name + "?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
-                    string response = await AddRemoveImagesFromTag(true, meTag.name);
-                    if (response != "OK")
-                    {
-                        ShowMessage(MessageType.Error, response);
-                        return;
-                    }
-                    else
-                    {
-                        string message = count.ToString() + " were successfully added to the tag: " + meTag.name;
-                        ShowMessage(MessageType.Info, message);
-                    }
-
-                    RefreshAndDisplayTagList(true);
+                    await AddRemoveImagesFromTag(true, meTag.name);
                 }
             }
         }
@@ -2302,19 +2478,7 @@ namespace ManageWalla
                     {
                         if (MessageBox.Show("Do you want to remove the " + count.ToString() + " selected images from the tag: " + tagListTagRefTemp.name + "?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         {
-                            string response = await AddRemoveImagesFromTag(false, tagListTagRefTemp.name);
-                            if (response != "OK")
-                            {
-                                ShowMessage(MessageType.Error, response);
-                                return;
-                            }
-                            else
-                            {
-                                string message = count.ToString() + " were successfully removed from the tag: " + tagListTagRefTemp.name;
-                                ShowMessage(MessageType.Info, message);
-                            }
-
-                            RefreshAndDisplayTagList(true);
+                            await AddRemoveImagesFromTag(false, tagListTagRefTemp.name);
                         }
                     }
                     else
@@ -2333,8 +2497,7 @@ namespace ManageWalla
             }
         }
 
-
-        async private Task<string> AddRemoveImagesFromTag(bool add, string tagName)
+        async private Task AddRemoveImagesFromTag(bool add, string tagName)
         {
             ImageMoveList moveList = new ImageMoveList();
             moveList.ImageRef = new long[lstImageMainViewerList.SelectedItems.Count];
@@ -2346,8 +2509,35 @@ namespace ManageWalla
                 i++;
             }
 
-            string response = await controller.TagAddRemoveImagesAsync(tagName, moveList, add);
-            return response;
+            try
+            {
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                ShowMessage(MessageType.Busy, "Updating images in tag");
+                await controller.TagAddRemoveImagesAsync(tagName, moveList, add, cancelTokenSource.Token);
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                await RefreshAndDisplayTagList(true);
+                ConcludeBusyProcess();
+
+                string message = moveList.ImageRef.Length.ToString() + " were successfully added to the tag: " + tagName;
+                ShowMessage(MessageType.Info, message);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("AddRemoveImagesFromTag has been cancelled");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "Images could not be add\removed from the Tag, there was an error on the server: " + ex.Message);
+            }
         }
 
         #endregion
@@ -2371,18 +2561,35 @@ namespace ManageWalla
 
         async private void cmdTagDelete_Click(object sender, RoutedEventArgs e)
         {
-            string response = await controller.TagDeleteAsync(currentTag);
-            if (response != "OK")
+            try
             {
-                ShowMessage(MessageType.Error, response);
-                return;
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                ShowMessage(MessageType.Busy, "Deleting tag");
+
+                await controller.TagDeleteAsync(currentTag, cancelTokenSource.Token);
+
+                imageMainViewerList.Clear();
+                ConcludeBusyProcess();
             }
-
-            imageMainViewerList.Clear();
-
-            //lstImageMainViewerList.Items.Clear();
-            RefreshPanesAllControls(PaneMode.TagView);
-            RefreshAndDisplayTagList(true);
+            catch (OperationCanceledException)
+            {
+                logger.Debug("cmdTagDelete_Click has been cancelled");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem deleting the tag.  Error: " + ex.Message);
+            }
+            finally
+            {
+                RefreshPanesAllControls(PaneMode.TagView);
+                RefreshAndDisplayTagList(true);
+            }
         }
 
         private void cmdTagAdd_Click(object sender, RoutedEventArgs e)
@@ -2395,7 +2602,6 @@ namespace ManageWalla
         async private void cmdTagEdit_Click(object sender, RoutedEventArgs e)
         {
             await PopulateTagMetaData();
-            RefreshPanesAllControls(PaneMode.TagEdit);
         }
 
         private void cmdTagCancel_Click(object sender, RoutedEventArgs e)
@@ -2405,37 +2611,73 @@ namespace ManageWalla
 
         async private void cmdTagSave_Click(object sender, RoutedEventArgs e)
         {
-            string response = null;
-
-            //Check tag name is unique
-
-            if (currentPane == PaneMode.TagAdd)
+            if (txtTagName.Text.Length < 1)
             {
-                Tag tag = new Tag();
-                tag.Name = txtTagName.Text;
-                tag.Desc = txtTagDescription.Text;
-
-                //Add Images selected
-
-                response = await controller.TagCreateAsync(tag);
-            }
-            else
-            {
-                string oldTagName = currentTag.Name;
-                currentTag.Name = txtTagName.Text;
-                currentTag.Desc = txtTagDescription.Text;
-
-                response = await controller.TagUpdateAsync(currentTag, oldTagName);
-            }
-
-            if (response != "OK")
-            {
-                ShowMessage(MessageType.Error, response);
+                ShowMessage(MessageType.Warning, "You must enter a tag name to continue.");
                 return;
             }
 
-            RefreshPanesAllControls(PaneMode.TagView);
-            RefreshAndDisplayTagList(true);
+            //Check tag name is unique
+            foreach (TagListTagRef tagRef in state.tagList.TagRef)
+            {
+                if (txtTagName.Text == tagRef.name)
+                {
+                    if (currentPane == PaneMode.TagAdd || currentTag.id != tagRef.id)
+                    {
+                        ShowMessage(MessageType.Warning, "Tag name must be unique.  " + tagRef.name + " has already been used.");
+                        return;
+                    }
+                }
+            }
+
+            try
+            {
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                ShowMessage(MessageType.Busy, "Saving Tag data");
+
+                if (currentPane == PaneMode.TagAdd)
+                {
+                    Tag tag = new Tag();
+                    tag.Name = txtTagName.Text;
+                    tag.Desc = txtTagDescription.Text;
+
+                    await controller.TagCreateAsync(tag, cancelTokenSource.Token);
+                }
+                else
+                {
+                    string oldTagName = currentTag.Name;
+                    currentTag.Name = txtTagName.Text;
+                    currentTag.Desc = txtTagDescription.Text;
+
+                    await controller.TagUpdateAsync(currentTag, oldTagName, cancelTokenSource.Token);
+                }
+
+                ConcludeBusyProcess();
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("cmdTagSave_Click has been cancelled");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem updating tag data on the server.  Error: " + ex.Message);
+            }
+            finally
+            {
+                RefreshPanesAllControls(PaneMode.TagView);
+                RefreshAndDisplayTagList(true);
+            }
+
         }
         #endregion
 
@@ -2648,33 +2890,57 @@ namespace ManageWalla
             System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
             if (folderDialog.SelectedPath.Length > 0)
             {
+                if (cancelUploadTokenSource != null)
+                    cancelUploadTokenSource.Cancel();
+
+                CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
+                cancelUploadTokenSource = newCancelUploadTokenSource;
+
                 uploadUIState.MapToSubFolders = false;
                 DirectoryInfo folder = new DirectoryInfo(folderDialog.SelectedPath);
-                if (folder.GetDirectories().Length > 0)
+
+                try
                 {
-                    uploadUIState.GotSubFolders = true;
-                    uploadUIState.RootFolder = folderDialog.SelectedPath;
-                    if (MessageBox.Show("Do you want to add images from the sub folders too ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    ShowMessage(MessageType.Busy, "Files being analysed for upload");
+
+                    if (folder.GetDirectories().Length > 0)
                     {
-                        await controller.LoadImagesFromFolder(folder, true, uploadFots);
-                        uploadUIState.MapToSubFolders = true;
+                        uploadUIState.GotSubFolders = true;
+                        uploadUIState.RootFolder = folderDialog.SelectedPath;
+                        if (MessageBox.Show("Do you want to add images from the sub folders too ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                        {
+                            await controller.LoadImagesFromFolder(folder, true, uploadFots, cancelUploadTokenSource.Token);
+                            uploadUIState.MapToSubFolders = true;
+                        }
+                        else
+                        {
+                            await controller.LoadImagesFromFolder(folder, false, uploadFots, cancelUploadTokenSource.Token);
+                        }
                     }
                     else
                     {
-                        await controller.LoadImagesFromFolder(folder, false, uploadFots);
+                        uploadUIState.RootFolder = "";
+                        await controller.LoadImagesFromFolder(folder, false, uploadFots, cancelUploadTokenSource.Token);
                     }
+
+                    if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                        cancelTokenSource = null;
+                    ConcludeBusyProcess();
                 }
-                else
+                catch (OperationCanceledException)
                 {
-                    uploadUIState.RootFolder = "";
-                    await controller.LoadImagesFromFolder(folder, false, uploadFots);
+                    logger.Debug("cmdUploadImportFolder_Click has been cancelled.");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MessageType.Error, "There was an unexpected error whilst preparing files for uploading.  Error: " + ex.Message);
                 }
 
-                uploadUIState.Mode = UploadUIState.UploadMode.Folder;
-                RefreshPanesAllControls(PaneMode.Upload);
-
-                if (lstUploadImageFileList.Items.Count > 0 && lstUploadImageFileList.SelectedItems.Count == 0)
+                if (lstUploadImageFileList.Items.Count > 0) //&& lstUploadImageFileList.SelectedItems.Count == 0
                 {
+                    uploadUIState.Mode = UploadUIState.UploadMode.Folder;
+                    RefreshPanesAllControls(PaneMode.Upload);
                     lstUploadImageFileList.SelectedIndex = 0;
                 }
             }
@@ -2690,14 +2956,39 @@ namespace ManageWalla
             System.Windows.Forms.DialogResult result = openDialog.ShowDialog();
             if (openDialog.FileNames.Length > 0)
             {
-                await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots);
+                if (cancelUploadTokenSource != null)
+                    cancelUploadTokenSource.Cancel();
+
+                CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
+                cancelUploadTokenSource = newCancelUploadTokenSource;
+
+                try
+                {
+                    ShowMessage(MessageType.Busy, "Files being analysed for upload");
+
+                    await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots, cancelUploadTokenSource.Token);
+
+                    if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                        cancelTokenSource = null;
+
+                    ConcludeBusyProcess();
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.Debug("cmdUploadImportFiles_Click has been cancelled.");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MessageType.Error, "There was an unexpected error whilst preparing files for uploading.  Error: " + ex.Message);
+                }
+            }
+
+            if (lstUploadImageFileList.Items.Count > 0) //&& lstUploadImageFileList.SelectedItems.Count == 0
+            {
                 uploadUIState.GotSubFolders = false;
                 uploadUIState.Mode = UploadUIState.UploadMode.Images;
                 RefreshPanesAllControls(PaneMode.Upload);
-            }
-
-            if (lstUploadImageFileList.Items.Count > 0 && lstUploadImageFileList.SelectedItems.Count == 0)
-            {
                 lstUploadImageFileList.SelectedIndex = 0;
             }
         }
@@ -3253,7 +3544,7 @@ namespace ManageWalla
         {
             try
             {
-                
+
                 bool isBusy = bool.Parse(radGallery.Tag.ToString());
                 if (isBusy) { return; }
 
@@ -3293,7 +3584,6 @@ namespace ManageWalla
                         gridGallery.Visibility = Visibility.Collapsed;
                         break;
                 }
-                radGallery.Tag = false;
             }
             catch (OperationCanceledException)
             {
@@ -3306,6 +3596,10 @@ namespace ManageWalla
                 state.galleryLoadState = GlobalState.DataLoadState.Unavailable;
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "Gallery list could not be loaded, there was an error: " + ex.Message);
+            }
+            finally
+            {
+                radGallery.Tag = false;
             }
         }
 
@@ -3477,14 +3771,11 @@ namespace ManageWalla
             catch (OperationCanceledException)
             {
                 logger.Debug("PopulateGalleryMetaData has been cancelled.");
-                RefreshOverallPanesStructure(PaneMode.GalleryView);
-                RefreshPanesAllControls(PaneMode.GalleryView);
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                RefreshOverallPanesStructure(PaneMode.GalleryView);
-                RefreshPanesAllControls(PaneMode.GalleryView);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the gallery data.  Error: " + ex.Message);
             }
             finally
             {
@@ -3982,7 +4273,7 @@ namespace ManageWalla
                 return;
             }
 
-            ShowMessage(MessageType.Busy, "Saving Gallery");
+            ShowMessage(MessageType.Busy, "Saving Gallery data");
 
             if (currentPane == PaneMode.GalleryAdd)
             {
@@ -4018,6 +4309,9 @@ namespace ManageWalla
 
             try
             {
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
                 
@@ -4032,6 +4326,8 @@ namespace ManageWalla
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
+
+                ConcludeBusyProcess();
             }
             catch (OperationCanceledException)
             {
@@ -4044,7 +4340,6 @@ namespace ManageWalla
             }
             finally
             {
-                ConcludeBusyProcess();
                 RefreshOverallPanesStructure(PaneMode.GalleryView);
                 RefreshPanesAllControls(PaneMode.GalleryView);
                 RefreshAndDisplayGalleryList(true);
@@ -4073,6 +4368,8 @@ namespace ManageWalla
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
+
+                ConcludeBusyProcess();
             }
             catch (OperationCanceledException)
             {
@@ -4085,7 +4382,6 @@ namespace ManageWalla
             }
             finally
             {
-                ConcludeBusyProcess();
                 RefreshOverallPanesStructure(PaneMode.GalleryView);
                 RefreshPanesAllControls(PaneMode.GalleryView);
                 RefreshAndDisplayGalleryList(true);
@@ -4130,116 +4426,6 @@ namespace ManageWalla
                 GalleryCategoryRecursiveRelatedUpdates(child, false);
         }
         #endregion
-
-        private void lblFotoWalla_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-
-            GeneralImage current = (GeneralImage)lstImageMainViewerList.SelectedItem;
-            CancellationToken cancel = new CancellationToken();
-
-            current.LoadMainCopyImage(cancel, mainCopyCacheList, state.mainCopyFolder);
-
-            //imageInlineDetailPane.V
-
-            //galleryCategoriesList.CategoryItems[0].name = "change1";
-            //galleryCategoriesList.CategoryItems[0].CategoryItems[1].name = "change";
-            
-
-            //GalleryCategoryApplyRelatedUpdates();
-            //BindingOperations.GetBindingExpression(treeGalleryCategoryView, TreeView.ItemsSourceProperty).UpdateTarget();
-
-
-            // Create Image Element
-            //Image myImage = new Image();
-            //myImage.Width = 200;
-/*
-            BitmapImage myBitmapImageOne = new BitmapImage();
-            myBitmapImageOne.BeginInit();
-            myBitmapImageOne.UriSource = new Uri(@"C:\Users\FastEddy\Desktop\fots\IMG_424.JPG");
-            myBitmapImageOne.DecodePixelWidth = 200;
-            myBitmapImageOne.EndInit();
-
-            BitmapImage myBitmapImageTwo = new BitmapImage();
-            myBitmapImageTwo.BeginInit();
-            myBitmapImageTwo.UriSource = new Uri(@"C:\Users\FastEddy\Desktop\fots\IMG_4060.JPG");
-            myBitmapImageTwo.DecodePixelWidth = 200;
-            myBitmapImageTwo.EndInit();
-
-            
-            //set image source
-            myImage.Source = myBitmapImage;
-
-            ThumbnailCache meCache = new ThumbnailCache();
-            meCache.imageId = 12345;
-            meCache.lastAccessed = DateTime.Now;
-            meCache.image = new Image();
-            meCache.image.Source = myBitmapImage;
-
-            BinaryFormatter formatter = new BinaryFormatter();
-            FileStream stream = new FileStream(@"C:\temp\simon.txt", FileMode.Create);
-            formatter.Serialize(stream, meCache);
-            stream.Close();
-
-            BinaryFormatter formatter2 = new BinaryFormatter();
-            FileStream stream2 = new FileStream(@"C:\temp\simon.txt", FileMode.Open);
-            ThumbnailCache test = formatter2.Deserialize(stream2) as ThumbnailCache;
-            stream2.Close();
-
-            long simonss = test.imageId;
-            Image sisiss = test.image;
-           
-            ThumbState thumbs = ThumbState.GetThumbs();
-            ThumbnailCache imageOne = new ThumbnailCache();
-            imageOne.imageId = 12345;
-            imageOne.lastAccessed = DateTime.Now;
-            imageOne.image = new Image();
-            imageOne.image.Source = myBitmapImageOne;
-
-            ThumbnailCache imageTwo = new ThumbnailCache();
-            imageTwo.imageId = 4321;
-            imageTwo.lastAccessed = DateTime.Now;
-            imageTwo.image = new Image();
-            imageTwo.image.Source = myBitmapImageTwo;
-
-            thumbs.thumbList.Add(imageOne);
-            thumbs.thumbList.Add(imageTwo);
-
-            thumbs.SaveState();
-
- */
-        }
-
-
-
-        private void cmdMultiSelectionMode_Checked(object sender, RoutedEventArgs e)
-        {
-            while (lstImageMainViewerList.SelectedItems.Count > 0)
-            {
-                ListBoxItem listBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
-                listBoxItem.IsSelected = false;
-            }
-            
-            lstImageMainViewerList.SelectionMode = SelectionMode.Multiple;
-        }
-
-        private void cmdMultiSelectionMode_Unchecked(object sender, RoutedEventArgs e)
-        {
-            lstImageMainViewerList.SelectionMode = SelectionMode.Single;
-        }
-
-        private void Image_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lstImageMainViewerList.SelectionMode == SelectionMode.Single)
-            {
-                previousPane = currentPane;
-                cmdImageViewDetailToggle.IsChecked = false;
-
-                RefreshPanesAllControls(PaneMode.ImageView);
-                RefreshOverallPanesStructure(currentPane);
-
-                ImageViewUpdateNextPrevious();
-            }
-        }
 
 
     }

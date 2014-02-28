@@ -67,11 +67,15 @@ namespace ManageWalla
                     /* GET /{userName}/image/{imageId}/{size}/ */
                     string requestUrl = "image/" + imageId.ToString() + "/300/300/";
                     thumbArray = await LoadImageArrayAsync(requestUrl, cancelToken);
-                    if (thumbArray != null)
-                        CacheHelper.SaveImageArray(imageId, thumbArray, thumbCacheList);
+                    CacheHelper.SaveImageArray(imageId, thumbArray, thumbCacheList);
                 }
 
                 thumbnailImage = ConvertByteArrayToImage(thumbArray);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("LoadThumb has been cancelled");
+                thumbnailImage = null;
             }
             catch (Exception ex)
             {
@@ -106,12 +110,14 @@ namespace ManageWalla
                 {
                     string requestUrl = "image/" + imageId.ToString() + "/maincopy";
                     byte[] mainImageArray = await LoadImageArrayAsync(requestUrl, cancelToken);
-                    if (mainImageArray != null)
-                    {
-                        CacheHelper.SaveMainCopyToCache(imageId, mainImageArray, mainCopyCacheList, folder);
-                        mainCopyImage = ConvertByteArrayToImage(mainImageArray);
-                    }
+                    CacheHelper.SaveMainCopyToCache(imageId, mainImageArray, mainCopyCacheList, folder);
+                    mainCopyImage = ConvertByteArrayToImage(mainImageArray);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("LoadMainCopyImage has been cancelled");
+                mainCopyImage = null;
             }
             catch (Exception ex)
             {
@@ -181,17 +187,17 @@ namespace ManageWalla
         {
             try
             {
-                string response = await serverHelper.ImageUpdateMetaAsync(imageMeta, cancelToken);
-                if (response == null)
-                    throw new Exception("The image meta data could not be saved.  An unexpected error occured: " + response);
+                await serverHelper.ImageUpdateMetaAsync(imageMeta, cancelToken);
             }
             catch (OperationCanceledException)
             {
+                metaLoadState = LoadState.Error;
                 logger.Debug("SaveImageMetaAsync has been cancelled");
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
+                metaLoadState = LoadState.Error;
             }
         }
         #endregion
@@ -241,16 +247,17 @@ namespace ManageWalla
         {
             try
             {
-                byte[] responseArray = await serverHelper.GetByteArray(requestUrl, cancelToken);
-                if (responseArray == null)
-                    throw new Exception("The image could not be retrieved from the server, an unexpected error occured");
-
-                return responseArray;
+                return await serverHelper.GetByteArray(requestUrl, cancelToken);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException cancelEx)
             {
                 logger.Debug("LoadImageArrayAsync has been cancelled");
-                return null;
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
             }
         }
 

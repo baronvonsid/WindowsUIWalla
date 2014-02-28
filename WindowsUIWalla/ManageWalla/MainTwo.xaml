@@ -451,7 +451,7 @@
                 </StackPanel>
 
                 <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-                <TextBox x:Name="txtTagName"  Grid.Column="1" Grid.Row="2" Margin="2" MaxLines="1" MaxLength="30" CharacterCasing="Upper" PreviewTextInput="txtTagName_PreviewTextInput" />
+                <TextBox x:Name="txtTagName"  Grid.Column="1" Grid.Row="2" Margin="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtTagName_PreviewTextInput" />
                 <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
                 <TextBox x:Name="txtTagDescription" Margin="2" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
 
@@ -490,7 +490,7 @@
                                     </Label.Content>
                                 </Label>
                                 
-                                <Image x:Name="imgUpload" Source="{StaticResource tagImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Image x:Name="imgUpload" Source="{StaticResource uploadImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
                                 <Label Content="Upload" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
@@ -1035,7 +1035,7 @@
                             <!-- File name, name, desc, -->
                             <RowDefinition Height="22"/>
                             <RowDefinition Height="22"/>
-                            <RowDefinition Height="22"/>
+                            <RowDefinition Height="0"/>
                             <RowDefinition Height="30" />
                             <RowDefinition Height="80" />
 

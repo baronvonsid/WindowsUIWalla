@@ -155,7 +155,6 @@ namespace ManageWalla
             {
                 logger.Error(ex);
             }
-
         }
 
         async public Task<long> MachineRegisterNew(string machineName, int platformId, CancellationToken cancelToken)
@@ -164,6 +163,7 @@ namespace ManageWalla
             {
                 return 0;
 
+                /* To implement 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "machine/" + platformId.ToString() + "/" + Uri.EscapeUriString(machineName));
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
@@ -175,10 +175,11 @@ namespace ManageWalla
                 long machineId = reader.ReadElementContentAsLong();
 
                 return machineId;
+                */
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GetByteArray has been cancelled.");
+                logger.Debug("MachineRegisterNew has been cancelled.");
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -187,8 +188,6 @@ namespace ManageWalla
                 return 0;
             }
         }
-
-
         #endregion
 
         #region Tag
@@ -234,7 +233,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> TagUpdateAsync(Tag newTag, string oldTagName, CancellationToken cancelToken)
+        async public Task TagUpdateAsync(Tag newTag, string oldTagName, CancellationToken cancelToken)
         {
             try
             {
@@ -248,8 +247,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -259,11 +256,11 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
-        async public Task<string> TagCreateAsync(Tag tag, CancellationToken cancelToken)
+        async public Task TagCreateAsync(Tag tag, CancellationToken cancelToken)
         {
             try
             {
@@ -277,8 +274,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -288,7 +283,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
@@ -321,7 +316,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> TagDeleteAsync(Tag tag, CancellationToken cancelToken)
+        async public Task TagDeleteAsync(Tag tag, CancellationToken cancelToken)
         {
             try
             {
@@ -334,8 +329,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -345,11 +338,11 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
-        async public Task<string> TagAddRemoveImagesAsync(string tagName, ImageMoveList imagesToMove, bool add, CancellationToken cancelToken)
+        async public Task TagAddRemoveImagesAsync(string tagName, ImageMoveList imagesToMove, bool add, CancellationToken cancelToken)
         {
             try
             {
@@ -372,8 +365,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -383,7 +374,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
         #endregion
@@ -428,7 +419,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> GalleryUpdateAsync(Gallery gallery, string oldGalleryName, CancellationToken cancelToken)
+        async public Task GalleryUpdateAsync(Gallery gallery, string oldGalleryName, CancellationToken cancelToken)
         {
             try
             {
@@ -442,8 +433,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -453,11 +442,11 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
-        async public Task<string> GalleryCreateAsync(Gallery gallery, CancellationToken cancelToken)
+        async public Task GalleryCreateAsync(Gallery gallery, CancellationToken cancelToken)
         {
             try
             {
@@ -471,8 +460,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -482,7 +469,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
@@ -556,10 +543,8 @@ namespace ManageWalla
                 StreamContent streamContent = new StreamContent(fileStream);
                 requestImage.Content = streamContent;
                 streamContent.Headers.ContentLength = fileStream.Length;
-                streamContent.Headers.ContentType = new MediaTypeHeaderValue(image.HttpFormat);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
 
-                //Upload file + image.Meta.Name
-                
                 //Upload file asynchronously and check response.
                 HttpResponseMessage response = await http.SendAsync(requestImage, cancelToken);
                 response.EnsureSuccessStatusCode();
@@ -706,7 +691,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> CategoryUpdateAsync(Category category, CancellationToken cancelToken)
+        async public Task CategoryUpdateAsync(Category category, CancellationToken cancelToken)
         {
             try
             {
@@ -719,8 +704,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -730,7 +713,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
@@ -761,7 +744,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> CategoryDeleteAsync(Category category, CancellationToken cancelToken)
+        async public Task CategoryDeleteAsync(Category category, CancellationToken cancelToken)
         {
             try
             {
@@ -774,8 +757,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -785,7 +766,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
 
@@ -816,7 +797,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
         #endregion
@@ -893,7 +874,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
+        async public Task DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
         {
             try
             {
@@ -907,8 +888,6 @@ namespace ManageWalla
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -949,7 +928,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> ImageUpdateMetaAsync(ImageMeta imageMeta, CancellationToken cancelToken)
+        async public Task ImageUpdateMetaAsync(ImageMeta imageMeta, CancellationToken cancelToken)
         {
             try
             {
@@ -962,8 +941,6 @@ namespace ManageWalla
                 requestMeta.Content = content;
                 HttpResponseMessage response = await http.SendAsync(requestMeta, cancelToken);
                 response.EnsureSuccessStatusCode();
-
-                return "OK";
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -973,7 +950,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return ex.Message;
+                throw ex;
             }
         }
         

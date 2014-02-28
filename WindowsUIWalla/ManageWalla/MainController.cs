@@ -205,18 +205,32 @@ namespace ManageWalla
         #endregion
 
         #region Upload Methods
-        async public Task LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots)
+        async public Task LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots, CancellationToken cancelToken)
         {
-            for (int i = 0; i < fileNames.Length; i++)
+            try
             {
-                UploadImage newImage = new UploadImage();
-                await newImage.Setup(fileNames[i]);
-                meFots.Add(newImage);
-            }
+                for (int i = 0; i < fileNames.Length; i++)
+                {
+                    UploadImage newImage = new UploadImage();
+                    await newImage.Setup(fileNames[i]);
+                    meFots.Add(newImage);
 
+                    cancelToken.ThrowIfCancellationRequested();
+                }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("LoadImagesFromArray has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
-        async public void CreateCategoryFromFolder(DirectoryInfo currentFolder, UploadImageFileList meFots, long parentCategoryId, CancellationToken cancelToken)
+        async private void CreateCategoryFromFolder(DirectoryInfo currentFolder, UploadImageFileList meFots, long parentCategoryId, CancellationToken cancelToken)
         {
             string folderName = currentFolder.Name;
             if (folderName.Length > 30)
@@ -294,6 +308,7 @@ namespace ManageWalla
                     UploadImage currentUpload = meFots.Where(r => r.State == UploadImage.UploadState.None).First();
 
                     AddMachineTag(currentUpload);
+                    currentUpload.Meta.MachineId = state.machineId;
 
                     string response = await serverHelper.UploadImageAsync(currentUpload, cancelToken);
                     if (response == null)
@@ -316,7 +331,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the images associated with the Category: " + categoryId.ToString() + ".  Error: " + ex.Message);
+                throw ex;
             }
         }
 
@@ -349,41 +364,48 @@ namespace ManageWalla
             }
         }
 
-        async public Task LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots)
+        async public Task LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots, CancellationToken cancelToken)
         {
-            if (recursive)
+            try
             {
-                foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
+                if (recursive)
                 {
-                    await LoadImagesFromFolder(folder, recursive, meFots);
+                    foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
+                    {
+                        await LoadImagesFromFolder(folder, recursive, meFots, cancelToken);
+                    }
                 }
-            }
 
-            foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>())
-            {
-                switch (file.Extension.ToUpper().Substring(1))
+                foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>())
                 {
-                    case "JPG":
-                    case "JPEG":
-                    case "TIF":
-                    case "TIFF":
-                    case "PSD":
-                    case "PNG":
-                    case "BMP":
-                    case "GIF":
-                    case "CR2":
-                    case "ARW":
-                    case "NEF":
+                    if (IsFormatOK(file.Extension.ToUpper().Substring(1)))
+                    {
                         UploadImage newImage = new UploadImage();
                         await newImage.Setup(file.FullName);
                         meFots.Add(newImage);
-                        break;
-                    default:
-                        break;
+                        cancelToken.ThrowIfCancellationRequested();
+                    }
                 }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("LoadImagesFromFolder has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
             }
         }
 
+        private bool IsFormatOK(string fileExtension)
+        {
+            string[] formatsOK = new string[11] { "JPG", "JPEG", "TIF", "TIFF", "PSD", "PNG", "BMP", "GIF", "CR2", "ARW", "NEF" };
+            return formatsOK.Any(r => r == fileExtension);
+        }
+
+        //TODO Sort out with date modified and to use local version.
         async public Task RefreshUploadStatusListAsync(CancellationToken cancelToken)
         {
             try
@@ -469,9 +491,10 @@ namespace ManageWalla
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException cancelEx)
             {
                 logger.Debug("TagRefreshListAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
@@ -548,103 +571,169 @@ namespace ManageWalla
             }
         }
 
-        async public Task<Tag> TagGetMetaAsync(TagListTagRef tagRef)
+        async public Task<Tag> TagGetMetaAsync(TagListTagRef tagRef, CancellationToken cancelToken)
         {
             try
             {
-                return await serverHelper.TagGetMeta(tagRef.name, cancelTokenSourceToDel.Token);
+                return await serverHelper.TagGetMeta(tagRef.name, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("TagGetMetaAsync has been cancelled");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the tag meta data: " + tagRef.name + ".  Error: " + ex.Message);
-                return null;
+                throw ex;
             }
-            
         }
 
-        async public Task<string> TagUpdateAsync(Tag newTag, string oldTagName)
+        async public Task TagUpdateAsync(Tag newTag, string oldTagName, CancellationToken cancelToken)
         {
-            string response = await serverHelper.TagUpdateAsync(newTag, oldTagName, cancelTokenSourceToDel.Token);
-            if (response != "OK")
-                response = "Tag could not be updated, there was an error on the server:" + response;
-
-            return response;
+            try
+            {
+                await serverHelper.TagUpdateAsync(newTag, oldTagName, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagUpdateAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
-        async public Task<string> TagCreateAsync(Tag tag)
+        async public Task TagCreateAsync(Tag tag, CancellationToken cancelToken)
         {
-            string response = await serverHelper.TagCreateAsync(tag, cancelTokenSourceToDel.Token);
-            if (response != "OK")
-                response = "Tag could not be created, there was an error on the server:" + response;
-
-            return response;
+            try
+            {
+                await serverHelper.TagCreateAsync(tag, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagCreateAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
-        async public Task<string> TagDeleteAsync(Tag tag)
+        async public Task TagDeleteAsync(Tag tag, CancellationToken cancelToken)
         {
-            string response = await serverHelper.TagDeleteAsync(tag, cancelTokenSourceToDel.Token);
-            if (response != "OK")
-                response = "Tag could not be deleted, there was an error on the server:" + response;
-
-            return response;
+            try
+            {
+                await serverHelper.TagDeleteAsync(tag, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagDeleteAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
-        async public Task<string> TagAddRemoveImagesAsync(string tagName, ImageMoveList moveList, bool add)
+        async public Task TagAddRemoveImagesAsync(string tagName, ImageMoveList moveList, bool add, CancellationToken cancelToken)
         {
-            string response = await serverHelper.TagAddRemoveImagesAsync(tagName, moveList, add, cancelTokenSourceToDel.Token);
-            if (response != "OK")
-                response = "Images could not be add\removed from the Tag, there was an error on the server:" + response;
-
-            return response;
+            try
+            {
+                await serverHelper.TagAddRemoveImagesAsync(tagName, moveList, add, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagAddRemoveImagesAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
         #endregion
 
         #region Category
-        async public Task<Category> CategoryGetMetaAsync(CategoryListCategoryRef categoryRef)
+        async public Task<Category> CategoryGetMetaAsync(CategoryListCategoryRef categoryRef, CancellationToken cancelToken)
         {
             try
             {
-                return await serverHelper.CategoryGetMeta(categoryRef.id, cancelTokenSourceToDel.Token);
+                return await serverHelper.CategoryGetMeta(categoryRef.id, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryGetMetaAsync has been cancelled");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the Category meta data: " + categoryRef.id.ToString() + ".  Error: " + ex.Message);
-                return null;
+                throw ex;
             }
-
         }
 
-        async public Task<string> CategoryUpdateAsync(Category existingCategory)
-        {
-            string response = await serverHelper.CategoryUpdateAsync(existingCategory, cancelTokenSourceToDel.Token);
-            if (response != "OK")
-                response = "Category could not be updated, there was an error on the server:" + response;
-
-            return response;
-        }
-
-        async public Task<string> CategoryCreateAsync(Category category)
+        async public Task CategoryUpdateAsync(Category existingCategory, CancellationToken cancelToken)
         {
             try
             {
-                long categoryId = await serverHelper.CategoryCreateAsync(category, cancelTokenSourceToDel.Token);
-                return "OK";
+                await serverHelper.CategoryUpdateAsync(existingCategory, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryUpdateAsync has been cancelled");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
-                return "Category could not be created, there was an error on the server: " + ex.Message;
+                logger.Error(ex);
+                throw ex;
             }
         }
 
-        async public Task<string> CategoryDeleteAsync(Category category)
+        async public Task CategoryCreateAsync(Category category, CancellationToken cancelToken)
         {
-            string response = await serverHelper.CategoryDeleteAsync(category, cancelTokenSourceToDel.Token);
-            if (response != "OK")
-                response = "Category could not be deleted, there was an error on the server:" + response;
+            try
+            {
+                await serverHelper.CategoryCreateAsync(category, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryCreateAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
 
-            return response;
+        async public Task CategoryDeleteAsync(Category category, CancellationToken cancelToken)
+        {
+            try
+            {
+                await serverHelper.CategoryDeleteAsync(category, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagDeleteAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         async public Task<ImageList> CategoryGetImagesAsync(long categoryId, int cursor, string searchQueryString, CancellationToken cancelToken)
@@ -692,7 +781,6 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                //Suppress exception and just return null.
                 logger.Debug("CategoryGetImagesAsync has been cancelled");
                 throw cancelEx;
             }
@@ -757,13 +845,22 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageMoveList moveList)
+        async public Task CategoryMoveImagesAsync(long categoryId, ImageMoveList moveList, CancellationToken cancelToken)
         {
-            string response = await serverHelper.CategoryMoveImagesAsync(categoryId, moveList, cancelTokenSourceToDel.Token);
-            if (response != "OK")
-                response = "Images could not be moved category, there was an error on the server:" + response;
-
-            return response;
+            try
+            {
+                await serverHelper.CategoryMoveImagesAsync(categoryId, moveList, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CategoryMoveImagesAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
         #endregion
 
@@ -810,9 +907,10 @@ namespace ManageWalla
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException cancelEx)
             {
                 logger.Debug("GalleryRefreshListAsync has been cancelled.");
+                throw (cancelEx);
             }
             catch (Exception ex)
             {
@@ -823,22 +921,75 @@ namespace ManageWalla
 
         async public Task<Gallery> GalleryGetMetaAsync(GalleryListGalleryRef galleryRef, CancellationToken cancelToken)
         {
-            return await serverHelper.GalleryGetMeta(galleryRef.name, cancelToken);
+            try
+            {
+                return await serverHelper.GalleryGetMeta(galleryRef.name, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("GalleryGetMetaAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         async public Task GalleryUpdateAsync(Gallery gallery, string oldGalleryName, CancellationToken cancelToken)
         {
-            await serverHelper.GalleryUpdateAsync(gallery, oldGalleryName, cancelToken);
+            try
+            {
+                await serverHelper.GalleryUpdateAsync(gallery, oldGalleryName, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryUpdateAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         async public Task GalleryCreateAsync(Gallery gallery, CancellationToken cancelToken)
         {
-            await serverHelper.GalleryCreateAsync(gallery, cancelToken);
+            try
+            {
+                await serverHelper.GalleryCreateAsync(gallery, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryCreateAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         async public Task GalleryDeleteAsync(Gallery gallery, CancellationToken cancelToken)
         {
-            await serverHelper.GalleryDeleteAsync(gallery, cancelToken);
+            try
+            {
+                await serverHelper.GalleryDeleteAsync(gallery, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryDeleteAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         async public Task<ImageList> GalleryGetImagesAsync(long id, string galleryName, int cursor, long sectionId, string searchQueryString, CancellationToken cancelToken)
@@ -913,27 +1064,21 @@ namespace ManageWalla
         #endregion
 
         #region  Images Processing
-        async public Task<string> DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
+        async public Task DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
         {
             try
             {
-                string response = await serverHelper.DeleteImagesAsync(imageList, cancelToken);
-                if (response != "OK")
-                    throw new Exception(response);
-
-                return response;
+                await serverHelper.DeleteImagesAsync(imageList, cancelToken);
             }
             catch (OperationCanceledException cancelEx)
             {
-                //Suppress exception and just return null.
                 logger.Debug("DeleteImagesAsync has been cancelled");
                 throw cancelEx;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                currentMain.ShowMessage(MainTwo.MessageType.Error, "Images could not be deleted, there was an error on the server:" + ex.Message);
-                return null;
+                throw ex;
             }
         }
         #endregion

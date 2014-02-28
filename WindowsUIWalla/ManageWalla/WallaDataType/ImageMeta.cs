@@ -34,7 +34,7 @@ namespace ManageWalla {
         
         private string localPathField;
         
-        private int machineIdField;
+        private long machineIdField;
         
         private int statusField;
         
@@ -151,7 +151,7 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        public int MachineId {
+        public long MachineId {
             get {
                 return this.machineIdField;
             }
