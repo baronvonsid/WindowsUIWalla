@@ -110,13 +110,25 @@
         </Setter>
     </Style>
 
+    <Style x:Key="UploadPhotoListItem" TargetType="{x:Type ListBoxItem}">
+        <Style.Resources>
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+        </Style.Resources>
+
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
     <Style x:Key="PhotoListItem" TargetType="{x:Type ListBoxItem}">
         <Style.Resources>
             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
         </Style.Resources>
-        
-        <Setter Property="Margin" Value="2" />
         <!--
+        <Setter Property="Margin" Value="2" />
+        
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="MaxHeight" Value="100" />
         <Setter Property="MinHeight" Value="100" />
@@ -125,7 +137,7 @@
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
-        <Setter Property="BorderThickness" Value="0.5" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="0" />
 
         <Style.Triggers>
@@ -175,10 +187,15 @@
                     <Border Name="Border" CornerRadius="1" BorderThickness="0" 
                             BorderBrush="{StaticResource FontBorderBrush}"
                             Background="{StaticResource PaneBodyBackgroundBrush}">
-                        <ScrollViewer Focusable="False" CanContentScroll="False" Padding="4">
+                        <ScrollViewer x:Name="treeViewScroller" Focusable="False" CanContentScroll="False" Padding="4" Opacity="1.0">
                             <ItemsPresenter />
                         </ScrollViewer>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="treeViewScroller" Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

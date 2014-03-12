@@ -198,6 +198,7 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 metaLoadState = LoadState.Error;
+                throw ex;
             }
         }
         #endregion

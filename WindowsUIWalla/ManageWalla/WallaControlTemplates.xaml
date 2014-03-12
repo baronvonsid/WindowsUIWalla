@@ -173,9 +173,9 @@
                         <Storyboard>
                             <ColorAnimation Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="Arrow"
                                             To="{StaticResource FontBorderColourSelected}" Duration="0:0:0.25" />
-                            <!--
-                            <ColorAnimation Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)" Storyboard.TargetName="Border"
-                                                To="{StaticResource ControlBackgroundMouseOverColour}" Duration="0:0:0.25" /> -->
+
+                            <ColorAnimation Storyboard.TargetProperty="(BorderBrush).(SolidColorBrush.Color)" Storyboard.TargetName="Border"
+                                                To="{StaticResource FontBorderColourSelected}" Duration="0:0:0.25" />
                         </Storyboard>
                     </VisualState>
                     
@@ -201,8 +201,8 @@
             <Border x:Name="Border"
                     Grid.ColumnSpan="2"
                     CornerRadius="0"
-                    BorderThickness="0"
-                    BorderBrush="{DynamicResource FontBorderBrush}"
+                    BorderThickness="0.5"
+                    BorderBrush="{StaticResource FontBorderBrush}"
                     Background="{DynamicResource EntryControlBackgroundBrush}">
             </Border>
             <Border 
@@ -216,7 +216,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Data="M 0 0 L 4 4 L 8 0 Z" 
-                            Fill="{DynamicResource FontBorderBrush}">
+                            Fill="{StaticResource FontBorderBrush}">
             </Path>
         </Grid>
     </ControlTemplate>
@@ -228,6 +228,7 @@
 
     <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}">
         <Setter Property="Background" Value="{DynamicResource EntryControlBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
         <Setter Property="SnapsToDevicePixels"
           Value="true" />
         <Setter Property="OverridesDefaultStyle"
@@ -320,9 +321,9 @@
                                             MinWidth="{TemplateBinding ActualWidth}"
                                             MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                 <Border x:Name="DropDownBorder" 
-                                        BorderThickness="1" 
-                                        Opacity="0.8"
-                                        BorderBrush="{DynamicResource FontBorderBrush}"
+                                        BorderThickness="0.5" 
+                                        Opacity="1.0"
+                                        BorderBrush="{DynamicResource FontBorderBrushSelected}"
                                         Background="{DynamicResource ControlBackgroundBrush}">
                                 </Border>
                                 <ScrollViewer Margin="1" SnapsToDevicePixels="True">
@@ -359,9 +360,10 @@
         </Setter>
     </Style>
 
-    <Style x:Key="{x:Type ComboBoxItem}" TargetType="{x:Type ComboBoxItem}">
+    <Style x:Key="{x:Type ComboBoxItem}" x:Name="comboBoxItem" TargetType="{x:Type ComboBoxItem}">
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Foreground" Value="{StaticResource FontBorderBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBoxItem}">
@@ -379,6 +381,9 @@
                                                 Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)">
                                             <EasingColorKeyFrame KeyTime="0" Value="{StaticResource ControlSelectedItemBackgroundColour}" />
                                         </ColorAnimationUsingKeyFrames>
+                                        <!--
+                                        <ColorAnimation Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="comboBoxItem"
+                                                To="{StaticResource FontBorderColourSelected}" Duration="0:0:0.25" />-->
                                     </Storyboard>
                                 </VisualState>
                                 <VisualState x:Name="SelectedUnfocused">

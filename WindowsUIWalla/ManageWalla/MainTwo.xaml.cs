@@ -60,7 +60,8 @@ namespace ManageWalla
             Busy = 1,
             Info = 2,
             Warning = 3,
-            Error = 4
+            Error = 4,
+            Other = 5
         }
 
         private PaneMode currentPane;
@@ -84,7 +85,8 @@ namespace ManageWalla
         public CancellationTokenSource cancelUploadTokenSource = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
         private double previousImageSize = 0.0;
-        private bool tweakImageSize = true;
+        private bool tweakMainImageSize = true;
+        private bool tweakUploadImageSize = true;
         private bool startingApplication = true;
         private DateTime lastMarginTweakTime = DateTime.Now;
 
@@ -134,6 +136,8 @@ namespace ManageWalla
                     currentPane = PaneMode.GalleryView;
                     cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 }
+
+                //TweakImageMarginSize(DateTime.Now);
             }
             catch (Exception ex)
             {
@@ -233,27 +237,29 @@ namespace ManageWalla
                 case MessageType.Busy:
                     if (currentDialogType == MessageType.Busy) { return; }
 
+                    if (currentDialogType != MessageType.Other)
+                    {
+                        //Special clause, if moving from dialog box to busy.
+                        paneBusy.BeginAnimation(Border.OpacityProperty, null);
+                        paneBusy.Opacity = 0.0;
+                        paneBusy.Visibility = Visibility.Visible;
+
+                        DoubleAnimationUsingKeyFrames opacityBusyFrameAnim = new DoubleAnimationUsingKeyFrames();
+                        opacityBusyFrameAnim.FillBehavior = FillBehavior.HoldEnd;
+                        opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
+                        opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(4.0)));
+                        paneBusy.BeginAnimation(Border.OpacityProperty, opacityBusyFrameAnim);
+                    }
+
                     currentDialogType = messageType;
                     lblAlertDialogMessage.Text = message;
                     lblAlertDialogHeader.Text = "Processing request...";
                     cmdAlertDialogResponse.Content = "Cancel";
-
-                    paneBusy.BeginAnimation(Border.OpacityProperty, null);
                     gridAlertDialog.BeginAnimation(Grid.OpacityProperty, null);
-
-                    paneBusy.Opacity = 0.0;    
                     gridAlertDialog.Opacity = 0.0;
                     gridAlertDialog.Visibility = Visibility.Visible;
-                    paneBusy.Visibility = Visibility.Visible;
-
-                    DoubleAnimationUsingKeyFrames opacityBusyFrameAnim = new DoubleAnimationUsingKeyFrames();
-                    opacityBusyFrameAnim.FillBehavior = FillBehavior.HoldEnd;
-                    opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
-                    opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(4.0)));
-                    paneBusy.BeginAnimation(Border.OpacityProperty, opacityBusyFrameAnim);
 
                     DoubleAnimationUsingKeyFrames opacityBusyActionsAnim = new DoubleAnimationUsingKeyFrames();
-                    //opacityActionsAnim.Duration = TimeSpan.FromSeconds(2.0);
                     opacityBusyActionsAnim.FillBehavior = FillBehavior.HoldEnd;
                     opacityBusyActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
                     opacityBusyActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(2.5)));
@@ -304,9 +310,18 @@ namespace ManageWalla
                         opacityActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(0.5)));
                         gridAlertDialog.BeginAnimation(Grid.OpacityProperty, opacityActionsAnim);
                     }
+                    break;
+                case MessageType.Other:
+                    currentDialogType = MessageType.Other;
 
+                    paneBusy.BeginAnimation(Border.OpacityProperty, null);
+                    paneBusy.Opacity = 0.0;
+                    paneBusy.Visibility = Visibility.Visible;
 
-
+                    DoubleAnimationUsingKeyFrames opacityPaneFrameAnim = new DoubleAnimationUsingKeyFrames();
+                    opacityPaneFrameAnim.FillBehavior = FillBehavior.HoldEnd;
+                    opacityPaneFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(2.0)));
+                    paneBusy.BeginAnimation(Border.OpacityProperty, opacityPaneFrameAnim);
                     break;
             }
         }
@@ -437,11 +452,9 @@ namespace ManageWalla
                     gridRight.RowDefinitions[0].Height = new GridLength(0); //Hide header
                     lstImageMainViewerList.Visibility = Visibility.Hidden;
                     grdImageView.Visibility = Visibility.Visible;
-
-
-
                     break;
             }
+            TweakImageMarginSize(DateTime.Now, mode);
         }
 
         private void RefreshPanesAllControls(PaneMode mode)
@@ -453,7 +466,8 @@ namespace ManageWalla
                     gridCategory.RowDefinitions[1].Height = new GridLength(48.0);
                     gridCategory.RowDefinitions[2].MaxHeight = 0;
                     gridCategory.RowDefinitions[3].MaxHeight = 0;
-                    gridCategory.RowDefinitions[4].Height = new GridLength(0.0);
+                    gridCategory.RowDefinitions[4].MaxHeight = 0;
+                    gridCategory.RowDefinitions[5].Height = new GridLength(0.0);
 
                     treeCategoryView.IsEnabled = true;
                     cmdCategoryAdd.IsEnabled = true;
@@ -470,9 +484,11 @@ namespace ManageWalla
                     gridCategory.RowDefinitions[1].Height = new GridLength(0.0);
                     gridCategory.RowDefinitions[2].MaxHeight = 30;
                     gridCategory.RowDefinitions[3].MaxHeight = 80;
-                    gridCategory.RowDefinitions[4].Height = new GridLength(48.0);
+                    gridCategory.RowDefinitions[4].MaxHeight = 30;
+                    gridCategory.RowDefinitions[5].Height = new GridLength(48.0);
 
                     cmdCategoryCancel.Visibility = Visibility.Visible;
+                    treeCategoryView.IsEnabled = false;
 
                     if (mode == PaneMode.CategoryAdd)
                     {
@@ -812,6 +828,7 @@ namespace ManageWalla
                         cmdImageViewDetailToggle.IsEnabled = false;
                         cmdImageViewNext.IsEnabled = false;
                         cmdImageViewPrevious.IsEnabled = false;
+                        lstImageViewTagList.IsEnabled = true;
                     }
                     else
                     {
@@ -823,6 +840,7 @@ namespace ManageWalla
                         cmdImageViewDetailToggle.IsEnabled = true;
                         cmdImageViewNext.IsEnabled = true;
                         cmdImageViewPrevious.IsEnabled = true;
+                        lstImageViewTagList.IsEnabled = false;
                     }
 
                     break;
@@ -833,59 +851,31 @@ namespace ManageWalla
         #endregion
 
         #region Pane Control Event Handelers
-        private void radCategory_Checked(object sender, RoutedEventArgs e)
+        async private void radCategory_Checked(object sender, RoutedEventArgs e)
         {
-            //cmdCategoryRefresh.Visibility = System.Windows.Visibility.Visible;
-            //cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
-
-            //imgTag.Source = (ImageSource)FindResource("tagImageSrc");
-            //imgCategory.Source = (ImageSource)FindResource("categoryImageSelectedSrc");
-            //imgGallery.Source = (ImageSource)FindResource("galleryImageSrc");
-            //imgUpload.Source = (ImageSource)FindResource("uploadImageSrc");
-
             RefreshOverallPanesStructure(PaneMode.CategoryView);
             RefreshPanesAllControls(PaneMode.CategoryView);
-            RefreshAndDisplayCategoryList(false);
+            await RefreshAndDisplayCategoryList(false);
         }
 
         private void radUpload_Checked(object sender, RoutedEventArgs e)
         {
-            //cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Visible;
-
-            //imgCategory.Source = (ImageSource)FindResource("categoryImageSrc");
-            //imgTag.Source = (ImageSource)FindResource("tagImageSrc");
-            //imgGallery.Source = (ImageSource)FindResource("galleryImageSrc");
-            //imgUpload.Source = (ImageSource)FindResource("uploadImageSelectedSrc");
-
             RefreshOverallPanesStructure(PaneMode.Upload);
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
         async private void radGallery_Checked(object sender, RoutedEventArgs e)
         {
-            //cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //cmdTagRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //cmdGalleryRefresh.Visibility = System.Windows.Visibility.Visible;
-            //lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
-
-            //imgCategory.Source = (ImageSource)FindResource("categoryImageSrc");
-            //imgTag.Source = (ImageSource)FindResource("tagImageSrc");
-            //imgGallery.Source = (ImageSource)FindResource("galleryImageSelectedSrc");
-            //imgUpload.Source = (ImageSource)FindResource("uploadImageSrc");
-
             RefreshOverallPanesStructure(PaneMode.GalleryView);
             RefreshPanesAllControls(PaneMode.GalleryView);
             await RefreshAndDisplayGalleryList(false);
-            await RefreshAndDisplayTagList(false);
-            await RefreshAndDisplayCategoryList(false);
+
 
             if (startingApplication)
             {
+                await RefreshAndDisplayTagList(false);
+                await RefreshAndDisplayCategoryList(false);
+
                 foreach (RadioButton button in wrapMyGalleries.Children.OfType<RadioButton>())
                 {
                     GalleryListGalleryRef galleryRef = (GalleryListGalleryRef)button.Tag;
@@ -901,21 +891,11 @@ namespace ManageWalla
             }
         }
 
-        private void radTag_Checked(object sender, RoutedEventArgs e)
+        async private void radTag_Checked(object sender, RoutedEventArgs e)
         {
-            //cmdCategoryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //cmdTagRefresh.Visibility = System.Windows.Visibility.Visible;
-            //cmdGalleryRefresh.Visibility = System.Windows.Visibility.Hidden;
-            //lblUploadProposedImageCount.Visibility = System.Windows.Visibility.Hidden;
-
-            //imgCategory.Source = (ImageSource)FindResource("categoryImageSrc");
-            //imgTag.Source = (ImageSource)FindResource("tagImageSelectedSrc");
-            //imgGallery.Source = (ImageSource)FindResource("galleryImageSrc");
-            //imgUpload.Source = (ImageSource)FindResource("uploadImageSrc");
-
             RefreshOverallPanesStructure(PaneMode.TagView);
             RefreshPanesAllControls(PaneMode.TagView);
-            RefreshAndDisplayTagList(false);
+            await RefreshAndDisplayTagList(false);
         }
 
         private void cmdAccount_Click(object sender, RoutedEventArgs e)
@@ -924,7 +904,6 @@ namespace ManageWalla
             RefreshOverallPanesStructure(PaneMode.Account);
             RefreshPanesAllControls(PaneMode.Account);
         }
-
 
         private void cmdAccountClose_Click(object sender, RoutedEventArgs e)
         {
@@ -960,7 +939,7 @@ namespace ManageWalla
             }
         }
 
-        private void ImageView_Click(object sender, RoutedEventArgs e)
+        async private void ImageView_Click(object sender, RoutedEventArgs e)
         {
             //GeneralImage current = this.lstImageMainViewerList.Items.CurrentItem as GeneralImage;
 
@@ -989,24 +968,20 @@ namespace ManageWalla
             ImageViewUpdateNextPrevious();
         }
 
-  
-        private void RevertFromImageView_MouseUp(object sender, RoutedEventArgs e)
-        {
-            RefreshPanesAllControls(previousPane);
-            RefreshOverallPanesStructure(currentPane);
-        }
-
         private void ImageViewDetails_Click(object sender, RoutedEventArgs e)
         {
             RefreshPanesAllControls(currentPane);
+            //if (currentPane == PaneMode.ImageView)
+                //ImageViewTagsUpdateFromMeta();
         }
 
-        private void ImageViewUpdateNextPrevious()
+        async private void ImageViewUpdateNextPrevious()
         {
             GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
             cancelTokenSource = new CancellationTokenSource();
-            current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.mainCopyFolder);
-            current.LoadMeta(false, cancelTokenSource.Token);
+            await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.mainCopyFolder);
+            await current.LoadMeta(false, cancelTokenSource.Token);
+            ImageViewTagsUpdateFromMeta();
 
             if (lstImageMainViewerList.SelectedIndex == 0)
             {
@@ -1038,26 +1013,88 @@ namespace ManageWalla
         {
             int newIndex = lstImageMainViewerList.SelectedIndex - 1;
 
-            ListBoxItem oldListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
-            oldListBoxItem.IsSelected = false;
+            if (newIndex >= 0)
+            {
+                ListBoxItem oldListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
+                oldListBoxItem.IsSelected = false;
 
-            ListBoxItem newListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.Items[newIndex]) as ListBoxItem;
-            newListBoxItem.IsSelected = true;
+                ListBoxItem newListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.Items[newIndex]) as ListBoxItem;
+                newListBoxItem.IsSelected = true;
 
-            ImageViewUpdateNextPrevious();
+                ImageViewUpdateNextPrevious();
+            }
         }
 
         private void ImageViewNext_Click(object sender, RoutedEventArgs e)
         {
             int newIndex = lstImageMainViewerList.SelectedIndex + 1;
 
-            ListBoxItem oldListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
-            oldListBoxItem.IsSelected = false;
+            if (lstImageMainViewerList.Items.Count > newIndex)
+            {
+                ListBoxItem oldListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
+                oldListBoxItem.IsSelected = false;
 
-            ListBoxItem newListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.Items[newIndex]) as ListBoxItem;
-            newListBoxItem.IsSelected = true;
+                ListBoxItem newListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.Items[newIndex]) as ListBoxItem;
+                newListBoxItem.IsSelected = true;
 
-            ImageViewUpdateNextPrevious();
+                ImageViewUpdateNextPrevious();
+            }
+        }
+
+        private void ImageViewUpdateMetaTags(GeneralImage current)
+        {
+            List<ImageMetaTagRef> imageMetaTagRefTemp = new List<ImageMetaTagRef>();
+
+            if (current.Meta.Tags == null)
+            {
+                foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
+                {
+                    TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                    ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
+                    newImageMetaTagRef.id = currentTagRef.id;
+                    newImageMetaTagRef.op = "I";
+                    imageMetaTagRefTemp.Add(newImageMetaTagRef);
+                }
+            }
+            else
+            {
+                foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
+                {
+                    TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+
+                    if (!current.Meta.Tags.Any<ImageMetaTagRef>(r => r.id == currentTagRef.id))
+                    {
+                        ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
+                        newImageMetaTagRef.id = currentTagRef.id;
+                        newImageMetaTagRef.op = "I";
+                        imageMetaTagRefTemp.Add(newImageMetaTagRef);
+                    }
+                }
+
+
+                foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
+                {
+                    bool found = false;
+                    foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
+                    {
+                        TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                        if (currentTagRef.id == tagRef.id)
+                            found = true;
+                    }
+
+                    if (!found)
+                    {
+                        ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
+                        newImageMetaTagRef.id = tagRef.id;
+                        newImageMetaTagRef.op = "D";
+                        imageMetaTagRefTemp.Add(newImageMetaTagRef);
+                    }
+                }
+            }
+            if (imageMetaTagRefTemp != null)
+                current.Meta.Tags = imageMetaTagRefTemp.ToArray<ImageMetaTagRef>();
+
+
         }
 
         async private void ImageViewEditSave_Click(object sender, RoutedEventArgs e)
@@ -1081,10 +1118,13 @@ namespace ManageWalla
                 {
                     ShowMessage(MessageType.Busy, "Saving image data updates");
 
+                    ImageViewUpdateMetaTags(current);
                     await current.SaveMeta(cancelTokenSource.Token);
 
                     if (newCancelTokenSource == cancelTokenSource)
                         cancelTokenSource = null;
+                    
+                    ImageViewTagsUpdateFromMeta();
 
                     ConcludeBusyProcess();
                 }
@@ -1095,7 +1135,7 @@ namespace ManageWalla
                 catch (Exception ex)
                 {
                     logger.Error(ex);
-                    ShowMessage(MessageType.Error, "Image data could not be saved, there was an error on the server:" + ex.Message);
+                    ShowMessage(MessageType.Error, "Image data could not be saved, there was an error:" + ex.Message);
                 }
                 RefreshPanesAllControls(PaneMode.ImageView);
             }
@@ -1138,6 +1178,9 @@ namespace ManageWalla
         #region Image and menu andlers
         async private void FetchCategoryImagesFirstAsync(object sender, RoutedEventArgs e)
         {
+            if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
+                return;
+
             cmbGallerySectionVert.Visibility = Visibility.Collapsed;
             cmbGallerySection.Visibility = Visibility.Collapsed;
 
@@ -1174,6 +1217,11 @@ namespace ManageWalla
                 catch (OperationCanceledException)
                 {
                     logger.Debug("FetchCategoryImagesFirstAsync has been cancelled by a subsequent request.");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
                 }
             }
         }
@@ -1216,6 +1264,11 @@ namespace ManageWalla
                 catch (OperationCanceledException)
                 {
                     logger.Debug("FetchTagImagesFirstAsync has been cancelled by a subsequent request. ");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
                 }
             }
         }
@@ -1263,6 +1316,11 @@ namespace ManageWalla
                     {
                         logger.Debug("FetchGalleryImagesFirstAsync has been cancelled by a subsequent request. ");
                     }
+                    catch (Exception ex)
+                    {
+                        logger.Error(ex);
+                        ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
+                    }
                 }
             }
         }
@@ -1291,6 +1349,11 @@ namespace ManageWalla
                 catch (OperationCanceledException)
                 {
                     logger.Debug("FetchTagImagesFirstAsync has been cancelled by a subsequent request. ");
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
                 }
             }
         }
@@ -1362,18 +1425,25 @@ namespace ManageWalla
             {
                 logger.Debug("FetchMoreImagesAsync has been cancelled by a subsequent request. ");
             }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
+            }
         }
 
-        private void sldImageSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        async private void sldImageSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            TweakImageMarginSize();
+            DateTime eventTime = DateTime.Now;
+            await WaitAsynchronouslyAsync();
+            TweakImageMarginSize(eventTime, currentPane);
         }
 
         async private void mainTwo_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             DateTime eventTime = DateTime.Now;
             await WaitAsynchronouslyAsync();
-            TweakImageSize(eventTime);
+            TweakImageMarginSize(eventTime, currentPane);
         }
 
         private void cmdShowInlineImageDetail_CheckedUnChecked(object sender, RoutedEventArgs e)
@@ -1382,15 +1452,13 @@ namespace ManageWalla
             {
                 previousImageSize = sldImageSize.Value;
                 sldImageSize.Visibility = Visibility.Hidden;
-                TweakImageSize(DateTime.Now);
             }
             else
             {
                 sldImageSize.Visibility = Visibility.Visible;
                 sldImageSize.Value = previousImageSize;
             }
-
-            //TweakImageSize(DateTime.Now);
+            TweakImageMarginSize(DateTime.Now, currentPane);
         }
 
         public async Task WaitAsynchronouslyAsync()
@@ -1447,22 +1515,40 @@ namespace ManageWalla
             return null;
         }
 
-        private void TweakImageMarginSize()
+        private void TweakUploadImageListMargin()
         {
-            //Just update the margin size
-            if (lstImageMainViewerList == null) { return; }
-            if (lstImageMainViewerList.Items.Count < 1)
-                return;
+            /* Upload image list margin */
+            double paneWidth = lstUploadImageFileList.ActualWidth - 22.0;
+            double imageWidth = 130.0;
+            double imageWidthWithMargin = imageWidth + 4.0;
 
-            
+            double imageWidthCount = Math.Floor(paneWidth / (imageWidthWithMargin));
+            double remainder = paneWidth - (imageWidthCount * (imageWidth));
+            double newMargin = Math.Floor((remainder / imageWidthCount) / 2.0);
 
+            Style newStyle = new Style();
+            newStyle.BasedOn = (Style)lstUploadImageFileList.ItemContainerStyle;
+            newStyle.TargetType = typeof(ListBoxItem);
+            Thickness newThickness = new Thickness(newMargin);
+            newStyle.Setters.Add(new Setter(MarginProperty, newThickness));
+            lstUploadImageFileList.ItemContainerStyle = newStyle;
+
+            lastMarginTweakTime = DateTime.Now;
+
+            double total = (imageWidthCount * (newMargin * 2)) + (imageWidthCount * imageWidth);
+            Console.Out.WriteLine("Upload");
+            Console.Out.WriteLine("New total:" + total.ToString());
+            Console.Out.WriteLine("Image Size:" + imageWidth.ToString());
+            Console.Out.WriteLine("Margin Changed:" + newMargin.ToString());
+            Console.Out.WriteLine("Altered width:" + paneWidth.ToString());
+            Console.Out.WriteLine("Actual width:" + lstUploadImageFileList.ActualWidth.ToString());
+        }
+
+        private void TweakMainImageListMargin()
+        {
             bool isDetail = (bool)cmdShowInlineImageDetail.IsChecked;
-
-            double currentPaneWidth = gridRight.ColumnDefinitions[0].ActualWidth - 17.0;
-            if (IsScrollBarVisible())
-                currentPaneWidth = currentPaneWidth - 23.0;
-
-            double imageWidth = sldImageSize.Value;
+            double paneWidth = lstImageMainViewerList.ActualWidth - 22.0;
+            double imageWidth = sldImageSize.Value + 1;
             double imageWidthWithMargin = imageWidth + 4.0;
 
             if (isDetail)
@@ -1471,8 +1557,8 @@ namespace ManageWalla
                 imageWidth = imageWidth + 140.0;
             }
 
-            double imageWidthCount = Math.Floor(currentPaneWidth / (imageWidthWithMargin));
-            double remainder = currentPaneWidth - (imageWidthCount * (imageWidth));
+            double imageWidthCount = Math.Floor(paneWidth / (imageWidthWithMargin));
+            double remainder = paneWidth - (imageWidthCount * (imageWidth));
             double newMargin = Math.Floor((remainder / imageWidthCount) / 2.0);
 
             Style newStyle = new Style();
@@ -1484,13 +1570,40 @@ namespace ManageWalla
                 newThickness = new Thickness(newMargin, 2, newMargin, 2);
 
             newStyle.Setters.Add(new Setter(MarginProperty, newThickness));
-
             lstImageMainViewerList.ItemContainerStyle = newStyle;
 
+            lastMarginTweakTime = DateTime.Now;
+
+            double total = (imageWidthCount * (newMargin * 2)) + (imageWidthCount * imageWidth);
+            Console.Out.WriteLine("Main");
+            Console.Out.WriteLine("New total:" + total.ToString());
+            Console.Out.WriteLine("Image Size:" + imageWidth.ToString());
             Console.Out.WriteLine("Margin Changed:" + newMargin.ToString());
-            Console.Out.WriteLine("Pane width:" + currentPaneWidth.ToString());
+            Console.Out.WriteLine("Altered width:" + paneWidth.ToString());
+            Console.Out.WriteLine("Actual width:" + lstImageMainViewerList.ActualWidth.ToString());
         }
 
+        private void TweakImageMarginSize(DateTime eventTime, PaneMode mode)
+        {
+            if (eventTime < lastMarginTweakTime)
+            {
+                Console.Out.WriteLine("TweakImageMarginSize not run cause of later update.");
+                return;
+            }
+
+            if (mode == PaneMode.Upload)
+            {
+                if (lstUploadImageFileList == null) { return; }
+                TweakUploadImageListMargin();
+            }
+            else
+            {
+                if (lstImageMainViewerList == null) { return; }
+                TweakMainImageListMargin();
+            }
+        }
+
+        /*  Could of worked better
         private void TweakImageSize(DateTime eventTime)
         {
             if (lstImageMainViewerList.Items.Count < 1)
@@ -1500,13 +1613,13 @@ namespace ManageWalla
             {
                 Console.Out.WriteLine("TweakImageSize not run cause of later update.");
                 return;
-
             }
+
             //Work out optimum image size.
             double imageCountAlongWidth;
             double remainder;
             double newImageWidth = 0.0;
-            double currentPaneWidth = gridRight.ColumnDefinitions[0].ActualWidth - 17.0;
+            double currentPaneWidth = gridRight.ColumnDefinitions[0].ActualWidth;
 
             bool isDetail = (bool)cmdShowInlineImageDetail.IsChecked;
             if (isDetail)
@@ -1515,8 +1628,8 @@ namespace ManageWalla
             }
             else
             {
-                if (IsScrollBarVisible())
-                    currentPaneWidth = currentPaneWidth - 23.0;
+                //if (IsScrollBarVisible())
+                //    currentPaneWidth = currentPaneWidth - 23.0;
 
                 double imageWidth = sldImageSize.Value;
                 double imageWidthWithMargin = imageWidth + 4.0;
@@ -1552,75 +1665,71 @@ namespace ManageWalla
             }
             Console.Out.WriteLine("Pane width:" + currentPaneWidth.ToString());
             
-
             lastMarginTweakTime = DateTime.Now;
-
-/*
-            double newMargin = Math.Floor(remainder / (imageWidthCount*2.0));
-
-            Style newStyle = new Style();
-            newStyle.BasedOn = (Style)lstImageMainViewerList.ItemContainerStyle;
-            newStyle.TargetType = typeof(ListBoxItem);
-            newStyle.Setters.Add(new Setter(MarginProperty, new Thickness(newMargin)));
-
-            lstImageMainViewerList.ItemContainerStyle = newStyle;
-
-
-            
-
-            double numberOfImagesInWidth = Math.Floor(currentPaneWidth / currentWidth);
-            double currentResidual = (currentPaneWidth - (currentWidth*numberOfImagesInWidth));
-            double newImageSize = 0.0;
-
-            //(currentWidth / 2.0) > currentResidual || 
-
-            if (isDetail)
-            {
-                //Indicates that the residual would be best used by decreasing the image size.
-                newImageSize = Math.Floor(currentPaneWidth / (numberOfImagesInWidth + 1)) - imageMargin;
-            }
-            else
-            {
-                //Increase the image size to fill the gap.
-                newImageSize = Math.Floor(currentPaneWidth / numberOfImagesInWidth) - imageMargin;
-            }
-            
-
-
-            sldImageSize.Value = Math.Max(Math.Min(newImageSize, 300.0), 75.0);
- */
-            //tweakImageSize = false;
         }
-
+ */
         async private Task ImageListUpdateControls(CancellationToken cancelToken)
         {
             try
             {
-
                 imageMainViewerList.Clear();
+
+                if (tweakMainImageSize)
+                {
+                    TweakImageMarginSize(DateTime.Now, currentPane);
+                    tweakMainImageSize = false;
+                }
 
                 if (currentImageList == null)
                     return;
 
-                if (currentImageList.Images == null)
-                    return;
 
-                lblImageListName.Content = currentImageList.Name;
-                lblImageListNameVert.Text = currentImageList.Name;
 
-                foreach (ImageListImageRef imageRef in currentImageList.Images)
+                string bannerName = "";
+                menuTagRemoveFrom.Header = "Remove images from tag";
+                menuTagRemoveFrom.IsEnabled = false;
+                menuCategoryMoveImage.IsEnabled = false;
+
+                if (currentPane == PaneMode.CategoryView)
                 {
-                    GeneralImage newImage = new GeneralImage(controller.GetServerHelper());
-                    newImage.imageId = imageRef.id;
-                    newImage.name = imageRef.name;
-                    newImage.description = imageRef.desc;
-                    newImage.shotSummary = imageRef.shotSummary;
-                    newImage.fileSummary = imageRef.fileSummary;
-                    newImage.uploadDate = imageRef.uploadDate;
-                    newImage.metaVersion = imageRef.metaVersion;
-
-                    imageMainViewerList.Add(newImage);
+                    bannerName = "Category: " + currentImageList.Name;
+                    menuCategoryMoveImage.IsEnabled = true;
                 }
+                else if (currentPane == PaneMode.TagView)
+                {
+                    bannerName = "Tag: " + currentImageList.Name;
+                    menuTagRemoveFrom.Header = "Remove images from tag: " + currentImageList.Name;
+                    menuTagRemoveFrom.IsEnabled = true;
+                }
+                else if (currentPane == PaneMode.GalleryView)
+                {
+                    bannerName = "Gallery: " + currentImageList.Name;
+                }
+
+                if (currentImageList.Images == null)
+                {
+                    bannerName = bannerName + " (no images)";
+                }
+                else
+                {
+                    foreach (ImageListImageRef imageRef in currentImageList.Images)
+                    {
+                        GeneralImage newImage = new GeneralImage(controller.GetServerHelper());
+                        newImage.imageId = imageRef.id;
+                        newImage.name = imageRef.name;
+                        newImage.description = imageRef.desc;
+                        newImage.shotSummary = imageRef.shotSummary;
+                        newImage.fileSummary = imageRef.fileSummary;
+                        newImage.uploadDate = imageRef.uploadDate;
+                        newImage.metaVersion = imageRef.metaVersion;
+                        newImage.categoryId = imageRef.categoryId;
+
+                        imageMainViewerList.Add(newImage);
+                    }
+                }
+
+                lblImageListName.Content = bannerName;
+                lblImageListNameVert.Text = bannerName;
 
                 if ((currentImageList.sectionId > 0 && currentImageList.sectionImageCount > currentImageList.imageCount)
                     || (currentImageList.sectionId < 1 && currentImageList.totalImageCount > currentImageList.imageCount))
@@ -1670,24 +1779,21 @@ namespace ManageWalla
                 }
                 else
                 {
-                    cmdImageNavigationBegin.Visibility = Visibility.Collapsed;
-                    cmdImageNavigationPrevious.Visibility = Visibility.Collapsed;
-                    cmdImageNavigationLast.Visibility = Visibility.Collapsed;
-                    cmdImageNavigationNext.Visibility = Visibility.Collapsed;
+                    cmdImageNavigationBegin.Visibility = Visibility.Hidden;
+                    cmdImageNavigationPrevious.Visibility = Visibility.Hidden;
+                    cmdImageNavigationLast.Visibility = Visibility.Hidden;
+                    cmdImageNavigationNext.Visibility = Visibility.Hidden;
 
-                    cmdImageNavigationBeginVert.Visibility = Visibility.Collapsed;
-                    cmdImageNavigationPreviousVert.Visibility = Visibility.Collapsed;
-                    cmdImageNavigationLastVert.Visibility = Visibility.Collapsed;
-                    cmdImageNavigationNextVert.Visibility = Visibility.Collapsed;
+                    cmdImageNavigationBeginVert.Visibility = Visibility.Hidden;
+                    cmdImageNavigationPreviousVert.Visibility = Visibility.Hidden;
+                    cmdImageNavigationLastVert.Visibility = Visibility.Hidden;
+                    cmdImageNavigationNextVert.Visibility = Visibility.Hidden;
 
-                    lineActionsMenu.Visibility = Visibility.Collapsed;
+                    lineActionsMenu.Visibility = Visibility.Hidden;
                 }
 
-                if (tweakImageSize)
-                {
-                    TweakImageSize(DateTime.Now);
-                    tweakImageSize = false;
-                }
+                if (currentImageList.Images == null)
+                    return;
 
                 int cursor = 0;
                 bool moreToLoad = true;
@@ -1732,11 +1838,6 @@ namespace ManageWalla
             {
                 logger.Debug("ImageListUpdateControls has been cancelled.");
                 throw (cancelEx);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw (ex);
             }
         }
 
@@ -1869,7 +1970,7 @@ namespace ManageWalla
         /// Method to load and refresh the category list, based on online status and whether or not a local cache contains a previous version
         /// </summary>
         /// <param name="forceRefresh"></param>
-        async private Task RefreshAndDisplayCategoryList(bool forceRefresh)
+        async public Task RefreshAndDisplayCategoryList(bool forceRefresh)
         {
             try
             {
@@ -2067,6 +2168,8 @@ namespace ManageWalla
                     Category category = await controller.CategoryGetMetaAsync((CategoryListCategoryRef)item.Tag, cancelTokenSource.Token);
                     txtCategoryName.Text = category.Name;
                     txtCategoryDescription.Text = category.Desc;
+                    lblCategoryParentName.Content = GetCategoryName(category.parentId);
+
                     currentCategory = category;
 
                     if (newCancelTokenSource == cancelTokenSource)
@@ -2087,6 +2190,12 @@ namespace ManageWalla
             }
         }
 
+        private String GetCategoryName(long categoryId)
+        {
+            CategoryListCategoryRef parentCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.id == categoryId);
+            return parentCategory.name;
+        }
+
         async private Task MoveImagesToCategory(long categoryId)
         {
             ImageMoveList moveList = new ImageMoveList();
@@ -2098,7 +2207,7 @@ namespace ManageWalla
                 moveList.ImageRef[i] = image.imageId;
                 if (image.categoryId == categoryId)
                 {
-                    MessageBox.Show("The update cannot be done, you have selected images which are already in the category.");
+                    ShowMessage(MessageType.Warning, "The update cannot be done, you have selected images which are already in the category.");
                     return;
                 }
                 i++;
@@ -2121,7 +2230,7 @@ namespace ManageWalla
                 ConcludeBusyProcess();
                 await RefreshAndDisplayCategoryList(true);
 
-                string message = moveList.ImageRef.Length.ToString() + " were successfully moved to the category.";
+                string message = moveList.ImageRef.Length.ToString() + " image(s) were successfully moved to the category.";
                 ShowMessage(MessageType.Info, message);
             }
             catch (OperationCanceledException)
@@ -2132,6 +2241,39 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 ShowMessage(MainTwo.MessageType.Error, "Images could not be moved to the category, there was an error on the server: " + ex.Message);
+            }
+        }
+
+        private void CategorySelectRefreshCategoryList()
+        {
+            treeCategorySelect.Items.Clear();
+            CategorySelectAddToTreeView(0, null);
+        }
+
+        private void CategorySelectAddToTreeView(long parentId, TreeViewItem currentHeader)
+        {
+            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
+            {
+                TreeViewItem newItem = new TreeViewItem();
+                newItem.Header = current.name;
+                StringBuilder builder = new StringBuilder();
+                if (current.desc != null && current.desc.Length > 0) { builder.Append(current.desc + "\r\n"); }
+                builder.Append("Photos - " + current.count.ToString());
+                newItem.ToolTip = builder.ToString();
+                newItem.Tag = current;
+                newItem.IsExpanded = true;
+                newItem.Padding = new Thickness(2.0);
+
+                if (currentHeader == null)
+                {
+                    treeCategorySelect.Items.Add(newItem);
+                }
+                else
+                {
+                    currentHeader.Items.Add(newItem);
+                }
+
+                UploadAddCategoryToTreeView(current.id, newItem);
             }
         }
         #endregion
@@ -2149,6 +2291,23 @@ namespace ManageWalla
 
         private void cmdCategoryAdd_Click(object sender, RoutedEventArgs e)
         {
+            currentCategory = new Category();
+            TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
+            if (item != null)
+            {
+                CategoryListCategoryRef currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+                //TODO Check for non system owned category.
+                currentCategory.parentId = currentSelectedCategory.id;
+            }
+
+            if (currentCategory.parentId == 0)
+            {
+                //TODO Get default category id from account object.
+                currentCategory.parentId = 300002;
+                //CategorySelect(currentCategory.parentId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
+            }
+
+            lblCategoryParentName.Content = GetCategoryName(currentCategory.parentId);
             txtCategoryName.Text = "";
             txtCategoryDescription.Text = "";
             RefreshPanesAllControls(PaneMode.CategoryAdd);
@@ -2156,6 +2315,7 @@ namespace ManageWalla
 
         async private void cmdCategoryEdit_Click(object sender, RoutedEventArgs e)
         {
+            //TODO check for system owned category, deny if so.
             await CategoryPopulateMetaData();
         }
 
@@ -2178,36 +2338,17 @@ namespace ManageWalla
 
                 ShowMessage(MessageType.Busy, "Updating server with category info");
 
-                CategoryListCategoryRef currentSelectedCategory = null;
-                TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
-                if (item != null)
-                {
-                    currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
-                }
-
                 if (currentPane == PaneMode.CategoryAdd)
                 {
-                    Category category = new Category();
-                    category.Name = txtCategoryName.Text;
-                    category.Desc = txtCategoryDescription.Text;
-                    if (currentSelectedCategory == null)
-                    {
-                        category.parentId = 0;
-                    }
-                    else
-                    {
-                        category.parentId = currentSelectedCategory.id;
-                    }
-                    await controller.CategoryCreateAsync(category, cancelTokenSource.Token);
+                    currentCategory.Name = txtCategoryName.Text;
+                    currentCategory.Desc = txtCategoryDescription.Text;
+
+                    await controller.CategoryCreateAsync(currentCategory, cancelTokenSource.Token);
                 }
                 else
                 {
                     currentCategory.Name = txtCategoryName.Text;
                     currentCategory.Desc = txtCategoryDescription.Text;
-                    if (currentSelectedCategory != null && currentCategory.id != currentSelectedCategory.id)
-                    {
-                        currentCategory.parentId = currentSelectedCategory.id;
-                    }
 
                     await controller.CategoryUpdateAsync(currentCategory, cancelTokenSource.Token);
                 }
@@ -2282,6 +2423,7 @@ namespace ManageWalla
                 }
             }
         }
+
         #endregion
 
         #region Tag Methods
@@ -2381,7 +2523,7 @@ namespace ManageWalla
                 newRadioButton.Tag = tag;
                 newRadioButton.AllowDrop = true;
                 newRadioButton.Checked += new RoutedEventHandler(FetchTagImagesFirstAsync);
-                newRadioButton.Drop += new DragEventHandler(TagDroppedImages);
+                //newRadioButton.Drop += new DragEventHandler(TagDroppedImages);
                 wrapMyTags.Children.Add(newRadioButton);
             }
 
@@ -2407,6 +2549,24 @@ namespace ManageWalla
             }
 
             UploadRefreshTagsList();
+            ImageViewTagsRefreshList();
+        }
+
+        private void TagAddImagesRefreshTagsList()
+        {
+
+            lstTagAddImagesInclude.Items.Clear();
+            //Load existing tags into the tag
+            foreach (TagListTagRef tagRef in state.tagList.TagRef)
+            {
+                if ((currentImageList.type == "Tag" && currentImageList.id != tagRef.id) || currentImageList.type != "Tag")
+                {
+                    ListBoxItem newItem = new ListBoxItem();
+                    newItem.Content = tagRef.name;
+                    newItem.Tag = tagRef;
+                    lstTagAddImagesInclude.Items.Add(newItem);
+                }
+            }
         }
 
         async private Task PopulateTagMetaData()
@@ -2450,6 +2610,7 @@ namespace ManageWalla
             }
         }
 
+        /*
         async private void TagDroppedImages(object sender, DragEventArgs e)
         {
             RadioButton meTagButton = sender as RadioButton;
@@ -2464,6 +2625,7 @@ namespace ManageWalla
                 }
             }
         }
+        */
 
         async private void TagRemoveImages_Click(object sender, RoutedEventArgs e)
         {
@@ -2478,7 +2640,7 @@ namespace ManageWalla
                     {
                         if (MessageBox.Show("Do you want to remove the " + count.ToString() + " selected images from the tag: " + tagListTagRefTemp.name + "?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         {
-                            await AddRemoveImagesFromTag(false, tagListTagRefTemp.name);
+                            await AddRemoveImagesFromTag(false, new string[1] {tagListTagRefTemp.name});
                         }
                     }
                     else
@@ -2497,7 +2659,7 @@ namespace ManageWalla
             }
         }
 
-        async private Task AddRemoveImagesFromTag(bool add, string tagName)
+        async private Task AddRemoveImagesFromTag(bool add, string[] tagName)
         {
             ImageMoveList moveList = new ImageMoveList();
             moveList.ImageRef = new long[lstImageMainViewerList.SelectedItems.Count];
@@ -2518,15 +2680,20 @@ namespace ManageWalla
                 cancelTokenSource = newCancelTokenSource;
 
                 ShowMessage(MessageType.Busy, "Updating images in tag");
-                await controller.TagAddRemoveImagesAsync(tagName, moveList, add, cancelTokenSource.Token);
-
+                for (int ii = 0; ii < tagName.Length; ii++)
+                {
+                    await controller.TagAddRemoveImagesAsync(tagName[ii], moveList, add, cancelTokenSource.Token);
+                }
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
 
                 await RefreshAndDisplayTagList(true);
                 ConcludeBusyProcess();
 
-                string message = moveList.ImageRef.Length.ToString() + " were successfully added to the tag: " + tagName;
+                string message = moveList.ImageRef.Length.ToString() + " images were removed from the tag: " + tagName[0];
+                if (add)
+                    message = moveList.ImageRef.Length.ToString() + " images were added to the tags selected.";
+
                 ShowMessage(MessageType.Info, message);
             }
             catch (OperationCanceledException)
@@ -2684,7 +2851,6 @@ namespace ManageWalla
         #region Upload Method and Event Handlers
         private void UploadRefreshCategoryList()
         {
-
             long categoryId = 0;
             //Keep a reference to the currently selected category item.
             TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
@@ -2718,8 +2884,6 @@ namespace ManageWalla
                 newItem.Tag = current;
                 newItem.IsExpanded = true;
                 newItem.Padding = new Thickness(2.0);
-                //newItem.Style = (Style)FindResource("styleRadioButton");
-                //newItem.Template = (ControlTemplate)FindResource("templateRadioButton");
 
                 if (currentHeader == null)
                 {
@@ -2890,6 +3054,12 @@ namespace ManageWalla
             System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
             if (folderDialog.SelectedPath.Length > 0)
             {
+                if (tweakUploadImageSize)
+                {
+                    TweakImageMarginSize(DateTime.Now, currentPane);
+                    tweakUploadImageSize = false;
+                }
+
                 if (cancelUploadTokenSource != null)
                     cancelUploadTokenSource.Cancel();
 
@@ -2956,6 +3126,12 @@ namespace ManageWalla
             System.Windows.Forms.DialogResult result = openDialog.ShowDialog();
             if (openDialog.FileNames.Length > 0)
             {
+                if (tweakUploadImageSize)
+                {
+                    TweakImageMarginSize(DateTime.Now, currentPane);
+                    tweakUploadImageSize = false;
+                }
+
                 if (cancelUploadTokenSource != null)
                     cancelUploadTokenSource.Cancel();
 
@@ -4427,6 +4603,174 @@ namespace ManageWalla
         }
         #endregion
 
+        private void cmdUploadRemoveImage_Click(object sender, RoutedEventArgs e)
+        {
+            UploadImage uploadImage = (UploadImage)lstUploadImageFileList.SelectedItem;
+            if (uploadImage != null)
+            {
+                uploadFots.Remove(uploadImage);
+            }
+        }
 
+        private void menuTagAddTo_Click(object sender, RoutedEventArgs e)
+        {
+            int count = lstImageMainViewerList.SelectedItems.Count;
+            if (count == 0)
+            {
+                ShowMessage(MessageType.Warning, "You must select at least one image to continue.");
+                return;
+            }
+
+            UpdateDialogsAndShow(MessageType.Other, "");
+
+            TagAddImagesRefreshTagsList();
+            gridTagSelectDialog.Visibility = Visibility.Visible;
+        }
+
+        async private void cmdTagAddImagesTo_Click(object sender, RoutedEventArgs e)
+        {
+            int count = lstTagAddImagesInclude.SelectedItems.Count;
+            if (count == 0)
+            {
+                ShowMessage(MessageType.Warning, "You must select at least one tag.");
+                return;
+            }
+
+            gridTagSelectDialog.Visibility = Visibility.Collapsed;
+            //paneBusy.Visibility = Visibility.Collapsed;
+
+            string[] tagName = new string[count];
+            int i = 0;
+            foreach (ListBoxItem current in lstTagAddImagesInclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+                tagName[i] = tagRef.name;
+                i++;
+            }
+
+            await AddRemoveImagesFromTag(true, tagName);
+            //UpdateDialogsAndShow(MessageType.Other, "");
+        }
+
+        private void cmdTagAddImagesCancel_Click(object sender, RoutedEventArgs e)
+        {
+            gridTagSelectDialog.Visibility = Visibility.Collapsed;
+            paneBusy.Visibility = Visibility.Collapsed;
+        }
+
+        private void menuCategoryMoveImage_Click(object sender, RoutedEventArgs e)
+        {
+            int count = lstImageMainViewerList.SelectedItems.Count;
+            if (count == 0)
+            {
+                ShowMessage(MessageType.Warning, "You must select at least one image to continue.");
+                return;
+            }
+
+            cmdCategorySelect.Content = "Add Images";
+            UpdateDialogsAndShow(MessageType.Other, "");
+            CategorySelectRefreshCategoryList();
+            gridCategorySelectDialog.Visibility = Visibility.Visible;
+        }
+
+        async private void cmdCategorySelect_Click(object sender, RoutedEventArgs e)
+        {
+            //CategoryListCategoryRef currentSelectedCategory = null;
+            TreeViewItem item = (TreeViewItem)treeCategorySelect.SelectedItem;
+            if (item != null)
+            {
+                CategoryListCategoryRef currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+
+                gridCategorySelectDialog.Visibility = Visibility.Collapsed;
+                if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
+                {
+                    currentCategory.parentId = currentSelectedCategory.id;
+                    lblCategoryParentName.Content = GetCategoryName(currentSelectedCategory.id);
+                    //CategorySelect(currentCategory.parentId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
+                    paneBusy.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+                    await MoveImagesToCategory(currentSelectedCategory.id);
+                }
+            }
+            else
+            {
+                ShowMessage(MessageType.Warning, "You must select a category to continue.");
+                return;
+            }
+        }
+
+        private void cmdCategorySelectCancel_Click(object sender, RoutedEventArgs e)
+        {
+            gridCategorySelectDialog.Visibility = Visibility.Collapsed;
+            paneBusy.Visibility = Visibility.Collapsed;
+        }
+
+        private void cmdCategoryMoveParent_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateDialogsAndShow(MessageType.Other, "");
+            CategorySelectRefreshCategoryList();
+
+            cmdCategorySelect.Content = "Select";
+            gridCategorySelectDialog.Visibility = Visibility.Visible;
+        }
+
+        private void ImageViewTagsRefreshList()
+        {
+            lstImageViewTagList.Items.Clear();
+            //Load existing tags into the tag
+            foreach (TagListTagRef tagRef in state.tagList.TagRef)
+            {
+                ListBoxItem newItem = new ListBoxItem();
+                newItem.Content = tagRef.name;
+                newItem.Tag = tagRef;
+                lstImageViewTagList.Items.Add(newItem);
+            }
+        }
+
+        private void lstImageMainViewerList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //if (currentPane == PaneMode.ImageView)
+            //    ImageViewTagsUpdateFromMeta();
+        }
+
+        private void ImageViewTagsUpdateFromMeta()
+        {
+
+            GeneralImage current = (GeneralImage)lstImageMainViewerList.SelectedItem;
+            if (current == null)
+                return;
+
+            //Deselect each tag.
+            foreach (ListBoxItem tagItem in lstImageViewTagList.Items)
+            {
+                tagItem.IsSelected = false;
+            }
+
+            if (current.Meta.Tags != null)
+            {
+                foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
+                {
+                    foreach (ListBoxItem tagItem in lstImageViewTagList.Items)
+                    {
+                        TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                        if (currentTagRef.id == tagRef.id)
+                        {
+                            tagItem.IsSelected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void RevertFromImageView_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            RefreshPanesAllControls(previousPane);
+            RefreshOverallPanesStructure(currentPane);
+            TweakImageMarginSize(DateTime.Now, currentPane);   
+        }
     }
 }

@@ -32,6 +32,7 @@ namespace ManageWalla
         private GlobalState state = null;
         private List<ThumbCache> thumbCacheList = null;
         private List<MainCopyCache> mainCopyCacheList = null;
+        private bool createdCategory = false;
 
         //private ThumbState thumbState = null;
         private ServerHelper serverHelper = null;
@@ -249,6 +250,7 @@ namespace ManageWalla
                 category.Name = folderName;
                 category.Desc = "";
                 categoryId = await serverHelper.CategoryCreateAsync(category, cancelToken);
+                createdCategory = true;
             }
             else
             {
@@ -270,6 +272,8 @@ namespace ManageWalla
         {
             try
             {
+                createdCategory = false;
+
                 if (uploadState.UploadToNewCategory)
                 {
                     Category category = new Category();
@@ -277,6 +281,7 @@ namespace ManageWalla
                     category.Name = uploadState.CategoryName;
                     category.Desc = uploadState.CategoryDesc;
                     categoryId = await serverHelper.CategoryCreateAsync(category, cancelToken);
+                    createdCategory = true;
                 }
 
                 if (uploadState.MapToSubFolders)
@@ -291,6 +296,9 @@ namespace ManageWalla
                         currentImage.Meta.categoryId = categoryId;
                     }
                 }
+
+                if (createdCategory)
+                    await currentMain.RefreshAndDisplayCategoryList(true);
 
                 //Check for each chkAll box set to true, then replace respective values.
                 if (uploadState.MetaTagRefAll)

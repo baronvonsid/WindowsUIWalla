@@ -14,7 +14,6 @@ namespace ManageWalla
 {
     public class UploadImage : INotifyPropertyChanged
     {
-        private string filePath;
         private Image image;
         private ImageMeta meta;
 
@@ -27,7 +26,7 @@ namespace ManageWalla
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public String FilePath { get { return filePath; } }
+        public String FilePath { get; set; }
         public Image Image { get { return image; } }
         public string FolderPath { get; set; }
         public UploadState State { get; set; }
@@ -38,7 +37,7 @@ namespace ManageWalla
         }
 
         #region Methods
-        async public Task Setup(string filePath)
+        async public Task Setup(string path)
         {
             State = UploadImage.UploadState.None;
             UploadError = "";
@@ -46,25 +45,26 @@ namespace ManageWalla
 
             try
             {
-                FolderPath = Path.GetDirectoryName(filePath);
+                FolderPath = Path.GetDirectoryName(path);
+                FilePath = path;
 
-                string format = GetFormat(filePath);
+                string format = GetFormat(FilePath);
                 if (format == null)
                 {
-                    throw new Exception("Format is not supported (" + Path.GetExtension(filePath).ToUpper().Substring(1) + "), image is excluded from Upload");
+                    throw new Exception("Format is not supported (" + Path.GetExtension(FilePath).ToUpper().Substring(1) + "), image is excluded from Upload");
                 }
                 else
                 {
-                    image = await LoadBitmapAsync(filePath, format);
+                    image = await LoadBitmapAsync(FilePath, format);
                 }
 
                 meta = new ImageMeta();
 
-                FileInfo fileInfo = new FileInfo(filePath);
-                meta.OriginalFileName = Path.GetFileName(filePath);
-                meta.Name = Path.GetFileNameWithoutExtension(filePath);
+                FileInfo fileInfo = new FileInfo(FilePath);
+                meta.OriginalFileName = Path.GetFileName(FilePath);
+                meta.Name = Path.GetFileNameWithoutExtension(FilePath);
                 meta.Format = format;
-                meta.LocalPath = filePath;
+                meta.LocalPath = FilePath;
 
                 meta.UploadDate = DateTime.Now;
                 meta.TakenDateFile = fileInfo.LastWriteTime;
@@ -187,7 +187,7 @@ namespace ManageWalla
 
         async public Task ResetMeta()
         {
-            await Setup(filePath);
+            await Setup(FilePath);
         }
 
         private string GetFormat(string fileName)
