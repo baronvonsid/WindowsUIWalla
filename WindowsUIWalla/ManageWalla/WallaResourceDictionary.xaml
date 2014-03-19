@@ -6,8 +6,13 @@
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
     <walla:UploadImageFileList x:Key="uploadImagefileListKey" />
-    <walla:UploadUIState x:Key="uploadUIStateKey"  />
-    <walla:UploadStatusListBind x:Key="uploadStatusListBindKey"  />
+    <walla:UploadUIState x:Key="uploadUIStateKey" />
+    
+    <!--<walla:UploadStatusListBind x:Key="uploadStatusListBindKey"  />-->
+    <walla:UploadImageStateList x:Key="uploadImageStateListKey"  />
+
+
+
     <walla:ImageMainViewerList x:Key="imageMainViewerListKey" />
     <walla:GalleryCategoryModel x:Key="galleryCategoryModelKey" />
 

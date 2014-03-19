@@ -14,11 +14,16 @@ namespace ManageWalla
         private bool mapToSubFolders = false;
         private bool gotSubFolders = false;
         private bool uploading = false;
-        private long categoryId = 1;
+        private long rootCategoryId = 1;
+        private string rootCategoryName = null;
         private string rootFolder = null;
         private bool uploadToNewCategory = false;
         private string categoryName = null;
         private string categoryDesc = null;
+
+        private long autoCategoryId = 0;
+        private string autoUploadFolder = "";
+        private string autoUploadCategoryName = "";
 
 		private string metaUdfChar1 = null;
 		private string metaUdfChar2 = null;
@@ -48,7 +53,8 @@ namespace ManageWalla
         {
             None = 0,
             Folder = 1,
-            Images = 2
+            Images = 2,
+            Auto = 3
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -74,13 +80,24 @@ namespace ManageWalla
             }
         }
 
-        public long CategoryId
+        public long RootCategoryId
         {
-            get { return categoryId; }
+            get { return rootCategoryId; }
             set
             {
-                categoryId = value;
-                OnPropertyChanged("CategoryId");
+                rootCategoryId = value;
+                OnPropertyChanged("RootCategoryId");
+            }
+        }
+
+        
+        public string RootCategoryName
+        {
+            get { return rootCategoryName; }
+            set
+            {
+                rootCategoryName = value;
+                OnPropertyChanged("RootCategoryName");
             }
         }
 
@@ -121,6 +138,50 @@ namespace ManageWalla
             {
                 categoryDesc = value;
                 OnPropertyChanged("CategoryDesc");
+            }
+        }
+
+        public string AutoUploadFolderAbbrev
+        {
+            get 
+            {
+                string abbrev = autoUploadFolder;
+                if (autoUploadFolder.Length > 97)
+                {
+                    abbrev = "..." + autoUploadFolder.Substring(autoUploadFolder.Length - 97);
+                }
+                return abbrev; 
+            }
+        }
+
+        public string AutoUploadFolder
+        {
+            get { return autoUploadFolder; }
+            set
+            {
+                autoUploadFolder = value;
+                OnPropertyChanged("AutoUploadFolder");
+                OnPropertyChanged("AutoUploadFolderAbbrev");
+            }
+        }
+
+        public string AutoUploadCategoryName
+        {
+            get { return autoUploadCategoryName; }
+            set
+            {
+                autoUploadCategoryName = value;
+                OnPropertyChanged("AutoUploadCategoryName");
+            }
+        }
+
+        public long AutoCategoryId
+        {
+            get { return autoCategoryId; }
+            set
+            {
+                autoCategoryId = value;
+                OnPropertyChanged("AutoCategoryId");
             }
         }
 

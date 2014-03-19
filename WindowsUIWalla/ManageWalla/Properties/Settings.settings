@@ -35,8 +35,11 @@
     <Setting Name="ThumbCacheFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Walla-LocalThumbCache.db</Value>
     </Setting>
-    <Setting Name="MainCopyCacheFileName" Type="System.String" Scope="User">
+    <Setting Name="MainCopyCacheFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Walla-LocalMainCopyCache.db</Value>
+    </Setting>
+    <Setting Name="UploadImageStateFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Walla-LocalUploadImageStateCache.db</Value>
     </Setting>
   </Settings>
 </SettingsFile>

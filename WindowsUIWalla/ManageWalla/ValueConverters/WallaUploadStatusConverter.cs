@@ -15,22 +15,20 @@ namespace ManageWalla
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            /*	private enum ImageStatus {Pending 0, Queued 1, Processing 2, Complete 3, Error 4, Inactive 5	}	*/
+            /*	private enum ImageStatus {None 0, File received 1, Awaiting processing 2, Being processed 3, Complete 4, Inactive 5}	*/
             switch (value.ToString())
             {
-                case "-1":
-                    return "Error in app";
-                case "0":
-                    return "Received";
-                case "1":
-                    return "Queued on Server";
-                case "2":
-                    return "Processing on Server";
-                case "3":
+                case "None":
+                    return "Not processed";
+                case "FileReceived":
+                    return "File received";
+                case "AwaitingProcessed":
+                    return "Awaiting processing";
+                case "BeingProcessed":
+                    return "Being processed";
+                case "Complete":
                     return "Complete";
-                case "4":
-                    return "Error on Server";
-                case "5":
+                case "Inactive":
                     return "Inactive";
             }
             return "";

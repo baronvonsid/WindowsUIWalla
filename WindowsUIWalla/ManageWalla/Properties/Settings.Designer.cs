@@ -122,15 +122,21 @@ namespace ManageWalla.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Walla-LocalMainCopyCache.db")]
         public string MainCopyCacheFileName {
             get {
                 return ((string)(this["MainCopyCacheFileName"]));
             }
-            set {
-                this["MainCopyCacheFileName"] = value;
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Walla-LocalUploadImageStateCache.db")]
+        public string UploadImageStateFileName {
+            get {
+                return ((string)(this["UploadImageStateFileName"]));
             }
         }
     }

@@ -17,11 +17,15 @@ namespace ManageWalla
         private Image image;
         private ImageMeta meta;
 
+        //None 0, File received 1, Awaiting processing 2, Being processed 3, Complete 4, Inactive 5
         public enum UploadState
         {
             None = 0,
-            Success = 1,
-            Error = 2
+            FileReceived = 1,
+            AwaitingProcessed = 2,
+            BeingProcessed = 3,
+            Complete = 4,
+            Inactive = 5
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -29,35 +33,35 @@ namespace ManageWalla
         public String FilePath { get; set; }
         public Image Image { get { return image; } }
         public string FolderPath { get; set; }
-        public UploadState State { get; set; }
-        public String UploadError { get; set; }
+        //public UploadState State { get; set; }
+        //public String UploadError { get; set; }
+
         public ImageMeta Meta
         {
             get { return meta; }
         }
 
         #region Methods
-        async public Task Setup(string path)
+        async public Task<string> Setup(string path, bool loadImage)
         {
-            State = UploadImage.UploadState.None;
-            UploadError = "";
-            image = new Image();
-
             try
             {
                 FolderPath = Path.GetDirectoryName(path);
                 FilePath = path;
-
                 string format = GetFormat(FilePath);
-                if (format == null)
-                {
-                    throw new Exception("Format is not supported (" + Path.GetExtension(FilePath).ToUpper().Substring(1) + "), image is excluded from Upload");
-                }
-                else
-                {
-                    image = await LoadBitmapAsync(FilePath, format);
-                }
 
+                if (loadImage)
+                {
+                    image = new Image();    
+                    if (format == null)
+                    {
+                        throw new Exception("Format is not supported (" + Path.GetExtension(FilePath).ToUpper().Substring(1) + "), image is excluded from Upload");
+                    }
+                    else
+                    {
+                        image = await LoadBitmapAsync(FilePath, format);
+                    }
+                }
                 meta = new ImageMeta();
 
                 FileInfo fileInfo = new FileInfo(FilePath);
@@ -75,12 +79,12 @@ namespace ManageWalla
                 meta.UdfDate3 = DateTime.Parse("01/01/1900");
 
                 meta.Size = fileInfo.Length;
+
+                return "OK";
             }
             catch (Exception ex)
             {
-                UploadError = ex.Message;
-                State = UploadState.Error;
-                image = UnavailableBitmapThumbnail(false);
+                return ex.Message;
             }
         }
 
@@ -109,85 +113,76 @@ namespace ManageWalla
 
         async private Task<Image> LoadBitmapAsync(string filePath, string format)
         {
-            try
+            switch (format)
             {
-                switch (format)
-                {
-                    case "JPG":
-                    case "TIF":
-                    case "PNG":
-                    case "BMP":
-                    case "GIF":
-                        break;
-                    default:
-                        return UnavailableBitmapThumbnail(true);
-                }
-
-                FileInfo fileInfo = new FileInfo(filePath);
-
-                //10 MB.
-                if (fileInfo.Length > 10485760)
+                case "JPG":
+                case "TIF":
+                case "PNG":
+                case "BMP":
+                case "GIF":
+                    break;
+                default:
                     return UnavailableBitmapThumbnail(true);
+            }
 
-                bool isLandscape = await IsLandscape(filePath);
+            FileInfo fileInfo = new FileInfo(filePath);
 
-                BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
-                {
-                    myBitmapImage = new BitmapImage();
-                    myBitmapImage.BeginInit();
+            //10 MB.
+            if (fileInfo.Length > 10485760)
+                return UnavailableBitmapThumbnail(true);
 
-                    if (isLandscape)
-                        myBitmapImage.DecodePixelHeight = 140;
-                    else
-                        myBitmapImage.DecodePixelWidth = 140;
-                    
-                    myBitmapImage.UriSource = new Uri(filePath);
-                    myBitmapImage.EndInit();
-                    myBitmapImage.Freeze();
+            bool isLandscape = await IsLandscape(filePath);
 
-                    return myBitmapImage;
-                });
-
-                int startX = 0;
-                int startY = 0;
-                int width = 0;
-                int height = 0;
+            BitmapImage myBitmapImage = await System.Threading.Tasks.Task.Run(() =>
+            {
+                myBitmapImage = new BitmapImage();
+                myBitmapImage.BeginInit();
 
                 if (isLandscape)
-                {
-                    double remainder = myBitmapImage.PixelWidth - myBitmapImage.PixelHeight;
-                    startX = Convert.ToInt32(remainder / 2.0);
-                    startY = 0;
-                    width = Convert.ToInt32(myBitmapImage.PixelHeight);
-                    height = Convert.ToInt32(myBitmapImage.PixelHeight);
-                }
+                    myBitmapImage.DecodePixelHeight = 140;
                 else
-                {
-                    //Portrait, so crop the tops and bottoms.
-                    double remainder = myBitmapImage.PixelHeight - myBitmapImage.PixelWidth;
-                    startX = 0;
-                    startY = Convert.ToInt32(remainder / 2.0);
-                    width = Convert.ToInt32(myBitmapImage.PixelWidth);
-                    height = Convert.ToInt32(myBitmapImage.PixelWidth);
-                }
+                    myBitmapImage.DecodePixelWidth = 140;
+                    
+                myBitmapImage.UriSource = new Uri(filePath);
+                myBitmapImage.EndInit();
+                myBitmapImage.Freeze();
 
-                CroppedBitmap croppedBitmap = new CroppedBitmap(myBitmapImage, new Int32Rect(startX, startY, width, height));
-                Image image = new Image();
-                image.Source = croppedBitmap;
+                return myBitmapImage;
+            });
 
-                return image;
-            }
-            catch (Exception ex)
+            int startX = 0;
+            int startY = 0;
+            int width = 0;
+            int height = 0;
+
+            if (isLandscape)
             {
-                UploadError = "Error converting image to Thumbnail." + ex.Message;
-                State = UploadState.Error;
-                return UnavailableBitmapThumbnail(false);
+                double remainder = myBitmapImage.PixelWidth - myBitmapImage.PixelHeight;
+                startX = Convert.ToInt32(remainder / 2.0);
+                startY = 0;
+                width = Convert.ToInt32(myBitmapImage.PixelHeight);
+                height = Convert.ToInt32(myBitmapImage.PixelHeight);
             }
+            else
+            {
+                //Portrait, so crop the tops and bottoms.
+                double remainder = myBitmapImage.PixelHeight - myBitmapImage.PixelWidth;
+                startX = 0;
+                startY = Convert.ToInt32(remainder / 2.0);
+                width = Convert.ToInt32(myBitmapImage.PixelWidth);
+                height = Convert.ToInt32(myBitmapImage.PixelWidth);
+            }
+
+            CroppedBitmap croppedBitmap = new CroppedBitmap(myBitmapImage, new Int32Rect(startX, startY, width, height));
+            Image image = new Image();
+            image.Source = croppedBitmap;
+
+            return image;
         }
 
         async public Task ResetMeta()
         {
-            await Setup(FilePath);
+            await Setup(FilePath, false);
         }
 
         private string GetFormat(string fileName)

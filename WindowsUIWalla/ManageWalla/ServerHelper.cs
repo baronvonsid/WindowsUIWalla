@@ -527,7 +527,7 @@ namespace ManageWalla
         #endregion
 
         #region Upload
-        async public Task<string> UploadImageAsync(UploadImage image, CancellationToken cancelToken)
+        async public Task<string> UploadImageAsync(UploadImage image, UploadImageState newUploadEntry, CancellationToken cancelToken)
         {
             try
             {
@@ -554,6 +554,10 @@ namespace ManageWalla
                 long imageId = reader.ReadElementContentAsLong();
                 image.Meta.id = imageId;
 
+                newUploadEntry.lastUpdated = DateTime.Now;
+                newUploadEntry.imageId = imageId;
+                newUploadEntry.uploadState = UploadImage.UploadState.FileReceived;
+
                 HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, "image/" + imageId.ToString() + "/meta");
                 requestMeta.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
@@ -566,6 +570,8 @@ namespace ManageWalla
                 requestMeta.Content = content;
                 HttpResponseMessage responseMeta = await http.SendAsync(requestMeta, cancelToken);
                 responseMeta.EnsureSuccessStatusCode();
+
+
 
                 //System.Threading.Thread.Sleep(1000);
 

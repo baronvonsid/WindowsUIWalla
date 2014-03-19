@@ -6,8 +6,18 @@
     xmlns:gif="http://wpfanimatedgif.codeplex.com"
     xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary"
     x:Name="mainTwo" x:Class="ManageWalla.MainTwo"
-    Title="fotowalla"  FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" SizeChanged="mainTwo_SizeChanged" FontSize="18" >
+    Title="fotowalla" FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" SizeChanged="mainTwo_SizeChanged" FontSize="18" >
 
+    <Window.Resources>
+        <CollectionViewSource x:Key="uploadImageStateListInProgressKey"
+                              Source="{StaticResource uploadImageStateListKey}"
+                              Filter="UploadImageStateInProgress_Filter" />
+
+    <CollectionViewSource x:Key="uploadImageStateListCompleteKey"
+                              Source="{StaticResource uploadImageStateListKey}"
+                              Filter="UploadImageStateComplete_Filter" />
+    </Window.Resources>
+    
     <Grid>
         <Grid x:Name="gridLeft" Margin="5,15,2,5" Background="{StaticResource BackgroundBrush}">
             <Grid.RowDefinitions>
@@ -519,46 +529,64 @@
 
             <Grid x:Name="grdUploadSettings" Grid.Column="1" Grid.Row="8" DataContext="{StaticResource uploadUIStateKey}" Background="{StaticResource PaneBodyBackgroundBrush}"  Margin="8,5,5,5">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="30" /> <!-- Upload Type -->
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="30" /> <!-- Auto folder details -->
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" /> <!-- Auto category details -->
+                    <RowDefinition Height="30" />
+
+                    <RowDefinition Height="40" /> <!-- 5 Root category -->
+                    <RowDefinition Height="30" /> <!-- New Category -->
+                    <RowDefinition Height="30" /> <!-- New category Name -->
+                    <RowDefinition Height="80" /> <!-- New category Desc -->
+                    <RowDefinition Height="60" /> <!-- Map sub Folders -->
+
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="80" />
-                    <RowDefinition Height="50" />
+                    <RowDefinition Height="50" />  <!-- Buttons -->
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100" />
                     <ColumnDefinition MinWidth="100" />
                 </Grid.ColumnDefinitions>
 
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Padding="2">
-                    <TreeView x:Name="treeUploadCategoryView" >
+                <Label x:Name="lblUploadType" Content="Manual Upload" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" FontWeight="SemiBold"/>
+                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="300" Y2="1" StrokeThickness="0.5" Margin="0,2,0,2" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" />
 
-                    </TreeView>
-                </ScrollViewer>
+                <Label Content="Auto upload folder" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" FontWeight="SemiBold" />
+                <Label x:Name="lblAutoUploadFolder" Content="{Binding Mode=OneWay, Path=AutoUploadFolderAbbrev}" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" ToolTip="{Binding Mode=OneWay, Path=AutoUploadFolder}" />
 
-                <Label x:Name="lblRootCalegory" Content="{Binding Mode=OneWay, Path=RootFolder}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" /> 
+                <Label Content="Upload category" Grid.Column="0" Grid.Row="4" FontWeight="SemiBold" />
+                <Label Content="{Binding Mode=OneWay, Path=AutoUploadCategoryName}" Grid.Column="0" Grid.Row="4" />
 
-                <Label Content="Map sub folders as categories" Grid.Column="0" Grid.Row="2" />
-                <CheckBox x:Name="chkUploadMapToSubFolders" Grid.Row="2" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=MapToSubFolders}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Label Content="Category" Grid.Column="0" Grid.Row="5" FontWeight="SemiBold" />
+                <DockPanel  LastChildFill="True" Grid.Column="1" Grid.Row="5" HorizontalAlignment="Right">
+                    <Button x:Name="cmdUploadChangeCategory" Content="Change" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadChangeCategory_Click" />
+                    <Label x:Name="lblRootCalegory" Content="{Binding Mode=OneWay, Path=RootCategoryName}" Margin="0,0,10,0" DockPanel.Dock="Left" HorizontalAlignment="Left"/>
+                </DockPanel>
 
-                <Label Content="New category" Grid.Column="0" Grid.Row="3" />
-                <CheckBox x:Name="chkUploadToNewCategory" Grid.Row="3" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=UploadToNewCategory}" Checked="chkUploadToNewCategory_Checked" Unchecked="chkUploadToNewCategory_Unchecked" />
+                <Label Content="Add category" Grid.Column="0" Grid.Row="6" FontWeight="SemiBold"/>
+                <CheckBox x:Name="chkUploadToNewCategory" Grid.Row="6" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=UploadToNewCategory}" Checked="chkUploadToNewCategory_Checked" Unchecked="chkUploadToNewCategory_Unchecked" />
 
-                <Label Content="Category Name" Grid.Column="0" Grid.Row="4" />
-                <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="4" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
+                <Label Content="Category Name" Grid.Column="0" Grid.Row="7" FontWeight="SemiBold" />
+                <TextBox x:Name="txtUploadCategoryName" Grid.Column="1" Grid.Row="7" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryName}"/>
 
-                <Label Content="Description" Grid.Column="0" Grid.Row="5" />
-                <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="5" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
+                <Label Content="Description" Grid.Column="0" Grid.Row="8" FontWeight="SemiBold" />
+                <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="8" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
 
-                <StackPanel Orientation="Vertical" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+                <Label Content="Copy folders with images" Grid.Column="0" Grid.Row="9" ToolTip="Select this option to create or map the sub folders selected with fotowalla categories" FontWeight="SemiBold"/>
+                <CheckBox x:Name="chkUploadMapToSubFolders" Grid.Row="9" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=MapToSubFolders}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                <StackPanel Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"></StackPanel>
+                
+                <StackPanel Orientation="Vertical" Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2">
                     <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="300" Y2="1" StrokeThickness="0.5" Margin="0,10,0,4" />
                     <StackPanel Orientation="Horizontal">
                         <Button x:Name="cmdUploadAll" Content="Upload" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadAll_Click" />
                         <Button x:Name="cmdUploadClear" Content="Clear" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadClear_Click" />
                         <Button x:Name="cmdUploadImportFolder" Content="Add Folder" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFolder_Click" />
                         <Button x:Name="cmdUploadImportFiles" Content="Add Images"  Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadImportFiles_Click" />
+                        <Button x:Name="cmdUploadTurnAutoOff" Content="Turn off auto upload"  Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadTurnAutoOff_Click"  />
                     </StackPanel>
                 </StackPanel>
 
@@ -1447,8 +1475,14 @@
                                 <TextBox x:Name="txtAccountPassword" Grid.Column="1" Grid.Row="1" MaxLength="20" Margin="2" />
 
                                 <Label Grid.Column="0" Grid.Row="2" Content="Profile Name"/>
-                                <Label x:Name="lblAccountProfileName" Grid.Column="1" Grid.Row="2" Content=""/>
+                                <Label x:Name="lblAccountProfileName" Grid.Column="1" Grid.Row="2" Content="" Visibility="Collapsed"/>
 
+                                <Label Grid.Column="1" Grid.Row="2">
+                                    <Binding Path="Count" Source="{StaticResource uploadImageStateListKey}">
+                                        <Binding.StringFormat>{0} meCount</Binding.StringFormat>
+                                    </Binding>
+                                </Label>
+                                
                                 <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
                                     <Button x:Name="cmdAccountLogin" Content="Login" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountLogin_Click" />
                                     <Button x:Name="cmdAccountEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountEdit_Click" />
@@ -1462,6 +1496,8 @@
                             </Grid>
                         </TabItem>
 
+
+
                         <TabItem x:Name="tabUploadStatusList" Header="Upload Status" >
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -1469,30 +1505,104 @@
                                     <RowDefinition Height="34" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="2*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <DataGrid x:Name="datUploadStatusList" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible"
-                                        SelectionMode="Single" CanUserResizeColumns="True" MinColumnWidth="40" CanUserSortColumns="True" 
-                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="0" Grid.Row="0" >
-                                    <DataGrid.ItemsSource>
-                                        <Binding Source="{StaticResource uploadStatusListBindKey}" />
-                                    </DataGrid.ItemsSource>
+                                <DataGrid x:Name="datUploadsInProgress" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible"
+                                        SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="True" 
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="0" Grid.Row="0" 
+                                          ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadImageStateListInProgressKey}}" RowHeaderWidth="0">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Name" Binding="{Binding name}" MinWidth="40" Width="*" IsReadOnly="True" CanUserSort="True" />
-                                        <DataGridTemplateColumn Header="Status" MinWidth="40" Width="30" IsReadOnly="True" SortMemberPath="imageStatus">
+
+                                        <DataGridTemplateColumn Header="Name" Width="*" IsReadOnly="True">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding imageStatus, Converter={StaticResource wallaUploadStatusConverterKey}}" ToolTip="{Binding errorMessage}">
+                                                    <TextBlock Text="{Binding name}" ToolTip="{Binding fullPath}" />
+                                                    <!--
+                                                            <TextBlock.ToolTip>
+                                                                <MultiBinding StringFormat="{}File name: {0}{3}Full path: {1}{3}Automatic Upload: {3}">
+                                                                    <Binding Path="fileName" />
+                                                                    <Binding Path="fullPath" />
+                                                                    <Binding Path="isAutoUpload"  />
+                                                                    <Binding Source="{x:Static sys:Environment.NewLine}"/>
+                                                                </MultiBinding>
+                                                        </TextBlock.ToolTip>
+                                            -->
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Status" Width="Auto" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding uploadState, Converter={StaticResource wallaUploadStatusConverterKey}}">
                                                     </TextBlock>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-                                        <DataGridTextColumn Header="Error" Binding="{Binding errorMessage}" MinWidth="40" Width="*" IsReadOnly="True" CanUserSort="True" />
-                                        <DataGridTextColumn Header="Last Updated" Binding="{Binding lastUpdated, StringFormat=g}" Width="50" IsReadOnly="True" CanUserSort="True" />
+
+                                        <DataGridTemplateColumn Header="Error" Width="10" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock x:Name="showError" Text="!" HorizontalAlignment="Center" FontWeight="Bold" Visibility="Hidden" ToolTip="{Binding errorMessage}">
+                                                    </TextBlock>
+                                                    <DataTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding hasError}" Value="true">
+                                                            <Setter TargetName="showError" Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        
+                                        <DataGridTextColumn Header="Last Updated" Binding="{Binding lastUpdated, StringFormat=g}" Width="Auto" IsReadOnly="True" CanUserSort="True" />
                                     </DataGrid.Columns>
                                 </DataGrid>
 
+                                <DataGrid x:Name="datUploadCompletedList" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible"
+                                        SelectionMode="Single" CanUserResizeColumns="True" MinColumnWidth="40" CanUserSortColumns="True" 
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="1" Grid.Row="0" RowHeaderWidth="0">
+                                    <DataGrid.ItemsSource>
+                                        <Binding Source="{StaticResource uploadImageStateListCompleteKey}" />
+                                    </DataGrid.ItemsSource>
+                                    <DataGrid.Columns>
+
+                                        <DataGridTemplateColumn Header="Name" Width="*" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding name}" ToolTip="{Binding fullPath}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Source Machine" Width="auto" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding machineName}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Error" Width="10" IsReadOnly="True">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock x:Name="showError" Text="!" HorizontalAlignment="Center" FontWeight="Bold" Visibility="Hidden" ToolTip="{Binding errorMessage}">
+                                                    </TextBlock>
+                                                    <DataTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding hasError}" Value="true">
+                                                            <Setter TargetName="showError" Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTextColumn Header="Uploaded" Binding="{Binding uploadDate, StringFormat=d}" Width="50" IsReadOnly="True" CanUserSort="True" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                
+                                
                                 <DockPanel x:Name="panUploadStatusListUnavailable" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2" Visibility="Collapsed">
                                     <TextBlock Text="Upload Status List" TextAlignment="Center" />
                                 </DockPanel>
@@ -1513,19 +1623,21 @@
         <Grid Panel.ZIndex="999" Opacity="100.0" x:Name="gridAlertDialog" Visibility="Collapsed" Background="{StaticResource AlertBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
-                <RowDefinition Height="auto" />
+                <RowDefinition MinHeight="80" MaxHeight="350" />
                 <RowDefinition Height="35" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240" />
+                <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
 
             <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" StrokeThickness="2" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0">
                 <Image gif:ImageBehavior.AnimatedSource="{DynamicResource loadingImageSrc}"  Height="32" Width="32" />
-                <TextBlock x:Name="lblAlertDialogHeader"  Margin="20,0,0,0" TextWrapping="Wrap" Text="loading" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                <TextBlock x:Name="lblAlertDialogHeader"  Margin="20,0,0,0" TextWrapping="Wrap" Text="loading" FontSize="20" VerticalAlignment="Center" Foreground="{StaticResource FontBorderBrush}"/>
             </StackPanel>
-            <TextBlock x:Name="lblAlertDialogMessage" Margin="5" TextWrapping="Wrap" HorizontalAlignment="Center" Text="some random message" Foreground="{StaticResource FontBorderBrush}" Grid.Column="0" Grid.Row="1"/>
+            <ScrollViewer Grid.Column="0" Grid.Row="1" Margin="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <TextBlock x:Name="lblAlertDialogMessage" Margin="5" FontSize="16" TextWrapping="Wrap" HorizontalAlignment="Center" Text="some random message" Foreground="{StaticResource FontBorderBrush}" />
+            </ScrollViewer>
             <Button x:Name="cmdAlertDialogResponse" Grid.Column="0" Grid.Row="2" Content="Cancel" Width="80" Click="cmdAlertDialogResponse_Click"  Template="{StaticResource templateButton}" Style="{StaticResource styleButton}" />
         </Grid>
 

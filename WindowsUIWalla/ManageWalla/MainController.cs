@@ -32,6 +32,7 @@ namespace ManageWalla
         private GlobalState state = null;
         private List<ThumbCache> thumbCacheList = null;
         private List<MainCopyCache> mainCopyCacheList = null;
+        private UploadImageStateList uploadImageStateList = null;
         private bool createdCategory = false;
 
         //private ThumbState thumbState = null;
@@ -71,11 +72,17 @@ namespace ManageWalla
             return mainCopyCacheList;
         }
 
+        //public UploadImageStateList UpdateFromStateUploadImageStateList()
+       // {
+         //   return uploadImageStateList;
+        //}
+
         public void Dispose()
         {
             CacheHelper.SaveGlobalState(state);
             CacheHelper.SaveThumbCacheList(thumbCacheList);
             CacheHelper.SaveMainCopyCacheList(mainCopyCacheList);
+            CacheHelper.SaveUploadImageStateList(uploadImageStateList);
         }
         #endregion
 
@@ -91,11 +98,10 @@ namespace ManageWalla
         /// </summary>
         /// <param name="currentMainParam"></param>
         /// <returns></returns>
-        public void InitApplication()
+        public void InitApplication(UploadImageStateList uploadImageStateListParam)
         {
             try
             {
-
                 //Setup Server helper.
                 serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, Properties.Settings.Default.WallaWSPort,
                     Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.WallaWebPath);
@@ -104,6 +110,8 @@ namespace ManageWalla
                 state = CacheHelper.GetGlobalState();
                 thumbCacheList = CacheHelper.GetThumbCacheList();
                 mainCopyCacheList = CacheHelper.GetMainCopyCacheList();
+                CacheHelper.GetUploadImageStateList(uploadImageStateListParam);
+                uploadImageStateList = uploadImageStateListParam;
             }
             catch (Exception ex)
             {
@@ -206,18 +214,27 @@ namespace ManageWalla
         #endregion
 
         #region Upload Methods
-        async public Task LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots, CancellationToken cancelToken)
+        async public Task<List<string>> LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots, CancellationToken cancelToken)
         {
+            List<string> errorResponses = new List<string>();
             try
             {
                 for (int i = 0; i < fileNames.Length; i++)
                 {
                     UploadImage newImage = new UploadImage();
-                    await newImage.Setup(fileNames[i]);
-                    meFots.Add(newImage);
+                    string response = await newImage.Setup(fileNames[i], true);
+                    if (response == "OK")
+                    {
+                        meFots.Add(newImage);
+                    }
+                    else
+                    {
+                        errorResponses.Add(response);
+                    }
 
                     cancelToken.ThrowIfCancellationRequested();
                 }
+                return errorResponses;
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -268,7 +285,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task DoUploadAsync(UploadImageFileList meFots, UploadUIState uploadState, long categoryId, CancellationToken cancelToken)
+        async public Task<List<string>> UploadManualAsync(UploadImageFileList meFots, UploadUIState uploadState, CancellationToken cancelToken)
         {
             try
             {
@@ -277,23 +294,23 @@ namespace ManageWalla
                 if (uploadState.UploadToNewCategory)
                 {
                     Category category = new Category();
-                    category.parentId = categoryId;
+                    category.parentId = uploadState.RootCategoryId;
                     category.Name = uploadState.CategoryName;
                     category.Desc = uploadState.CategoryDesc;
-                    categoryId = await serverHelper.CategoryCreateAsync(category, cancelToken);
+                    uploadState.RootCategoryId = await serverHelper.CategoryCreateAsync(category, cancelToken);
                     createdCategory = true;
                 }
 
                 if (uploadState.MapToSubFolders)
                 {
                     DirectoryInfo rootFolder = new DirectoryInfo(uploadState.RootFolder);
-                    CreateCategoryFromFolder(rootFolder, meFots, categoryId, cancelToken);
+                    CreateCategoryFromFolder(rootFolder, meFots, uploadState.RootCategoryId, cancelToken);
                 }
                 else
                 {
                     foreach (UploadImage currentImage in meFots)
                     {
-                        currentImage.Meta.categoryId = categoryId;
+                        currentImage.Meta.categoryId = uploadState.RootCategoryId;
                     }
                 }
 
@@ -309,31 +326,95 @@ namespace ManageWalla
                     }
                 }
 
-                while (meFots.Where(r => r.State == UploadImage.UploadState.None).Count() > 0)
+                foreach (UploadImage currentImage in meFots)
                 {
-                    cancelToken.ThrowIfCancellationRequested();
-
-                    UploadImage currentUpload = meFots.Where(r => r.State == UploadImage.UploadState.None).First();
-
-                    AddMachineTag(currentUpload);
-                    currentUpload.Meta.MachineId = state.machineId;
-
-                    string response = await serverHelper.UploadImageAsync(currentUpload, cancelToken);
-                    if (response == null)
+                    if (uploadState.MetaTagRefAll)
                     {
-                        currentMain.uploadFots.Remove(currentUpload);
+                        currentImage.Meta.Tags = uploadState.MetaTagRef;
                     }
-                    else
-                    {
-                        currentUpload.State = UploadImage.UploadState.Error;
-                        currentUpload.UploadError = response;
-                    }
+
+                    AddMachineTag(currentImage);
+                    currentImage.Meta.MachineId = state.machineId;
                 }
+
+                return await UploadProcessAsync(meFots, false, cancelToken);
             }
             catch (OperationCanceledException cancelEx)
             {
                 //Suppress exception and just return null.
-                logger.Debug("DoUploadAsync has been cancelled");
+                logger.Debug("UploadManualAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task<List<string>> UploadProcessAsync(UploadImageFileList meFots, bool isAuto, CancellationToken cancelToken)
+        {
+            try
+            {
+                List<string> responseErrors = new List<string>();
+                while (meFots.Count() > 0)
+                {
+                    cancelToken.ThrowIfCancellationRequested();
+
+                    //UploadImage currentUpload = meFots.Where(r => r.State == UploadImage.UploadState.None).First();
+                    UploadImage currentUpload = meFots[0];
+                    
+                    //Get or Create new Upload entry in cache.
+                    UploadImageState newUploadEntry = CacheHelper.GetOrCreateCacheItem(uploadImageStateList, 
+                        currentUpload.Meta.OriginalFileName, currentUpload.FilePath, currentUpload.Meta.Name, 
+                        currentUpload.Meta.Size, isAuto, state.machineId, "myMachineName");
+
+                    string response = await serverHelper.UploadImageAsync(currentUpload, newUploadEntry, cancelToken);
+                    if (response == null)
+                    {
+                        newUploadEntry.lastUpdated = DateTime.Now;
+                        newUploadEntry.uploadState = UploadImage.UploadState.AwaitingProcessed;
+                    }
+                    else
+                    {
+                        newUploadEntry.hasError = true;
+                        newUploadEntry.lastUpdated = DateTime.Now;
+                        newUploadEntry.errorMessage = response;
+                        responseErrors.Add(currentUpload.Meta.OriginalFileName + " error: " + response);
+                    }
+                    meFots.Remove(currentUpload);
+                }
+                return responseErrors;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                //Suppress exception and just return null.
+                logger.Debug("UploadProcessAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task UploadAutoAsync(UploadImageFileList meFots, UploadUIState uploadState, CancellationToken cancelToken)
+        {
+            try
+            {
+                foreach (UploadImage currentImage in meFots)
+                {
+                    AddMachineTag(currentImage);
+                    currentImage.Meta.MachineId = state.machineId;
+                    currentImage.Meta.categoryId = uploadState.AutoCategoryId;
+                }
+
+                await UploadProcessAsync(meFots, true, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("UploadAutoAsync has been cancelled");
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -346,22 +427,24 @@ namespace ManageWalla
         private void AddMachineTag(UploadImage current)
         {
             ImageMetaTagRef newTagRef = new ImageMetaTagRef();
+            //TODO Change to use tagid from userapp object.
             newTagRef.id = state.account.Machines.Single(r => r.id == state.machineId).tagId;
-
-            ImageMetaTagRef[] newTagArray;
 
             if (current.Meta.Tags == null)
             {
-                newTagArray = new ImageMetaTagRef[1];
-                newTagArray[0] = newTagRef;
+                current.Meta.Tags = new ImageMetaTagRef[1] { newTagRef };
             }
             else
             {
-                newTagArray = new ImageMetaTagRef[current.Meta.Tags.Length + 1];
-                current.Meta.Tags.CopyTo(newTagArray, 0);
-                newTagArray[newTagArray.Length - 1] = newTagRef;
+                if (!current.Meta.Tags.Any<ImageMetaTagRef>(r => r.id == newTagRef.id))
+                {
+                    ImageMetaTagRef[] newTagArray = new ImageMetaTagRef[current.Meta.Tags.Length + 1];
+                    current.Meta.Tags.CopyTo(newTagArray, 0);
+                    newTagArray[newTagArray.Length - 1] = newTagRef;
+
+                    current.Meta.Tags = newTagArray;
+                }
             }
-            current.Meta.Tags = newTagArray;
         }
 
         async public Task ResetMeFotsMeta(UploadImageFileList metFots)
@@ -372,15 +455,17 @@ namespace ManageWalla
             }
         }
 
-        async public Task LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots, CancellationToken cancelToken)
+        async public Task<List<string>> LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots, CancellationToken cancelToken)
         {
+            List<string> errorResponses = new List<string>();
             try
             {
                 if (recursive)
                 {
                     foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
                     {
-                        await LoadImagesFromFolder(folder, recursive, meFots, cancelToken);
+                        List<string> tempErrorResponses = await LoadImagesFromFolder(folder, recursive, meFots, cancelToken);
+                        errorResponses.AddRange(tempErrorResponses);
                     }
                 }
 
@@ -389,11 +474,20 @@ namespace ManageWalla
                     if (IsFormatOK(file.Extension.ToUpper().Substring(1)))
                     {
                         UploadImage newImage = new UploadImage();
-                        await newImage.Setup(file.FullName);
-                        meFots.Add(newImage);
+                        string response = await newImage.Setup(file.FullName, true);
+                        if (response == "OK")
+                        {
+                            meFots.Add(newImage);
+                        }
+                        else
+                        {
+                            errorResponses.Add(response);
+                        }
                         cancelToken.ThrowIfCancellationRequested();
                     }
                 }
+
+                return errorResponses;
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -411,6 +505,55 @@ namespace ManageWalla
         {
             string[] formatsOK = new string[11] { "JPG", "JPEG", "TIF", "TIFF", "PSD", "PNG", "BMP", "GIF", "CR2", "ARW", "NEF" };
             return formatsOK.Any(r => r == fileExtension);
+        }
+
+        async public Task<List<string>> CheckImagesForAutoUploadAsync(DirectoryInfo imageDirectory, UploadImageFileList meFots, 
+            CancellationToken cancelToken)
+        {
+            List<string> errorResponses = new List<string>();
+            try
+            {
+                foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
+                {
+                    List<string> tempErrorResponses = await CheckImagesForAutoUploadAsync(folder, meFots, cancelToken);
+                    errorResponses.AddRange(tempErrorResponses);
+                }
+
+                foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>())
+                {
+                    if (IsFormatOK(file.Extension.ToUpper().Substring(1)))
+                    {
+                        //Check for file already uploaded.
+
+                        if (!uploadImageStateList.Any<UploadImageState>(r => (r.fileName == file.Name && r.sizeBytes == file.Length)))
+                        {
+                            UploadImage newImage = new UploadImage();
+                            string response = await newImage.Setup(file.FullName, true);
+                            if (response == "OK")
+                            {
+                                meFots.Add(newImage);
+                            }
+                            else
+                            {
+                                errorResponses.Add(response);
+                            }
+                        }
+                        cancelToken.ThrowIfCancellationRequested();
+                    }
+                }
+
+                return errorResponses;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CheckImagesForAutoUpload has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
 
         //TODO Sort out with date modified and to use local version.

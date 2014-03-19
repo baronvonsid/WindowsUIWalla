@@ -17,6 +17,7 @@ namespace ManageWalla
     
         private static byte[] key = { 9, 2, 7, 1, 5, 4, 7, 8 };
         private static byte[] iv = { 1, 8, 3, 4, 1, 6, 5, 9 };
+        private static string cacheFileLocation = Application.UserAppDataPath;
 
         #region GlobalState
         public static GlobalState GetGlobalState()
@@ -31,7 +32,7 @@ namespace ManageWalla
                 state.categoryImageList = new List<ImageList>();
                 state.galleryImageList = new List<ImageList>();
                 state.imageMetaList = new List<ImageMeta>();
-                state.mainCopyCacheList = new List<MainCopyCache>();
+                //state.mainCopyCacheList = new List<MainCopyCache>();
                 state.connectionState = GlobalState.ConnectionState.NoAccount;
                 state.mainCopyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Copies");
                 state.mainCopyCacheSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
@@ -271,6 +272,149 @@ namespace ManageWalla
                 return mainCopyTemp;
             }
             return null;
+        }
+        #endregion
+
+        #region UploadHistoryCache
+        public static void GetUploadImageStateList(UploadImageStateList uploadImageStateList)
+        {
+            RetrieveUploadImageStateFromFile(uploadImageStateList);
+            //if (uploadImageStateList == null)
+            //{
+            //    uploadImageStateList = new UploadImageStateList();
+            //}
+            //return uploadImageStateList;
+        }
+
+        public static void SaveUploadImageStateList(UploadImageStateList uploadImageStateList)
+        {
+            string fileName = Path.Combine(cacheFileLocation, Properties.Settings.Default.UploadImageStateFileName);
+
+            using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(fs, uploadImageStateList);
+                fs.Close();
+            }
+        }
+
+        public static long[] GetUploadImageListQueryIds(UploadImageStateList uploadImageStateList)
+        {
+            var queryItems = uploadImageStateList.Where(
+                                            r => (r.uploadState == UploadImage.UploadState.AwaitingProcessed
+                                            || r.uploadState == UploadImage.UploadState.BeingProcessed
+                                            || r.uploadState == UploadImage.UploadState.FileReceived) 
+                                            && r.lastUpdated > DateTime.Now.AddMonths(-1));
+
+            return queryItems.Select(r => r.imageId).ToArray();
+        }
+
+        public static void UpdateUploadImageStateListWithServerStatus(UploadImageStateList uploadImageStateList, UploadStatusList uploadStatusList)
+        {
+            //TODO
+
+            //Loop through uploadStatusList and reflect new reality in uploadHistoryCacheList 
+        }
+
+        public static void DeleteUploadedFiles(UploadImageStateList uploadImageStateList, string autoUploadFolder)
+        {
+            var needDeletingItems = uploadImageStateList.Where(
+                                            r => r.uploadState == UploadImage.UploadState.Complete
+                                            && r.isDeleted == false);
+
+            foreach (UploadImageState uploadedItem in needDeletingItems)
+            {
+                try
+                {
+                    string deleteFile = Path.Combine(autoUploadFolder, uploadedItem.fileName);
+                    if (File.Exists(deleteFile))
+                    {
+                        File.Delete(deleteFile);
+                    }
+                    uploadedItem.isDeleted = true;
+                    uploadedItem.lastUpdated = DateTime.Now;
+                }
+                catch (Exception ex)
+                {
+                    uploadedItem.errorMessage = "File cannot be deleted.  Error: " + ex.Message;
+                    uploadedItem.lastUpdated = DateTime.Now;
+                }
+            }
+        }
+
+        public static void ClearUploadImageStateListOldEntries(UploadImageStateList uploadImageStateList)
+        {
+            var clearItems = uploadImageStateList.Where(
+                                            r => (r.uploadState == UploadImage.UploadState.FileReceived
+                                            || r.uploadState == UploadImage.UploadState.None)
+                                            && r.lastUpdated < DateTime.Now.AddMonths(-1));
+
+            foreach (UploadImageState remove in clearItems)
+            {
+                uploadImageStateList.Remove(remove);
+            }
+        }
+
+        public static UploadImageState GetOrCreateCacheItem(UploadImageStateList uploadImageStateList, string fileName, string fullPath, string name, long size, bool isAuto, long userAppId, string machineName)
+        {
+            //Method checks for existing entries.  Adds in a new entry if none is found.
+
+            var existingItem = uploadImageStateList.FirstOrDefault(r => r.fileName.ToUpper() == fileName.ToUpper() 
+                && r.sizeBytes == size 
+                && (r.uploadState == UploadImage.UploadState.None));
+
+            if (existingItem != null)
+            {
+                return existingItem;
+            }
+            else
+            {
+                UploadImageState newUploadEntry = new UploadImageState();
+                newUploadEntry.imageId = 0;
+                newUploadEntry.errorMessage = "";
+                newUploadEntry.hasError = false;
+                newUploadEntry.fileName = fileName;
+                newUploadEntry.fullPath = fullPath;
+                newUploadEntry.isAutoUpload = isAuto;
+                newUploadEntry.isDeleted = false;
+                newUploadEntry.lastUpdated = DateTime.Now;
+                newUploadEntry.name = name;
+                newUploadEntry.sizeBytes = size;
+                newUploadEntry.uploadDate = DateTime.Now;
+                newUploadEntry.uploadState = UploadImage.UploadState.None;
+                newUploadEntry.userAppId = userAppId;
+                newUploadEntry.machineName = machineName;
+
+                uploadImageStateList.Add(newUploadEntry);
+
+                return newUploadEntry;
+            }
+        }
+
+        private static void RetrieveUploadImageStateFromFile(UploadImageStateList uploadImageStateList)
+        {
+            string fileName = Path.Combine(cacheFileLocation, Properties.Settings.Default.UploadImageStateFileName);
+            UploadImageStateList uploadImageStateListTemp = null;
+
+            if (File.Exists(fileName))
+            {
+                using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    //UploadImageStateList temp = formatter.Deserialize(fs) as UploadImageStateList;
+                    uploadImageStateListTemp = formatter.Deserialize(fs) as UploadImageStateList;
+                    fs.Close();
+                }
+            }
+
+            if (uploadImageStateListTemp != null)
+            {
+                foreach (UploadImageState current in uploadImageStateListTemp)
+                {
+                    uploadImageStateList.Add(current);
+                }
+            }
+
         }
         #endregion
     }

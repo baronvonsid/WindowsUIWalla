@@ -49,7 +49,7 @@ namespace ManageWalla
         public List<ImageList> categoryImageList { get; set; }
         public List<ImageList> galleryImageList { get; set; }
         public List<ImageMeta> imageMetaList { get; set; }
-        public List<MainCopyCache> mainCopyCacheList { get; set; }
+        //public List<MainCopyCache> mainCopyCacheList { get; set; }
 
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }

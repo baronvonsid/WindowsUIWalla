@@ -72,7 +72,7 @@ namespace ManageWalla
         private MainController controller = null;
         public UploadUIState uploadUIState = null;
         public UploadImageFileList uploadFots = null;
-        public UploadStatusListBind uploadStatusListBind = null;
+        public UploadImageStateList uploadImageStateList = null;
         public ImageMainViewerList imageMainViewerList = null;
         public GalleryCategoryModel galleryCategoriesList = null;
         public GlobalState state = null;
@@ -100,7 +100,7 @@ namespace ManageWalla
 
             uploadFots = (UploadImageFileList)FindResource("uploadImagefileListKey");
             uploadUIState = (UploadUIState)FindResource("uploadUIStateKey");
-            uploadStatusListBind = (UploadStatusListBind)FindResource("uploadStatusListBindKey");
+            uploadImageStateList = (UploadImageStateList)FindResource("uploadImageStateListKey");
             imageMainViewerList = (ImageMainViewerList)FindResource("imageMainViewerListKey");
             galleryCategoriesList = (GalleryCategoryModel)FindResource("galleryCategoryModelKey");
         }
@@ -116,7 +116,7 @@ namespace ManageWalla
 
             try
             {
-                controller.InitApplication();
+                controller.InitApplication(uploadImageStateList);
                 state = controller.GetState();
                 thumbCacheList = controller.GetThumbCacheList();
                 mainCopyCacheList = controller.GetMainCopyCacheList();
@@ -130,6 +130,7 @@ namespace ManageWalla
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
                     radGallery.IsChecked = true;
+                    ResetUploadState();
                 }
                 else
                 {
@@ -431,8 +432,9 @@ namespace ManageWalla
                     panUpload.Visibility = System.Windows.Visibility.Visible;
 
                     gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
-                    gridRight.ColumnDefinitions[1].Width = new GridLength(255);
-
+                    if (uploadFots.Count > 0)
+                        gridRight.ColumnDefinitions[1].Width = new GridLength(255);
+                    
                     gridLeft.RowDefinitions[2].Height = new GridLength(0);
                     gridLeft.RowDefinitions[4].Height = new GridLength(0);
                     gridLeft.RowDefinitions[6].Height = new GridLength(0);
@@ -673,95 +675,145 @@ namespace ManageWalla
 
                 #region Upload
                 case PaneMode.Upload:
+                    /*
+                    <RowDefinition Height="30" /> <!-- Upload Type -->
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="30" /> <!-- Auto folder details -->
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" /> <!-- Auto category details -->
+                    <RowDefinition Height="30" />
+
+                    <RowDefinition Height="40" /> <!-- 5 Root category -->
+                    <RowDefinition Height="30" /> <!-- New Category -->
+                    <RowDefinition Height="30" /> <!-- New category Name -->
+                    <RowDefinition Height="80" /> <!-- New category Desc -->
+                    <RowDefinition Height="60" /> <!-- Map sub Folders -->
+
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="50" />  <!-- Buttons -->
+                    */
 
                     cmbGallerySectionVert.Visibility = Visibility.Collapsed;
                     cmbGallerySection.Visibility = Visibility.Collapsed;
 
                     if (uploadUIState.Uploading == true)
                     {
+                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
+
                         lstUploadImageFileList.IsEnabled = false;
-                        cmdUploadImportFiles.Visibility = Visibility.Hidden;
-                        cmdUploadImportFolder.Visibility = Visibility.Hidden;
+                        cmdUploadImportFiles.Visibility = Visibility.Collapsed;
+                        cmdUploadImportFolder.Visibility = Visibility.Collapsed;
                         cmdUploadClear.IsEnabled = true;
-                        cmdUploadClear.Content = "Cancel Uploads";
+                        if (uploadUIState.Mode != UploadUIState.UploadMode.Auto)
+                        {
+                            lblUploadType.Content = "Uploading images...";
+                            cmdUploadClear.Content = "Cancel Uploads";
+                        }
+                        else
+                        {
+                            lblUploadType.Content = "Uploading images (auto)...";
+                            cmdUploadClear.Content = "Pause Auto Upload";
+                            cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
+                        }
                         break;
                     }
 
-                    if (uploadUIState.UploadToNewCategory)
-                    {
-                        grdUploadSettings.RowDefinitions[4].MaxHeight = 30; //Category Name
-                        grdUploadSettings.RowDefinitions[5].MaxHeight = 80; //Category Description
-                    }
-                    else
-                    {
-                        grdUploadSettings.RowDefinitions[4].MaxHeight = 0;
-                        grdUploadSettings.RowDefinitions[5].MaxHeight = 0;
-                    }
+
 
                     //Initialise upload controls, no state to consider.
                     if (uploadUIState.Mode == UploadUIState.UploadMode.None)
                     {
-                        //Tag Setup
-                        //gridTag.RowDefinitions[1].MaxHeight = 34;
-                        //gridTag.RowDefinitions[2].MaxHeight = 0;
-                        //gridTag.RowDefinitions[3].MaxHeight = 0;
-                        //gridTag.RowDefinitions[4].MaxHeight = 0;
-                        //cmdAssociateTag.Visibility = Visibility.Visible;
-                        //cmdTagAdd.Visibility = Visibility.Collapsed;
-                        //cmdEditTag.Visibility = Visibility.Collapsed;
-                        //wrapMyTags.IsEnabled = false;
-                        //cmdAssociateTag.IsEnabled = false;
-                        //RefreshAndDisplayTagList(false);
+                        lblUploadType.Content = "Choose images or folders to upload";
+                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
 
                         //Upload controls setup
                         lstUploadImageFileList.IsEnabled = false;
                         cmdUploadImportFolder.Visibility = Visibility.Visible;
                         cmdUploadImportFiles.Visibility = Visibility.Visible;
                         cmdUploadClear.Visibility = Visibility.Collapsed;
+                        cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
                         cmdUploadAll.IsEnabled = false;
                         panUpload.IsEnabled = false;
                     }
+                    else if (uploadUIState.Mode == UploadUIState.UploadMode.Auto)
+                    {
+                        lblUploadType.Content = "Auto upload - paused";
+                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
+
+                        cmdUploadTurnAutoOff.Visibility = Visibility.Visible;
+                    }
                     else
                     {
+                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[5].Height = new GridLength(40);
+                        if (uploadUIState.UploadToNewCategory)
+                        {
+                            grdUploadSettings.RowDefinitions[7].Height = new GridLength(30.0); //Category Name
+                            grdUploadSettings.RowDefinitions[8].Height = new GridLength(80.0); //Category Description
+                        }
+                        else
+                        {
+                            grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
+                        }
+                        grdUploadSettings.RowDefinitions[6].Height = new GridLength(30);
+                        grdUploadSettings.RowDefinitions[9].Height = new GridLength(60);
+
                         //Upload has been initialised, set controls to reflect upload options.
                         lstUploadImageFileList.IsEnabled = true;
                         panUpload.IsEnabled = true;
-                        //grdUploadSettings.RowDefinitions[3].MaxHeight = 25;  //Upload to new category
-                        //tabUploadImageDetails.IsEnabled = true;
-
 
                         cmdUploadAll.IsEnabled = true;
                         cmdUploadClear.Content = "Clear";
                         cmdUploadClear.IsEnabled = true;
                         cmdUploadClear.Visibility = Visibility.Visible;
+                        cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
 
                         //Enable Tags
-                        wrapMyTags.IsEnabled = true;
+                        //wrapMyTags.IsEnabled = true;
                         //cmdAssociateTag.IsEnabled = true;
 
                         if (uploadUIState.Mode == UploadUIState.UploadMode.Images)
                         {
-                            //grdUploadImageDetails.RowDefinitions[0].Height = 0; //Sub category marker
-                            grdUploadSettings.RowDefinitions[1].Height = new GridLength(0); //Map to sub folders
-                            grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                            lblUploadType.Content = "Upload - Files";
+                            grdUploadSettings.RowDefinitions[9].Height = new GridLength(0); //Map to sub folders
                             chkUploadMapToSubFolders.IsChecked = false;
 
                             cmdUploadImportFolder.Visibility = Visibility.Hidden;
                         }
                         else if (uploadUIState.Mode == UploadUIState.UploadMode.Folder)
                         {
-
+                            lblUploadType.Content = "Upload - Folders";
                             if (uploadUIState.GotSubFolders)
                             {
-                                //grdUploadImageDetails.RowDefinitions[0].MaxHeight = 25; //Sub category marker
-                                grdUploadSettings.RowDefinitions[1].Height = new GridLength(30);
-                                grdUploadSettings.RowDefinitions[2].Height = new GridLength(30); //Maintain sub folders.
-                                //chkUploadMapToSubFolders.IsChecked = true;
+                                grdUploadSettings.RowDefinitions[9].Height = new GridLength(60);
                             }
                             else
                             {
-                                grdUploadSettings.RowDefinitions[1].Height = new GridLength(0); //Map to sub folders
-                                grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                                grdUploadSettings.RowDefinitions[9].Height = new GridLength(0); //Map to sub folders
                                 chkUploadMapToSubFolders.IsChecked = false;
                             }
                             cmdUploadImportFiles.Visibility = Visibility.Hidden;
@@ -2085,7 +2137,7 @@ namespace ManageWalla
             //    CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
             //}
 
-            UploadRefreshCategoryList();
+            //UploadRefreshCategoryList();
         }
 
         private void CategoryAddTreeViewLevel(long parentId, TreeViewItem currentHeader)
@@ -2273,7 +2325,7 @@ namespace ManageWalla
                     currentHeader.Items.Add(newItem);
                 }
 
-                UploadAddCategoryToTreeView(current.id, newItem);
+                //UploadAddCategoryToTreeView(current.id, newItem);
             }
         }
         #endregion
@@ -2849,6 +2901,7 @@ namespace ManageWalla
         #endregion
 
         #region Upload Method and Event Handlers
+        /*
         private void UploadRefreshCategoryList()
         {
             long categoryId = 0;
@@ -2897,6 +2950,7 @@ namespace ManageWalla
                 UploadAddCategoryToTreeView(current.id, newItem);
             }
         }
+        */
 
         private void UploadRefreshTagsList()
         {
@@ -2911,19 +2965,8 @@ namespace ManageWalla
             }
         }
 
-        private void ResetUploadState(bool fullReset)
+        private void ResetAllMetaUpdates()
         {
-            if (fullReset)
-            {
-                uploadUIState.GotSubFolders = false;
-                uploadUIState.CategoryName = "";
-                uploadUIState.CategoryDesc = "";
-                uploadUIState.MapToSubFolders = false;
-                uploadUIState.UploadToNewCategory = false;
-
-                uploadUIState.Mode = UploadUIState.UploadMode.None;
-            }
-
             uploadUIState.MetaUdfChar1 = null;
             uploadUIState.MetaUdfChar2 = null;
             uploadUIState.MetaUdfChar3 = null;
@@ -2948,6 +2991,26 @@ namespace ManageWalla
             uploadUIState.MetaTagRefAll = false;
 
             //TODO clear down each images meta data changes.
+            for (int i = 0; i < uploadFots.Count; i++)
+            {
+                uploadFots[i].ResetMeta();
+            }
+        }
+
+        private void ResetUploadState()
+        {
+            uploadUIState.GotSubFolders = false;
+            uploadUIState.CategoryName = "";
+            uploadUIState.CategoryDesc = "";
+            uploadUIState.MapToSubFolders = false;
+            uploadUIState.UploadToNewCategory = false;
+            uploadUIState.Mode = UploadUIState.UploadMode.None;
+            uploadUIState.RootCategoryId = -1;
+            uploadUIState.RootCategoryName = "Not set";
+            uploadUIState.RootFolder = "";
+            uploadUIState.AutoUploadCategoryName = "Simon"; // GetCategoryName
+            uploadUIState.AutoUploadFolder = @"C:\";
+            uploadUIState.AutoCategoryId = 101010;
         }
 
         private void UpdateUploadTagCollection()
@@ -3073,29 +3136,44 @@ namespace ManageWalla
                 {
                     ShowMessage(MessageType.Busy, "Files being analysed for upload");
 
+                    List<string> responses = null;
                     if (folder.GetDirectories().Length > 0)
                     {
                         uploadUIState.GotSubFolders = true;
                         uploadUIState.RootFolder = folderDialog.SelectedPath;
                         if (MessageBox.Show("Do you want to add images from the sub folders too ?", "ManageWalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         {
-                            await controller.LoadImagesFromFolder(folder, true, uploadFots, cancelUploadTokenSource.Token);
+                            responses = await controller.LoadImagesFromFolder(folder, true, uploadFots, cancelUploadTokenSource.Token);
                             uploadUIState.MapToSubFolders = true;
                         }
                         else
                         {
-                            await controller.LoadImagesFromFolder(folder, false, uploadFots, cancelUploadTokenSource.Token);
+                            responses = await controller.LoadImagesFromFolder(folder, false, uploadFots, cancelUploadTokenSource.Token);
                         }
                     }
                     else
                     {
                         uploadUIState.RootFolder = "";
-                        await controller.LoadImagesFromFolder(folder, false, uploadFots, cancelUploadTokenSource.Token);
+                        responses = await controller.LoadImagesFromFolder(folder, false, uploadFots, cancelUploadTokenSource.Token);
                     }
 
                     if (newCancelUploadTokenSource == cancelUploadTokenSource)
-                        cancelTokenSource = null;
-                    ConcludeBusyProcess();
+                        cancelUploadTokenSource = null;
+
+                    if (responses.Count == 0)
+                    {
+                        ConcludeBusyProcess();
+                    }
+                    else
+                    {
+                        StringBuilder messageBuilder = new StringBuilder();
+                        messageBuilder.AppendLine("Some files could not be prepared for upload:");
+                        foreach (string response in responses)
+                        {
+                            messageBuilder.AppendLine(response);
+                        }
+                        ShowMessage(MessageType.Error, messageBuilder.ToString());
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -3113,6 +3191,7 @@ namespace ManageWalla
                     RefreshPanesAllControls(PaneMode.Upload);
                     lstUploadImageFileList.SelectedIndex = 0;
                 }
+                RefreshOverallPanesStructure(currentPane);
             }
         }
 
@@ -3142,12 +3221,26 @@ namespace ManageWalla
                 {
                     ShowMessage(MessageType.Busy, "Files being analysed for upload");
 
-                    await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots, cancelUploadTokenSource.Token);
+                    List<string> responses = null;
+                    responses = await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots, cancelUploadTokenSource.Token);
 
                     if (newCancelUploadTokenSource == cancelUploadTokenSource)
-                        cancelTokenSource = null;
+                        cancelUploadTokenSource = null;
 
-                    ConcludeBusyProcess();
+                    if (responses.Count == 0)
+                    {
+                        ConcludeBusyProcess();
+                    }
+                    else
+                    {
+                        StringBuilder messageBuilder = new StringBuilder();
+                        messageBuilder.AppendLine("Some files could not be prepared for upload:");
+                        foreach (string response in responses)
+                        {
+                            messageBuilder.AppendLine(response);
+                        }
+                        ShowMessage(MessageType.Error, messageBuilder.ToString());
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -3167,6 +3260,7 @@ namespace ManageWalla
                 RefreshPanesAllControls(PaneMode.Upload);
                 lstUploadImageFileList.SelectedIndex = 0;
             }
+            RefreshOverallPanesStructure(currentPane);
         }
 
         private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
@@ -3179,14 +3273,15 @@ namespace ManageWalla
             else
             {
                 uploadFots.Clear();
-                ResetUploadState(true);
+                ResetUploadState();
             }
             RefreshPanesAllControls(PaneMode.Upload);
+            RefreshOverallPanesStructure(currentPane);
         }
 
         async private void cmdUploadResetMeta_Click(object sender, RoutedEventArgs e)
         {
-            ResetUploadState(false);
+            ResetAllMetaUpdates();
             await controller.ResetMeFotsMeta(uploadFots);
             RefreshPanesAllControls(PaneMode.Upload);
         }
@@ -3215,8 +3310,9 @@ namespace ManageWalla
         {
             try
             {
-                TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
-                if (item == null)
+
+                //TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
+                if (uploadUIState.RootCategoryId < 0)
                 {
                     ShowMessage(MessageType.Warning, "You must select a Category for your uploaded images to be stored in.");
                     return;
@@ -3228,8 +3324,8 @@ namespace ManageWalla
                     return;
                 }
 
-                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
-                long categoryId = category.id;
+                //CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+                //long categoryId = category.id;
 
                 uploadUIState.Uploading = true;
                 RefreshPanesAllControls(PaneMode.Upload);
@@ -3240,21 +3336,26 @@ namespace ManageWalla
                 CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
                 cancelUploadTokenSource = newCancelUploadTokenSource;
 
-                await controller.DoUploadAsync(uploadFots, uploadUIState, categoryId, cancelUploadTokenSource.Token);
+                List<string> responses = await controller.UploadManualAsync(uploadFots, uploadUIState, cancelUploadTokenSource.Token);
 
                 if (newCancelUploadTokenSource == cancelUploadTokenSource)
-                    cancelTokenSource = null;
+                    cancelUploadTokenSource = null;
 
-                uploadUIState.Uploading = false;
+                if (responses.Count > 0)
+                {
+                    StringBuilder messageBuilder = new StringBuilder();
+                    messageBuilder.AppendLine("Some images encountered errors being uploaded.  Check the Upload Status page for more details.");
+                    foreach (string response in responses)
+                    {
+                        messageBuilder.AppendLine(response);
+                    }
+                    ShowMessage(MessageType.Error, messageBuilder.ToString());
+                }
 
-                if (lstUploadImageFileList.Items.Count > 0)
-                {
-                    lstUploadImageFileList.IsEnabled = true;
-                }
-                else
-                {
-                    ResetUploadState(true);
-                }
+                if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                    cancelUploadTokenSource = null;
+
+                ResetUploadState();
             }
             catch (OperationCanceledException)
             {
@@ -3264,10 +3365,10 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "During the upload there was an unexpected error: " + ex.Message + "  Please check the upload status window for details.");
-                ResetUploadState(true);
             }
             finally
             {
+                uploadUIState.Uploading = false;
                 RefreshPanesAllControls(PaneMode.Upload);
             }
         }
@@ -3501,17 +3602,21 @@ namespace ManageWalla
         private void RefreshUploadStatusFromStateList()
         {
             /* Clear list and add local image load errors */
-            uploadStatusListBind.Clear();
+            //uploadStatusListBind.Clear();
 
-            foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.Error))
+            datUploadsInProgress.GetBindingExpression(DataGrid.ItemsSourceProperty).UpdateTarget();
+            return;
+
+            //foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.ClientError))
+            foreach (UploadImage currentUploadImage in uploadFots)
             {
                 UploadStatusListImageUploadRef newImageRef = new UploadStatusListImageUploadRef();
                 newImageRef.imageStatus = -1;
                 newImageRef.name = currentUploadImage.Meta.Name;
                 newImageRef.lastUpdated = DateTime.Now;
-                newImageRef.errorMessage = currentUploadImage.UploadError;
+                //newImageRef.errorMessage = currentUploadImage.;
 
-                uploadStatusListBind.Add(newImageRef);
+                //uploadStatusListBind.Add(newImageRef);
             }
 
             /* Load in existing upload entries */
@@ -3519,12 +3624,12 @@ namespace ManageWalla
             {
                 foreach (UploadStatusListImageUploadRef currentImageUploadRef in state.uploadStatusList.ImageUploadRef)
                 {
-                    uploadStatusListBind.Add(currentImageUploadRef);
+                    //uploadStatusListBind.Add(currentImageUploadRef);
                 }
             }
 
             /* Refresh message and icon */
-            datUploadStatusList.GetBindingExpression(DataGrid.ItemsSourceProperty).UpdateTarget();
+            
 
             //TODO update message and icon
         }
@@ -3536,7 +3641,7 @@ namespace ManageWalla
                 if (state.connectionState != GlobalState.ConnectionState.NoAccount &&
                     (state.uploadStatusListState == GlobalState.DataLoadState.No || forceUpdate || state.tagLoadState == GlobalState.DataLoadState.LocalCache))
                 {
-                    ShowMessage(MessageType.Busy, "Account information being saved");
+                    ShowMessage(MessageType.Busy, "Refreshing upload history list");
 
                     if (cancelTokenSource != null)
                         cancelTokenSource.Cancel();
@@ -3556,13 +3661,15 @@ namespace ManageWalla
                     case GlobalState.DataLoadState.LocalCache:
                         RefreshUploadStatusFromStateList();
                         panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Collapsed;
-                        datUploadStatusList.Visibility = Visibility.Visible;
+                        //datUploadStatusList.Visibility = Visibility.Visible;
                         break;
                     case GlobalState.DataLoadState.Unavailable:
                         panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Visible;
-                        datUploadStatusList.Visibility = Visibility.Collapsed;
+                        //datUploadStatusList.Visibility = Visibility.Collapsed;
                         break;
                 }
+
+                ConcludeBusyProcess();
             }
             catch (OperationCanceledException)
             {
@@ -3572,10 +3679,6 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "Retrieving the upload history has failed with an unexpected problem: " + ex.Message);
-            }
-            finally
-            {
-                ConcludeBusyProcess();
             }
         }
 
@@ -4689,6 +4792,11 @@ namespace ManageWalla
                     //CategorySelect(currentCategory.parentId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
                     paneBusy.Visibility = Visibility.Collapsed;
                 }
+                else if (currentPane == PaneMode.Upload)
+                {
+                    uploadUIState.RootCategoryId = currentSelectedCategory.id;
+                    uploadUIState.RootCategoryName = GetCategoryName(currentSelectedCategory.id);
+                }
                 else
                 {
                     currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
@@ -4772,5 +4880,116 @@ namespace ManageWalla
             RefreshOverallPanesStructure(currentPane);
             TweakImageMarginSize(DateTime.Now, currentPane);   
         }
+
+        public void UploadImageStateInProgress_Filter(object sender, FilterEventArgs e)
+        {
+            UploadImageState item = e.Item as UploadImageState;
+            if (item.uploadState != UploadImage.UploadState.Complete && item.uploadState != UploadImage.UploadState.Inactive)
+            {
+                e.Accepted = true;
+            }
+            else
+            {
+                e.Accepted = false;
+            }
+        }
+
+        public void UploadImageStateComplete_Filter(object sender, FilterEventArgs e)
+        {
+            UploadImageState item = e.Item as UploadImageState;
+            if (item.uploadState == UploadImage.UploadState.Complete)
+            {
+                e.Accepted = true;
+            }
+            else
+            {
+                e.Accepted = false;
+            }
+        }
+
+        private void cmdUploadChangeCategory_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateDialogsAndShow(MessageType.Other, "");
+            CategorySelectRefreshCategoryList();
+
+            cmdCategorySelect.Content = "Select";
+            gridCategorySelectDialog.Visibility = Visibility.Visible;
+        }
+
+        private void cmdUploadTurnAutoOff_Click(object sender, RoutedEventArgs e)
+        {
+            //TODO set account level flag and update on server
+            uploadFots.Clear();
+        }
+
+        private void UploadImageStateApplyServerState()
+        {
+
+        }
+
+        async private void DoAutoUploadAsync()
+        {
+            UploadImageStateApplyServerState();
+
+            //TODO check account level flag, if false return
+
+            if (currentPane == PaneMode.Upload)
+                return;
+
+            if (uploadUIState.Mode == UploadUIState.UploadMode.Auto)
+                return;
+
+            if (uploadUIState.Uploading == true)
+                return;
+
+            if (uploadFots.Count > 0)
+                return;
+
+            if (cancelUploadTokenSource != null)
+                cancelUploadTokenSource.Cancel();
+
+            CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
+            cancelUploadTokenSource = newCancelUploadTokenSource;
+
+            DirectoryInfo folder = new DirectoryInfo(uploadUIState.RootFolder);
+
+            try
+            {
+                List<string> responses = await controller.CheckImagesForAutoUploadAsync(folder, uploadFots, cancelUploadTokenSource.Token);
+
+                if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                    cancelUploadTokenSource = null;
+
+                if (responses.Count > 1)
+                {
+                    StringBuilder messageBuilder = new StringBuilder();
+                    messageBuilder.AppendLine("Some files could not be prepared for upload:");
+                    foreach (string response in responses)
+                    {
+                        messageBuilder.AppendLine(response);
+                    }
+                    ShowMessage(MessageType.Error, messageBuilder.ToString());
+                }
+
+                int uploadCount = uploadFots.Count;
+
+                if (uploadCount > 0)
+                {
+                    ShowMessage(MessageType.Info, uploadCount.ToString() + " images were found and are being uploaded automatically");
+                    await controller.UploadAutoAsync(uploadFots, uploadUIState, cancelUploadTokenSource.Token);
+                    ShowMessage(MessageType.Info, uploadCount.ToString() + " images were uploaded successfully");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("DoAutoUploadAsync has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "There was an unexpected error whilst preparing files for uploading.  Error: " + ex.Message);
+            }
+        }
+
     }
 }
