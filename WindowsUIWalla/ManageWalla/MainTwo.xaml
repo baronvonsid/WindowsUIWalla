@@ -164,7 +164,7 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-                    <Label x:Name="lblFotoWalla" FontSize="24" VerticalContentAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="{StaticResource FontBorderBrush}">
+                    <Label x:Name="lblFotoWalla" FontSize="24" VerticalContentAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="{StaticResource FontBorderBrush}" MouseDoubleClick="lblFotoWalla_MouseDoubleClick" >
                     </Label>
                 </DockPanel>
 
@@ -490,7 +490,7 @@
                                 </Rectangle.Fill>
                             </Rectangle>
                             <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
-                                <Label x:Name="lblUploadProposedImageCount" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" DockPanel.Dock="Right" VerticalContentAlignment="Center" >
+                                <Label x:Name="lblUploadProposedImageCount" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" DockPanel.Dock="Right" VerticalContentAlignment="Center">
                                     <Label.Content>
                                         <TextBlock>
                                             <TextBlock.Text>
@@ -534,7 +534,6 @@
                     <RowDefinition Height="30" /> <!-- Auto folder details -->
                     <RowDefinition Height="30" />
                     <RowDefinition Height="30" /> <!-- Auto category details -->
-                    <RowDefinition Height="30" />
 
                     <RowDefinition Height="40" /> <!-- 5 Root category -->
                     <RowDefinition Height="30" /> <!-- New Category -->
@@ -577,7 +576,9 @@
                 <Label Content="Copy folders with images" Grid.Column="0" Grid.Row="9" ToolTip="Select this option to create or map the sub folders selected with fotowalla categories" FontWeight="SemiBold"/>
                 <CheckBox x:Name="chkUploadMapToSubFolders" Grid.Row="9" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=MapToSubFolders}" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-                <StackPanel Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"></StackPanel>
+                <DockPanel Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="True">
+                    <TextBlock></TextBlock>
+                </DockPanel>
                 
                 <StackPanel Orientation="Vertical" Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2">
                     <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="300" Y2="1" StrokeThickness="0.5" Margin="0,10,0,4" />
@@ -676,7 +677,7 @@
                                             <Image Source="{StaticResource downloadOriginalsImageSrc}" Height="20" />
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Download Images - Original" ToolTip="Requests a download of the originals, available in the downloads section when complete.">
+                                    <MenuItem Header="Download Images - Original"  ToolTip="Requests a download of the originals, available in the downloads section when complete." Click="MenuItem_Click">
                                         <MenuItem.Icon>
                                             <Image Source="{StaticResource downloadOriginalsImageSrc}" Height="20" />
                                         </MenuItem.Icon>
@@ -1623,22 +1624,27 @@
         <Grid Panel.ZIndex="999" Opacity="100.0" x:Name="gridAlertDialog" Visibility="Collapsed" Background="{StaticResource AlertBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
+                <RowDefinition Height="4" />
                 <RowDefinition MinHeight="80" MaxHeight="350" />
-                <RowDefinition Height="35" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="40" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
 
-            <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" StrokeThickness="2" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0">
-                <Image gif:ImageBehavior.AnimatedSource="{DynamicResource loadingImageSrc}"  Height="32" Width="32" />
-                <TextBlock x:Name="lblAlertDialogHeader"  Margin="20,0,0,0" TextWrapping="Wrap" Text="loading" FontSize="20" VerticalAlignment="Center" Foreground="{StaticResource FontBorderBrush}"/>
-            </StackPanel>
-            <ScrollViewer Grid.Column="0" Grid.Row="1" Margin="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5" StrokeThickness="2" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
+
+            <TextBlock x:Name="lblAlertDialogHeader" TextWrapping="Wrap" Text="Loading.." Foreground="{StaticResource FontBorderBrush}" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
+            <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" />
+
+            <ScrollViewer Grid.Column="0" Grid.Row="2" Margin="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <TextBlock x:Name="lblAlertDialogMessage" Margin="5" FontSize="16" TextWrapping="Wrap" HorizontalAlignment="Center" Text="some random message" Foreground="{StaticResource FontBorderBrush}" />
             </ScrollViewer>
-            <Button x:Name="cmdAlertDialogResponse" Grid.Column="0" Grid.Row="2" Content="Cancel" Width="80" Click="cmdAlertDialogResponse_Click"  Template="{StaticResource templateButton}" Style="{StaticResource styleButton}" />
+
+            <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="3" />
+            <Button x:Name="cmdAlertDialogResponse" Grid.Column="0" Grid.Row="4" Content="Cancel" Width="80" Click="cmdAlertDialogResponse_Click"  Template="{StaticResource templateButton}" Style="{StaticResource styleButton}" />
+            
         </Grid>
 
         <Grid Panel.ZIndex="999" Opacity="100.0" x:Name="gridInfoAlert" Visibility="Collapsed" Background="{StaticResource AlertBackgroundBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,20,20">
@@ -1653,7 +1659,7 @@
             <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Stroke="{StaticResource FontBorderBrush}" StrokeThickness="1"></Rectangle>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0">
                 <Image gif:ImageBehavior.AnimatedSource="{DynamicResource loadingImageSrc}"  Height="32" Width="32" />
-                <TextBlock Margin="20,0,0,0" TextWrapping="Wrap" Text="Info alert" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                <TextBlock Margin="20,0,0,0" TextWrapping="Wrap" Text="Info alert" FontSize="20" VerticalAlignment="Center" Foreground="{StaticResource FontBorderBrush}"/>
             </StackPanel>
             <TextBlock x:Name="lblInfoDialogMessage" Margin="5" TextWrapping="Wrap" HorizontalAlignment="Center" Text="some random message" Foreground="{StaticResource FontBorderBrush}" Grid.Column="0" Grid.Row="1"/>
         </Grid>
@@ -1672,7 +1678,7 @@
 
             <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5" StrokeThickness="1" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
 
-            <TextBlock TextWrapping="Wrap" Text="Select Tag(s)" FontWeight="Medium" Foreground="{StaticResource FontBorderBrush}" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
+            <TextBlock TextWrapping="Wrap" Text="Select Tag(s)" Foreground="{StaticResource FontBorderBrush}" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
             <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" />
             
             <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="2" Margin="2">
@@ -1692,7 +1698,6 @@
             </StackPanel>
         </Grid>
 
-
         <Grid Panel.ZIndex="998" Opacity="100.0" x:Name="gridCategorySelectDialog" Visibility="Collapsed" Background="{StaticResource AlertBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
@@ -1707,7 +1712,7 @@
 
             <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5" StrokeThickness="1" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
 
-            <TextBlock TextWrapping="Wrap" Text="Select Category" FontWeight="Medium" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
+            <TextBlock TextWrapping="Wrap" Text="Select Category" FontSize="20" VerticalAlignment="Center" Foreground="{StaticResource FontBorderBrush}" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
             <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" />
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="2" Margin="2">

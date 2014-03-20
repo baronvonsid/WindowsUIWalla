@@ -233,7 +233,7 @@ namespace ManageWalla
                     visibilityAnimInfo.KeyFrames.Add(new DiscreteObjectKeyFrame(Visibility.Collapsed, TimeSpan.FromSeconds(7.0)));
                     gridInfoAlert.BeginAnimation(Grid.VisibilityProperty, visibilityAnimInfo);
 
-                    currentDialogType = MessageType.Info;
+                    currentDialogType = MessageType.None;
                     break;
                 case MessageType.Busy:
                     if (currentDialogType == MessageType.Busy) { return; }
@@ -2325,7 +2325,7 @@ namespace ManageWalla
                     currentHeader.Items.Add(newItem);
                 }
 
-                //UploadAddCategoryToTreeView(current.id, newItem);
+                CategorySelectAddToTreeView(current.id, newItem);
             }
         }
         #endregion
@@ -2901,57 +2901,7 @@ namespace ManageWalla
         #endregion
 
         #region Upload Method and Event Handlers
-        /*
-        private void UploadRefreshCategoryList()
-        {
-            long categoryId = 0;
-            //Keep a reference to the currently selected category item.
-            TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
-            if (item != null)
-            {
-                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
-                categoryId = category.id;
-            }
-            else
-            {
-                CategoryListCategoryRef firstCategoryWithImages = state.categoryList.CategoryRef.First<CategoryListCategoryRef>(r => r.parentId != 0);
-                categoryId = firstCategoryWithImages.id;
-            }
-
-            treeUploadCategoryView.Items.Clear();
-            UploadAddCategoryToTreeView(0, null);
-
-            CategorySelect(categoryId, (TreeViewItem)treeUploadCategoryView.Items[0], treeUploadCategoryView);
-        }
-
-        private void UploadAddCategoryToTreeView(long parentId, TreeViewItem currentHeader)
-        {
-            foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
-            {
-                TreeViewItem newItem = new TreeViewItem();
-                newItem.Header = current.name;
-                StringBuilder builder = new StringBuilder();
-                if (current.desc != null && current.desc.Length > 0) { builder.Append(current.desc + "\r\n"); }
-                builder.Append("Photos - " + current.count.ToString());
-                newItem.ToolTip = builder.ToString();
-                newItem.Tag = current;
-                newItem.IsExpanded = true;
-                newItem.Padding = new Thickness(2.0);
-
-                if (currentHeader == null)
-                {
-                    treeUploadCategoryView.Items.Add(newItem);
-                }
-                else
-                {
-                    currentHeader.Items.Add(newItem);
-                }
-
-                UploadAddCategoryToTreeView(current.id, newItem);
-            }
-        }
-        */
-
+        
         private void UploadRefreshTagsList()
         {
             lstUploadTagList.Items.Clear();
@@ -3009,8 +2959,8 @@ namespace ManageWalla
             uploadUIState.RootCategoryName = "Not set";
             uploadUIState.RootFolder = "";
             uploadUIState.AutoUploadCategoryName = "Simon"; // GetCategoryName
-            uploadUIState.AutoUploadFolder = @"C:\";
-            uploadUIState.AutoCategoryId = 101010;
+            uploadUIState.AutoUploadFolder = @"C:\temp\AutoUpload";
+            uploadUIState.AutoCategoryId = 300039;
         }
 
         private void UpdateUploadTagCollection()
@@ -4796,6 +4746,7 @@ namespace ManageWalla
                 {
                     uploadUIState.RootCategoryId = currentSelectedCategory.id;
                     uploadUIState.RootCategoryName = GetCategoryName(currentSelectedCategory.id);
+                    paneBusy.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
@@ -4951,14 +4902,11 @@ namespace ManageWalla
             CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
             cancelUploadTokenSource = newCancelUploadTokenSource;
 
-            DirectoryInfo folder = new DirectoryInfo(uploadUIState.RootFolder);
+            DirectoryInfo folder = new DirectoryInfo(uploadUIState.AutoUploadFolder);
 
             try
             {
                 List<string> responses = await controller.CheckImagesForAutoUploadAsync(folder, uploadFots, cancelUploadTokenSource.Token);
-
-                if (newCancelUploadTokenSource == cancelUploadTokenSource)
-                    cancelUploadTokenSource = null;
 
                 if (responses.Count > 1)
                 {
@@ -4970,7 +4918,6 @@ namespace ManageWalla
                     }
                     ShowMessage(MessageType.Error, messageBuilder.ToString());
                 }
-
                 int uploadCount = uploadFots.Count;
 
                 if (uploadCount > 0)
@@ -4979,16 +4926,31 @@ namespace ManageWalla
                     await controller.UploadAutoAsync(uploadFots, uploadUIState, cancelUploadTokenSource.Token);
                     ShowMessage(MessageType.Info, uploadCount.ToString() + " images were uploaded successfully");
                 }
+
+                if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                    cancelUploadTokenSource = null;
             }
             catch (OperationCanceledException)
             {
+                //uploadFots.Clear();
                 logger.Debug("DoAutoUploadAsync has been cancelled.");
             }
             catch (Exception ex)
             {
+                uploadFots.Clear();
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "There was an unexpected error whilst preparing files for uploading.  Error: " + ex.Message);
             }
+        }
+
+        private void lblFotoWalla_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            DoAutoUploadAsync();
         }
 
     }
