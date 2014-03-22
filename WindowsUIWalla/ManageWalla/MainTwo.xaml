@@ -556,7 +556,7 @@
                 <Label x:Name="lblAutoUploadFolder" Content="{Binding Mode=OneWay, Path=AutoUploadFolderAbbrev}" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" ToolTip="{Binding Mode=OneWay, Path=AutoUploadFolder}" />
 
                 <Label Content="Upload category" Grid.Column="0" Grid.Row="4" FontWeight="SemiBold" />
-                <Label Content="{Binding Mode=OneWay, Path=AutoUploadCategoryName}" Grid.Column="0" Grid.Row="4" />
+                <Label Content="{Binding Mode=OneWay, Path=AutoUploadCategoryName}" Grid.Column="1" Grid.Row="4" />
 
                 <Label Content="Category" Grid.Column="0" Grid.Row="5" FontWeight="SemiBold" />
                 <DockPanel  LastChildFill="True" Grid.Column="1" Grid.Row="5" HorizontalAlignment="Right">
@@ -573,8 +573,8 @@
                 <Label Content="Description" Grid.Column="0" Grid.Row="8" FontWeight="SemiBold" />
                 <TextBox x:Name="txtUploadCatDescription" VerticalContentAlignment="Top" Grid.Column="1" Grid.Row="8" Height="75" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200" Margin="2" Text="{Binding Mode=TwoWay, Path=CategoryDesc}" />
 
-                <Label Content="Copy folders with images" Grid.Column="0" Grid.Row="9" ToolTip="Select this option to create or map the sub folders selected with fotowalla categories" FontWeight="SemiBold"/>
-                <CheckBox x:Name="chkUploadMapToSubFolders" Grid.Row="9" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=MapToSubFolders}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Label Content="Create categories from folders" Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="2" ToolTip="Select this option to create or map the sub folders selected with fotowalla categories" FontWeight="SemiBold"/>
+                <CheckBox x:Name="chkUploadMapToSubFolders" Grid.Row="9" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=MapToSubFolders}" HorizontalAlignment="Right" VerticalAlignment="Center" />
 
                 <DockPanel Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" LastChildFill="True">
                     <TextBlock></TextBlock>

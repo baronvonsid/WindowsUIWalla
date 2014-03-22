@@ -432,7 +432,8 @@ namespace ManageWalla
                     panUpload.Visibility = System.Windows.Visibility.Visible;
 
                     gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
-                    if (uploadFots.Count > 0)
+
+                    if (uploadFots.Count > 0 && uploadUIState.Mode != UploadUIState.UploadMode.Auto)
                         gridRight.ColumnDefinitions[1].Width = new GridLength(255);
                     
                     gridLeft.RowDefinitions[2].Height = new GridLength(0);
@@ -710,14 +711,23 @@ namespace ManageWalla
                         lstUploadImageFileList.IsEnabled = false;
                         cmdUploadImportFiles.Visibility = Visibility.Collapsed;
                         cmdUploadImportFolder.Visibility = Visibility.Collapsed;
+                        cmdUploadClear.Visibility = Visibility.Visible;
                         cmdUploadClear.IsEnabled = true;
                         if (uploadUIState.Mode != UploadUIState.UploadMode.Auto)
                         {
+                            cmdUploadChangeCategory.IsEnabled = true;
+                            grdUploadSettings.RowDefinitions[9].Height = new GridLength(60);
+                            grdUploadSettings.RowDefinitions[5].Height = new GridLength(40);
+
                             lblUploadType.Content = "Uploading images...";
                             cmdUploadClear.Content = "Cancel Uploads";
                         }
                         else
                         {
+                            grdUploadSettings.RowDefinitions[2].Height = new GridLength(30.0);
+                            grdUploadSettings.RowDefinitions[3].Height = new GridLength(30.0);
+                            grdUploadSettings.RowDefinitions[4].Height = new GridLength(30.0);
+
                             lblUploadType.Content = "Uploading images (auto)...";
                             cmdUploadClear.Content = "Pause Auto Upload";
                             cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
@@ -752,15 +762,17 @@ namespace ManageWalla
                     else if (uploadUIState.Mode == UploadUIState.UploadMode.Auto)
                     {
                         lblUploadType.Content = "Auto upload - paused";
-                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
+                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(30.0);
+                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(30.0);
+                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(30.0);
                         grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
                         grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
                         grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
                         grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
                         grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
 
+                        cmdUploadAll.Visibility = Visibility.Collapsed;
+                        cmdUploadClear.Content = "Resume";
                         cmdUploadTurnAutoOff.Visibility = Visibility.Visible;
                     }
                     else
@@ -786,12 +798,13 @@ namespace ManageWalla
                         lstUploadImageFileList.IsEnabled = true;
                         panUpload.IsEnabled = true;
 
+                        cmdUploadAll.Visibility = Visibility.Visible;
                         cmdUploadAll.IsEnabled = true;
                         cmdUploadClear.Content = "Clear";
                         cmdUploadClear.IsEnabled = true;
                         cmdUploadClear.Visibility = Visibility.Visible;
                         cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
-
+                        cmdUploadChangeCategory.IsEnabled = true;
                         //Enable Tags
                         //wrapMyTags.IsEnabled = true;
                         //cmdAssociateTag.IsEnabled = true;
@@ -899,6 +912,7 @@ namespace ManageWalla
             }
 
             currentPane = mode;
+            TweakImageMarginSize(DateTime.Now, currentPane);
         }
         #endregion
 
@@ -3213,7 +3227,7 @@ namespace ManageWalla
             RefreshOverallPanesStructure(currentPane);
         }
 
-        private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
+        async private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
         {
             if (uploadUIState.Uploading)
             {
@@ -3222,8 +3236,15 @@ namespace ManageWalla
             }
             else
             {
-                uploadFots.Clear();
-                ResetUploadState();
+                if (uploadUIState.Mode == UploadUIState.UploadMode.Auto)
+                {
+                    await Task.Run(new Action(() => { DoAutoUploadAsync(true); }));
+                }
+                else
+                {
+                    uploadFots.Clear();
+                    ResetUploadState();
+                }
             }
             RefreshPanesAllControls(PaneMode.Upload);
             RefreshOverallPanesStructure(currentPane);
@@ -4871,6 +4892,7 @@ namespace ManageWalla
         {
             //TODO set account level flag and update on server
             uploadFots.Clear();
+            ResetUploadState();
         }
 
         private void UploadImageStateApplyServerState()
@@ -4878,23 +4900,22 @@ namespace ManageWalla
 
         }
 
-        async private void DoAutoUploadAsync()
+        async private void DoAutoUploadAsync(bool resume)
         {
-            UploadImageStateApplyServerState();
+            if (!resume)
+            {
+                UploadImageStateApplyServerState();
 
-            //TODO check account level flag, if false return
+                //TODO check account level flag, if false return
 
-            if (currentPane == PaneMode.Upload)
-                return;
+                if (currentPane == PaneMode.Upload &&
+                    uploadUIState.Mode == UploadUIState.UploadMode.Auto &&
+                    uploadUIState.Uploading == true)
+                    return;
 
-            if (uploadUIState.Mode == UploadUIState.UploadMode.Auto)
-                return;
-
-            if (uploadUIState.Uploading == true)
-                return;
-
-            if (uploadFots.Count > 0)
-                return;
+                if (uploadFots.Count > 0)
+                    return;
+            }
 
             if (cancelUploadTokenSource != null)
                 cancelUploadTokenSource.Cancel();
@@ -4906,18 +4927,26 @@ namespace ManageWalla
 
             try
             {
-                List<string> responses = await controller.CheckImagesForAutoUploadAsync(folder, uploadFots, cancelUploadTokenSource.Token);
-
-                if (responses.Count > 1)
+                uploadUIState.Uploading = true;
+                if (!resume)
                 {
-                    StringBuilder messageBuilder = new StringBuilder();
-                    messageBuilder.AppendLine("Some files could not be prepared for upload:");
-                    foreach (string response in responses)
+
+                    uploadUIState.Mode = UploadUIState.UploadMode.Auto;
+
+                    List<string> responses = await controller.CheckImagesForAutoUploadAsync(folder, uploadFots, cancelUploadTokenSource.Token);
+
+                    if (responses.Count > 1)
                     {
-                        messageBuilder.AppendLine(response);
+                        StringBuilder messageBuilder = new StringBuilder();
+                        messageBuilder.AppendLine("Some files could not be prepared for upload:");
+                        foreach (string response in responses)
+                        {
+                            messageBuilder.AppendLine(response);
+                        }
+                        ShowMessage(MessageType.Error, messageBuilder.ToString());
                     }
-                    ShowMessage(MessageType.Error, messageBuilder.ToString());
                 }
+
                 int uploadCount = uploadFots.Count;
 
                 if (uploadCount > 0)
@@ -4929,6 +4958,8 @@ namespace ManageWalla
 
                 if (newCancelUploadTokenSource == cancelUploadTokenSource)
                     cancelUploadTokenSource = null;
+
+                ResetUploadState();
             }
             catch (OperationCanceledException)
             {
@@ -4940,6 +4971,14 @@ namespace ManageWalla
                 uploadFots.Clear();
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "There was an unexpected error whilst preparing files for uploading.  Error: " + ex.Message);
+                //uploadUIState.Mode = UploadUIState.UploadMode.None;
+                ResetUploadState();
+            }
+            finally
+            {
+                uploadUIState.Uploading = false;
+                RefreshPanesAllControls(currentPane);
+                RefreshOverallPanesStructure(currentPane);
             }
         }
 
@@ -4950,7 +4989,7 @@ namespace ManageWalla
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            DoAutoUploadAsync();
+            DoAutoUploadAsync(false);
         }
 
     }
