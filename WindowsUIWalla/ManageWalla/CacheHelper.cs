@@ -36,8 +36,6 @@ namespace ManageWalla
                 state.connectionState = GlobalState.ConnectionState.NoAccount;
                 state.mainCopyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Copies");
                 state.mainCopyCacheSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
-
-                state.machineId = 0;
             }
 
             state.imageFetchSize = Properties.Settings.Default.ImageFetchSize;

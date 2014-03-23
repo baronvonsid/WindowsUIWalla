@@ -10,6 +10,7 @@ targetNamespace="http://www.example.org/ImageList"
         <element type="string" name="Name"/>
         <element type="string" name="Desc"/>
         <element type="dateTime" name="LastChanged"/>
+        <element name="SystemOwned" type="boolean"/>
         <element name="Images">
           <complexType>
             <sequence>

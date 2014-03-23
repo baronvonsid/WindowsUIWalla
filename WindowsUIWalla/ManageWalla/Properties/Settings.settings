@@ -30,7 +30,7 @@
       <Value Profile="(Default)">Walla-LocalGlobalState.db</Value>
     </Setting>
     <Setting Name="WallaAppKey" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">12345678901234567890</Value>
+      <Value Profile="(Default)">1234567890</Value>
     </Setting>
     <Setting Name="ThumbCacheFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Walla-LocalThumbCache.db</Value>
@@ -40,6 +40,12 @@
     </Setting>
     <Setting Name="UploadImageStateFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Walla-LocalUploadImageStateCache.db</Value>
+    </Setting>
+    <Setting Name="OS" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Windows</Value>
+    </Setting>
+    <Setting Name="TempUserName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">JohanTheThird</Value>
     </Setting>
   </Settings>
 </SettingsFile>

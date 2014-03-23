@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.example.org/UserApp"
+	xmlns:tns="http://www.example.org/UserApp" 
+	elementFormDefault="qualified">
+
+  <element name="UserApp">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="0">
+      	  <element type="int" name="AppId" />
+	      <element type="int" name="PlatformId" />
+	      <element type="string" name="MachineName" />
+	      <element type="dateTime" name="LastUsed" />
+	      <element type="long" name="TagId" default="0" />
+	      <element type="long" name="UserAppCategoryId" default="0" />
+	      <element type="long" name="UserDefaultCategoryId" default="0" />
+	      <element type="long" name="GalleryId" default="0" />
+	      <element type="int" name="ThumbCacheSizeMB" />
+	      <element type="int" name="MainCopyCacheSizeMB" />
+	      <element type="int" name="FetchSize" />
+	      <element type="string" name="MainCopyFolder" />
+	      <element type="string" name="AutoUploadFolder" />
+	      <element type="boolean" name="AutoUpload" />
+       </sequence>
+      <attribute type="long" name="id" default="0"/>
+      <attribute type="int" name="version" default="0"/>
+    </complexType>
+  </element>
+</schema>

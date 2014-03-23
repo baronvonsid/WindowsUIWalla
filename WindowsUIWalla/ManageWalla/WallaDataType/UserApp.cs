@@ -20,186 +20,188 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/Account")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/Account", IsNullable=false)]
-    public partial class Account {
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/UserApp")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/UserApp", IsNullable=false)]
+    public partial class UserApp {
         
-        private string profileNameField;
+        private int appIdField;
         
-        private string descField;
+        private int platformIdField;
         
-        private string emailField;
+        private string machineNameField;
         
-        private string passwordField;
+        private System.DateTime lastUsedField;
         
-        private int statusField;
+        private long tagIdField;
         
-        private int accountTypeField;
+        private long userAppCategoryIdField;
         
-        private string accountTypeNameField;
+        private long userDefaultCategoryIdField;
         
-        private System.DateTime openDateField;
+        private long galleryIdField;
         
-        private System.DateTime closeDateField;
+        private int thumbCacheSizeMBField;
         
-        private double storageGBLimitField;
+        private int mainCopyCacheSizeMBField;
         
-        private double storageGBCurrentField;
+        private int fetchSizeField;
         
-        private int totalImagesField;
+        private string mainCopyFolderField;
         
-        private int monthlyUploadCapField;
+        private string autoUploadFolderField;
         
-        private int uploadCount30DaysField;
+        private bool autoUploadField;
         
         private long idField;
         
         private int versionField;
         
-        public Account() {
+        public UserApp() {
+            this.tagIdField = ((long)(0));
+            this.userAppCategoryIdField = ((long)(0));
+            this.userDefaultCategoryIdField = ((long)(0));
+            this.galleryIdField = ((long)(0));
             this.idField = ((long)(0));
             this.versionField = 0;
         }
         
         /// <remarks/>
-        public string ProfileName {
+        public int AppId {
             get {
-                return this.profileNameField;
+                return this.appIdField;
             }
             set {
-                this.profileNameField = value;
+                this.appIdField = value;
             }
         }
         
         /// <remarks/>
-        public string Desc {
+        public int PlatformId {
             get {
-                return this.descField;
+                return this.platformIdField;
             }
             set {
-                this.descField = value;
+                this.platformIdField = value;
             }
         }
         
         /// <remarks/>
-        public string Email {
+        public string MachineName {
             get {
-                return this.emailField;
+                return this.machineNameField;
             }
             set {
-                this.emailField = value;
+                this.machineNameField = value;
             }
         }
         
         /// <remarks/>
-        public string Password {
+        public System.DateTime LastUsed {
             get {
-                return this.passwordField;
+                return this.lastUsedField;
             }
             set {
-                this.passwordField = value;
+                this.lastUsedField = value;
             }
         }
         
         /// <remarks/>
-        public int Status {
+        public long TagId {
             get {
-                return this.statusField;
+                return this.tagIdField;
             }
             set {
-                this.statusField = value;
+                this.tagIdField = value;
             }
         }
         
         /// <remarks/>
-        public int AccountType {
+        public long UserAppCategoryId {
             get {
-                return this.accountTypeField;
+                return this.userAppCategoryIdField;
             }
             set {
-                this.accountTypeField = value;
+                this.userAppCategoryIdField = value;
             }
         }
         
         /// <remarks/>
-        public string AccountTypeName {
+        public long UserDefaultCategoryId {
             get {
-                return this.accountTypeNameField;
+                return this.userDefaultCategoryIdField;
             }
             set {
-                this.accountTypeNameField = value;
+                this.userDefaultCategoryIdField = value;
             }
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(DataType="date")]
-        public System.DateTime OpenDate {
+        public long GalleryId {
             get {
-                return this.openDateField;
+                return this.galleryIdField;
             }
             set {
-                this.openDateField = value;
+                this.galleryIdField = value;
             }
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(DataType="date")]
-        public System.DateTime CloseDate {
+        public int ThumbCacheSizeMB {
             get {
-                return this.closeDateField;
+                return this.thumbCacheSizeMBField;
             }
             set {
-                this.closeDateField = value;
+                this.thumbCacheSizeMBField = value;
             }
         }
         
         /// <remarks/>
-        public double StorageGBLimit {
+        public int MainCopyCacheSizeMB {
             get {
-                return this.storageGBLimitField;
+                return this.mainCopyCacheSizeMBField;
             }
             set {
-                this.storageGBLimitField = value;
+                this.mainCopyCacheSizeMBField = value;
             }
         }
         
         /// <remarks/>
-        public double StorageGBCurrent {
+        public int FetchSize {
             get {
-                return this.storageGBCurrentField;
+                return this.fetchSizeField;
             }
             set {
-                this.storageGBCurrentField = value;
+                this.fetchSizeField = value;
             }
         }
         
         /// <remarks/>
-        public int TotalImages {
+        public string MainCopyFolder {
             get {
-                return this.totalImagesField;
+                return this.mainCopyFolderField;
             }
             set {
-                this.totalImagesField = value;
+                this.mainCopyFolderField = value;
             }
         }
         
         /// <remarks/>
-        public int MonthlyUploadCap {
+        public string AutoUploadFolder {
             get {
-                return this.monthlyUploadCapField;
+                return this.autoUploadFolderField;
             }
             set {
-                this.monthlyUploadCapField = value;
+                this.autoUploadFolderField = value;
             }
         }
         
         /// <remarks/>
-        public int UploadCount30Days {
+        public bool AutoUpload {
             get {
-                return this.uploadCount30DaysField;
+                return this.autoUploadField;
             }
             set {
-                this.uploadCount30DaysField = value;
+                this.autoUploadField = value;
             }
         }
         

@@ -121,6 +121,16 @@ namespace ManageWalla
                 thumbCacheList = controller.GetThumbCacheList();
                 mainCopyCacheList = controller.GetMainCopyCacheList();
 
+                if (!await controller.VerifyApp())
+                {
+                    throw new Exception("The application failed validation with the server.  Please check for the latest update.");
+                }
+
+                if (state.account == null)
+                {
+                    state.connectionState = GlobalState.ConnectionState.NoAccount;
+                }
+
                 if (state.connectionState != GlobalState.ConnectionState.NoAccount)
                 {
                     await Login(false);
@@ -3740,7 +3750,9 @@ namespace ManageWalla
             {
                 ShowMessage(MessageType.Busy, "Logging onto FotoWalla");
 
-                string email = (onAccountForm) ? txtAccountEmail.Text : state.account.Email;
+                //TODO change to email.
+
+                string email = (onAccountForm) ? txtAccountEmail.Text : state.account.ProfileName;
                 string password = (onAccountForm) ? txtAccountPassword.Text : state.account.Password;
                 string logonResponse = await controller.Logon(email, password);
 
@@ -3754,7 +3766,8 @@ namespace ManageWalla
                 {
                     case GlobalState.ConnectionState.LoggedOn:
                         await controller.AccountDetailsGet(cancelTokenSource.Token);
-                        await controller.MachineSetIdentity(cancelTokenSource.Token);
+                        await controller.SetPlatform();
+                        await controller.SetUserApp();
                         AccountRefreshFromState();
                         ShowMessage(MessageType.Info, "Account: " + state.account.ProfileName + " has been connected with FotoWalla");
                         break;

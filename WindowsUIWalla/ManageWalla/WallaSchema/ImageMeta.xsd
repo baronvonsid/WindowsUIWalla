@@ -12,7 +12,7 @@ targetNamespace="http://www.example.org/ImageMeta"
         <element type="string" name="OriginalFileName"/>
         <element type="string" name="Format"/>
         <element type="string" name="LocalPath"/>
-        <element type="int" name="MachineId"/>
+        <element type="long" name="UserAppId"/>
         <element type="int" name="Status" default="0"/>
 	    <element type="int" name="Width" default="0"/>
 	    <element type="int" name="Height" default="0"/>
@@ -23,6 +23,8 @@ targetNamespace="http://www.example.org/ImageMeta"
 	    <element type="string" name="ShutterSpeed"/>
 	    <element type="int" name="ISO"/>
 	    <element type="int" name="Orientation"/>
+	    <element type="dateTime" name="TakenDate"/>
+	    <element type="boolean" name="TakenDateSpecified"/>
 	    <element type="dateTime" name="TakenDateFile"/>
 	    <element type="dateTime" name="TakenDateMeta"/>
 	    <element type="dateTime" name="UploadDate"/>

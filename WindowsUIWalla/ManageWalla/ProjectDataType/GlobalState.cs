@@ -24,14 +24,14 @@ namespace ManageWalla
         //public string password { get; set; }
         //public int platformId { get; set; }
         //public string machineName { get; set; }
-        public long machineId { get; set; }
+        //public long userAppId { get; set; }
         public int imageFetchSize { get; set; }
         public DateTime lastLoggedIn { get; set; }
         public int mainCopyCacheSizeMB { get; set; }
         public int thumbCacheSizeMB { get; set; }
         public string mainCopyFolder { get; set; }
         public Account account { get; set; }
-
+        public UserApp userApp { get; set; }
 
 
         //Complex-ify !!!

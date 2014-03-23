@@ -12,6 +12,7 @@
 							<attribute name="name" type="string"></attribute>
 							<attribute name="desc" type="string"></attribute>
 							<attribute name="count" type="int"></attribute>
+							<attribute name="SystemOwned" type="boolean"></attribute>
 						</complexType>
 					</element>
 				</sequence>

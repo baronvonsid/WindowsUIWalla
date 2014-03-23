@@ -23,29 +23,11 @@
 							<attribute name="name" type="string"></attribute>
 							<attribute name="desc" type="string"></attribute>
 							<attribute name="urlComplex" type="string" />
+							<attribute name="systemOwned" type="boolean" />
 						</complexType>
 					</element>
 				</sequence>
 				<attribute type="dateTime" name="lastChanged" />
 		</complexType>
 	</element>
-
-<!-- 
-							<sequence>
-								<element name="Sections">
-						          <complexType>
-						            <sequence>
-						              <element name="SectionRef" maxOccurs="unbounded" minOccurs="0">
-						                <complexType>
-						                  <attribute type="long" name="id" default="0" />
-						                  <attribute type="string" name="name" />
-						                  <attribute type="int" name="imageCount" />
-						                </complexType>
-						              </element>
-						            </sequence>
-						          </complexType>
-						        </element>
-							</sequence>
- -->
-
 </schema>

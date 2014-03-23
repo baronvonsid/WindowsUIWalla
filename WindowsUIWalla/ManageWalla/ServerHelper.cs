@@ -62,24 +62,25 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> Logon(string emailParam, string passwordParam)
+        async public Task<bool> Logon(string emailParam, string passwordParam)
         {
-
-            //Logon sends back userId.
-            userId = 100001;
-
-            if (http == null)
+            try
             {
-                http = new HttpClient();
-                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userId.ToString() + "/");
+                //http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + emailParam + "/");
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,"logon");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return true;
             }
-
-            //Do logon
-            //TODO - Logon and send application key.
-
-            //Log failed login as a warning.
-
-            return "OK";
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return false;
+            }
         }
 
         //public long GetUserId()
@@ -92,18 +93,6 @@ namespace ManageWalla
         {
             try
             {
-                Account account = new Account();
-                account.id = 100001;
-                account.ProfileName = "ProfileName";
-                account.Machines = new AccountMachine[1];
-                account.Machines[0] = new AccountMachine();
-                account.Machines[0].id = 500001;
-                account.Machines[0].platformId = 200;
-                account.Machines[0].name = System.Environment.MachineName;
-                account.Machines[0].tagId = 200004;
-                return account;
-
-                /*
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "");
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
@@ -114,8 +103,6 @@ namespace ManageWalla
                 Account account = (Account)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
 
                 return account;
-                */
-
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -134,6 +121,103 @@ namespace ManageWalla
             return "http://" + hostName + ":" + port.ToString() + webPath + userId.ToString() + "/";
         }
 
+        async public Task<bool> VerifyApp(string validation, string userName)
+        {
+            try
+            {
+                if (http == null)
+                {
+                    http = new HttpClient();
+                    http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
+                }
+
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "appcheck?wsKey=" + validation);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return false;
+            }
+        }
+
+        async public Task<bool> VerifyPlatform(string os, string machineType, int majorVersion, int minorVersion)
+        {
+            try
+            {
+                // POST /{userName}/platform?OS={OS}&machine={machine}&major={major}&minor={minor}
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,
+                    "platform?OS=" + os + "&machineType=" + machineType + 
+                    "&major=" + majorVersion.ToString() + "&minor=" + minorVersion.ToString());
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return false;
+            }
+        }
+
+        async public Task<UserApp> UserAppGet(long userAppId)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "userapp/" + userAppId.ToString());
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                XmlSerializer serialKiller = new XmlSerializer(typeof(UserApp));
+                UserApp userApp = (UserApp)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+
+                return userApp;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task UserAppCreateUpdateAsync(UserApp userApp)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "userapp");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<UserApp>(userApp, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("TagUpdateAsync has been cancelled.");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+ /*
         async public Task MachineMarkSession(long machineId, CancellationToken cancelToken)
         {
             try
@@ -156,14 +240,14 @@ namespace ManageWalla
                 logger.Error(ex);
             }
         }
-
+ To implement
         async public Task<long> MachineRegisterNew(string machineName, int platformId, CancellationToken cancelToken)
         {
             try
             {
                 return 0;
 
-                /* To implement 
+                
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "machine/" + platformId.ToString() + "/" + Uri.EscapeUriString(machineName));
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
@@ -175,7 +259,7 @@ namespace ManageWalla
                 long machineId = reader.ReadElementContentAsLong();
 
                 return machineId;
-                */
+               
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -187,7 +271,7 @@ namespace ManageWalla
                 logger.Error(ex);
                 return 0;
             }
-        }
+        } */
         #endregion
 
         #region Tag

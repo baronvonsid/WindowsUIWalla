@@ -120,44 +120,41 @@ namespace ManageWalla
             }
         }
 
-        //Windows Versions.
-        private int GetPlatformId()
+        async public Task SetPlatform()
         {
             System.OperatingSystem osInfo = System.Environment.OSVersion;
 
-            
 
-            switch (osInfo.Version.Major)
+            if (!await serverHelper.VerifyPlatform(Properties.Settings.Default.OS, "PC", osInfo.Version.Major, osInfo.Version.Minor))
             {
-                case 6:
-                    //Windows 7
-                    return 200;
-                case 7:
-                    //Windows 8;
-                    return 300;
-                default:
-                    return -1;
+                throw new Exception("The platform this application is running on could not be validated on server.");
+            }
+        }
+
+        async public Task<bool> VerifyApp()
+        {
+            state.connectionState = GlobalState.ConnectionState.Offline;
+
+            if (await serverHelper.isOnline(Properties.Settings.Default.WebServerTest))
+            {
+                return await serverHelper.VerifyApp(Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.TempUserName);
+            }
+            else
+            {
+                return true;
             }
         }
 
         async public Task<string> Logon(string email, string password)
         {
-            //Verify if online
-            if (!await serverHelper.isOnline(Properties.Settings.Default.WebServerTest))
-            {
-                state.connectionState = GlobalState.ConnectionState.Offline;
-                return "";
-            }
-
-            string logonResponse = await serverHelper.Logon(email, password);
-            if (logonResponse == "OK")
+            if (await serverHelper.Logon(email, password))
             {
                 state.connectionState = GlobalState.ConnectionState.LoggedOn;
             }
             else
             {
                 state.connectionState = GlobalState.ConnectionState.FailedLogin;
-                return logonResponse;
+                return "Logon failed";
             }
 
             return "OK";
@@ -169,7 +166,6 @@ namespace ManageWalla
             {
                 Account account = await serverHelper.AccountGet(cancelToken);
                 state.account = account;
-
             }
             catch (OperationCanceledException)
             {
@@ -178,6 +174,7 @@ namespace ManageWalla
             }
         }
 
+        /*
         async public Task MachineSetIdentity(CancellationToken cancelToken)
         {
             //Get current platformId and machine name.
@@ -189,7 +186,7 @@ namespace ManageWalla
             {
                 if (platformId == current.platformId && machineName == current.name)
                 {
-                    state.machineId = current.id;
+                    state.userAppId = current.id;
                     found = true;
                 }
             }
@@ -197,12 +194,12 @@ namespace ManageWalla
             {
                 if (found)
                 {
-                    await serverHelper.MachineMarkSession(state.machineId, cancelToken);
+                    await serverHelper.MachineMarkSession(state.userAppId, cancelToken);
                 }
                 else
                 {
                     long machineId = await serverHelper.MachineRegisterNew(machineName, platformId, cancelToken);
-                    state.machineId = machineId;
+                    state.userAppId = machineId;
                 }
             }
             catch (OperationCanceledException)
@@ -210,6 +207,32 @@ namespace ManageWalla
                 //Suppress exception
                 logger.Debug("AccountDetailsGet has been cancelled");
             }
+        }
+        */
+
+        async public Task SetUserApp()
+        {
+            if (state.userApp == null)
+            {
+                string machineName = System.Environment.MachineName;
+
+                UserApp newUserApp = new UserApp();
+                newUserApp.MachineName = machineName;
+
+                await serverHelper.UserAppCreateUpdateAsync(newUserApp);
+            }
+
+
+            UserApp userApp = await serverHelper.UserAppGet(600010);
+            if (userApp != null)
+            {
+                state.userApp = userApp;
+            }
+            else
+            {
+                throw new Exception("Valid settings for this application could not be established on the server.");
+            }
+
         }
         #endregion
 
@@ -333,8 +356,10 @@ namespace ManageWalla
                         currentImage.Meta.Tags = uploadState.MetaTagRef;
                     }
 
+                    currentImage.Meta.TakenDate = currentImage.Meta.TakenDateFile;
+
                     AddMachineTag(currentImage);
-                    currentImage.Meta.MachineId = state.machineId;
+                    currentImage.Meta.UserAppId = state.userApp.id;
                 }
 
                 return await UploadProcessAsync(meFots, false, cancelToken);
@@ -367,7 +392,7 @@ namespace ManageWalla
                     //Get or Create new Upload entry in cache.
                     UploadImageState newUploadEntry = CacheHelper.GetOrCreateCacheItem(uploadImageStateList, 
                         currentUpload.Meta.OriginalFileName, currentUpload.FilePath, currentUpload.Meta.Name, 
-                        currentUpload.Meta.Size, isAuto, state.machineId, "myMachineName");
+                        currentUpload.Meta.Size, isAuto, state.userApp.id, state.userApp.MachineName);
 
                     string response = await serverHelper.UploadImageAsync(currentUpload, newUploadEntry, cancelToken);
                     if (response == null)
@@ -406,7 +431,7 @@ namespace ManageWalla
                 foreach (UploadImage currentImage in meFots)
                 {
                     AddMachineTag(currentImage);
-                    currentImage.Meta.MachineId = state.machineId;
+                    currentImage.Meta.UserAppId = state.userApp.id;
                     currentImage.Meta.categoryId = uploadState.AutoCategoryId;
                 }
 
@@ -428,7 +453,7 @@ namespace ManageWalla
         {
             ImageMetaTagRef newTagRef = new ImageMetaTagRef();
             //TODO Change to use tagid from userapp object.
-            newTagRef.id = state.account.Machines.Single(r => r.id == state.machineId).tagId;
+            newTagRef.id = state.userApp.TagId;   //account.Machines.Single(r => r.id == state.userAppId).tagId;
 
             if (current.Meta.Tags == null)
             {
