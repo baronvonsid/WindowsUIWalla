@@ -17,13 +17,13 @@ namespace ManageWalla
     
         private static byte[] key = { 9, 2, 7, 1, 5, 4, 7, 8 };
         private static byte[] iv = { 1, 8, 3, 4, 1, 6, 5, 9 };
-        private static string cacheFileLocation = Application.UserAppDataPath;
+        //private static string cacheFileLocation = Application.UserAppDataPath;
 
         #region GlobalState
-        public static GlobalState GetGlobalState()
+        public static GlobalState GetGlobalState(string profileName)
         {
             // Try to load from File
-            GlobalState state = RetrieveFromFile();
+            GlobalState state = RetrieveFromFile(profileName);
             if (state == null)
             {
                 state = new GlobalState();
@@ -36,6 +36,8 @@ namespace ManageWalla
                 state.connectionState = GlobalState.ConnectionState.NoAccount;
                 state.mainCopyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Copies");
                 state.mainCopyCacheSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
+                state.account = new Account();
+                state.account.ProfileName = "";
             }
 
             state.imageFetchSize = Properties.Settings.Default.ImageFetchSize;
@@ -49,9 +51,9 @@ namespace ManageWalla
             return state;
         }
 
-        public static void SaveGlobalState(GlobalState state)
+        public static void SaveGlobalState(GlobalState state, string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, Properties.Settings.Default.GlobalStateCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
             DESCryptoServiceProvider des = new DESCryptoServiceProvider();
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
@@ -65,9 +67,9 @@ namespace ManageWalla
             }
         }
 
-        private static GlobalState RetrieveFromFile()
+        private static GlobalState RetrieveFromFile(string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, Properties.Settings.Default.GlobalStateCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
             GlobalState stateTemp = null;
 
             DESCryptoServiceProvider des = new DESCryptoServiceProvider();
@@ -89,10 +91,10 @@ namespace ManageWalla
         #endregion
 
         #region ThumbCache
-        public static List<ThumbCache> GetThumbCacheList()
+        public static List<ThumbCache> GetThumbCacheList(string profileName)
         {
             // Try to load from File
-            List<ThumbCache> thumbCacheList = RetrieveThumbCacheFromFile();
+            List<ThumbCache> thumbCacheList = RetrieveThumbCacheFromFile(profileName);
             if (thumbCacheList == null)
             {
                 thumbCacheList = new List<ThumbCache>();
@@ -101,9 +103,9 @@ namespace ManageWalla
             return thumbCacheList;
         }
 
-        public static void SaveThumbCacheList(List<ThumbCache> thumbCacheList)
+        public static void SaveThumbCacheList(List<ThumbCache> thumbCacheList, string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, Properties.Settings.Default.ThumbCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.ThumbCacheFileName);
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -154,9 +156,9 @@ namespace ManageWalla
 
         }
 
-        private static List<ThumbCache> RetrieveThumbCacheFromFile()
+        private static List<ThumbCache> RetrieveThumbCacheFromFile(string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, Properties.Settings.Default.ThumbCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.ThumbCacheFileName);
             List<ThumbCache> thumbStateTemp = null;
 
             if (File.Exists(fileName))
@@ -174,10 +176,10 @@ namespace ManageWalla
         #endregion
 
         #region MainCopyCache
-        public static List<MainCopyCache> GetMainCopyCacheList()
+        public static List<MainCopyCache> GetMainCopyCacheList(string profileName)
         {
             // Try to load from File
-            List<MainCopyCache> mainCopyCacheList = RetrieveMainCopyCacheFromFile();
+            List<MainCopyCache> mainCopyCacheList = RetrieveMainCopyCacheFromFile(profileName);
             if (mainCopyCacheList == null)
             {
                 mainCopyCacheList = new List<MainCopyCache>();
@@ -185,9 +187,9 @@ namespace ManageWalla
             return mainCopyCacheList;
         }
 
-        public static void SaveMainCopyCacheList(List<MainCopyCache> mainCopyCacheList)
+        public static void SaveMainCopyCacheList(List<MainCopyCache> mainCopyCacheList, string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, Properties.Settings.Default.MainCopyCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.MainCopyCacheFileName);
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -254,9 +256,9 @@ namespace ManageWalla
 
         }
 
-        private static List<MainCopyCache> RetrieveMainCopyCacheFromFile()
+        private static List<MainCopyCache> RetrieveMainCopyCacheFromFile(string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, Properties.Settings.Default.MainCopyCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.MainCopyCacheFileName);
             List<MainCopyCache> mainCopyTemp = null;
 
             if (File.Exists(fileName))
@@ -274,19 +276,14 @@ namespace ManageWalla
         #endregion
 
         #region UploadHistoryCache
-        public static void GetUploadImageStateList(UploadImageStateList uploadImageStateList)
+        public static void GetUploadImageStateList(UploadImageStateList uploadImageStateList, string profileName)
         {
-            RetrieveUploadImageStateFromFile(uploadImageStateList);
-            //if (uploadImageStateList == null)
-            //{
-            //    uploadImageStateList = new UploadImageStateList();
-            //}
-            //return uploadImageStateList;
+            RetrieveUploadImageStateFromFile(uploadImageStateList, profileName);
         }
 
-        public static void SaveUploadImageStateList(UploadImageStateList uploadImageStateList)
+        public static void SaveUploadImageStateList(UploadImageStateList uploadImageStateList, string profileName)
         {
-            string fileName = Path.Combine(cacheFileLocation, Properties.Settings.Default.UploadImageStateFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.UploadImageStateFileName);
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -389,9 +386,9 @@ namespace ManageWalla
             }
         }
 
-        private static void RetrieveUploadImageStateFromFile(UploadImageStateList uploadImageStateList)
+        private static void RetrieveUploadImageStateFromFile(UploadImageStateList uploadImageStateList,string profileName)
         {
-            string fileName = Path.Combine(cacheFileLocation, Properties.Settings.Default.UploadImageStateFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.UploadImageStateFileName);
             UploadImageStateList uploadImageStateListTemp = null;
 
             if (File.Exists(fileName))

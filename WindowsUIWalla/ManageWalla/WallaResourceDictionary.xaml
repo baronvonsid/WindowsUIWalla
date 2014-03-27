@@ -27,10 +27,13 @@
 
 
 
-    <ImageSource x:Key="loadingImageSrc">resources/anim/loading.gif</ImageSource>
-    <ImageSource x:Key="infoImageSrc">resources/icons/info.gif</ImageSource>
+    <!--<ImageSource x:Key="loadingImageSrc">resources/anim/loading.gif</ImageSource>
+    <ImageSource x:Key="infoImageSrc">resources/icons/info.gif</ImageSource>-->
     <ImageSource x:Key="errorImageSrc">resources/icons/error.gif</ImageSource>
     <ImageSource x:Key="warningImageSrc">resources/icons/warning.gif</ImageSource>
+    <ImageSource x:Key="busyImageSrc">resources/anim/busy.gif</ImageSource>
+    
+
     <ImageSource x:Key="menuItemImageSrc">resources/icons/menuItem.gif</ImageSource>
 
     <ImageSource x:Key="categoryImageSrc">resources/icons/category.png</ImageSource>
@@ -42,16 +45,17 @@
     <ImageSource x:Key="uploadImageSrc">resources/icons/upload.png</ImageSource>
     <ImageSource x:Key="uploadImageSelectedSrc">resources/icons/upload_selected.png</ImageSource>
     
-    <ImageSource x:Key="fotoWallaImageSrc">resources/icons/fotoWalla.gif</ImageSource>
+    <!--<ImageSource x:Key="fotoWallaImageSrc">resources/icons/fotoWalla.gif</ImageSource>-->
 
     <ImageSource x:Key="refreshImageSrc">resources/icons/refresh.gif</ImageSource>
     <ImageSource x:Key="refreshImageSelectedSrc">resources/icons/refresh_selected.gif</ImageSource>
     <ImageSource x:Key="refreshImageRotatingSrc">resources/anim/refresh_rotating.gif</ImageSource>
-    <ImageSource x:Key="accountImageSrc">resources/icons/fotowallaLogo31x146.png</ImageSource>
-    <ImageSource x:Key="accountImageSelectedSrc">resources/icons/fotowallaLogoSelected31x146.png</ImageSource>
+    <ImageSource x:Key="accountImageSrc">resources/icons/fotowallaLogo.png</ImageSource>
+    <ImageSource x:Key="accountImageSelectedSrc">resources/icons/fotowallaLogoSelected.png</ImageSource>
     <ImageSource x:Key="expandImageSrc">resources/icons/expand.gif</ImageSource>
     <ImageSource x:Key="contractImageSrc">resources/icons/contract.gif</ImageSource>
- 
+
+
     <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.png</ImageSource>
     <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notSelected.png</ImageSource>
 

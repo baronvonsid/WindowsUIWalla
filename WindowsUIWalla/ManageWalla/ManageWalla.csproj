@@ -369,16 +369,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\error.gif" />
-    <Resource Include="resources\icons\info.gif" />
     <Resource Include="resources\icons\menuItem.gif" />
     <Resource Include="resources\icons\notSelected.gif" />
     <Resource Include="resources\icons\warning.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\anim\loading.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\account.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\expand.gif" />
@@ -387,19 +380,7 @@
     <Resource Include="resources\icons\contract.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\category.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="resources\icons\reload.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\gallery.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\fotoWalla.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\upload.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\selected.gif" />
@@ -420,13 +401,7 @@
     <Resource Include="resources\icons\navLast.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\dropDownMenu.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="resources\icons\imageSummary.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\tag.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\removeFromTag.gif" />
@@ -445,10 +420,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\sharedSecure.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\fotowallaLogoSelected31x146.png" />
-    <Resource Include="resources\icons\fotowallaLogo31x146.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\tag.png" />
@@ -474,6 +445,13 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\anim\refresh_rotating.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\fotowallaLogo.png" />
+    <Resource Include="resources\icons\fotowallaLogoSelected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\anim\busy.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -17,14 +17,7 @@ namespace ManageWalla
     //[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/GlobalState", IsNullable = false)]
     public class GlobalState
     {
-        //Infra Properties
-        //static GlobalState state = null;
-        //public long userId { get; set; }
-        //public string email { get; set; }
-        //public string password { get; set; }
-        //public int platformId { get; set; }
-        //public string machineName { get; set; }
-        //public long userAppId { get; set; }
+        
         public int imageFetchSize { get; set; }
         public DateTime lastLoggedIn { get; set; }
         public int mainCopyCacheSizeMB { get; set; }

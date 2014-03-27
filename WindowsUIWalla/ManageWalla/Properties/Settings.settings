@@ -44,8 +44,8 @@
     <Setting Name="OS" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Windows</Value>
     </Setting>
-    <Setting Name="TempUserName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">JohanTheThird</Value>
+    <Setting Name="LastUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NewBoy</Value>
     </Setting>
   </Settings>
 </SettingsFile>

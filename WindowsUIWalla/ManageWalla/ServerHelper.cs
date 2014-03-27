@@ -32,6 +32,7 @@ namespace ManageWalla
         private string appKey;
         private long userId;
         private string webPath;
+        private string sessionKey;
 
         public ServerHelper(string hostNameParam, int portParam, string wsPathParam, string appKeyParam, string webPathParam)
         {
@@ -62,17 +63,25 @@ namespace ManageWalla
             }
         }
 
-        async public Task<bool> Logon(string emailParam, string passwordParam)
+        async public Task<bool> Logon(string userName, string passwordParam)
         {
             try
             {
-                //http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + emailParam + "/");
+                HttpClient initialHttp = new HttpClient();
+                //TODO change once server path is updated.
+                //http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath +  "/");
+                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,"logon");
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await initialHttp.SendAsync(request);
                 response.EnsureSuccessStatusCode();
+
+                http = new HttpClient();
+                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
+
+                //TODO get session returned to Walla for use in all subsequent requests.
 
                 return true;
             }
@@ -82,12 +91,6 @@ namespace ManageWalla
                 return false;
             }
         }
-
-        //public long GetUserId()
-        //{
-        //    return userId;
-        //}
-
 
         async public Task<Account> AccountGet(CancellationToken cancelToken)
         {
@@ -121,21 +124,19 @@ namespace ManageWalla
             return "http://" + hostName + ":" + port.ToString() + webPath + userId.ToString() + "/";
         }
 
-        async public Task<bool> VerifyApp(string validation, string userName)
+        async public Task<bool> VerifyApp(string validation, string userName) // Remove userName
         {
             try
             {
-                if (http == null)
-                {
-                    http = new HttpClient();
-                    http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
-                }
-
+                HttpClient initialHttp = new HttpClient();
+                //TODO change once server path is updated.
+                //http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath +  "/");
+                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "appcheck?wsKey=" + validation);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await initialHttp.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
                 return true;

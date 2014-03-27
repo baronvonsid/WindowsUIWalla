@@ -79,10 +79,13 @@ namespace ManageWalla
 
         public void Dispose()
         {
-            CacheHelper.SaveGlobalState(state);
-            CacheHelper.SaveThumbCacheList(thumbCacheList);
-            CacheHelper.SaveMainCopyCacheList(mainCopyCacheList);
-            CacheHelper.SaveUploadImageStateList(uploadImageStateList);
+            if (state == null || state.account == null || state.account.ProfileName.Length < 1)
+                return;
+
+            CacheHelper.SaveGlobalState(state, state.account.ProfileName);
+            CacheHelper.SaveThumbCacheList(thumbCacheList, state.account.ProfileName);
+            CacheHelper.SaveMainCopyCacheList(mainCopyCacheList, state.account.ProfileName);
+            CacheHelper.SaveUploadImageStateList(uploadImageStateList, state.account.ProfileName);
         }
         #endregion
 
@@ -98,26 +101,28 @@ namespace ManageWalla
         /// </summary>
         /// <param name="currentMainParam"></param>
         /// <returns></returns>
-        public void InitApplication(UploadImageStateList uploadImageStateListParam)
+        public void InitApplication()
         {
             try
             {
                 //Setup Server helper.
                 serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, Properties.Settings.Default.WallaWSPort,
                     Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.WallaWebPath);
-
-                //Initialise state.
-                state = CacheHelper.GetGlobalState();
-                thumbCacheList = CacheHelper.GetThumbCacheList();
-                mainCopyCacheList = CacheHelper.GetMainCopyCacheList();
-                CacheHelper.GetUploadImageStateList(uploadImageStateListParam);
-                uploadImageStateList = uploadImageStateListParam;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 throw ex;
             }
+        }
+
+        public void SetUpCacheFiles(string profileName, UploadImageStateList uploadImageStateListParam)
+        {
+            state = CacheHelper.GetGlobalState(profileName);
+            thumbCacheList = CacheHelper.GetThumbCacheList(profileName);
+            mainCopyCacheList = CacheHelper.GetMainCopyCacheList(profileName);
+            CacheHelper.GetUploadImageStateList(uploadImageStateListParam, profileName);
+            uploadImageStateList = uploadImageStateListParam;
         }
 
         async public Task SetPlatform()
@@ -131,13 +136,18 @@ namespace ManageWalla
             }
         }
 
+        async public Task<bool> CheckOnline()
+        {
+            return await serverHelper.isOnline(Properties.Settings.Default.WebServerTest);
+        }
+
         async public Task<bool> VerifyApp()
         {
-            state.connectionState = GlobalState.ConnectionState.Offline;
+            //state.connectionState = GlobalState.ConnectionState.Offline;
 
             if (await serverHelper.isOnline(Properties.Settings.Default.WebServerTest))
             {
-                return await serverHelper.VerifyApp(Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.TempUserName);
+                return await serverHelper.VerifyApp(Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.LastUser);
             }
             else
             {
@@ -222,10 +232,10 @@ namespace ManageWalla
                 await serverHelper.UserAppCreateUpdateAsync(newUserApp);
             }
 
-
-            UserApp userApp = await serverHelper.UserAppGet(600010);
+            UserApp userApp = await serverHelper.UserAppGet(500001);
             if (userApp != null)
             {
+                userApp.UserDefaultCategoryId = 300002;
                 state.userApp = userApp;
             }
             else
@@ -322,6 +332,12 @@ namespace ManageWalla
                     category.Desc = uploadState.CategoryDesc;
                     uploadState.RootCategoryId = await serverHelper.CategoryCreateAsync(category, cancelToken);
                     createdCategory = true;
+
+                    //Reset these values in case of a resume scenario.
+                    uploadState.UploadToNewCategory = false;
+                    uploadState.RootCategoryName = uploadState.CategoryName;
+                    uploadState.CategoryName = "";
+                    uploadState.CategoryDesc = "";
                 }
 
                 if (uploadState.MapToSubFolders)
