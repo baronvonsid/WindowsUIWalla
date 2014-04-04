@@ -143,6 +143,7 @@
     <Compile Include="ProjectDataType\ThumbCache.cs" />
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="ValueConverters\WallaCacheSizeConverter.cs" />
     <Compile Include="ValueConverters\WallaByteToMBConverter.cs" />
     <Compile Include="WallaDataType\Account.cs" />
     <Compile Include="WallaDataType\Category.cs" />

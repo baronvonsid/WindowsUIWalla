@@ -220,7 +220,7 @@ namespace ManageWalla
         }
         */
 
-        async public Task SetUserApp()
+        async public Task SetUserApp(CancellationToken cancelToken)
         {
             if (state.userApp == null)
             {
@@ -229,7 +229,7 @@ namespace ManageWalla
                 UserApp newUserApp = new UserApp();
                 newUserApp.MachineName = machineName;
 
-                await serverHelper.UserAppCreateUpdateAsync(newUserApp);
+                await serverHelper.UserAppCreateUpdateAsync(newUserApp, cancelToken);
             }
 
             UserApp userApp = await serverHelper.UserAppGet(500001);
@@ -243,6 +243,24 @@ namespace ManageWalla
                 throw new Exception("Valid settings for this application could not be established on the server.");
             }
 
+        }
+
+        async public Task UserAppUpdateAsync(UserApp userApp, CancellationToken cancelToken)
+        {
+            try
+            {
+                await serverHelper.UserAppCreateUpdateAsync(userApp, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("UserAppUpdateAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
         }
         #endregion
 

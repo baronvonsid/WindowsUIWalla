@@ -906,29 +906,40 @@ namespace ManageWalla
                     if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                     {
                         //tabAccount.IsEnabled = true;
-                        cmdAccountClose.IsEnabled = true;
-                        cmdAccountEdit.Visibility = Visibility.Visible;
-                        cmdAccountSave.Visibility = Visibility.Collapsed;
-                        cmdAccountCancel.Visibility = Visibility.Collapsed;
+                        //cmdAccountClose.IsEnabled = true;
+                        cmdUserAppEdit.Visibility = Visibility.Visible;
+                        cmdUserAppSave.Visibility = Visibility.Collapsed;
+                        cmdUserAppCancel.Visibility = Visibility.Collapsed;
                         cmdAccountLogin.Visibility = Visibility.Collapsed;
                     }
                     else
                     {
                         //tabAccount.IsEnabled = false;
-                        cmdAccountClose.IsEnabled = false;
-                        cmdAccountEdit.Visibility = Visibility.Collapsed;
-                        cmdAccountCancel.Visibility = Visibility.Collapsed;
-                        cmdAccountSave.Visibility = Visibility.Collapsed;
+                        //cmdAccountClose.IsEnabled = false;
+                        cmdUserAppEdit.Visibility = Visibility.Collapsed;
+                        cmdUserAppCancel.Visibility = Visibility.Collapsed;
+                        cmdUserAppSave.Visibility = Visibility.Collapsed;
                         cmdAccountLogin.Visibility = Visibility.Visible;
                     }
+
+                    chkAccountAutoUpload.IsEnabled = false;
+                    sldAccountImageCopySize.IsEnabled = false;
+                    cmdAccountChangeAutoUploadFolder.IsEnabled = false;
+                    cmdAccountChangeImageCopyFolder.IsEnabled = false;
+
                     break;
                 case PaneMode.AccountEdit:
                     //tabAccount.IsEnabled = false;
-                    cmdAccountClose.IsEnabled = false;
-                    cmdAccountEdit.Visibility = Visibility.Collapsed;
-                    cmdAccountCancel.Visibility = Visibility.Visible;
-                    cmdAccountSave.Visibility = Visibility.Collapsed;
+                    //cmdAccountClose.IsEnabled = false;
+                    cmdUserAppEdit.Visibility = Visibility.Collapsed;
+                    cmdUserAppCancel.Visibility = Visibility.Visible;
+                    cmdUserAppSave.Visibility = Visibility.Visible;
                     cmdAccountLogin.Visibility = Visibility.Collapsed;
+
+                    chkAccountAutoUpload.IsEnabled = true;
+                    sldAccountImageCopySize.IsEnabled = true;
+                    cmdAccountChangeAutoUploadFolder.IsEnabled = true;
+                    cmdAccountChangeImageCopyFolder.IsEnabled = true;
                     break;
                 #endregion
 
@@ -2806,7 +2817,6 @@ namespace ManageWalla
                 lstImageViewTagList.Items.Add(newItem);
             }
         }
-
         #endregion
 
         #region Tag Event Handlers
@@ -3760,20 +3770,20 @@ namespace ManageWalla
             await RefreshUploadStatusStateAsync(true);
         }
 
-        private void cmdAccountCancel_Click(object sender, RoutedEventArgs e)
+        private void cmdUserAppCancel_Click(object sender, RoutedEventArgs e)
         {
             AccountRefreshFromState();
             RefreshPanesAllControls(PaneMode.Account);
         }
 
-        async private void cmdAccountSave_Click(object sender, RoutedEventArgs e)
+        async private void cmdUserAppSave_Click(object sender, RoutedEventArgs e)
         {
-            await AccountSave();
-            AccountRefreshFromState();
-            RefreshPanesAllControls(PaneMode.Account);
+            await UserAppSave();
+            //AccountRefreshFromState();
+            //RefreshPanesAllControls(PaneMode.Account);
         }
 
-        private void cmdAccountEdit_Click(object sender, RoutedEventArgs e)
+        private void cmdUserAppEdit_Click(object sender, RoutedEventArgs e)
         {
             RefreshPanesAllControls(PaneMode.AccountEdit);
         }
@@ -3803,16 +3813,41 @@ namespace ManageWalla
 
         private void AccountRefreshFromState()
         {
+            lblAccountType.Content = state.account.AccountTypeName;
+            lblAccountOpen.Content = state.account.OpenDate.ToShortDateString();
+            lblAccountStorageLimitGB.Content = state.account.StorageGBLimit + "GB";
+            lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + "GB " + state.account.TotalImages.ToString() + " Images";
+
+            chkAccountAutoUpload.IsChecked = state.userApp.AutoUpload;
+            lblAccountAutoUploadFolder.Content = state.userApp.AutoUploadFolder;
+            lblAccountAutoUploadFolderAbbrev.Content = StringTrim(state.userApp.AutoUploadFolder,80);
+
+            lblAccountImageCopyFolder.Content = state.userApp.MainCopyFolder;
+            lblAccountImageCopyFolderAbbrev.Content = StringTrim(state.userApp.MainCopyFolder,80);
+
+            lblAccountImageCopyStatus.Content = " TODO ";
+            sldAccountImageCopySize.Value = state.userApp.MainCopyCacheSizeMB;
+
             lblAccountEmail.Content = state.account.Email;
             txtAccountPassword.Text = state.account.Password;
             txtAccountProfileName.Text = state.account.ProfileName;
         }
 
-        async private Task AccountSave()
+        private string StringTrim(string input, int length)
+        {
+            string abbrev = input;
+            if (abbrev.Length > length-3)
+            {
+                abbrev = "..." + input.Substring(input.Length - length - 3);
+            }
+            return abbrev; 
+        }
+
+        async private Task UserAppSave()
         {
             try
             {
-                ShowMessage(MessageType.Busy, "Account information being saved");
+                ShowMessage(MessageType.Busy, "Application settings being saved");
 
                 if (cancelTokenSource != null)
                     cancelTokenSource.Cancel();
@@ -3820,7 +3855,20 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                //To be done.
+                UserApp changedUserApp = new UserApp();
+                changedUserApp.AppId = state.userApp.AppId;
+                changedUserApp.id = state.userApp.id;
+                changedUserApp.MachineName = state.userApp.MachineName;
+                changedUserApp.version = state.userApp.version;
+
+                changedUserApp.AutoUpload = (bool)chkAccountAutoUpload.IsChecked;
+                changedUserApp.AutoUploadFolder = (string)lblAccountAutoUploadFolder.Content;
+
+                changedUserApp.MainCopyFolder = (string)lblAccountImageCopyFolder.Content;
+                changedUserApp.MainCopyCacheSizeMB = Convert.ToInt32(sldAccountImageCopySize.Value);
+
+                await controller.UserAppUpdateAsync(changedUserApp, cancelTokenSource.Token);
+                await controller.SetUserApp(cancelTokenSource.Token);
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
@@ -3828,17 +3876,16 @@ namespace ManageWalla
             catch (OperationCanceledException)
             {
                 logger.Debug("AccountSave has been cancelled.");
-                AccountRefreshFromState();
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "The account save process failed with an unexpected problem: " + ex.Message);
-                AccountRefreshFromState();
             }
             finally
             {
-                ConcludeBusyProcess();
+                AccountRefreshFromState();
+                RefreshPanesAllControls(PaneMode.Account);
             }
         }
 
@@ -3864,7 +3911,7 @@ namespace ManageWalla
                         await controller.AccountDetailsGet(cancelTokenSource.Token);
                         state.account.Password = password;
                         await controller.SetPlatform();
-                        await controller.SetUserApp();
+                        await controller.SetUserApp(cancelTokenSource.Token);
                         AccountRefreshFromState();
                         ShowMessage(MessageType.Info, "Account: " + state.account.ProfileName + " has been connected with FotoWalla");
                         break;
@@ -4051,7 +4098,6 @@ namespace ManageWalla
             }
         }
 
-
         async private Task PopulateGalleryMetaData(GalleryListGalleryRef galleryListGalleryRef)
         {
             try
@@ -4086,12 +4132,21 @@ namespace ManageWalla
                 chkGalleryShowImageMeta.IsChecked = gallery.ShowImageMeta;
 
                 //TODO select radio buttons for tags.
-                //lstGalleryTagListInclude.SelectedItems
                 foreach (GalleryTagRef tagRef in gallery.Tags)
                 {
                     if (tagRef.exclude)
                     {
-                        foreach (ListBoxItem current in lstGalleryTagListExclude.Items)
+                        foreach (ListBoxItem current in lstGalleryMyTagListExclude.Items)
+                        {
+                            TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
+                            if (tagRefInList.id == tagRef.tagId)
+                            {
+                                current.IsSelected = true;
+                                break;
+                            }
+                        }
+
+                        foreach (ListBoxItem current in lstGallerySystemTagListExclude.Items)
                         {
                             TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
                             if (tagRefInList.id == tagRef.tagId)
@@ -4103,7 +4158,17 @@ namespace ManageWalla
                     }
                     else
                     {
-                        foreach (ListBoxItem current in lstGalleryTagListInclude.Items)
+                        foreach (ListBoxItem current in lstGalleryMyTagListInclude.Items)
+                        {
+                            TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
+                            if (tagRefInList.id == tagRef.tagId)
+                            {
+                                current.IsSelected = true;
+                                break;
+                            }
+                        }
+
+                        foreach (ListBoxItem current in lstGallerySystemTagListInclude.Items)
                         {
                             TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
                             if (tagRefInList.id == tagRef.tagId)
@@ -4114,7 +4179,6 @@ namespace ManageWalla
                         }
                     }
                 }
-
 
                 GalleryCategoryApplyGallerySettings(gallery.Categories);
 
@@ -4146,8 +4210,11 @@ namespace ManageWalla
 
         private void GalleryRefreshTagsListFromState()
         {
-            lstGalleryTagListExclude.Items.Clear();
-            lstGalleryTagListInclude.Items.Clear();
+            lstGalleryMyTagListExclude.Items.Clear();
+            lstGallerySystemTagListExclude.Items.Clear();
+            lstGalleryMyTagListInclude.Items.Clear();
+            lstGallerySystemTagListInclude.Items.Clear();
+
             //Load existing tags into the tag
             foreach (TagListTagRef tagRef in state.tagList.TagRef)
             {
@@ -4161,8 +4228,16 @@ namespace ManageWalla
                 newItemExclude.Tag = tagRef;
                 newItemExclude.Selected += new RoutedEventHandler(GalleryCheckForExcludeConflict);
 
-                lstGalleryTagListExclude.Items.Add(newItemExclude);
-                lstGalleryTagListInclude.Items.Add(newItemInclude);
+                if (tagRef.systemOwned == false)
+                {
+                    lstGalleryMyTagListExclude.Items.Add(newItemExclude);
+                    lstGalleryMyTagListInclude.Items.Add(newItemInclude);
+                }
+                else
+                {
+                    lstGallerySystemTagListExclude.Items.Add(newItemExclude);
+                    lstGallerySystemTagListInclude.Items.Add(newItemInclude);
+                }
             }
         }
 
@@ -4171,7 +4246,17 @@ namespace ManageWalla
             ListBoxItem listBoxItem = (ListBoxItem)sender;
             TagListTagRef tagRef = (TagListTagRef)listBoxItem.Tag;
 
-            foreach (ListBoxItem current in lstGalleryTagListExclude.Items)
+            foreach (ListBoxItem current in lstGalleryMyTagListExclude.Items)
+            {
+                TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
+                if (tagRefInList.id == tagRef.id)
+                {
+                    current.IsSelected = false;
+                    break;
+                }
+            }
+
+            foreach (ListBoxItem current in lstGallerySystemTagListExclude.Items)
             {
                 TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
                 if (tagRefInList.id == tagRef.id)
@@ -4187,7 +4272,17 @@ namespace ManageWalla
             ListBoxItem listBoxItem = (ListBoxItem)sender;
             TagListTagRef tagRef = (TagListTagRef)listBoxItem.Tag;
 
-            foreach (ListBoxItem current in lstGalleryTagListInclude.Items)
+            foreach (ListBoxItem current in lstGalleryMyTagListInclude.Items)
+            {
+                TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
+                if (tagRefInList.id == tagRef.id)
+                {
+                    current.IsSelected = false;
+                    break;
+                }
+            }
+
+            foreach (ListBoxItem current in lstGallerySystemTagListInclude.Items)
             {
                 TagListTagRef tagRefInList = (TagListTagRef)current.Tag;
                 if (tagRefInList.id == tagRef.id)
@@ -4421,21 +4516,36 @@ namespace ManageWalla
         private GalleryTagRef[] GalleryTagsUpdateList(int selectionType)
         {
             GalleryTagRef[] newTagUpdates = null;
+            int currentItemIndex = 0;
+            int excludeCount = lstGalleryMyTagListExclude.SelectedItems.Count + lstGallerySystemTagListExclude.SelectedItems.Count;
+            int includeCount = lstGalleryMyTagListInclude.SelectedItems.Count + lstGallerySystemTagListInclude.SelectedItems.Count;
+            
             if (selectionType == 0)
             {
                 //Ignore tags to include.
-                newTagUpdates = new GalleryTagRef[lstGalleryTagListExclude.SelectedItems.Count];
+                newTagUpdates = new GalleryTagRef[excludeCount];
             }
             else
             {
-                newTagUpdates = new GalleryTagRef[lstGalleryTagListInclude.SelectedItems.Count + lstGalleryTagListExclude.SelectedItems.Count];
+                newTagUpdates = new GalleryTagRef[excludeCount + includeCount];
             }
-
-            int currentItemIndex = 0;
 
             if (selectionType != 0)
             {
-                foreach (ListBoxItem current in lstGalleryTagListInclude.SelectedItems)
+                foreach (ListBoxItem current in lstGalleryMyTagListInclude.SelectedItems)
+                {
+                    TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                    GalleryTagRef galleryTag = new GalleryTagRef();
+                    galleryTag.tagId = tagRef.id;
+                    galleryTag.tagIdSpecified = true;
+                    galleryTag.exclude = false;
+                    galleryTag.excludeSpecified = true;
+                    newTagUpdates[currentItemIndex] = galleryTag;
+                    currentItemIndex++;
+                }
+
+                foreach (ListBoxItem current in lstGallerySystemTagListInclude.SelectedItems)
                 {
                     TagListTagRef tagRef = (TagListTagRef)current.Tag;
 
@@ -4449,7 +4559,20 @@ namespace ManageWalla
                 }
             }
 
-            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
+            foreach (ListBoxItem current in lstGalleryMyTagListExclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+
+                GalleryTagRef galleryTag = new GalleryTagRef();
+                galleryTag.tagId = tagRef.id;
+                galleryTag.tagIdSpecified = true;
+                galleryTag.exclude = true;
+                galleryTag.excludeSpecified = true;
+                newTagUpdates[currentItemIndex] = galleryTag;
+                currentItemIndex++;
+            }
+
+            foreach (ListBoxItem current in lstGallerySystemTagListExclude.SelectedItems)
             {
                 TagListTagRef tagRef = (TagListTagRef)current.Tag;
 
@@ -4462,29 +4585,6 @@ namespace ManageWalla
                 currentItemIndex++;
             }
             return newTagUpdates;
-        }
-
-        private GalleryTagRef[] GalleryTagsExclude()
-        {
-            if (lstGalleryTagListExclude.SelectedItems.Count == 0)
-                return null;
-
-            int currentItemIndex = 0;
-            GalleryTagRef[] newTagsExclude = new GalleryTagRef[lstGalleryTagListExclude.SelectedItems.Count];
-
-            foreach (ListBoxItem current in lstGalleryTagListExclude.SelectedItems)
-            {
-                TagListTagRef tagRef = (TagListTagRef)current.Tag;
-
-                GalleryTagRef galleryTag = new GalleryTagRef();
-                galleryTag.tagId = tagRef.id;
-                galleryTag.tagIdSpecified = true;
-                galleryTag.exclude = true;
-                galleryTag.excludeSpecified = true;
-                newTagsExclude[currentItemIndex] = galleryTag;
-                currentItemIndex++;
-            }
-            return newTagsExclude;
         }
 
         private void GalleryCategoryRecursiveRelatedUpdates(TreeViewItem currentItem, bool parentRecursive)
@@ -4602,6 +4702,9 @@ namespace ManageWalla
         async private void cmdGallerySave_Click(object sender, RoutedEventArgs e)
         {
             GalleryCategoryRef[] galleryCategories = null;
+            int excludeCount = lstGalleryMyTagListExclude.SelectedItems.Count + lstGallerySystemTagListExclude.SelectedItems.Count;
+            int includeCount = lstGalleryMyTagListInclude.SelectedItems.Count + lstGallerySystemTagListInclude.SelectedItems.Count;
+            
 
             if (cmbGallerySelectionType.SelectedIndex != 1)
                 galleryCategories = GalleryCategoryGetUpdateList();
@@ -4611,12 +4714,12 @@ namespace ManageWalla
                 ShowMessage(MessageType.Warning, "The gallery does not have any catgories associated with it, so cannot be saved.");
                 return;
             }
-            else if (cmbGallerySelectionType.SelectedIndex == 1 && lstGalleryTagListInclude.SelectedItems.Count == 0)
+            else if (cmbGallerySelectionType.SelectedIndex == 1 && includeCount == 0)
             {
                 ShowMessage(MessageType.Warning, "The gallery does not have any tags associated with it, so cannot be saved.");
                 return;
             }
-            else if (lstGalleryTagListInclude.SelectedItems.Count == 0 && galleryCategories.Length == 0)
+            else if (includeCount == 0 && galleryCategories.Length == 0)
             {
                 ShowMessage(MessageType.Warning, "The gallery does not have any catgories or tags associated with it, so cannot be saved.");
                 return;
@@ -5090,6 +5193,30 @@ namespace ManageWalla
             //await WaitAsynchronouslyAsync();
             //TweakImageMarginSize(eventTime, currentPane);
         }
+
+        private void cmdAccountChangeImageCopyFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
+            if (folderDialog.SelectedPath.Length > 0)
+            {
+                lblAccountImageCopyFolder.Content = folderDialog.SelectedPath;
+                lblAccountImageCopyFolderAbbrev.Content = StringTrim(folderDialog.SelectedPath, 80);
+            }
+        }
+
+        private void cmdAccountChangeAutoUploadFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
+            if (folderDialog.SelectedPath.Length > 0)
+            {
+                chkAccountAutoUpload.IsChecked = true;
+                lblAccountAutoUploadFolder.Content = folderDialog.SelectedPath;
+                lblAccountAutoUploadFolderAbbrev.Content = StringTrim(folderDialog.SelectedPath, 80);
+            }
+        }
+
 
     }
 }

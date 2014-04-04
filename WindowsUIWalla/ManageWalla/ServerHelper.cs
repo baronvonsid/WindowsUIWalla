@@ -192,7 +192,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task UserAppCreateUpdateAsync(UserApp userApp)
+        async public Task UserAppCreateUpdateAsync(UserApp userApp, CancellationToken cancelToken)
         {
             try
             {
@@ -203,12 +203,16 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<UserApp>(userApp, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
+
+                //XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                //reader.MoveToContent();
+                //long machineId = reader.ReadElementContentAsLong();
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("TagUpdateAsync has been cancelled.");
+                logger.Debug("UserAppCreateUpdateAsync has been cancelled.");
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -217,62 +221,6 @@ namespace ManageWalla
                 throw ex;
             }
         }
-
- /*
-        async public Task MachineMarkSession(long machineId, CancellationToken cancelToken)
-        {
-            try
-            {
-                return;
-
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "machine/" + machineId.ToString());
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
-            }
-            catch (OperationCanceledException cancelEx)
-            {
-                logger.Debug("MarkMachineSession has been cancelled.");
-                throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-            }
-        }
- To implement
-        async public Task<long> MachineRegisterNew(string machineName, int platformId, CancellationToken cancelToken)
-        {
-            try
-            {
-                return 0;
-
-                
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "machine/" + platformId.ToString() + "/" + Uri.EscapeUriString(machineName));
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
-
-                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
-                reader.MoveToContent();
-                long machineId = reader.ReadElementContentAsLong();
-
-                return machineId;
-               
-            }
-            catch (OperationCanceledException cancelEx)
-            {
-                logger.Debug("MachineRegisterNew has been cancelled.");
-                throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                return 0;
-            }
-        } */
         #endregion
 
         #region Tag

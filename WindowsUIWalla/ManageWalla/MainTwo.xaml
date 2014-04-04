@@ -46,8 +46,6 @@
                     </Button.Content>
                 </Button>
 
-
-
                 <StackPanel x:Name="panNavigationVert" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" DockPanel.Dock="Bottom">
                     <Button x:Name="cmdImageNavigationBeginVert" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click">
                         <Button.Content>
@@ -70,16 +68,6 @@
                         </Button.Content>
                     </Button>
                 </StackPanel>
-
-                <!--
-
-            
-                            <Label x:Name="lblImageListNameVert" FontSize="16" Content="Gallery Name"  Background="Transparent" Foreground="#FF408383" Width="109">
-                    <Label.LayoutTransform>
-                        <RotateTransform Angle="-90"></RotateTransform>
-                    </Label.LayoutTransform>
-                </Label>
-            -->
 
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
 
@@ -125,8 +113,6 @@
                 </StackPanel>
             </DockPanel>
 
-            
-            
             <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Vertical">
                 <DockPanel Margin="12,0,10,0" LastChildFill="True" Background="{StaticResource WallaBannerBackgroundBrush}" VerticalAlignment="Center">
 
@@ -160,7 +146,6 @@
                     <Label x:Name="lblFotoWalla" FontSize="24" VerticalContentAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="{StaticResource FontBorderBrush}">
                     </Label>
                 </DockPanel>
-
 
                 <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="500" Y2="5" StrokeThickness="0.5" Margin="0,8,0,0" />
 
@@ -552,7 +537,7 @@
                 <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="300" Y2="1" StrokeThickness="0.5" Margin="0,2,0,2" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" />
 
                 <Label Content="Auto upload folder" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" FontWeight="SemiBold" />
-                <Label x:Name="lblAutoUploadFolder" Content="{Binding Mode=OneWay, Path=AutoUploadFolderAbbrev}" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" ToolTip="{Binding Mode=OneWay, Path=AutoUploadFolder}" />
+                <Label x:Name="lblUploadAutoUploadFolder" Content="{Binding Mode=OneWay, Path=AutoUploadFolderAbbrev}" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" ToolTip="{Binding Mode=OneWay, Path=AutoUploadFolder}" />
 
                 <Label Content="Category" Grid.Column="0" Grid.Row="4" FontWeight="SemiBold" />
                 <Label Content="{Binding Mode=OneWay, Path=AutoUploadCategoryName}" Grid.Column="1" Grid.Row="4" />
@@ -566,8 +551,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="65" />
                     </Grid.ColumnDefinitions>
-                    <Label x:Name="lblRootCalegory" Content="{Binding Mode=OneWay, Path=RootCategoryName}" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" DockPanel.Dock="Left" />
-
+                    <Label x:Name="lblUploadRootCalegory" Content="{Binding Mode=OneWay, Path=RootCategoryName}" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" DockPanel.Dock="Left" />
                     <Button x:Name="cmdUploadChangeCategory" Content="Change" DockPanel.Dock="Right" Grid.Column="1" Grid.Row="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadChangeCategory_Click" />
                 </Grid>
 
@@ -737,7 +721,7 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition MinWidth="300"/>
+                                <ColumnDefinition Width="300"/>
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="150"/>
                                 <ColumnDefinition Width="*"/>
@@ -759,12 +743,12 @@
                                     <RowDefinition Height="2*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="150"/>
                                 </Grid.ColumnDefinitions>
 
                                 <Label Content="Group Fotos" Grid.Column="0" Grid.Row="0" />
-                                <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="1" Margin="2" Grid.Column="1" Grid.Row="0">
+                                <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="1" Margin="2" Width="120" Height="26" Grid.Column="1" Grid.Row="0">
                                     <ComboBoxItem ToolTip="Fotos will not be grouped">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
@@ -804,7 +788,7 @@
                             </Grid>
 
                             <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" >
-                                <ComboBox x:Name="cmbGalleryPresentationType" Margin="2" SelectedIndex="0" SelectionChanged="cmbGalleryPresentationType_SelectionChanged" >
+                                <ComboBox x:Name="cmbGalleryPresentationType" Margin="2" SelectedIndex="0" Width="120" Height="26" SelectionChanged="cmbGalleryPresentationType_SelectionChanged" >
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
@@ -821,7 +805,7 @@
                             </StackPanel>
 
                             <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" >
-                                <ComboBox x:Name="cmbGalleryStyleType" Margin="2" SelectedIndex="0" >
+                                <ComboBox x:Name="cmbGalleryStyleType" Margin="2" SelectedIndex="0" Width="120" Height="26">
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
@@ -856,20 +840,21 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="30" />
                                 <RowDefinition Height="30" />
-                                <RowDefinition Height="*" />
+                                <RowDefinition Height="2*" />
+                                <RowDefinition Height="2*" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="3*" MaxWidth="200"/>
                                 <ColumnDefinition Width="25"/>
-                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="3*" MaxWidth="200"/>
                                 <ColumnDefinition Width="20"/>
-                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="3*" MaxWidth="200"/>
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal">
-                                <Label Content="Selection Type"/>
+                                <Label Content="Selection Type" FontSize="24"/>
 
-                                <ComboBox x:Name="cmbGallerySelectionType" SelectedIndex="2" Width="150" Margin="2" Grid.Column="1" Grid.Row="4" SelectionChanged="cmbGallerySelectionType_SelectionChanged">
+                                <ComboBox x:Name="cmbGallerySelectionType" SelectedIndex="2" Height="26" Width="150" Margin="2" Grid.Column="1" Grid.Row="4" SelectionChanged="cmbGallerySelectionType_SelectionChanged">
                                     <ComboBoxItem ToolTip="Fotos will be included from selected categories">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="{StaticResource menuItemImageSrc}"  Height="20" Width="20" />
@@ -898,109 +883,55 @@
 
                             </StackPanel>
 
-                            <Label Content="Categories to include" FontWeight="Bold" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="1" />
+                            <Label Content="Categories to include" FontSize="20" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="1" />
 
-                            <!-- ItemsSource="{Binding Mode=TwoWay, Path=CategoryItems}" DataContext="{DynamicResource galleryCategoryModelKey}" 
-                        ItemsSource="{Binding Mode=TwoWay, Path= CategoryItems}"  SelectedIndex="{Binding selectionIndex}" 
-                        <TextBlock Text="{Binding name}" ToolTip="{Binding tooltip}"/>
-                        -->
-
-
-                            <ScrollViewer  x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="2" Margin="2,0,0,2">
-
+                            <ScrollViewer  x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="2,0,0,2">
                                 <TreeView x:Name="treeGalleryCategoryView" ItemContainerStyle="{StaticResource styleTreeViewItemWithCombo}">
-                                    <!--
-                                <TreeView.ItemTemplate>
-                                    <HierarchicalDataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <ComboBox SelectionChanged="GalleryCategory_SelectionChanged">
-                                                    <ComboBoxItem> - </ComboBoxItem>
-                                                    <ComboBoxItem> Y </ComboBoxItem>
-                                                    <ComboBoxItem>ALL</ComboBoxItem>
-                                                </ComboBox>
-                                                <TextBlock Text="" ToolTip=""/>
-                                            </StackPanel>
-                                    </HierarchicalDataTemplate>
-                                </TreeView.ItemTemplate>
-                                -->
-                                    <!--
-                                <TreeView.ItemContainerStyle>
-
-                                    <Style TargetType="TreeViewItem">
-
-                                        <Setter Property="IsExpanded" Value="True"/>
-                                        <Setter Property="IsEnabled" Value="True"/>
-                                    </Style>
-
-                                </TreeView.ItemContainerStyle>
--->
-
-                                    <!--
-                                <TreeView.Resources>
-                                    <Style TargetType="{x:Type TreeViewItem}">
-                                        <Setter Property="HeaderTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <CheckBox Name="chk" Margin="2" >
-                                                        </CheckBox>
-                                                        <TextBlock Text="{Binding Path=Name}"></TextBlock>
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </TreeView.Resources>
--->
 
                                 </TreeView>
                             </ScrollViewer>
 
-                            <!--
-                            <local:MultiSelectTreeView
-                                
-                                x:Name="treeGalleryCategoryView"
-                                DataContext="{DynamicResource galleryCategoryModelKey}"
-                                ItemContainerStyle="{StaticResource MultiSelectTreeViewItemStyle}"
-                                ItemsSource="{Binding Mode=TwoWay, Path=GalleryCategories}">
-
-                                <local:MultiSelectTreeView.ItemTemplate>
-                                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <CheckBox IsChecked="{Binding recursive}" Content="All  " ToolTip="Check this to include ALL sub folders." Checked="GalleryCategory_CheckBoxUpdated" Unchecked="GalleryCategory_CheckBoxUpdated"  />
-                                            <TextBlock Text="{Binding name}" ToolTip="{Binding tooltip}"/>
-                                        </StackPanel>
-                                    </HierarchicalDataTemplate>
-                                </local:MultiSelectTreeView.ItemTemplate>
-
-                            </local:MultiSelectTreeView>
--->
-
-
-                            <StackPanel Grid.Column="1" Grid.Row="2" Margin="0" VerticalAlignment="Center" >
+                            <StackPanel Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" Margin="0" VerticalAlignment="Center" >
                                 <Label x:Name="lblGallerySelectionAndOr" Content="AND"   HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0" FontSize="12" />
                             </StackPanel>
 
-                            <Label Content="Tags to include" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="1" FontWeight="Bold" />
+                            <Label Content="Tags to include" VerticalContentAlignment="Center" Grid.Column="2" FontSize="20" Grid.Row="1"/>
 
-                            <ScrollViewer x:Name="scrollGalleryTagInclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="2" Grid.Row="2" Margin="0,0,0,2">
+                            <ScrollViewer x:Name="scrollGalleryMyTagInclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="2" Grid.Row="2" Margin="0,0,0,2">
                                 <ListBox Style="{DynamicResource TagListStyle}" 
-                            	x:Name ="lstGalleryTagListInclude" 
+                            	x:Name ="lstGalleryMyTagListInclude" 
                             	ScrollViewer.VerticalScrollBarVisibility="Auto"
                                 SelectionMode="Multiple" 
                                 ItemContainerStyle="{DynamicResource TagListItem}">
                                 </ListBox>
                             </ScrollViewer>
 
-                            <Label Content="Tags to exclude" Grid.Column="4" Grid.Row="1" Margin="4" VerticalContentAlignment="Center" FontWeight="Bold" />
-
-                            <ScrollViewer x:Name="scrollGalleryTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="2" Margin="0,0,2,2">
+                            <ScrollViewer x:Name="scrollGallerySystemTagInclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="2" Grid.Row="3" Margin="0,0,0,2">
                                 <ListBox Style="{DynamicResource TagListStyle}" 
-                            	x:Name ="lstGalleryTagListExclude" 
+                            	x:Name ="lstGallerySystemTagListInclude" 
+                            	ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                SelectionMode="Multiple" 
+                                ItemContainerStyle="{DynamicResource TagListItem}">
+                                </ListBox>
+                            </ScrollViewer>
+
+                            <Label Content="Tags to exclude" Grid.Column="4" Grid.Row="1" Margin="4" VerticalContentAlignment="Center" FontSize="20" />
+
+                            <ScrollViewer x:Name="scrollGalleryMyTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="2" Margin="0,0,2,2">
+                                <ListBox Style="{DynamicResource TagListStyle}" 
+                            	x:Name ="lstGalleryMyTagListExclude" 
                             	ScrollViewer.VerticalScrollBarVisibility="Visible"
                                 SelectionMode="Multiple" 
-                                ItemContainerStyle="{DynamicResource TagListItem}"
-                                >
+                                ItemContainerStyle="{DynamicResource TagListItem}">
+                                </ListBox>
+                            </ScrollViewer>
+
+                            <ScrollViewer x:Name="scrollGallerySystemTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="2" Margin="0,0,2,2">
+                                <ListBox Style="{DynamicResource TagListStyle}" 
+                            	x:Name ="lstGallerySystemTagListExclude" 
+                            	ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                SelectionMode="Multiple" 
+                                ItemContainerStyle="{DynamicResource TagListItem}">
                                 </ListBox>
                             </ScrollViewer>
                         </Grid>
@@ -1027,7 +958,7 @@
                                     </StackPanel>
                                 </Grid>
                                 <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane"  Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140" MouseUp="Image_MouseUp" >
-                                    <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2" Foreground="{StaticResource FontBorderBrush}"/>
+                                    <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2" Foreground="{StaticResource FontBorderBrush}"/> 
                                     <TextBlock Text="{Binding description}" MaxHeight="60" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
                                     <TextBlock Text="{Binding shotSummary}" TextWrapping="Wrap" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
                                     <TextBlock Text="{Binding fileSummary}" TextWrapping="Wrap" Margin="6,2,2,2" FontSize="12" FontWeight="Light" Foreground="{StaticResource FontBorderBrush}" />
@@ -1451,55 +1382,183 @@
 
             </Grid>
 
-            <Grid x:Name="gridAccount" Margin="0,0,0,0" Grid.Column="3" Grid.Row="0" Grid.RowSpan="9">
+            <Grid x:Name="gridAccount" Margin="12,0,10,0" Grid.Column="3" Grid.Row="0" Grid.RowSpan="9">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <DockPanel x:Name="panAccount" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2">
+                <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical">
+                    <Button x:Name="cmdAccountClose"  HorizontalAlignment="Left" Style="{StaticResource styleButton}" Padding="0" BorderThickness="0" Click="cmdAccountClose_Click" >
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Image x:Name="imageContent" Source="{StaticResource accountImageSelectedSrc}" SnapsToDevicePixels="True" Height="31" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="imageContent" Property="Source" Value="{StaticResource accountImageSrc}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="imageContent" Property="Source" Value="{StaticResource accountImageSelectedSrc}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="imageContent" Property="Opacity" Value="0.7" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="2000" Y2="5" StrokeThickness="0.5" Margin="0,8,0,0" />
+                </StackPanel>
+                
+                <DockPanel x:Name="panAccount" Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" Margin="2">
                     <TabControl x:Name="tabAccount" Margin="4" SelectionChanged="tabAccount_SelectionChanged">
                         <TabItem x:Name="tabAccountSettings" Header="Account Details" >
+
                             <Grid x:Name="gridAccountSettings" Background="{StaticResource PaneBodyBackgroundBrush}">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="30" />
-                                    <RowDefinition Height="30" />
-                                    <RowDefinition Height="30" />
-                                    <RowDefinition Height="34" />
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="120" />
+                                    <RowDefinition Height="40" />
                                     <RowDefinition Height="*" />
+                                    <RowDefinition Height="34" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100" />
-                                    <ColumnDefinition Width="250" />
+                                    <ColumnDefinition Width="300" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="330" />
                                 </Grid.ColumnDefinitions>
-                                
-                                <Label Grid.Column="0" Grid.Row="0" Content="Profile Name"/>
-                                <TextBox x:Name="txtAccountProfileName" Grid.Column="1" Grid.Row="0" MaxLength="100" Margin="2" />
 
-                                <Label Grid.Column="0" Grid.Row="1" Content="Password"/>
-                                <TextBox x:Name="txtAccountPassword" Grid.Column="1" Grid.Row="1" MaxLength="20" Margin="2" />
-                                
-                                <Label Grid.Column="0" Grid.Row="2" Content="Email Address"/>
-                                <Label x:Name="lblAccountEmail" Grid.Column="1" Grid.Row="2" />
+                                <Label Content="Account" FontWeight="SemiBold" FontSize="24" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="0" />
 
-                                <Label Grid.Column="1" Grid.Row="2">
-                                    <Binding Path="Count" Source="{StaticResource uploadImageStateListKey}">
-                                        <Binding.StringFormat>{0} meCount</Binding.StringFormat>
-                                    </Binding>
-                                </Label>
+                                <Label Content="Account Status" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="0" />
+
+                                <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="5" Y1="10" X2="5" Y2="2000" StrokeThickness="0.5" Margin="0" Grid.Column="1" Grid.Row="0" Grid.RowSpan="5" />
+
+                                <Grid Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="0" Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="200" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Grid.Column="0" Grid.Row="0" Content="Profile Name" FontWeight="SemiBold"/>
+                                    <TextBox x:Name="txtAccountProfileName" Grid.Column="1" Grid.Row="0" MaxLength="100" Margin="2" />
+
+                                    <Label Grid.Column="0" Grid.Row="1" Content="Password" FontWeight="SemiBold"/>
+                                    <TextBox x:Name="txtAccountPassword" Grid.Column="1" Grid.Row="1" MaxLength="20" Margin="2" />
+
+                                    <Label Grid.Column="0" Grid.Row="2" Content="Email Address" FontWeight="SemiBold"/>
+                                    <Label x:Name="lblAccountEmail" Grid.Column="1" Grid.Row="2" />
+
+                                </Grid>
+
+                                <Grid Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="2" Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="30" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="200" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Grid.Row="0" Content="Account Type" FontWeight="SemiBold"/>
+                                    <Label x:Name="lblAccountType" Grid.Column="1" Grid.Row="0" />
+
+                                    <Label Grid.Column="0" Grid.Row="1" Content="Account Open" FontWeight="SemiBold"/>
+                                    <Label x:Name="lblAccountOpen" Grid.Column="1" Grid.Row="1" />
+
+                                    <Label Grid.Column="0" Grid.Row="2" Content="Storage Limit" FontWeight="SemiBold"/>
+                                    <Label x:Name="lblAccountStorageLimitGB" Grid.Column="1" Grid.Row="2" />
+
+                                    <Label Grid.Column="0" Grid.Row="3" Content="Current Storage" FontWeight="SemiBold"/>
+                                    <Label x:Name="lblAccountCurrentUtil" Grid.Column="1" Grid.Row="3" />
+                                </Grid>
+
+                                <Label Content="Application Settings" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="2" />
                                 
-                                <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+                                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="3">
+                                    <Grid Background="{StaticResource PaneBodyBackgroundBrush}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height="34" />
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height="34" />
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height="30" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="200" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Label Grid.Column="0" Grid.Row="0" Content="Auto Upload" FontWeight="SemiBold"/>
+                                        <CheckBox x:Name="chkAccountAutoUpload" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,20,0" VerticalAlignment="Center" />
+
+                                        <Label Grid.Column="0" Grid.Row="1" Content="Auto Upload Folder" Grid.ColumnSpan="2" FontWeight="SemiBold"/>
+                                        <Button x:Name="cmdAccountChangeAutoUploadFolder" HorizontalAlignment="Right" Content="Change" Grid.Column="1" Grid.Row="1" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountChangeAutoUploadFolder_Click" />
+                                        
+                                        <Label x:Name="lblAccountAutoUploadFolder" Visibility="Collapsed" Content="..." Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+                                        <Label x:Name="lblAccountAutoUploadFolderAbbrev" Content="..." Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+
+                                        <Label Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Content="Image Copy Folder" FontWeight="SemiBold"/>
+                                        <Button x:Name="cmdAccountChangeImageCopyFolder" Content="Change"  HorizontalAlignment="Right" Grid.Column="1" Grid.Row="3" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountChangeImageCopyFolder_Click" />
+
+                                        <Label x:Name="lblAccountImageCopyFolder" Visibility="Collapsed" Content="..." Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+                                        <Label x:Name="lblAccountImageCopyFolderAbbrev" Content="..." Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+
+                                        <Label Grid.Column="0" Grid.Row="5" Content="Copies Saved" FontWeight="SemiBold" />
+                                        <Label x:Name="lblAccountImageCopyStatus" Grid.Column="1" Grid.Row="5" Content="..." HorizontalAlignment="Right"/>
+
+                                        <Label Grid.Column="0" Grid.Row="6" Content="Max Size" FontWeight="SemiBold" />
+                                        <Grid Grid.Column="1" Grid.Row="6" HorizontalAlignment="Right">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="50" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Slider x:Name="sldAccountImageCopySize" Grid.Column="0" Grid.Row="0" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Value="250"
+                                                    Delay="500"
+                                                    Interval="10"
+                                                    TickPlacement="BottomRight"
+                                                    Minimum="0"
+                                                    Maximum="500"
+                                                    Width="100"></Slider>
+                                            <Label Content="{Binding ElementName=sldAccountImageCopySize, Path=Value, Converter={StaticResource WallaCacheSizeConverterKey}}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>                                        
+                                    </Grid>
+                                </ScrollViewer>
+
+                                <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" >
                                     <Button x:Name="cmdAccountLogin" Content="Login" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountLogin_Click" />
-                                    <Button x:Name="cmdAccountEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountEdit_Click" />
-                                    <Button x:Name="cmdAccountSave" Content="Save" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountSave_Click" />
-                                    <Button x:Name="cmdAccountCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountCancel_Click" />
+                                    <Button x:Name="cmdUseOffline" Content="Use Offline" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
+                                    <Button x:Name="cmdAccountUpdateOnWeb" Content="Update Profile" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
                                 </StackPanel>
 
-                                <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Left">
-                                    <Button x:Name="cmdAccountClose" Content="Close" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountClose_Click" />
+                                <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="2">
+                                    <Button x:Name="cmdUserAppEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUserAppEdit_Click" />
+                                    <Button x:Name="cmdUserAppSave" Content="Save" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUserAppSave_Click" />
+                                    <Button x:Name="cmdUserAppCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUserAppCancel_Click" />
                                 </StackPanel>
+                                
+                                <!-- <Button x:Name="cmdAccountClose" Content="Close" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountClose_Click" /> -->
                             </Grid>
                         </TabItem>
 

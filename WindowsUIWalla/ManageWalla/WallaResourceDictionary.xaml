@@ -11,13 +11,12 @@
     <!--<walla:UploadStatusListBind x:Key="uploadStatusListBindKey"  />-->
     <walla:UploadImageStateList x:Key="uploadImageStateListKey"  />
 
-
-
     <walla:ImageMainViewerList x:Key="imageMainViewerListKey" />
     <walla:GalleryCategoryModel x:Key="galleryCategoryModelKey" />
 
     <walla:WallaUploadStatusConverter x:Key="wallaUploadStatusConverterKey"  />
     <walla:WallaByteToMBConverter x:Key="WallaByteToMBConverterKey" />
+    <walla:WallaCacheSizeConverter x:Key="WallaCacheSizeConverterKey" />
     
     <XmlNamespaceMappingCollection x:Key="wallaNamespaceMappingKey">
         <XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
