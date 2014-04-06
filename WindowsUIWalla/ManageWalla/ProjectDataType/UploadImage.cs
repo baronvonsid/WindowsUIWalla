@@ -68,7 +68,6 @@ namespace ManageWalla
                 meta.OriginalFileName = Path.GetFileName(FilePath);
                 meta.Name = Path.GetFileNameWithoutExtension(FilePath);
                 meta.Format = format;
-                meta.LocalPath = FilePath;
 
                 meta.UploadDate = DateTime.Now;
                 meta.TakenDateFile = fileInfo.LastWriteTime;

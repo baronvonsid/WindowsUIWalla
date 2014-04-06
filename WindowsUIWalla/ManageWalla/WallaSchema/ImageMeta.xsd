@@ -11,7 +11,6 @@ targetNamespace="http://www.example.org/ImageMeta"
         <element type="string" name="Desc"/>
         <element type="string" name="OriginalFileName"/>
         <element type="string" name="Format"/>
-        <element type="string" name="LocalPath"/>
         <element type="long" name="UserAppId"/>
         <element type="int" name="Status" default="0"/>
 	    <element type="int" name="Width" default="0"/>

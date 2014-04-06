@@ -32,8 +32,6 @@ namespace ManageWalla {
         
         private string formatField;
         
-        private string localPathField;
-        
         private long userAppIdField;
         
         private int statusField;
@@ -141,16 +139,6 @@ namespace ManageWalla {
             }
             set {
                 this.formatField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public string LocalPath {
-            get {
-                return this.localPathField;
-            }
-            set {
-                this.localPathField = value;
             }
         }
         
