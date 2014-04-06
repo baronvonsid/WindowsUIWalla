@@ -54,7 +54,7 @@ namespace ManageWalla
         }
 
         #region Thumb
-        async public Task LoadThumb(CancellationToken cancelToken, List<ThumbCache> thumbCacheList)
+        async public Task LoadThumb(CancellationToken cancelToken, List<ThumbCache> thumbCacheList, int thumbCacheSizeMB)
         {
             if (imageId == 0)
                 return;
@@ -67,7 +67,7 @@ namespace ManageWalla
                     /* GET /{userName}/image/{imageId}/{size}/ */
                     string requestUrl = "image/" + imageId.ToString() + "/300/300/";
                     thumbArray = await LoadImageArrayAsync(requestUrl, cancelToken);
-                    CacheHelper.SaveImageArray(imageId, thumbArray, thumbCacheList);
+                    CacheHelper.SaveImageArray(imageId, thumbArray, thumbCacheList, thumbCacheSizeMB);
                 }
 
                 thumbnailImage = ConvertByteArrayToImage(thumbArray);
@@ -93,7 +93,7 @@ namespace ManageWalla
         #endregion
 
         #region MainCopy
-        async public Task LoadMainCopyImage(CancellationToken cancelToken, List<MainCopyCache> mainCopyCacheList, string folder)
+        async public Task LoadMainCopyImage(CancellationToken cancelToken, List<MainCopyCache> mainCopyCacheList, string folder, int mainCopyCacheSizeMB)
         {
             if (imageId == 0)
                 return;
@@ -110,7 +110,7 @@ namespace ManageWalla
                 {
                     string requestUrl = "image/" + imageId.ToString() + "/maincopy";
                     byte[] mainImageArray = await LoadImageArrayAsync(requestUrl, cancelToken);
-                    CacheHelper.SaveMainCopyToCache(imageId, mainImageArray, mainCopyCacheList, folder);
+                    CacheHelper.SaveMainCopyToCache(imageId, mainImageArray, mainCopyCacheList, folder, mainCopyCacheSizeMB);
                     mainCopyImage = ConvertByteArrayToImage(mainImageArray);
                 }
             }

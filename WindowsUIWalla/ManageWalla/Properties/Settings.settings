@@ -17,15 +17,6 @@
     <Setting Name="WebServerTest" Type="System.String" Scope="Application">
       <Value Profile="(Default)">www.google.com</Value>
     </Setting>
-    <Setting Name="ThumbCacheSizeMB" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">50</Value>
-    </Setting>
-    <Setting Name="MainCopyCacheSizeMB" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">400</Value>
-    </Setting>
-    <Setting Name="ImageFetchSize" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">50</Value>
-    </Setting>
     <Setting Name="GlobalStateCacheFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Walla-LocalGlobalState.db</Value>
     </Setting>

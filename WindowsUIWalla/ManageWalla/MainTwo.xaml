@@ -1436,8 +1436,10 @@
 
                                 <Label Content="Account" FontWeight="SemiBold" FontSize="24" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="0" />
 
-                                <Label Content="Account Status" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="0" />
+                                <Label Content="Account Status" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="0" />
 
+                                <Button x:Name="cmdAccountStatusRefresh" Tag="false" HorizontalAlignment="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Padding="0" Margin="0" Grid.Column="2" Grid.Row="0" BorderThickness="0" Click="cmdAccountStatusRefresh_Click" />
+                                
                                 <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="5" Y1="10" X2="5" Y2="2000" StrokeThickness="0.5" Margin="0" Grid.Column="1" Grid.Row="0" Grid.RowSpan="5" />
 
                                 <Grid Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="0" Grid.Row="1">
@@ -1562,8 +1564,6 @@
                             </Grid>
                         </TabItem>
 
-
-
                         <TabItem x:Name="tabUploadStatusList" Header="Upload Status" >
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -1668,12 +1668,12 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                                 
-                                
                                 <DockPanel x:Name="panUploadStatusListUnavailable" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2" Visibility="Collapsed">
                                     <TextBlock Text="Upload Status List" TextAlignment="Center" />
                                 </DockPanel>
 
-                                <Button x:Name="cmdUploadStatusRefresh" Content="Refresh" HorizontalAlignment="Right" Padding="4" Grid.Column="0" Grid.Row="1" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUploadStatusRefresh_Click" />
+                                <Button x:Name="cmdUploadStatusRefresh" Tag="false" HorizontalAlignment="Left" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Padding="0" Margin="0" Grid.Column="0" Grid.Row="1" BorderThickness="0" Click="cmdUploadStatusRefresh_Click" />
+                               
                             </Grid>
                         </TabItem>
                     </TabControl>

@@ -18,11 +18,11 @@ namespace ManageWalla
     public class GlobalState
     {
         
-        public int imageFetchSize { get; set; }
+        //public int imageFetchSize { get; set; }
         public DateTime lastLoggedIn { get; set; }
-        public int mainCopyCacheSizeMB { get; set; }
-        public int thumbCacheSizeMB { get; set; }
-        public string mainCopyFolder { get; set; }
+        //public int mainCopyCacheSizeMB { get; set; }
+        //public int thumbCacheSizeMB { get; set; }
+        //public string mainCopyFolder { get; set; }
         public Account account { get; set; }
         public UserApp userApp { get; set; }
 

@@ -34,14 +34,14 @@ namespace ManageWalla
                 state.imageMetaList = new List<ImageMeta>();
                 //state.mainCopyCacheList = new List<MainCopyCache>();
                 state.connectionState = GlobalState.ConnectionState.NoAccount;
-                state.mainCopyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Copies");
-                state.mainCopyCacheSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
+                //state.mainCopyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Copies");
+                //state.mainCopyCacheSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
                 state.account = new Account();
                 state.account.ProfileName = "";
             }
 
-            state.imageFetchSize = Properties.Settings.Default.ImageFetchSize;
-            state.thumbCacheSizeMB = Properties.Settings.Default.ThumbCacheSizeMB;
+            //state.imageFetchSize = Properties.Settings.Default.ImageFetchSize;
+            //state.thumbCacheSizeMB = Properties.Settings.Default.ThumbCacheSizeMB;
 
             state.categoryLoadState = GlobalState.DataLoadState.No;
             state.tagLoadState = GlobalState.DataLoadState.No;
@@ -126,10 +126,10 @@ namespace ManageWalla
             return null;
         }
 
-        public static void SaveImageArray(long imageId, Byte[] newImageArray, List<ThumbCache> thumbCacheList)
+        public static void SaveImageArray(long imageId, Byte[] newImageArray, List<ThumbCache> thumbCacheList, int thumbCacheSizeMB)
         {
             //Check current size of cache, if exceeding limit then remove images.
-            ReduceThumbCacheSize(thumbCacheList);
+            ReduceThumbCacheSize(thumbCacheList, thumbCacheSizeMB);
             ThumbCache newCacheItem = new ThumbCache();
             newCacheItem.imageId = imageId;
             newCacheItem.lastAccessed = DateTime.Now;
@@ -138,14 +138,14 @@ namespace ManageWalla
             thumbCacheList.Add(newCacheItem);
         }
 
-        public static void ReduceThumbCacheSize(List<ThumbCache> thumbCacheList)
+        public static void ReduceThumbCacheSize(List<ThumbCache> thumbCacheList, int thumbCacheSizeMB)
         {
-            long targetSizeMB = Properties.Settings.Default.ThumbCacheSizeMB;
+            //long targetSizeMB = Properties.Settings.Default.ThumbCacheSizeMB;
             long totalSize = (long)thumbCacheList.Sum(r => r.imageSize);
 
             long thumbSize = 14000; //30KB average
             long buffer = thumbSize * 10;
-            long targetSizeBytes = targetSizeMB * 131072;
+            long targetSizeBytes = thumbCacheSizeMB * 131072;
             while (totalSize > (targetSizeBytes - buffer))
             {
                 //Find oldest entry and remove form list.
@@ -214,10 +214,10 @@ namespace ManageWalla
             return "";
         }
 
-        public static void SaveMainCopyToCache(long imageId, Byte[] mainCopyByteArray, List<MainCopyCache> mainCopyCacheList, string folder)
+        public static void SaveMainCopyToCache(long imageId, Byte[] mainCopyByteArray, List<MainCopyCache> mainCopyCacheList, string folder, int mainCopyCacheSizeMB)
         {
             //Check current size of cache, if exceeding limit then remove images.
-            ReduceMainCopyCacheSize(mainCopyCacheList, folder);
+            ReduceMainCopyCacheSize(mainCopyCacheList, folder, mainCopyCacheSizeMB);
 
             string fileName = Path.Combine(folder, imageId.ToString()) + ".jpg";
             if (!File.Exists(fileName))
@@ -236,17 +236,20 @@ namespace ManageWalla
             mainCopyCacheList.Add(newCacheItem);
         }
 
-        public static void ReduceMainCopyCacheSize(List<MainCopyCache> mainCopyCacheList, string folder)
+        public static void ReduceMainCopyCacheSize(List<MainCopyCache> mainCopyCacheList, string folder, int mainCopyCacheSizeMB)
         {
-            long targetSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
+            //long targetSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
+            if (mainCopyCacheSizeMB >= 500)
+                return;
+
             long totalSize = (long)mainCopyCacheList.Sum(r => r.imageSize);
 
             long mainCopySize = 100000; //200KB average
             long buffer = mainCopySize * 10;
-            long targetSizeBytes = targetSizeMB * 131072;
+            long targetSizeBytes = mainCopyCacheSizeMB / 1024 / 1024;
             while (totalSize > (targetSizeBytes - buffer))
             {
-                //Find oldest entry and remove form list.
+                //Find oldest entry and remove from list.
                 MainCopyCache oldest = mainCopyCacheList.First(m => m.lastAccessed == (mainCopyCacheList.Max(e => e.lastAccessed)));
                 mainCopyCacheList.Remove(oldest);
                 string path = Path.Combine(folder, oldest.imageId.ToString()) + ".jpg";

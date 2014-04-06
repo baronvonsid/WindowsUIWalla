@@ -911,15 +911,18 @@ namespace ManageWalla
                         cmdUserAppSave.Visibility = Visibility.Collapsed;
                         cmdUserAppCancel.Visibility = Visibility.Collapsed;
                         cmdAccountLogin.Visibility = Visibility.Collapsed;
+                        cmdAccount.IsEnabled = true;
+                        cmdAccountStatusRefresh.IsEnabled = true;
                     }
                     else
                     {
                         //tabAccount.IsEnabled = false;
-                        //cmdAccountClose.IsEnabled = false;
+                        cmdAccountStatusRefresh.IsEnabled = false;
                         cmdUserAppEdit.Visibility = Visibility.Collapsed;
                         cmdUserAppCancel.Visibility = Visibility.Collapsed;
                         cmdUserAppSave.Visibility = Visibility.Collapsed;
                         cmdAccountLogin.Visibility = Visibility.Visible;
+                        cmdAccount.IsEnabled = false;
                     }
 
                     chkAccountAutoUpload.IsEnabled = false;
@@ -936,6 +939,7 @@ namespace ManageWalla
                     cmdUserAppSave.Visibility = Visibility.Visible;
                     cmdAccountLogin.Visibility = Visibility.Collapsed;
 
+                    cmdAccountStatusRefresh.IsEnabled = false;
                     chkAccountAutoUpload.IsEnabled = true;
                     sldAccountImageCopySize.IsEnabled = true;
                     cmdAccountChangeAutoUploadFolder.IsEnabled = true;
@@ -1123,7 +1127,7 @@ namespace ManageWalla
         {
             GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
             cancelTokenSource = new CancellationTokenSource();
-            await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.mainCopyFolder);
+            await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
             await current.LoadMeta(false, cancelTokenSource.Token);
             ImageViewTagsUpdateFromMeta();
 
@@ -1134,7 +1138,7 @@ namespace ManageWalla
             else
             {
                 GeneralImage previous = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex - 1];
-                previous.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.mainCopyFolder);
+                previous.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
                 previous.LoadMeta(false, cancelTokenSource.Token);
 
                 cmdImageViewPrevious.IsEnabled = true;
@@ -1147,7 +1151,7 @@ namespace ManageWalla
             else
             {
                 GeneralImage next = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex + 1];
-                next.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.mainCopyFolder);
+                next.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
                 next.LoadMeta(false, cancelTokenSource.Token);
                 cmdImageViewNext.IsEnabled = true;
             }
@@ -1515,14 +1519,14 @@ namespace ManageWalla
                     cursor = 0;
                     break;
                 case FetchDirection.Next:
-                    if ((currentImageList.imageCursor + state.imageFetchSize) <= currentImageList.totalImageCount)
-                        cursor = currentImageList.imageCursor + state.imageFetchSize;
+                    if ((currentImageList.imageCursor + state.userApp.FetchSize) <= currentImageList.totalImageCount)
+                        cursor = currentImageList.imageCursor + state.userApp.FetchSize;
                     break;
                 case FetchDirection.Previous:
-                    cursor = Math.Max(currentImageList.imageCursor - state.imageFetchSize, 0);
+                    cursor = Math.Max(currentImageList.imageCursor - state.userApp.FetchSize, 0);
                     break;
                 case FetchDirection.Last:
-                    cursor = Math.Abs(currentImageList.totalImageCount / state.imageFetchSize) * state.imageFetchSize;
+                    cursor = Math.Abs(currentImageList.totalImageCount / state.userApp.FetchSize) * state.userApp.FetchSize;
                     break;
             }
 
@@ -1905,8 +1909,8 @@ namespace ManageWalla
                         cmdImageNavigationPreviousVert.IsEnabled = true;
                     }
 
-                    if ((currentImageList.sectionId > 0 && currentImageList.sectionImageCount > (currentImageList.imageCursor + state.imageFetchSize))
-                        || (currentImageList.sectionId < 1 && currentImageList.totalImageCount > (currentImageList.imageCursor + state.imageFetchSize)))
+                    if ((currentImageList.sectionId > 0 && currentImageList.sectionImageCount > (currentImageList.imageCursor + state.userApp.FetchSize))
+                        || (currentImageList.sectionId < 1 && currentImageList.totalImageCount > (currentImageList.imageCursor + state.userApp.FetchSize)))
                     {
                         cmdImageNavigationLast.IsEnabled = true;
                         cmdImageNavigationNext.IsEnabled = true;
@@ -1951,7 +1955,7 @@ namespace ManageWalla
                     for (int i = 0; i < 10; i++)
                     {
                         if (cursor + i < imageMainViewerList.Count)
-                            tasks[i] = imageMainViewerList[cursor + i].LoadThumb(cancelToken, thumbCacheList);
+                            tasks[i] = imageMainViewerList[cursor + i].LoadThumb(cancelToken, thumbCacheList, state.userApp.ThumbCacheSizeMB);
                     }
 
                     for (int i = 0; i < 10; i++)
@@ -3709,65 +3713,17 @@ namespace ManageWalla
             //TODO update message and icon
         }
 
-        async private Task RefreshUploadStatusStateAsync(bool forceUpdate)
-        {
-            try
-            {
-                if (state.connectionState != GlobalState.ConnectionState.NoAccount &&
-                    (state.uploadStatusListState == GlobalState.DataLoadState.No || forceUpdate || state.tagLoadState == GlobalState.DataLoadState.LocalCache))
-                {
-                    ShowMessage(MessageType.Busy, "Refreshing upload history list");
-
-                    if (cancelTokenSource != null)
-                        cancelTokenSource.Cancel();
-
-                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                    cancelTokenSource = newCancelTokenSource;
-
-                    await controller.RefreshUploadStatusListAsync(cancelTokenSource.Token);
-
-                    if (newCancelTokenSource == cancelTokenSource)
-                        cancelTokenSource = null;
-                }
-
-                switch (state.uploadStatusListState)
-                {
-                    case GlobalState.DataLoadState.Loaded:
-                    case GlobalState.DataLoadState.LocalCache:
-                        RefreshUploadStatusFromStateList();
-                        panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Collapsed;
-                        //datUploadStatusList.Visibility = Visibility.Visible;
-                        break;
-                    case GlobalState.DataLoadState.Unavailable:
-                        panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Visible;
-                        //datUploadStatusList.Visibility = Visibility.Collapsed;
-                        break;
-                }
-
-                ConcludeBusyProcess();
-            }
-            catch (OperationCanceledException)
-            {
-                logger.Debug("RefreshUploadStatusStateAsync has been cancelled.");
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                ShowMessage(MessageType.Error, "Retrieving the upload history has failed with an unexpected problem: " + ex.Message);
-            }
-        }
-
         async private void tabAccount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (tabAccount.SelectedIndex == 1)
             {
-                await RefreshUploadStatusStateAsync(false);
+                await RefreshUploadStatusStateAsync();
             }
         }
 
         async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
         {
-            await RefreshUploadStatusStateAsync(true);
+            await RefreshUploadStatusStateAsync();
         }
 
         private void cmdUserAppCancel_Click(object sender, RoutedEventArgs e)
@@ -3815,8 +3771,8 @@ namespace ManageWalla
         {
             lblAccountType.Content = state.account.AccountTypeName;
             lblAccountOpen.Content = state.account.OpenDate.ToShortDateString();
-            lblAccountStorageLimitGB.Content = state.account.StorageGBLimit + "GB";
-            lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + "GB " + state.account.TotalImages.ToString() + " Images";
+            lblAccountStorageLimitGB.Content = state.account.StorageGBLimit + " GB";
+            lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + " GB - " + state.account.TotalImages.ToString() + " Images";
 
             chkAccountAutoUpload.IsChecked = state.userApp.AutoUpload;
             lblAccountAutoUploadFolder.Content = state.userApp.AutoUploadFolder;
@@ -3825,7 +3781,10 @@ namespace ManageWalla
             lblAccountImageCopyFolder.Content = state.userApp.MainCopyFolder;
             lblAccountImageCopyFolderAbbrev.Content = StringTrim(state.userApp.MainCopyFolder,80);
 
-            lblAccountImageCopyStatus.Content = " TODO ";
+            WallaByteToMBConverter converter = new WallaByteToMBConverter();
+            lblAccountImageCopyStatus.Content = converter.Convert(mainCopyCacheList.Sum<MainCopyCache>(r => r.imageSize), null, null, null) 
+                + " - " + mainCopyCacheList.Count().ToString() + " Images";
+
             sldAccountImageCopySize.Value = state.userApp.MainCopyCacheSizeMB;
 
             lblAccountEmail.Content = state.account.Email;
@@ -3868,7 +3827,7 @@ namespace ManageWalla
                 changedUserApp.MainCopyCacheSizeMB = Convert.ToInt32(sldAccountImageCopySize.Value);
 
                 await controller.UserAppUpdateAsync(changedUserApp, cancelTokenSource.Token);
-                await controller.SetUserApp(cancelTokenSource.Token);
+                //await controller.SetUserApp(cancelTokenSource.Token);
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
@@ -3884,7 +3843,7 @@ namespace ManageWalla
             }
             finally
             {
-                AccountRefreshFromState();
+                AccountStatusRefresh(null);
                 RefreshPanesAllControls(PaneMode.Account);
             }
         }
@@ -3908,11 +3867,12 @@ namespace ManageWalla
                 switch (state.connectionState)
                 {
                     case GlobalState.ConnectionState.LoggedOn:
-                        await controller.AccountDetailsGet(cancelTokenSource.Token);
-                        state.account.Password = password;
-                        await controller.SetPlatform();
-                        await controller.SetUserApp(cancelTokenSource.Token);
-                        AccountRefreshFromState();
+                        AccountStatusRefresh(password);
+                        //await controller.AccountDetailsGet(cancelTokenSource.Token);
+                        //state.account.Password = password;
+                        //await controller.SetPlatform();
+                        //await controller.SetUserApp(cancelTokenSource.Token);
+                        //AccountRefreshFromState();
                         ShowMessage(MessageType.Info, "Account: " + state.account.ProfileName + " has been connected with FotoWalla");
                         break;
                     //case GlobalState.ConnectionState.Offline:
@@ -5217,6 +5177,102 @@ namespace ManageWalla
             }
         }
 
+        async private void cmdAccountStatusRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            await AccountStatusRefresh(null);
+        }
 
+        async private Task AccountStatusRefresh(string password)
+        {
+            try
+            {
+                ShowMessage(MessageType.Busy, "Refreshing Account information");
+                cmdAccountStatusRefresh.Tag = true;
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                if (password == null)
+                    password = state.account.Password;
+
+                await controller.AccountDetailsGet(cancelTokenSource.Token);
+                state.account.Password = password;
+                await controller.SetPlatform();
+                await controller.SetUserApp(cancelTokenSource.Token);
+
+                ConcludeBusyProcess();
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("AccountStatusRefresh has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Account information could not be loaded, there was an error: " + ex.Message);
+            }
+            finally
+            {
+                cmdAccountStatusRefresh.Tag = false;
+                AccountRefreshFromState();
+            }
+        }
+
+        async private Task RefreshUploadStatusStateAsync()
+        {
+            try
+            {
+                bool isBusy = bool.Parse(cmdUploadStatusRefresh.Tag.ToString());
+                if (isBusy) { return; }
+
+                ShowMessage(MessageType.Busy, "Refreshing upload history list");
+
+                cmdUploadStatusRefresh.Tag = true;
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                await controller.RefreshUploadStatusListAsync(cancelTokenSource.Token);
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                switch (state.uploadStatusListState)
+                {
+                    case GlobalState.DataLoadState.Loaded:
+                    case GlobalState.DataLoadState.LocalCache:
+                        RefreshUploadStatusFromStateList();
+                        panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Collapsed;
+                        break;
+                    case GlobalState.DataLoadState.Unavailable:
+                        panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Visible;
+                        break;
+                }
+
+                ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("RefreshUploadStatusStateAsync has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Retrieving the upload history has failed with an unexpected problem: " + ex.Message);
+            }
+            finally
+            {
+                cmdUploadStatusRefresh.Tag = false;
+            }
+        }
     }
 }

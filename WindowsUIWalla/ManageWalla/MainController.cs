@@ -226,12 +226,25 @@ namespace ManageWalla
             {
                 string machineName = System.Environment.MachineName;
 
+                string uploadFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Auto Upload");
+                string copyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Copies");
+
                 UserApp newUserApp = new UserApp();
                 newUserApp.MachineName = machineName;
+                newUserApp.AutoUpload = true;
+                newUserApp.AutoUploadFolder = uploadFolder;
+                newUserApp.MainCopyFolder = copyFolder;
 
                 await serverHelper.UserAppCreateUpdateAsync(newUserApp, cancelToken);
+
+                if (!Directory.Exists(uploadFolder))
+                    Directory.CreateDirectory(uploadFolder);
+
+                if (!Directory.Exists(copyFolder))
+                    Directory.CreateDirectory(copyFolder);
             }
 
+            //TODO to sort!
             UserApp userApp = await serverHelper.UserAppGet(500001);
             if (userApp != null)
             {
@@ -738,7 +751,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localTagList.LastChanged;
-                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
+                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, lastModified, cursor, state.userApp.FetchSize, searchQueryString, -1, cancelToken);
                     if (tagImageList != null)
                     {
                         state.tagImageList.Remove(localTagList);
@@ -753,7 +766,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, null, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
+                    ImageList tagImageList = await serverHelper.GetImageListAsync("tag", tagName, null, cursor, state.userApp.FetchSize, searchQueryString, -1, cancelToken);
                     if (tagImageList != null)
                     {
                         if (searchQueryString == null)
@@ -960,7 +973,7 @@ namespace ManageWalla
                 if (localCategoryList != null && searchQueryString == null)
                 {
                     //With Local version, check with server is a new version is required.
-                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), localCategoryList.LastChanged, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
+                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), localCategoryList.LastChanged, cursor, state.userApp.FetchSize, searchQueryString, -1, cancelToken);
                     if (categoryImageList != null)
                     {
                         state.categoryImageList.Remove(localCategoryList);
@@ -975,7 +988,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), null, cursor, state.imageFetchSize, searchQueryString, -1, cancelToken);
+                    ImageList categoryImageList = await serverHelper.GetImageListAsync("category", categoryId.ToString(), null, cursor, state.userApp.FetchSize, searchQueryString, -1, cancelToken);
                     if (categoryImageList != null)
                     {
                         if (searchQueryString == null)
@@ -1217,7 +1230,7 @@ namespace ManageWalla
                 {
                     //With Local version, check with server is a new version is required.
                     DateTime lastModified = localGalleryList.LastChanged;
-                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.imageFetchSize, searchQueryString, sectionId, cancelToken);
+                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, lastModified, cursor, state.userApp.FetchSize, searchQueryString, sectionId, cancelToken);
                     if (galleryImageList != null)
                     {
                         state.galleryImageList.Remove(localGalleryList);
@@ -1232,7 +1245,7 @@ namespace ManageWalla
                 else
                 {
                     //Add the image list to the state if no search is specified.
-                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, null, cursor, state.imageFetchSize, searchQueryString, sectionId, cancelToken);
+                    ImageList galleryImageList = await serverHelper.GetImageListAsync("gallery", galleryName, null, cursor, state.userApp.FetchSize, searchQueryString, sectionId, cancelToken);
                     if (galleryImageList != null)
                     {
                         if (searchQueryString == null)
