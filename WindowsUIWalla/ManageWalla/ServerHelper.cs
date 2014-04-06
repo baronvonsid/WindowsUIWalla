@@ -68,11 +68,10 @@ namespace ManageWalla
             try
             {
                 HttpClient initialHttp = new HttpClient();
-                //TODO change once server path is updated.
-                //http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath +  "/");
-                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
+                
+                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
 
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,"logon");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,"logon?userName=" + userName);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await initialHttp.SendAsync(request);
@@ -129,9 +128,7 @@ namespace ManageWalla
             try
             {
                 HttpClient initialHttp = new HttpClient();
-                //TODO change once server path is updated.
-                //http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath +  "/");
-                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
+                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "appcheck?wsKey=" + validation);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
@@ -192,7 +189,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task UserAppCreateUpdateAsync(UserApp userApp, CancellationToken cancelToken)
+        async public Task<long> UserAppCreateUpdateAsync(UserApp userApp, CancellationToken cancelToken)
         {
             try
             {
@@ -206,9 +203,9 @@ namespace ManageWalla
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 
-                //XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
-                //reader.MoveToContent();
-                //long machineId = reader.ReadElementContentAsLong();
+                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                reader.MoveToContent();
+                return reader.ReadElementContentAsLong();
             }
             catch (OperationCanceledException cancelEx)
             {

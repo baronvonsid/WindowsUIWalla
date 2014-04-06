@@ -155,9 +155,9 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> Logon(string email, string password)
+        async public Task<string> Logon(string userName, string password)
         {
-            if (await serverHelper.Logon(email, password))
+            if (await serverHelper.Logon(userName, password))
             {
                 state.connectionState = GlobalState.ConnectionState.LoggedOn;
             }
@@ -222,8 +222,12 @@ namespace ManageWalla
 
         async public Task SetUserApp(CancellationToken cancelToken)
         {
+            long userAppId;
+
             if (state.userApp == null)
             {
+                //TODO add find existing user app function.
+
                 string machineName = System.Environment.MachineName;
 
                 string uploadFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Auto Upload");
@@ -235,7 +239,7 @@ namespace ManageWalla
                 newUserApp.AutoUploadFolder = uploadFolder;
                 newUserApp.MainCopyFolder = copyFolder;
 
-                await serverHelper.UserAppCreateUpdateAsync(newUserApp, cancelToken);
+                userAppId = await serverHelper.UserAppCreateUpdateAsync(newUserApp, cancelToken);
 
                 if (!Directory.Exists(uploadFolder))
                     Directory.CreateDirectory(uploadFolder);
@@ -243,12 +247,15 @@ namespace ManageWalla
                 if (!Directory.Exists(copyFolder))
                     Directory.CreateDirectory(copyFolder);
             }
+            else
+            {
+                userAppId = state.userApp.id;
+            }
 
-            //TODO to sort!
-            UserApp userApp = await serverHelper.UserAppGet(500001);
+            UserApp userApp = await serverHelper.UserAppGet(userAppId);
             if (userApp != null)
             {
-                userApp.UserDefaultCategoryId = 300002;
+                //userApp.UserDefaultCategoryId = 300002;
                 state.userApp = userApp;
             }
             else

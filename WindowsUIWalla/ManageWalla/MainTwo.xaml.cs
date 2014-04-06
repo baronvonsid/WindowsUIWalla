@@ -122,6 +122,7 @@ namespace ManageWalla
                 ShowMessage(MessageType.Busy, "Loading fotowalla");
 
                 controller.InitApplication();
+                
 
                 /*
                 if (!await controller.CheckOnline())
@@ -138,15 +139,17 @@ namespace ManageWalla
                  */
 
                 string profileName = Properties.Settings.Default.LastUser;
+                await Initialise(profileName, "", false);
+                /*
                 if (profileName.Length > 0)
                 {
-                    await Initialise(profileName, "", false);
+                    
                 }
                 else
                 {
                     state.connectionState = GlobalState.ConnectionState.NoAccount;
                 }
-
+                */
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
                     radGallery.IsChecked = true;
@@ -180,6 +183,7 @@ namespace ManageWalla
                 if (state.account.ProfileName.Length > 0)
                 {
                     ShowMessage(MessageType.Warning, "No internet connection could be established.  Working with local data only");
+                    state.connectionState = GlobalState.ConnectionState.Offline;
                 }
                 else
                 {
@@ -193,12 +197,16 @@ namespace ManageWalla
                 throw new Exception("The application failed validation with the server.  Please check for the latest app version.");
             }
 
-            if (!onAccountForm)
+            if (profileName.Length > 0)
             {
-                password = state.account.Password;
+                await Login(profileName, password);
+                if (!onAccountForm)
+                    password = state.account.Password;
             }
-
-            await Login(profileName, password);
+            else
+            {
+                state.connectionState = GlobalState.ConnectionState.NoAccount;
+            }
         }
 
         public void UserConcludeProcess()
@@ -3867,6 +3875,8 @@ namespace ManageWalla
                 switch (state.connectionState)
                 {
                     case GlobalState.ConnectionState.LoggedOn:
+
+                        Properties.Settings.Default.LastUser = profileName;
                         AccountStatusRefresh(password);
                         //await controller.AccountDetailsGet(cancelTokenSource.Token);
                         //state.account.Password = password;
@@ -3879,7 +3889,7 @@ namespace ManageWalla
                     //    ShowMessage(MessageType.Info, "No internet connection could be established with FotoWalla, working in Offline mode");
                     //    break;
                     case GlobalState.ConnectionState.FailedLogin:
-                        ShowMessage(MessageType.Info, "The logon for: " + profileName + ", failed with the message: " + logonResponse);
+                        ShowMessage(MessageType.Warning, "The logon for: " + profileName + ", failed with the message: " + logonResponse);
                         //cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                         break;
                 }
