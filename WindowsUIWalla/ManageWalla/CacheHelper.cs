@@ -38,6 +38,7 @@ namespace ManageWalla
                 //state.mainCopyCacheSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
                 state.account = new Account();
                 state.account.ProfileName = "";
+                state.account.Password = "";
             }
 
             //state.imageFetchSize = Properties.Settings.Default.ImageFetchSize;
@@ -246,7 +247,7 @@ namespace ManageWalla
 
             long mainCopySize = 100000; //200KB average
             long buffer = mainCopySize * 10;
-            long targetSizeBytes = mainCopyCacheSizeMB / 1024 / 1024;
+            long targetSizeBytes = mainCopyCacheSizeMB * 1024 * 1024;
             while (totalSize > (targetSizeBytes - buffer))
             {
                 //Find oldest entry and remove from list.

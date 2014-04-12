@@ -33,6 +33,7 @@ namespace ManageWalla
         public String FilePath { get; set; }
         public Image Image { get { return image; } }
         public string FolderPath { get; set; }
+
         //public UploadState State { get; set; }
         //public String UploadError { get; set; }
 
@@ -216,22 +217,23 @@ namespace ManageWalla
             string loadingImagePath = "";
             if (unavailable)
             {
-                loadingImagePath = @"pack://application:,,,/Icons/UnavailableThumbnail.gif";
+                loadingImagePath = @"pack://application:,,,/resources/icons/Error.gif";
             }
             else
             {
-                loadingImagePath = @"pack://application:,,,/Icons/ErrorThumbnail.gif";
+                loadingImagePath = @"pack://application:,,,/resources/icons/warning.gif";
             }
 
             BitmapImage loadingImage = new BitmapImage();
             loadingImage.BeginInit();
-            loadingImage.DecodePixelWidth = 140;
+            loadingImage.DecodePixelWidth = 32;
             loadingImage.UriSource = new Uri(loadingImagePath);
             loadingImage.EndInit();
             loadingImage.Freeze();
 
             Image newImage = new Image();
             newImage.Source = loadingImage;
+            newImage.MaxHeight = 32.0;
 
             return newImage;
         }
