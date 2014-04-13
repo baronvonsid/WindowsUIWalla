@@ -40,32 +40,132 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0" Grid.Row="0" Grid.RowSpan="9" Margin="2,2,2,2" Background="{StaticResource WallaBannerBackgroundBrush}" LastChildFill="True">
-                <Button x:Name="cmdExpand" DockPanel.Dock="Top" Margin="2,3,2,2" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdExpand_Click" Padding="0">
+               <!-- <Button x:Name="cmdExpand" DockPanel.Dock="Top" Margin="2,3,2,2" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdExpand_Click" Padding="0">
                     <Button.Content>
                         <Image Source="{StaticResource expandImageSrc}" Height="28" />
                     </Button.Content>
+                </Button>-->
+
+                <Button x:Name="cmdExpand" Margin="2" DockPanel.Dock="Top"  Click="cmdExpand_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Image x:Name="imageNav" Source="{StaticResource expandImageSrc}" Height="32" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsEnabled" Value="true" />
+                                        <Condition Property="IsMouseOver" Value="true" />
+                                    </MultiTrigger.Conditions>
+                                    <MultiTrigger.Setters>
+                                        <Setter TargetName="imageNav" Property="Source" Value="{StaticResource expandImageSelectedSrc}" />
+                                    </MultiTrigger.Setters>
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
                 </Button>
 
                 <StackPanel x:Name="panNavigationVert" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" DockPanel.Dock="Bottom">
-                    <Button x:Name="cmdImageNavigationBeginVert" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click">
-                        <Button.Content>
-                            <Image Source="{StaticResource navFirstImageSrc}" Height="28" />
-                        </Button.Content>
+                                    
+                    <Button x:Name="cmdImageNavigationBeginVert" Click="cmdImageNavigationBegin_Click" Margin="2">
+                        <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Image x:Name="imageNav" Source="{StaticResource navFirstImageSrc}" Height="24" />
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="true" />
+                                            <Condition Property="IsMouseOver" Value="true" />
+                                        </MultiTrigger.Conditions>
+                                        <MultiTrigger.Setters>
+                                            <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navFirstImageSelectedSrc}" />
+                                        </MultiTrigger.Setters>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                     </Button>
-                    <Button x:Name="cmdImageNavigationPreviousVert" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click">
-                        <Button.Content>
-                            <Image Source="{StaticResource navPreviousImageSrc}" Height="28" />
-                        </Button.Content>
+
+                    <Button x:Name="cmdImageNavigationPreviousVert" Click="cmdImageNavigationPrevious_Click" Margin="2">
+                        <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Image x:Name="imageNav" Source="{StaticResource navPreviousImageSrc}" Height="24" />
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="true" />
+                                            <Condition Property="IsMouseOver" Value="true" />
+                                        </MultiTrigger.Conditions>
+                                        <MultiTrigger.Setters>
+                                            <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navPreviousImageSelectedSrc}" />
+                                        </MultiTrigger.Setters>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                     </Button>
-                    <Button x:Name="cmdImageNavigationNextVert" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click">
-                        <Button.Content>
-                            <Image Source="{StaticResource navNextImageSrc}" Height="28" />
-                        </Button.Content>
+
+                    <Button x:Name="cmdImageNavigationNextVert" Click="cmdImageNavigationNext_Click" Margin="2">
+                        <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Image x:Name="imageNav" Source="{StaticResource navNextImageSrc}" Height="24" />
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="true" />
+                                            <Condition Property="IsMouseOver" Value="true" />
+                                        </MultiTrigger.Conditions>
+                                        <MultiTrigger.Setters>
+                                            <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navNextImageSelectedSrc}" />
+                                        </MultiTrigger.Setters>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                     </Button>
-                    <Button x:Name="cmdImageNavigationLastVert" Padding="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click">
-                        <Button.Content>
-                            <Image Source="{StaticResource navLastImageSrc}" Height="28" />
-                        </Button.Content>
+
+                    <Button x:Name="cmdImageNavigationLastVert" Click="cmdImageNavigationLast_Click" Margin="2">
+                        <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Image x:Name="imageNav" Source="{StaticResource navLastImageSrc}" Height="24" />
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="true" />
+                                            <Condition Property="IsMouseOver" Value="true" />
+                                        </MultiTrigger.Conditions>
+                                        <MultiTrigger.Setters>
+                                            <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navLastImageSelectedSrc}" />
+                                        </MultiTrigger.Setters>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                     </Button>
                 </StackPanel>
 
@@ -116,10 +216,28 @@
             <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Vertical">
                 <DockPanel Margin="12,0,10,0" LastChildFill="True" Background="{StaticResource WallaBannerBackgroundBrush}" VerticalAlignment="Center">
 
-                    <Button x:Name="cmdContract" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdContract_Click" Padding="0" Margin="0" BorderThickness="0">
-                        <Button.Content>
-                            <Image Source="{StaticResource contractImageSrc}" Height="28" />
-                        </Button.Content>
+                    <Button x:Name="cmdContract" Margin="2" DockPanel.Dock="Right"  Click="cmdContract_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Image x:Name="imageNav" Source="{StaticResource contractImageSrc}" Height="32" />
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="true" />
+                                            <Condition Property="IsMouseOver" Value="true" />
+                                        </MultiTrigger.Conditions>
+                                        <MultiTrigger.Setters>
+                                            <Setter TargetName="imageNav" Property="Source" Value="{StaticResource contractImageSelectedSrc}" />
+                                        </MultiTrigger.Setters>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
                     </Button>
 
                     <!-- <Image Source="{StaticResource contractImageSrc}" Height="28" /> -->
@@ -607,7 +725,7 @@
                             Minimum="75"
                             Maximum="300"
                             Width="100" Margin="6" ValueChanged="sldImageSize_ValueChanged"></Slider>
-
+                        
                         <ToggleButton x:Name="cmdShowActionsMenu" DockPanel.Dock="Right" ContextMenuService.IsEnabled="False" IsChecked="{Binding Path=ContextMenu.IsOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType="ToggleButton">
@@ -679,27 +797,101 @@
 
                         <Line x:Name="lineActionsMenu" Visibility="Visible" DockPanel.Dock="Right" Stroke="{StaticResource FontBorderBrushSelected}" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="6,0,6,0" />
 
-                        <Button x:Name="cmdImageNavigationLast" DockPanel.Dock="Right" Padding="0" Margin="0" BorderThickness="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationLast_Click">
-                            <Button.Content>
-                                <Image Source="{StaticResource navFirstImageSrc}" Height="28" />
-                            </Button.Content>
-                        </Button>
-                        <Button x:Name="cmdImageNavigationNext" DockPanel.Dock="Right" Padding="0" Margin="0" BorderThickness="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationNext_Click">
-                            <Button.Content>
-                                <Image Source="{StaticResource navPreviousImageSrc}" Height="28" />
-                            </Button.Content>
-                        </Button>
-                        <Button x:Name="cmdImageNavigationPrevious" DockPanel.Dock="Right" Padding="0" Margin="0" BorderThickness="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationPrevious_Click">
-                            <Button.Content>
-                                <Image Source="{StaticResource navNextImageSrc}" Height="28" />
-                            </Button.Content>
-                        </Button>
-                        <Button x:Name="cmdImageNavigationBegin" DockPanel.Dock="Right" Padding="0" Margin="0" BorderThickness="0" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdImageNavigationBegin_Click">
-                            <Button.Content>
-                                <Image Source="{StaticResource navLastImageSrc}" Height="28" />
-                            </Button.Content>
+                        <Button x:Name="cmdImageNavigationBegin" Click="cmdImageNavigationBegin_Click" Margin="2" DockPanel.Dock="Right">
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="imageNav" Source="{StaticResource navFirstImageSrc}" Height="24" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsEnabled" Value="true" />
+                                                <Condition Property="IsMouseOver" Value="true" />
+                                            </MultiTrigger.Conditions>
+                                            <MultiTrigger.Setters>
+                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navFirstImageSelectedSrc}" />
+                                            </MultiTrigger.Setters>
+                                        </MultiTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
                         </Button>
 
+                        <Button x:Name="cmdImageNavigationPrevious" Click="cmdImageNavigationPrevious_Click" Margin="2" DockPanel.Dock="Right">
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="imageNav" Source="{StaticResource navPreviousImageSrc}" Height="24" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsEnabled" Value="true" />
+                                                <Condition Property="IsMouseOver" Value="true" />
+                                            </MultiTrigger.Conditions>
+                                            <MultiTrigger.Setters>
+                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navPreviousImageSelectedSrc}" />
+                                            </MultiTrigger.Setters>
+                                        </MultiTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button x:Name="cmdImageNavigationNext" Click="cmdImageNavigationNext_Click" Margin="2" DockPanel.Dock="Right">
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="imageNav" Source="{StaticResource navNextImageSrc}" Height="24" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsEnabled" Value="true" />
+                                                <Condition Property="IsMouseOver" Value="true" />
+                                            </MultiTrigger.Conditions>
+                                            <MultiTrigger.Setters>
+                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navNextImageSelectedSrc}" />
+                                            </MultiTrigger.Setters>
+                                        </MultiTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button x:Name="cmdImageNavigationLast" Click="cmdImageNavigationLast_Click" Margin="2" DockPanel.Dock="Right">
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="imageNav" Source="{StaticResource navLastImageSrc}" Height="24" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsEnabled" Value="true" />
+                                                <Condition Property="IsMouseOver" Value="true" />
+                                            </MultiTrigger.Conditions>
+                                            <MultiTrigger.Setters>
+                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navLastImageSelectedSrc}" />
+                                            </MultiTrigger.Setters>
+                                        </MultiTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
 
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <Label x:Name="lblImageListName" Content="..."  Background="Transparent" FontSize="24" />
@@ -952,9 +1144,23 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <Grid>
-                                    <Image x:Name="imageThumb" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" AllowDrop="True" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" />
+                                    <!--
+                                    <Image x:Name="imageThumbError" Source="{StaticResource errorImageSrc}" Height="32" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp">
+                                        <Image.Visibility>
+                                            <Binding  Path="thumbnailImage.thumbImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
+                                                <Binding.ConverterParameter>
+                                                    <sys:Int32>3</sys:Int32>
+                                                </Binding.ConverterParameter>
+                                            </Binding>
+                                        </Image.Visibility>
+
+                                    </Image>
+                                    -->
+                                    <!--<Image x:Name="imageThumb" Visibility="{Binding thumbnailImage.thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter={x:Static LoadState.Loaded}}" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" />-->
+                                    <Image x:Name="imageThumb" Visibility="Visible" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" />
+                                    
                                     <StackPanel x:Name="paneSelectedPane" Visibility="{Binding ElementName=cmdMultiSelectionMode, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource radioNotSelectedImageSrc}" MaxHeight="11" />
+                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
                                     </StackPanel>
                                 </Grid>
                                 <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane"  Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140" MouseUp="Image_MouseUp" >
@@ -1012,7 +1218,7 @@
                                 <Grid>
                                     <Image x:Name="imageThumb" Source="{Binding Image.Source}" MaxHeight="130" />
                                     <StackPanel x:Name="paneSelectedPane" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource radioNotSelectedImageSrc}" MaxHeight="11" />
+                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
@@ -1392,28 +1598,59 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical">
-                    <Button x:Name="cmdAccountClose"  HorizontalAlignment="Left" Style="{StaticResource styleButton}" Padding="0" BorderThickness="0" Click="cmdAccountClose_Click" >
-                    <Button.Template>
-                        <ControlTemplate TargetType="{x:Type Button}">
-                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image x:Name="imageContent" Source="{StaticResource accountImageSelectedSrc}" SnapsToDevicePixels="True" Height="31" />
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="imageContent" Property="Source" Value="{StaticResource accountImageSrc}" />
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="imageContent" Property="Source" Value="{StaticResource accountImageSelectedSrc}" />
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter TargetName="imageContent" Property="Opacity" Value="0.7" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
 
-                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="2000" Y2="5" StrokeThickness="0.5" Margin="0,8,0,0" />
+                    <DockPanel LastChildFill="True">
+                        <Button x:Name="cmdAccountFotoWallaClose" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Padding="0" BorderThickness="0" Click="cmdAccountClose_Click" >
+                            <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Image x:Name="imageContent" Source="{StaticResource accountImageSelectedSrc}" SnapsToDevicePixels="True" Height="31" />
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="imageContent" Property="Source" Value="{StaticResource accountImageSrc}" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="imageContent" Property="Source" Value="{StaticResource accountImageSelectedSrc}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter TargetName="imageContent" Property="Opacity" Value="0.7" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button x:Name="cmdAccountClose" VerticalAlignment="Center" DockPanel.Dock="Right" Padding="0" Margin="2" BorderThickness="0" Click="cmdAccountClose_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="accountCloseImage" Source="{StaticResource accountCloseImageSrc}" Height="32" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter TargetName="accountCloseImage" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsEnabled" Value="true" />
+                                                <Condition Property="IsMouseOver" Value="true" />
+                                            </MultiTrigger.Conditions>
+                                            <MultiTrigger.Setters>
+                                                <Setter TargetName="accountCloseImage" Property="Source" Value="{StaticResource accountCloseSelectedImageSrc}" />
+                                            </MultiTrigger.Setters>
+                                        </MultiTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <Button x:Name="cmdAccountRefresh" DockPanel.Dock="Right" Tag="false" VerticalAlignment="Center" Padding="0" Margin="2" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" BorderThickness="0" Click="cmdAccountRefresh_Click" />
+                        <Line Visibility="Visible" DockPanel.Dock="Right" Stroke="{StaticResource FontBorderBrushSelected}" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="6,0,6,0" />
+
+                        <Label Content="Account info"  Background="Transparent" FontSize="24" HorizontalAlignment="Center" />
+                    </DockPanel>
+
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="2000" Y2="5" StrokeThickness="0.5" Margin="0,8,0,0" />
                 </StackPanel>
                 
                 <DockPanel x:Name="panAccount" Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" Margin="2">
@@ -1438,8 +1675,6 @@
 
                                 <Label Content="Account Status" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="0" />
 
-                                <Button x:Name="cmdAccountStatusRefresh" Tag="false" HorizontalAlignment="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Padding="0" Margin="0" Grid.Column="2" Grid.Row="0" BorderThickness="0" Click="cmdAccountStatusRefresh_Click" />
-                                
                                 <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="5" Y1="10" X2="5" Y2="2000" StrokeThickness="0.5" Margin="0" Grid.Column="1" Grid.Row="0" Grid.RowSpan="5" />
 
                                 <Grid Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="0" Grid.Row="1">
@@ -1458,7 +1693,7 @@
                                     <TextBox x:Name="txtAccountProfileName" Grid.Column="1" Grid.Row="0" MaxLength="100" Margin="2" />
 
                                     <Label Grid.Column="0" Grid.Row="1" Content="Password" FontWeight="SemiBold"/>
-                                    <TextBox x:Name="txtAccountPassword" Grid.Column="1" Grid.Row="1" MaxLength="20" Margin="2" />
+                                    <PasswordBox x:Name="txtAccountPassword" Grid.Column="1" Grid.Row="1" MaxLength="20" Margin="2" />
 
                                     <Label Grid.Column="0" Grid.Row="2" Content="Email Address" FontWeight="SemiBold"/>
                                     <Label x:Name="lblAccountEmail" Grid.Column="1" Grid.Row="2" />
@@ -1568,7 +1803,6 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
-                                    <RowDefinition Height="34" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="2*"/>
@@ -1672,9 +1906,11 @@
                                     <TextBlock Text="Upload Status List" TextAlignment="Center" />
                                 </DockPanel>
 
-                                <Button x:Name="cmdUploadStatusRefresh" Tag="false" HorizontalAlignment="Left" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Padding="0" Margin="0" Grid.Column="0" Grid.Row="1" BorderThickness="0" Click="cmdUploadStatusRefresh_Click" />
-                               
                             </Grid>
+                        </TabItem>
+
+                        <TabItem x:Name="tabDownloadList" Header="Downloads" >
+
                         </TabItem>
                     </TabControl>
                 </DockPanel>
@@ -1702,7 +1938,7 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Image x:Name="imgBusy" gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageSrc}" Height="30" />
-                <Image x:Name="imgAlert" Source="{StaticResource errorImageSrc}" Height="30" />
+                <Image x:Name="imgAlert" Source="{StaticResource errorImageSrc}" Height="32" />
                 <TextBlock x:Name="lblAlertDialogHeader" TextWrapping="Wrap" Margin="20,0,0,0" Text="Loading.." Foreground="{StaticResource FontBorderBrush}" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
             </StackPanel>
             <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" />

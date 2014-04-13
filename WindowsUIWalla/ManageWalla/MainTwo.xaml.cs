@@ -64,6 +64,14 @@ namespace ManageWalla
             Other = 5
         }
 
+        public enum LoadState
+        {
+            NotLoaded = 0,
+            Requested = 1,
+            Loaded = 2,
+            Error = 3
+        }
+
         private PaneMode currentPane;
         private PaneMode previousPane;
         private Tag currentTag = null;
@@ -122,34 +130,10 @@ namespace ManageWalla
                 ShowMessage(MessageType.Busy, "Loading fotowalla");
 
                 controller.InitApplication();
-                
-
-                /*
-                if (!await controller.CheckOnline())
-                {
-
-                    ShowMessage(MessageType.Warning, "No internet connection could be established.  Working with local data only");
-                    state.connectionState = GlobalState.ConnectionState.Offline;
-                }
-
-                if (!await controller.VerifyApp())
-                {
-                    throw new Exception("The application failed validation with the server.  Please check for the latest update.");
-                }
-                 */
 
                 string profileName = Properties.Settings.Default.LastUser;
                 await Initialise(profileName, "", false);
-                /*
-                if (profileName.Length > 0)
-                {
-                    
-                }
-                else
-                {
-                    state.connectionState = GlobalState.ConnectionState.NoAccount;
-                }
-                */
+
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
                     radGallery.IsChecked = true;
@@ -199,9 +183,12 @@ namespace ManageWalla
 
             if (profileName.Length > 0)
             {
-                await Login(profileName, password);
-                if (!onAccountForm)
+                if (!onAccountForm && state.account != null)
+                {
                     password = state.account.Password;
+                }
+
+                await Login(profileName, password);
             }
             else
             {
@@ -920,19 +907,28 @@ namespace ManageWalla
                         cmdUserAppCancel.Visibility = Visibility.Collapsed;
                         cmdAccountLogin.Visibility = Visibility.Collapsed;
                         cmdAccount.IsEnabled = true;
-                        cmdAccountStatusRefresh.IsEnabled = true;
+                        cmdAccountRefresh.IsEnabled = true;
+                        tabDownloadList.IsEnabled = true;
+                        tabUploadStatusList.IsEnabled = true;
+                        cmdAccountFotoWallaClose.IsEnabled = true;
+
                     }
                     else
                     {
                         //tabAccount.IsEnabled = false;
-                        cmdAccountStatusRefresh.IsEnabled = false;
+                        cmdAccountRefresh.IsEnabled = false;
                         cmdUserAppEdit.Visibility = Visibility.Collapsed;
                         cmdUserAppCancel.Visibility = Visibility.Collapsed;
                         cmdUserAppSave.Visibility = Visibility.Collapsed;
                         cmdAccountLogin.Visibility = Visibility.Visible;
                         cmdAccount.IsEnabled = false;
+                        tabDownloadList.IsEnabled = false;
+                        tabUploadStatusList.IsEnabled = false;
+                        cmdAccountFotoWallaClose.IsEnabled = false;
                     }
 
+                    cmdUseOffline.IsEnabled = true;
+                    cmdAccountUpdateOnWeb.IsEnabled = true;
                     chkAccountAutoUpload.IsEnabled = false;
                     sldAccountImageCopySize.IsEnabled = false;
                     cmdAccountChangeAutoUploadFolder.IsEnabled = false;
@@ -947,7 +943,14 @@ namespace ManageWalla
                     cmdUserAppSave.Visibility = Visibility.Visible;
                     cmdAccountLogin.Visibility = Visibility.Collapsed;
 
-                    cmdAccountStatusRefresh.IsEnabled = false;
+                    cmdAccountRefresh.IsEnabled = false;
+                    cmdAccountClose.IsEnabled = false;
+                    tabDownloadList.IsEnabled = false;
+                    tabUploadStatusList.IsEnabled = false;
+
+                    cmdAccountFotoWallaClose.IsEnabled = false;
+                    cmdUseOffline.IsEnabled = false;
+                    cmdAccountUpdateOnWeb.IsEnabled = false;
                     chkAccountAutoUpload.IsEnabled = true;
                     sldAccountImageCopySize.IsEnabled = true;
                     cmdAccountChangeAutoUploadFolder.IsEnabled = true;
@@ -1026,7 +1029,6 @@ namespace ManageWalla
             RefreshPanesAllControls(PaneMode.GalleryView);
             await RefreshAndDisplayGalleryList(false);
 
-
             if (startingApplication)
             {
                 await RefreshAndDisplayTagList(false);
@@ -1035,8 +1037,7 @@ namespace ManageWalla
                 foreach (RadioButton button in wrapMyGalleries.Children.OfType<RadioButton>())
                 {
                     GalleryListGalleryRef galleryRef = (GalleryListGalleryRef)button.Tag;
-                    long tempGalleryId = 400001;
-                    if (galleryRef.id == tempGalleryId)
+                    if (galleryRef.id == state.userApp.GalleryId)
                     {
                         button.IsChecked = true;
                     }
@@ -1200,7 +1201,7 @@ namespace ManageWalla
         private void ImageViewUpdateMetaTags(GeneralImage current)
         {
             List<ImageMetaTagRef> imageMetaTagRefTemp = new List<ImageMetaTagRef>();
-
+            
             if (current.Meta.Tags == null)
             {
                 foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
@@ -1208,7 +1209,7 @@ namespace ManageWalla
                     TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
                     ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
                     newImageMetaTagRef.id = currentTagRef.id;
-                    newImageMetaTagRef.op = "I";
+                    newImageMetaTagRef.op = "C";
                     imageMetaTagRefTemp.Add(newImageMetaTagRef);
                 }
             }
@@ -1222,7 +1223,7 @@ namespace ManageWalla
                     {
                         ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
                         newImageMetaTagRef.id = currentTagRef.id;
-                        newImageMetaTagRef.op = "I";
+                        newImageMetaTagRef.op = "C";
                         imageMetaTagRefTemp.Add(newImageMetaTagRef);
                     }
                 }
@@ -1230,20 +1231,24 @@ namespace ManageWalla
 
                 foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
                 {
-                    bool found = false;
-                    foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
+                    TagListTagRef stateTag = state.tagList.TagRef.First<TagListTagRef>(r => r.id == tagRef.id);
+                    if (!stateTag.systemOwned)
                     {
-                        TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
-                        if (currentTagRef.id == tagRef.id)
-                            found = true;
-                    }
+                        bool found = false;
+                        foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
+                        {
+                            TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                            if (currentTagRef.id == tagRef.id)
+                                found = true;
+                        }
 
-                    if (!found)
-                    {
-                        ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
-                        newImageMetaTagRef.id = tagRef.id;
-                        newImageMetaTagRef.op = "D";
-                        imageMetaTagRefTemp.Add(newImageMetaTagRef);
+                        if (!found)
+                        {
+                            ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
+                            newImageMetaTagRef.id = tagRef.id;
+                            newImageMetaTagRef.op = "D";
+                            imageMetaTagRefTemp.Add(newImageMetaTagRef);
+                        }
                     }
                 }
             }
@@ -2679,7 +2684,8 @@ namespace ManageWalla
 
                 if (tag.systemOwned == true)
                 {
-                    wrapSystemTags.Children.Add(newRadioButton);
+                    if (tag.name.Length>3)
+                        wrapSystemTags.Children.Add(newRadioButton);
                 }
                 else
                 {
@@ -3729,11 +3735,6 @@ namespace ManageWalla
             }
         }
 
-        async private void cmdUploadStatusRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            await RefreshUploadStatusStateAsync();
-        }
-
         private void cmdUserAppCancel_Click(object sender, RoutedEventArgs e)
         {
             AccountRefreshFromState();
@@ -3757,7 +3758,7 @@ namespace ManageWalla
             try
             {
                 string profileName = txtAccountProfileName.Text;
-                string password = txtAccountPassword.Text;
+                string password = txtAccountPassword.Password;
 
                 if (profileName.Length < 1 || password.Length < 1)
                 {
@@ -3766,6 +3767,12 @@ namespace ManageWalla
                 }
 
                 await Initialise(profileName, password, true);
+
+                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                {
+                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    radGallery.IsChecked = true;
+                }
             }
             catch (Exception ex)
             {
@@ -3796,7 +3803,7 @@ namespace ManageWalla
             sldAccountImageCopySize.Value = state.userApp.MainCopyCacheSizeMB;
 
             lblAccountEmail.Content = state.account.Email;
-            txtAccountPassword.Text = state.account.Password;
+            txtAccountPassword.Password = state.account.Password;
             txtAccountProfileName.Text = state.account.ProfileName;
         }
 
@@ -3839,6 +3846,8 @@ namespace ManageWalla
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
+
+                await AccountStatusRefresh(null);
             }
             catch (OperationCanceledException)
             {
@@ -3848,10 +3857,10 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "The account save process failed with an unexpected problem: " + ex.Message);
+                AccountRefreshFromState();
             }
             finally
             {
-                AccountStatusRefresh(null);
                 RefreshPanesAllControls(PaneMode.Account);
             }
         }
@@ -3875,9 +3884,10 @@ namespace ManageWalla
                 switch (state.connectionState)
                 {
                     case GlobalState.ConnectionState.LoggedOn:
-
+                        
                         Properties.Settings.Default.LastUser = profileName;
-                        AccountStatusRefresh(password);
+                        Properties.Settings.Default.Save();
+                        await AccountStatusRefresh(password);
                         //await controller.AccountDetailsGet(cancelTokenSource.Token);
                         //state.account.Password = password;
                         //await controller.SetPlatform();
@@ -5187,17 +5197,12 @@ namespace ManageWalla
             }
         }
 
-        async private void cmdAccountStatusRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            await AccountStatusRefresh(null);
-        }
-
         async private Task AccountStatusRefresh(string password)
         {
             try
             {
                 ShowMessage(MessageType.Busy, "Refreshing Account information");
-                cmdAccountStatusRefresh.Tag = true;
+                cmdAccountRefresh.Tag = true;
 
                 if (cancelTokenSource != null)
                     cancelTokenSource.Cancel();
@@ -5229,7 +5234,7 @@ namespace ManageWalla
             }
             finally
             {
-                cmdAccountStatusRefresh.Tag = false;
+                cmdAccountRefresh.Tag = false;
                 AccountRefreshFromState();
             }
         }
@@ -5238,12 +5243,12 @@ namespace ManageWalla
         {
             try
             {
-                bool isBusy = bool.Parse(cmdUploadStatusRefresh.Tag.ToString());
+                bool isBusy = bool.Parse(cmdAccountRefresh.Tag.ToString());
                 if (isBusy) { return; }
 
                 ShowMessage(MessageType.Busy, "Refreshing upload history list");
 
-                cmdUploadStatusRefresh.Tag = true;
+                cmdAccountRefresh.Tag = true;
 
                 if (cancelTokenSource != null)
                     cancelTokenSource.Cancel();
@@ -5281,8 +5286,25 @@ namespace ManageWalla
             }
             finally
             {
-                cmdUploadStatusRefresh.Tag = false;
+                cmdAccountRefresh.Tag = false;
             }
         }
+
+        async private void cmdAccountRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            if (tabAccount.SelectedIndex == 0)
+            {
+                await AccountStatusRefresh(null);
+            }
+            else if (tabAccount.SelectedIndex == 1)
+            {
+                await RefreshUploadStatusStateAsync();
+            }
+            else
+            {
+                //TODO
+            }
+        }
+
     }
 }

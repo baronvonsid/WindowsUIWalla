@@ -184,41 +184,6 @@ namespace ManageWalla
             }
         }
 
-        /*
-        async public Task MachineSetIdentity(CancellationToken cancelToken)
-        {
-            //Get current platformId and machine name.
-            int platformId = GetPlatformId();
-            string machineName = System.Environment.MachineName;
-            bool found = false;
-
-            foreach (AccountMachine current in state.account.Machines)
-            {
-                if (platformId == current.platformId && machineName == current.name)
-                {
-                    state.userAppId = current.id;
-                    found = true;
-                }
-            }
-            try
-            {
-                if (found)
-                {
-                    await serverHelper.MachineMarkSession(state.userAppId, cancelToken);
-                }
-                else
-                {
-                    long machineId = await serverHelper.MachineRegisterNew(machineName, platformId, cancelToken);
-                    state.userAppId = machineId;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                //Suppress exception
-                logger.Debug("AccountDetailsGet has been cancelled");
-            }
-        }
-        */
 
         async public Task SetUserApp(CancellationToken cancelToken)
         {
@@ -410,7 +375,7 @@ namespace ManageWalla
                         currentImage.Meta.Tags = uploadState.MetaTagRef;
                     }
 
-                    currentImage.Meta.TakenDate = currentImage.Meta.TakenDateFile;
+                    //currentImage.Meta.TakenDate = currentImage.Meta.TakenDateFile;
 
                     AddMachineTag(currentImage);
                     currentImage.Meta.UserAppId = state.userApp.id;

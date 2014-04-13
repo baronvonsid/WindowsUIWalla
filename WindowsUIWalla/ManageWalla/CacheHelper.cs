@@ -38,6 +38,7 @@ namespace ManageWalla
                 //state.mainCopyCacheSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
                 state.account = new Account();
                 state.account.ProfileName = "";
+                state.account.Password = "";
             }
 
             //state.imageFetchSize = Properties.Settings.Default.ImageFetchSize;

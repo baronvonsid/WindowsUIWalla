@@ -30,10 +30,11 @@ namespace ManageWalla
         public DateTime uploadDate { get; set; }
         public int metaVersion { get; set; }
         //private LoadState mainImageLoadState;
-        private LoadState metaLoadState;
+        public LoadState metaLoadState;
+        public LoadState mainImageLoadState;
+        public LoadState thumbImageLoadState;
 
-
-        private enum LoadState
+        public enum LoadState
         {
             NotLoaded = 0,
             Requested = 1,
@@ -48,8 +49,11 @@ namespace ManageWalla
         public GeneralImage(ServerHelper serverHelperParam) 
         {
             serverHelper = serverHelperParam;
-            thumbnailImage = GetTempBitmap("Working", true);
-            mainCopyImage = GetTempBitmap("Working", false);
+            mainImageLoadState = LoadState.NotLoaded;
+            thumbImageLoadState = LoadState.NotLoaded;
+
+            //thumbnailImage = GetTempBitmap("Working", true);
+            //mainCopyImage = GetTempBitmap("Working", false);
             metaLoadState = LoadState.NotLoaded;
         }
 
@@ -61,6 +65,10 @@ namespace ManageWalla
 
             try
             {
+                thumbImageLoadState = LoadState.Requested;
+                OnPropertyChanged("thumbImageLoadState");
+
+
                 byte[] thumbArray = CacheHelper.GetImageArray(imageId, thumbCacheList);
                 if (thumbArray == null)
                 {
@@ -76,14 +84,18 @@ namespace ManageWalla
             {
                 logger.Debug("LoadThumb has been cancelled");
                 thumbnailImage = null;
+                thumbImageLoadState = LoadState.NotLoaded;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                thumbnailImage = GetTempBitmap("Error", true);
+                thumbImageLoadState = LoadState.Error;
+                //thumbnailImage = GetTempBitmap("Error", true);
             }
             finally
             {
+                OnPropertyChanged("thumbImageLoadState");
+
                 if (thumbnailImage != null)
                     OnPropertyChanged("thumbnailImage");
             }
@@ -122,7 +134,7 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                mainCopyImage = GetTempBitmap("Error", false);
+                //mainCopyImage = GetTempBitmap("Error", false);
             }
             finally
             {
@@ -204,24 +216,25 @@ namespace ManageWalla
         #endregion
 
         #region Utility Methods
-        private Image GetTempBitmap(string type, bool isThumb)
+        private Image todelete_GetTempBitmap(string type, bool isThumb)
         {
             //TODO isThumb when new images are available.
 
             string loadingImagePath = "";
             if (type == "Working")
             {
-                loadingImagePath = @"pack://application:,,,/Icons/LoadingMain.gif";
+                loadingImagePath = @"pack://application:,,,/resources/anim/refresh_selected.gif";
                 //mainImageLoadState = LoadState.NotLoaded;
             }
             else
             {
-                loadingImagePath = @"pack://application:,,,/Icons/ErrorMain.gif";
+                loadingImagePath = @"pack://application:,,,/resources/icons/warning.gif";
                 //mainImageLoadState = LoadState.Error;
             }
 
             BitmapImage loadingImage = new BitmapImage();
             loadingImage.BeginInit();
+            loadingImage.DecodePixelWidth = 32;
             loadingImage.UriSource = new Uri(loadingImagePath);
             loadingImage.EndInit();
             loadingImage.Freeze();

@@ -31,6 +31,9 @@
     <ImageSource x:Key="errorImageSrc">resources/icons/error.gif</ImageSource>
     <ImageSource x:Key="warningImageSrc">resources/icons/warning.gif</ImageSource>
     <ImageSource x:Key="busyImageSrc">resources/anim/busy.gif</ImageSource>
+
+    <ImageSource x:Key="accountCloseImageSrc">resources/icons/error.gif</ImageSource>
+    <ImageSource x:Key="accountCloseSelectedImageSrc">resources/icons/warning.gif</ImageSource>
     
 
     <ImageSource x:Key="menuItemImageSrc">resources/icons/menuItem.gif</ImageSource>
@@ -53,19 +56,28 @@
     <ImageSource x:Key="accountImageSelectedSrc">resources/icons/fotowallaLogoSelected.png</ImageSource>
     <ImageSource x:Key="expandImageSrc">resources/icons/expand.gif</ImageSource>
     <ImageSource x:Key="contractImageSrc">resources/icons/contract.gif</ImageSource>
-
+    <ImageSource x:Key="expandImageSelectedSrc">resources/icons/expand_selected.gif</ImageSource>
+    <ImageSource x:Key="contractImageSelectedSrc">resources/icons/contract_selected.gif</ImageSource>
 
     <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.png</ImageSource>
     <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notSelected.png</ImageSource>
 
+    <ImageSource x:Key="imageSelectedSrc">resources/icons/imageSelected.png</ImageSource>
+    
+    
     <ImageSource x:Key="imageDetailImageSrc">resources/icons/imageDetail.gif</ImageSource>
     <ImageSource x:Key="imageSummaryImageSrc">resources/icons/imageSummary.gif</ImageSource>
+
+    <ImageSource x:Key="navFirstImageSelectedSrc">resources/icons/navFirst_selected.gif</ImageSource>
+    <ImageSource x:Key="navNextImageSelectedSrc">resources/icons/navNext_selected.gif</ImageSource>
+    <ImageSource x:Key="navPreviousImageSelectedSrc">resources/icons/navPrevious_selected.gif</ImageSource>
+    <ImageSource x:Key="navLastImageSelectedSrc">resources/icons/navLast_selected.gif</ImageSource>
 
     <ImageSource x:Key="navFirstImageSrc">resources/icons/navFirst.gif</ImageSource>
     <ImageSource x:Key="navNextImageSrc">resources/icons/navNext.gif</ImageSource>
     <ImageSource x:Key="navPreviousImageSrc">resources/icons/navPrevious.gif</ImageSource>
     <ImageSource x:Key="navLastImageSrc">resources/icons/navLast.gif</ImageSource>
-
+    
     <ImageSource x:Key="dropDownMenuImageSrc">resources/icons/menu.png</ImageSource>
     <ImageSource x:Key="dropDownMenuSelectedImageSrc">resources/icons/menu_selected.png</ImageSource>
     

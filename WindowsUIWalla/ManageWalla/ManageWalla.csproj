@@ -143,6 +143,7 @@
     <Compile Include="ProjectDataType\ThumbCache.cs" />
     <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="ValueConverters\WallaLoadStateToVisibleConverter.cs" />
     <Compile Include="ValueConverters\WallaCacheSizeConverter.cs" />
     <Compile Include="ValueConverters\WallaByteToMBConverter.cs" />
     <Compile Include="WallaDataType\Account.cs" />
@@ -371,7 +372,6 @@
   <ItemGroup>
     <Resource Include="resources\icons\error.gif" />
     <Resource Include="resources\icons\menuItem.gif" />
-    <Resource Include="resources\icons\notSelected.gif" />
     <Resource Include="resources\icons\warning.gif" />
   </ItemGroup>
   <ItemGroup>
@@ -382,9 +382,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\reload.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\selected.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\imageDetail.gif" />
@@ -437,7 +434,7 @@
     <Resource Include="resources\icons\upload_selected.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\notSelected.png" />
+    <Resource Include="resources\icons\imageSelected.png" />
     <Resource Include="resources\icons\selected.png" />
   </ItemGroup>
   <ItemGroup>
@@ -453,6 +450,19 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\anim\busy.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\navFirst_selected.gif" />
+    <Resource Include="resources\icons\navLast_selected.gif" />
+    <Resource Include="resources\icons\navNext_selected.gif" />
+    <Resource Include="resources\icons\navPrevious_selected.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\contract_selected.gif" />
+    <Resource Include="resources\icons\expand_selected.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\notSelected.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
