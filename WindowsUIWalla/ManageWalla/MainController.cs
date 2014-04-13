@@ -220,7 +220,6 @@ namespace ManageWalla
             UserApp userApp = await serverHelper.UserAppGet(userAppId);
             if (userApp != null)
             {
-                //userApp.UserDefaultCategoryId = 300002;
                 state.userApp = userApp;
             }
             else

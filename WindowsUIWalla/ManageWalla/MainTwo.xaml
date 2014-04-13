@@ -913,10 +913,10 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="300"/>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="350"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                
                             </Grid.ColumnDefinitions>
 
                             <Label FontWeight="Bold" Content="Gallery Options" Grid.Column="0" Grid.Row="0" />
@@ -936,11 +936,11 @@
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="200"/>
                                 </Grid.ColumnDefinitions>
 
                                 <Label Content="Group Fotos" Grid.Column="0" Grid.Row="0" />
-                                <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="1" Margin="2" Width="120" Height="26" Grid.Column="1" Grid.Row="0">
+                                <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="1" Margin="2" Width="150" Height="26" Grid.Column="1" Grid.Row="0" VerticalContentAlignment="Center">
                                     <ComboBoxItem ToolTip="Fotos will not be grouped">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
@@ -979,8 +979,8 @@
 
                             </Grid>
 
-                            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" >
-                                <ComboBox x:Name="cmbGalleryPresentationType" Margin="2" SelectedIndex="0" Width="120" Height="26" SelectionChanged="cmbGalleryPresentationType_SelectionChanged" >
+                            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <ComboBox x:Name="cmbGalleryPresentationType" Margin="2" SelectedIndex="0" Width="150" VerticalContentAlignment="Center" Height="26" SelectionChanged="cmbGalleryPresentationType_SelectionChanged" >
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
@@ -996,8 +996,8 @@
                                 </ComboBox>
                             </StackPanel>
 
-                            <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" >
-                                <ComboBox x:Name="cmbGalleryStyleType" Margin="2" SelectedIndex="0" Width="120" Height="26">
+                            <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <ComboBox x:Name="cmbGalleryStyleType" Margin="2" SelectedIndex="0" Width="150" Height="26" VerticalContentAlignment="Center">
                                     <ComboBoxItem>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
@@ -1036,11 +1036,11 @@
                                 <RowDefinition Height="2*" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="3*" MaxWidth="200"/>
+                                <ColumnDefinition Width="3*" MaxWidth="300"/>
                                 <ColumnDefinition Width="25"/>
-                                <ColumnDefinition Width="3*" MaxWidth="200"/>
+                                <ColumnDefinition Width="3*" MaxWidth="300"/>
                                 <ColumnDefinition Width="20"/>
-                                <ColumnDefinition Width="3*" MaxWidth="200"/>
+                                <ColumnDefinition Width="3*" MaxWidth="300"/>
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal">
@@ -1118,7 +1118,7 @@
                                 </ListBox>
                             </ScrollViewer>
 
-                            <ScrollViewer x:Name="scrollGallerySystemTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="2" Margin="0,0,2,2">
+                            <ScrollViewer x:Name="scrollGallerySystemTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="3" Margin="0,0,2,2">
                                 <ListBox Style="{DynamicResource TagListStyle}" 
                             	x:Name ="lstGallerySystemTagListExclude" 
                             	ScrollViewer.VerticalScrollBarVisibility="Visible"

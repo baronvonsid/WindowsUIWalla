@@ -3829,11 +3829,20 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
+                int mainCopySize = state.userApp.MainCopyCacheSizeMB;
+
+                
+
                 UserApp changedUserApp = new UserApp();
                 changedUserApp.AppId = state.userApp.AppId;
                 changedUserApp.id = state.userApp.id;
                 changedUserApp.MachineName = state.userApp.MachineName;
                 changedUserApp.version = state.userApp.version;
+                changedUserApp.FetchSize = state.userApp.FetchSize;
+                changedUserApp.GalleryId = state.userApp.GalleryId;
+                changedUserApp.UserAppCategoryId = state.userApp.UserAppCategoryId;
+                changedUserApp.UserDefaultCategoryId = state.userApp.UserDefaultCategoryId;
+                changedUserApp.ThumbCacheSizeMB = state.userApp.ThumbCacheSizeMB;
 
                 changedUserApp.AutoUpload = (bool)chkAccountAutoUpload.IsChecked;
                 changedUserApp.AutoUploadFolder = (string)lblAccountAutoUploadFolder.Content;
@@ -3842,6 +3851,10 @@ namespace ManageWalla
                 changedUserApp.MainCopyCacheSizeMB = Convert.ToInt32(sldAccountImageCopySize.Value);
 
                 await controller.UserAppUpdateAsync(changedUserApp, cancelTokenSource.Token);
+
+                if (changedUserApp.MainCopyCacheSizeMB < mainCopySize)
+                    CacheHelper.ReduceMainCopyCacheSize(mainCopyCacheList, changedUserApp.MainCopyFolder, changedUserApp.MainCopyCacheSizeMB);
+
                 //await controller.SetUserApp(cancelTokenSource.Token);
 
                 if (newCancelTokenSource == cancelTokenSource)
