@@ -79,6 +79,7 @@ namespace ManageWalla
                 }
 
                 thumbnailImage = ConvertByteArrayToImage(thumbArray);
+                thumbImageLoadState = LoadState.Loaded;
             }
             catch (OperationCanceledException)
             {
@@ -90,7 +91,6 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 thumbImageLoadState = LoadState.Error;
-                //thumbnailImage = GetTempBitmap("Error", true);
             }
             finally
             {
@@ -100,8 +100,6 @@ namespace ManageWalla
                     OnPropertyChanged("thumbnailImage");
             }
         }
-
-
         #endregion
 
         #region MainCopy
@@ -112,6 +110,9 @@ namespace ManageWalla
 
             try
             {
+                mainImageLoadState = LoadState.Requested;
+                OnPropertyChanged("mainImageLoadState");
+
                 string fileName = CacheHelper.GetMainCopyFileName(imageId, mainCopyCacheList, folder);
 
                 if (fileName.Length > 0)
@@ -125,19 +126,25 @@ namespace ManageWalla
                     CacheHelper.SaveMainCopyToCache(imageId, mainImageArray, mainCopyCacheList, folder, mainCopyCacheSizeMB);
                     mainCopyImage = ConvertByteArrayToImage(mainImageArray);
                 }
+
+                mainImageLoadState = LoadState.Loaded;
             }
             catch (OperationCanceledException)
             {
                 logger.Debug("LoadMainCopyImage has been cancelled");
                 mainCopyImage = null;
+                mainImageLoadState = LoadState.NotLoaded;
             }
             catch (Exception ex)
             {
+                mainCopyImage = null;
+                mainImageLoadState = LoadState.Error;
                 logger.Error(ex);
-                //mainCopyImage = GetTempBitmap("Error", false);
             }
             finally
             {
+                OnPropertyChanged("mainImageLoadState");
+
                 if (mainCopyImage != null)
                     OnPropertyChanged("mainCopyImage");
             }
@@ -297,39 +304,3 @@ namespace ManageWalla
         #endregion
     }
 }
-
-
-
-
-
-/*
-async private Task<Image> LoadImageMainAsync(CancellationToken cancelToken)
-{
-    try
-    {
-        //mainImageLoadState = LoadState.Requested;
-
-        BitmapImage responseImage = await serverHelper.GetMainImage(imageId, cancelToken);
-        if (responseImage == null)
-            throw new Exception("The image could not be retrieved from the server, an unexpected error occured");
-
-        Image newImage = new Image();
-        newImage.Source = responseImage;
-
-        //mainImageLoadState = LoadState.Loaded;
-        return newImage;
-    }
-    catch (OperationCanceledException)
-    {
-        //mainImageLoadState = LoadState.Error;
-        logger.Debug("LoadImageMainAsync has been cancelled");
-        return null;
-    }
-    catch (Exception ex)
-    {
-        //mainImageLoadState = LoadState.Error;
-        logger.Error(ex);
-        return GetTempBitmap("Error");
-    }
-}
-*/

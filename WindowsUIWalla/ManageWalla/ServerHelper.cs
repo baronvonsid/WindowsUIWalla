@@ -47,6 +47,8 @@ namespace ManageWalla
         {
             try
             {
+                return true;
+
                 IPAddress[] addresslist = await Dns.GetHostAddressesAsync(webServerTest);
                 if (addresslist[0].ToString().Length > 6)
                 {

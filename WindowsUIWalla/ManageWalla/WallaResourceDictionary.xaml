@@ -4,7 +4,8 @@
                     xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary">
 
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-
+    <walla:WallaLoadStateToVisibleConverter x:Key="WallaLoadStateToVisibleConverter" />
+    
     <walla:UploadImageFileList x:Key="uploadImagefileListKey" />
     <walla:UploadUIState x:Key="uploadUIStateKey" />
     
@@ -106,7 +107,9 @@
     <SolidColorBrush x:Key="ImageViewBackgroundBrush" Color="White" />
     <SolidColorBrush x:Key="WallaBannerBackgroundBrush" Color="White" />
 
-    <SolidColorBrush x:Key="PaneHeaderBackgroundSelectedBrush" Color="#00A7BF" />
+    <!-- #00A7BF -->
+
+    <SolidColorBrush x:Key="PaneHeaderBackgroundSelectedBrush" Color="#FF00A7BF" />
     <SolidColorBrush x:Key="PaneHeaderNotSelectedBrush" Color="White" />
     <SolidColorBrush x:Key="PaneBodyBackgroundBrush" Color="White" />
     

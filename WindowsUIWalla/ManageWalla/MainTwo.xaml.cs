@@ -568,10 +568,10 @@ namespace ManageWalla
 
                 #region Tag
                 case PaneMode.TagView:
-                    gridTag.RowDefinitions[2].Height = new GridLength(48.0);
+                    gridTag.RowDefinitions[1].Height = new GridLength(48.0);
+                    gridTag.RowDefinitions[2].MaxHeight = 0;
                     gridTag.RowDefinitions[3].MaxHeight = 0;
-                    gridTag.RowDefinitions[4].MaxHeight = 0;
-                    gridTag.RowDefinitions[5].Height = new GridLength(0.0);
+                    gridTag.RowDefinitions[4].Height = new GridLength(0.0);
 
                     cmdTagAdd.Visibility = Visibility.Visible;
                     cmdTagEdit.Visibility = Visibility.Visible;
@@ -586,10 +586,10 @@ namespace ManageWalla
                     break;
                 case PaneMode.TagAdd:
                 case PaneMode.TagEdit:
-                    gridTag.RowDefinitions[2].Height = new GridLength(0.0);
-                    gridTag.RowDefinitions[3].MaxHeight = 30;
-                    gridTag.RowDefinitions[4].MaxHeight = 80;
-                    gridTag.RowDefinitions[5].Height = new GridLength(48.0);
+                    gridTag.RowDefinitions[1].Height = new GridLength(0.0);
+                    gridTag.RowDefinitions[2].MaxHeight = 30;
+                    gridTag.RowDefinitions[3].MaxHeight = 80;
+                    gridTag.RowDefinitions[4].Height = new GridLength(48.0);
                     wrapMyTags.IsEnabled = false;
                     wrapSystemTags.IsEnabled = false;
 

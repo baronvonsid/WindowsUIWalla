@@ -18,11 +18,10 @@ namespace ManageWalla
         {
             //elementType = image, loading, unavi
             GeneralImage.LoadState loadState = (GeneralImage.LoadState)value;
-            GeneralImage.LoadState elementType = (GeneralImage.LoadState)parameter;
-            //string elementTypeStr = (string)parameter;
+            int elementTypeParam = (int)parameter;
+            GeneralImage.LoadState elementType = (GeneralImage.LoadState)elementTypeParam;
 
             //GeneralImage.LoadState elementType = (GeneralImage.LoadState)int.Parse(elementTypeStr);
-
             if (loadState == elementType)
             {
                 return Visibility.Visible;

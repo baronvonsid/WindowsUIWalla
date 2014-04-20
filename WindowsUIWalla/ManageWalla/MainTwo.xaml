@@ -534,8 +534,7 @@
 
             <Grid x:Name="gridTag" Background="{StaticResource PaneBodyBackgroundBrush}"  Margin="8,5,5,5" Grid.Column="1" Grid.Row="6">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="48" />
                     <RowDefinition Height="30" />
                     <RowDefinition Height="80" />
@@ -546,17 +545,18 @@
                     <ColumnDefinition MinWidth="100" />
                 </Grid.ColumnDefinitions>
 
+                
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Disabled">
-                    <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal">
-                    </WrapPanel>
+                    <StackPanel Orientation="Vertical">
+                        <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal">
+                        </WrapPanel>
+                        <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,5,0,5" />
+                        <WrapPanel x:Name="wrapSystemTags" Orientation="Horizontal">
+                        </WrapPanel>
+                    </StackPanel>
                 </ScrollViewer>
 
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Disabled">
-                    <WrapPanel x:Name="wrapSystemTags" Orientation="Horizontal">
-                    </WrapPanel>
-                </ScrollViewer>
-
-                <StackPanel Orientation="Vertical" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                     <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
                     <StackPanel Orientation="Horizontal" >
                         <Button x:Name="cmdTagAdd" Content="Add" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagAdd_Click"  />
@@ -564,12 +564,12 @@
                     </StackPanel>
                 </StackPanel>
 
-                <Label Grid.Column="0" Grid.Row="3" Content="Name"/>
-                <TextBox x:Name="txtTagName"  Grid.Column="1" Grid.Row="3" Margin="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtTagName_PreviewTextInput" />
-                <Label Grid.Column="0" Grid.Row="4" Content="Description"/>
-                <TextBox x:Name="txtTagDescription" Margin="2" Grid.Column="1" Grid.Row="4" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
+                <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
+                <TextBox x:Name="txtTagName"  Grid.Column="1" Grid.Row="2" Margin="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtTagName_PreviewTextInput" />
+                <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
+                <TextBox x:Name="txtTagDescription" Margin="2" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
 
-                <StackPanel Orientation="Vertical" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
+                <StackPanel Orientation="Vertical" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                     <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
                     <StackPanel Orientation="Horizontal" >
                         <Button x:Name="cmdTagSave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdTagSave_Click" />
@@ -1144,21 +1144,42 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <Grid>
-                                    <!--
-                                    <Image x:Name="imageThumbError" Source="{StaticResource errorImageSrc}" Height="32" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp">
+                                    <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}">
+                                        <Image x:Name="imageThumbError" Source="{StaticResource errorImageSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Image.Visibility>
+                                                <Binding  Path="thumbnailImage.thumbImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
+                                                    <Binding.ConverterParameter>
+                                                        <sys:Int32>3</sys:Int32>
+                                                    </Binding.ConverterParameter>
+                                                </Binding>
+                                            </Image.Visibility>
+                                        </Image>
+                                    </Grid>
+                                    <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}">
+                                        <Image x:Name="imageThumbLoading" Source="{StaticResource errorImageSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Image.Visibility>
+                                                <Binding  Path="thumbnailImage.thumbImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
+                                                    <Binding.ConverterParameter>
+                                                        <sys:Int32>1</sys:Int32>
+                                                    </Binding.ConverterParameter>
+                                                </Binding>
+                                            </Image.Visibility>
+                                        </Image>
+                                    </Grid>
+
+                                    <!--<Image x:Name="imageThumb" Visibility="{Binding thumbnailImage.thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter={x:Static Int32}}" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" />-->
+                                    <!--<Image x:Name="imageThumb" Visibility="Visible" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" />-->
+
+                                    <Image x:Name="imageThumb" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp">
                                         <Image.Visibility>
                                             <Binding  Path="thumbnailImage.thumbImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
                                                 <Binding.ConverterParameter>
-                                                    <sys:Int32>3</sys:Int32>
+                                                    <sys:Int32>2</sys:Int32>
                                                 </Binding.ConverterParameter>
                                             </Binding>
                                         </Image.Visibility>
-
                                     </Image>
-                                    -->
-                                    <!--<Image x:Name="imageThumb" Visibility="{Binding thumbnailImage.thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter={x:Static LoadState.Loaded}}" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" />-->
-                                    <Image x:Name="imageThumb" Visibility="Visible" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" />
-                                    
+
                                     <StackPanel x:Name="paneSelectedPane" Visibility="{Binding ElementName=cmdMultiSelectionMode, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
                                         <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
                                     </StackPanel>
@@ -1411,7 +1432,43 @@
                         <ColumnDefinition Width="240"/>
                     </Grid.ColumnDefinitions>
 
-                    <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="0" DataContext="{StaticResource imageMainViewerListKey}" Source="{Binding mainCopyImage.Source}" MouseUp="RevertFromImageView_MouseUp" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+
+                    <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="0" DataContext="{StaticResource imageMainViewerListKey}" Source="{Binding mainCopyImage.Source}" MouseUp="RevertFromImageView_MouseUp" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image.Visibility>
+                            <Binding  Path="mainImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
+                                <Binding.ConverterParameter>
+                                    <sys:Int32>2</sys:Int32>
+                                </Binding.ConverterParameter>
+                            </Binding>
+                        </Image.Visibility>
+                    </Image>
+
+                    <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="0">
+                        <Image Source="{StaticResource errorImageSrc}" Visibility="Collapsed" Height="32" DataContext="{StaticResource imageMainViewerListKey}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!--<Image.Visibility>
+                                <Binding  Path="mainImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
+                                    <Binding.ConverterParameter>
+                                        <sys:Int32>3</sys:Int32>
+                                    </Binding.ConverterParameter>
+                                </Binding>
+                            </Image.Visibility>-->
+                        </Image>
+                    </Grid>
+
+                    <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="0">
+                        <Image Source="{StaticResource errorImageSrc}" Visibility="Collapsed" DataContext="{StaticResource imageMainViewerListKey}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!--
+                            <Image.Visibility>
+                                <Binding  Path="mainImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
+                                    <Binding.ConverterParameter>
+                                        <sys:Int32>1</sys:Int32>
+                                    </Binding.ConverterParameter>
+                                </Binding>
+                            </Image.Visibility>-->
+                        </Image>
+                    </Grid>
+
 
                     <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
 
@@ -1447,8 +1504,6 @@
 
                     </StackPanel>
 
-                    
-                    
                     <Grid x:Name="grdImageViewDetails" DataContext="{StaticResource imageMainViewerListKey}" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Margin="2" HorizontalAlignment="Left" Background="{StaticResource PaneBodyBackgroundBrush}">
                         <Grid.RowDefinitions>
                             <!-- Name, desc, file name, date -->
