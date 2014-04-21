@@ -9,8 +9,9 @@
 					minOccurs="0">
 					<complexType>
 						<attribute type="long" name="imageId" />
-						<attribute type="int" name="imageStatus" />
+						<attribute type="int" name="status" />
 						<attribute type="string" name="name" />
+						<attribute type="boolean" name="error" />
 						<attribute type="string" name="errorMessage" />
 						<attribute type="dateTime" name="lastUpdated" />
 					</complexType>

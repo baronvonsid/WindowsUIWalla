@@ -20,9 +20,9 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageMoveList")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/ImageMoveList", IsNullable=false)]
-    public partial class ImageMoveList {
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageIdList")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/ImageIdList", IsNullable=false)]
+    public partial class ImageIdList {
         
         private long[] imageRefField;
         

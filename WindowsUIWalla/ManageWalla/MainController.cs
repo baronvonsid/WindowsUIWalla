@@ -79,7 +79,7 @@ namespace ManageWalla
 
         public void Dispose()
         {
-            if (state == null || state.account == null || state.account.ProfileName.Length < 1)
+            if (state == null)
                 return;
 
             CacheHelper.SaveGlobalState(state, state.account.ProfileName);
@@ -90,22 +90,10 @@ namespace ManageWalla
         #endregion
 
         #region AppInitialise
-        /// <summary>
-        /// Check for user specific state, saved locally.  Initialise object.
-        /// Create Server helper and check if online.
-        /// If not online then set online flag and finish further initialisation.
-        /// If online. If user credentials in state object are present attempt logon to Walla.
-        /// When success - Pass Machine details to Walla and retrieve machine id.
-        /// If logon fails or no user credentials.
-        /// Show Settings form and display message about failure.
-        /// </summary>
-        /// <param name="currentMainParam"></param>
-        /// <returns></returns>
-        public void InitApplication()
+        public void SetupServerHelper()
         {
             try
             {
-                //Setup Server helper.
                 serverHelper = new ServerHelper(Properties.Settings.Default.WallaWSHostname, Properties.Settings.Default.WallaWSPort,
                     Properties.Settings.Default.WallaWSPath, Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.WallaWebPath);
             }
@@ -114,6 +102,11 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+        }
+
+        public bool CacheFilesPresent(string profileName)
+        {
+            return CacheHelper.CacheFilesPresent(profileName);
         }
 
         public void SetUpCacheFiles(string profileName, UploadImageStateList uploadImageStateListParam)
@@ -125,15 +118,11 @@ namespace ManageWalla
             uploadImageStateList = uploadImageStateListParam;
         }
 
-        async public Task SetPlatform()
+        async public Task<bool> SetPlatform()
         {
             System.OperatingSystem osInfo = System.Environment.OSVersion;
 
-
-            if (!await serverHelper.VerifyPlatform(Properties.Settings.Default.OS, "PC", osInfo.Version.Major, osInfo.Version.Minor))
-            {
-                throw new Exception("The platform this application is running on could not be validated on server.");
-            }
+            return await serverHelper.VerifyPlatform(Properties.Settings.Default.OS, "PC", osInfo.Version.Major, osInfo.Version.Minor);
         }
 
         async public Task<bool> CheckOnline()
@@ -143,31 +132,19 @@ namespace ManageWalla
 
         async public Task<bool> VerifyApp()
         {
-            //state.connectionState = GlobalState.ConnectionState.Offline;
-
-            if (await serverHelper.isOnline(Properties.Settings.Default.WebServerTest))
-            {
-                return await serverHelper.VerifyApp(Properties.Settings.Default.WallaAppKey, Properties.Settings.Default.LastUser);
-            }
-            else
-            {
-                return true;
-            }
+            return await serverHelper.VerifyApp(Properties.Settings.Default.WallaAppKey);
         }
 
         async public Task<string> Logon(string userName, string password)
         {
             if (await serverHelper.Logon(userName, password))
             {
-                state.connectionState = GlobalState.ConnectionState.LoggedOn;
+                return "OK";
             }
             else
             {
-                state.connectionState = GlobalState.ConnectionState.FailedLogin;
                 return "Logon failed";
             }
-
-            return "OK";
         }
 
         async public Task AccountDetailsGet(CancellationToken cancelToken)
@@ -416,11 +393,11 @@ namespace ManageWalla
                     if (response == null)
                     {
                         newUploadEntry.lastUpdated = DateTime.Now;
-                        newUploadEntry.uploadState = UploadImage.UploadState.AwaitingProcessed;
+                        newUploadEntry.status = UploadImage.ImageStatus.AwaitingProcessed;
                     }
                     else
                     {
-                        newUploadEntry.hasError = true;
+                        newUploadEntry.error = true;
                         newUploadEntry.lastUpdated = DateTime.Now;
                         newUploadEntry.errorMessage = response;
                         responseErrors.Add(currentUpload.Meta.OriginalFileName + " error: " + response);
@@ -838,7 +815,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task TagAddRemoveImagesAsync(string tagName, ImageMoveList moveList, bool add, CancellationToken cancelToken)
+        async public Task TagAddRemoveImagesAsync(string tagName, ImageIdList moveList, bool add, CancellationToken cancelToken)
         {
             try
             {
@@ -1039,7 +1016,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task CategoryMoveImagesAsync(long categoryId, ImageMoveList moveList, CancellationToken cancelToken)
+        async public Task CategoryMoveImagesAsync(long categoryId, ImageIdList moveList, CancellationToken cancelToken)
         {
             try
             {

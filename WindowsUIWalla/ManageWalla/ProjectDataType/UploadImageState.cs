@@ -21,9 +21,9 @@ namespace ManageWalla
         public DateTime uploadDate { get; set; }
         public DateTime lastUpdated { get; set; }
         public long imageId { get; set; }
-        public UploadImage.UploadState uploadState { get; set; }
+        public UploadImage.ImageStatus status { get; set; }
         public string errorMessage { get; set; }
-        public bool hasError { get; set; }
+        public bool error { get; set; }
         public string name { get; set; }
         public string fileName { get; set; }
         public string fullPath { get; set; }

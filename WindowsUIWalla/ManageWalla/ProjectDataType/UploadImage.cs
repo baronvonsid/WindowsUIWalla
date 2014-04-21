@@ -18,7 +18,7 @@ namespace ManageWalla
         private ImageMeta meta;
 
         //None 0, File received 1, Awaiting processing 2, Being processed 3, Complete 4, Inactive 5
-        public enum UploadState
+        public enum ImageStatus
         {
             None = 0,
             FileReceived = 1,

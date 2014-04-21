@@ -50,11 +50,15 @@ namespace ManageWalla {
         
         private bool imageIdFieldSpecified;
         
-        private int imageStatusField;
+        private int statusField;
         
-        private bool imageStatusFieldSpecified;
+        private bool statusFieldSpecified;
         
         private string nameField;
+        
+        private bool errorField;
+        
+        private bool errorFieldSpecified;
         
         private string errorMessageField;
         
@@ -86,23 +90,23 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public int imageStatus {
+        public int status {
             get {
-                return this.imageStatusField;
+                return this.statusField;
             }
             set {
-                this.imageStatusField = value;
+                this.statusField = value;
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool imageStatusSpecified {
+        public bool statusSpecified {
             get {
-                return this.imageStatusFieldSpecified;
+                return this.statusFieldSpecified;
             }
             set {
-                this.imageStatusFieldSpecified = value;
+                this.statusFieldSpecified = value;
             }
         }
         
@@ -114,6 +118,28 @@ namespace ManageWalla {
             }
             set {
                 this.nameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public bool error {
+            get {
+                return this.errorField;
+            }
+            set {
+                this.errorField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool errorSpecified {
+            get {
+                return this.errorFieldSpecified;
+            }
+            set {
+                this.errorFieldSpecified = value;
             }
         }
         

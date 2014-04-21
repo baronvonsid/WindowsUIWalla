@@ -86,7 +86,8 @@ namespace ManageWalla
         public GlobalState state = null;
         public List<ThumbCache> thumbCacheList = null;
         public List<MainCopyCache> mainCopyCacheList = null;
-         
+
+        private bool cacheFilesSetup = false;
         public ImageList currentImageList = null;
         private bool tagListUploadRefreshing = false;
         public CancellationTokenSource cancelTokenSource = null;
@@ -129,20 +130,18 @@ namespace ManageWalla
                 currentDialogType = MessageType.Other;
                 ShowMessage(MessageType.Busy, "Loading fotowalla");
 
-                controller.InitApplication();
+                controller.SetupServerHelper();
+
+                //Initialise UI for logon.
+                previousPane = PaneMode.GalleryView;
+                RefreshOverallPanesStructure(PaneMode.Account);
+                RefreshPanesAllControls(PaneMode.Account);
 
                 string profileName = Properties.Settings.Default.LastUser;
-                await Initialise(profileName, "", false);
-
-                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                if (await ApplicationInit(profileName))
                 {
-                    radGallery.IsChecked = true;
-                    ResetUploadState();
-                }
-                else
-                {
-                    currentPane = PaneMode.GalleryView;
-                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    AccountRefreshFromState();
+                    await Login(state.account.ProfileName, state.account.Password);
                 }
 
                 ConcludeBusyProcess();
@@ -150,30 +149,36 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                ShowMessage(MessageType.Error, "There was an unexpected error starting the application and must now close.  Error was: " + ex.Message);
+                ShowMessage(MessageType.Error, "There was a problem starting fotowalla and will now close.  " + ex.Message);
+                //Thread.Sleep(10000);
                 //Application.Current.Shutdown();
             }
         }
 
-        async private Task Initialise(string profileName, string password, bool onAccountForm)
+        async private Task<bool> ApplicationInit(string profileName)
         {
-            controller.SetUpCacheFiles(profileName, uploadImageStateList);
-            state = controller.GetState();
-            thumbCacheList = controller.GetThumbCacheList();
-            mainCopyCacheList = controller.GetMainCopyCacheList();
-
             if (!await controller.CheckOnline())
             {
-                if (state.account.ProfileName.Length > 0)
+                //Offline !
+                if (profileName.Length > 0 && controller.CacheFilesPresent(profileName))
                 {
-                    ShowMessage(MessageType.Warning, "No internet connection could be established.  Working with local data only");
-                    state.connectionState = GlobalState.ConnectionState.Offline;
+                    string message = "No internet connection could be established.  Would you like to work with just fotowalla data saved on this machine?";
+                    if (MessageBox.Show(message, "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                    {
+                        throw new Exception("No internet connection and no local data found.");
+                    }
+                    else
+                    {
+                        UseCreateLocalCacheFiles(profileName);
+                        state.connectionState = GlobalState.ConnectionState.Offline;
+                        DisplayConnectionStatus();
+                        return true;
+                    }
                 }
                 else
                 {
-                    state.connectionState = GlobalState.ConnectionState.NoAccount;
+                    throw new Exception("No internet connection and no local data found.");
                 }
-                return;
             }
 
             if (!await controller.VerifyApp())
@@ -181,19 +186,30 @@ namespace ManageWalla
                 throw new Exception("The application failed validation with the server.  Please check for the latest app version.");
             }
 
-            if (profileName.Length > 0)
+            if (!await controller.SetPlatform())
             {
-                if (!onAccountForm && state.account != null)
-                {
-                    password = state.account.Password;
-                }
+                throw new Exception("The platform is not supported by fotowalla.  Please check the web site for our latest application details.");
+            }
 
-                await Login(profileName, password);
+            if (profileName.Length > 0 && controller.CacheFilesPresent(profileName))
+            {
+                UseCreateLocalCacheFiles(profileName);
+                return true;
             }
             else
             {
-                state.connectionState = GlobalState.ConnectionState.NoAccount;
+                return false;
             }
+        }
+
+        private void UseCreateLocalCacheFiles(string profileName)
+        {
+            controller.SetUpCacheFiles(profileName, uploadImageStateList);
+            state = controller.GetState();
+            thumbCacheList = controller.GetThumbCacheList();
+            mainCopyCacheList = controller.GetMainCopyCacheList();
+
+            cacheFilesSetup = true;
         }
 
         public void UserConcludeProcess()
@@ -898,7 +914,7 @@ namespace ManageWalla
 
                 #region Account
                 case PaneMode.Account:
-                    if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                    if (state != null && state.connectionState == GlobalState.ConnectionState.LoggedOn)
                     {
                         //tabAccount.IsEnabled = true;
                         //cmdAccountClose.IsEnabled = true;
@@ -2332,13 +2348,19 @@ namespace ManageWalla
 
         private String GetCategoryName(long categoryId)
         {
-            CategoryListCategoryRef parentCategory = state.categoryList.CategoryRef.Single<CategoryListCategoryRef>(r => r.id == categoryId);
-            return parentCategory.name;
+            if (state.categoryList == null)
+                return "";
+
+            CategoryListCategoryRef parentCategory = state.categoryList.CategoryRef.FirstOrDefault<CategoryListCategoryRef>(r => r.id == categoryId);
+            if (parentCategory != null)
+                return parentCategory.name;
+
+            return "";
         }
 
         async private Task MoveImagesToCategory(long categoryId)
         {
-            ImageMoveList moveList = new ImageMoveList();
+            ImageIdList moveList = new ImageIdList();
             moveList.ImageRef = new long[lstImageMainViewerList.SelectedItems.Count];
 
             int i = 0;
@@ -2778,7 +2800,7 @@ namespace ManageWalla
 
         async private Task AddRemoveImagesFromTag(bool add, string[] tagName)
         {
-            ImageMoveList moveList = new ImageMoveList();
+            ImageIdList moveList = new ImageIdList();
             moveList.ImageRef = new long[lstImageMainViewerList.SelectedItems.Count];
             
             int i = 0;
@@ -3083,7 +3105,7 @@ namespace ManageWalla
             uploadUIState.RootCategoryName = GetCategoryName(state.userApp.UserDefaultCategoryId);
             uploadUIState.RootFolder = "";
             uploadUIState.AutoUploadCategoryName = GetCategoryName(state.userApp.UserAppCategoryId);
-            uploadUIState.AutoUploadFolder = @"C:\temp\AutoUpload";
+            uploadUIState.AutoUploadFolder = state.userApp.AutoUploadFolder;
             uploadUIState.AutoCategoryId = state.userApp.UserAppCategoryId;
         }
 
@@ -3704,7 +3726,7 @@ namespace ManageWalla
             foreach (UploadImage currentUploadImage in uploadFots)
             {
                 UploadStatusListImageUploadRef newImageRef = new UploadStatusListImageUploadRef();
-                newImageRef.imageStatus = -1;
+                newImageRef.status = -1;
                 newImageRef.name = currentUploadImage.Meta.Name;
                 newImageRef.lastUpdated = DateTime.Now;
                 //newImageRef.errorMessage = currentUploadImage.;
@@ -3766,13 +3788,13 @@ namespace ManageWalla
                     return;
                 }
 
-                await Initialise(profileName, password, true);
+                await Login(profileName, password);
 
-                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
-                {
-                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                    radGallery.IsChecked = true;
-                }
+                //if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                //{
+                //    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                //    radGallery.IsChecked = true;
+                //}
             }
             catch (Exception ex)
             {
@@ -3784,27 +3806,31 @@ namespace ManageWalla
 
         private void AccountRefreshFromState()
         {
-            lblAccountType.Content = state.account.AccountTypeName;
-            lblAccountOpen.Content = state.account.OpenDate.ToShortDateString();
-            lblAccountStorageLimitGB.Content = state.account.StorageGBLimit + " GB";
-            lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + " GB - " + state.account.TotalImages.ToString() + " Images";
+            if (state.account != null)
+            {
+                lblAccountType.Content = state.account.AccountTypeName;
+                lblAccountOpen.Content = state.account.OpenDate.ToShortDateString();
+                lblAccountStorageLimitGB.Content = state.account.StorageGBLimit + " GB";
+                lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + " GB - " + state.account.TotalImages.ToString() + " Images";
+                lblAccountEmail.Content = state.account.Email;
+                txtAccountProfileName.Text = state.account.ProfileName;
+            }
 
-            chkAccountAutoUpload.IsChecked = state.userApp.AutoUpload;
-            lblAccountAutoUploadFolder.Content = state.userApp.AutoUploadFolder;
-            lblAccountAutoUploadFolderAbbrev.Content = StringTrim(state.userApp.AutoUploadFolder,80);
+            if (state.userApp != null)
+            {
+                chkAccountAutoUpload.IsChecked = state.userApp.AutoUpload;
+                lblAccountAutoUploadFolder.Content = state.userApp.AutoUploadFolder;
+                lblAccountAutoUploadFolderAbbrev.Content = StringTrim(state.userApp.AutoUploadFolder, 80);
 
-            lblAccountImageCopyFolder.Content = state.userApp.MainCopyFolder;
-            lblAccountImageCopyFolderAbbrev.Content = StringTrim(state.userApp.MainCopyFolder,80);
+                lblAccountImageCopyFolder.Content = state.userApp.MainCopyFolder;
+                lblAccountImageCopyFolderAbbrev.Content = StringTrim(state.userApp.MainCopyFolder, 80);
 
-            WallaByteToMBConverter converter = new WallaByteToMBConverter();
-            lblAccountImageCopyStatus.Content = converter.Convert(mainCopyCacheList.Sum<MainCopyCache>(r => r.imageSize), null, null, null) 
-                + " - " + mainCopyCacheList.Count().ToString() + " Images";
+                WallaByteToMBConverter converter = new WallaByteToMBConverter();
+                lblAccountImageCopyStatus.Content = converter.Convert(mainCopyCacheList.Sum<MainCopyCache>(r => r.imageSize), null, null, null)
+                    + " - " + mainCopyCacheList.Count().ToString() + " Images";
 
-            sldAccountImageCopySize.Value = state.userApp.MainCopyCacheSizeMB;
-
-            lblAccountEmail.Content = state.account.Email;
-            txtAccountPassword.Password = state.account.Password;
-            txtAccountProfileName.Text = state.account.ProfileName;
+                sldAccountImageCopySize.Value = state.userApp.MainCopyCacheSizeMB;
+            }
         }
 
         private string StringTrim(string input, int length)
@@ -3884,52 +3910,40 @@ namespace ManageWalla
             {
                 ShowMessage(MessageType.Busy, "Logging onto FotoWalla");
 
-                //string profileName = (onAccountForm) ? txtAccountProfileName.Text : state.account.ProfileName;
-                //string password = (onAccountForm) ? txtAccountPassword.Text : state.account.Password;
                 string logonResponse = await controller.Logon(profileName, password);
 
-                if (cancelTokenSource != null)
-                    cancelTokenSource.Cancel();
-
-                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                cancelTokenSource = newCancelTokenSource;
-
-                switch (state.connectionState)
+                if (logonResponse == "OK")
                 {
-                    case GlobalState.ConnectionState.LoggedOn:
-                        
+                    if (profileName != Properties.Settings.Default.LastUser)
+                    {
                         Properties.Settings.Default.LastUser = profileName;
                         Properties.Settings.Default.Save();
-                        await AccountStatusRefresh(password);
-                        //await controller.AccountDetailsGet(cancelTokenSource.Token);
-                        //state.account.Password = password;
-                        //await controller.SetPlatform();
-                        //await controller.SetUserApp(cancelTokenSource.Token);
-                        //AccountRefreshFromState();
-                        ShowMessage(MessageType.Info, "Account: " + state.account.ProfileName + " has been connected with FotoWalla");
-                        break;
-                    //case GlobalState.ConnectionState.Offline:
-                    //    ShowMessage(MessageType.Info, "No internet connection could be established with FotoWalla, working in Offline mode");
-                    //    break;
-                    case GlobalState.ConnectionState.FailedLogin:
-                        ShowMessage(MessageType.Warning, "The logon for: " + profileName + ", failed with the message: " + logonResponse);
-                        //cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                        break;
-                }
+                    }
 
-                if (newCancelTokenSource == cancelTokenSource)
-                    cancelTokenSource = null;
-            }
-            catch (OperationCanceledException)
-            {
-                logger.Debug("Login has been cancelled.");
-                RefreshPanesAllControls(PaneMode.Account);
+                    if (!cacheFilesSetup)
+                        UseCreateLocalCacheFiles(profileName);
+
+                    state.connectionState = GlobalState.ConnectionState.LoggedOn;
+
+                    await AccountStatusRefresh(password);
+
+                    ShowMessage(MessageType.Info, "Account: " + state.account.ProfileName + " has been connected with FotoWalla");
+                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    radGallery.IsChecked = true;
+                        
+                }
+                else
+                {
+                    if (cacheFilesSetup)
+                        state.connectionState = GlobalState.ConnectionState.FailedLogin;
+
+                    ShowMessage(MessageType.Warning, "The logon for: " + profileName + ", failed with the message: " + logonResponse);
+                }
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "The logon process failed with an unexpected problem: " + ex.Message);
-                RefreshPanesAllControls(PaneMode.Account);
             }
             finally
             {
@@ -5048,7 +5062,7 @@ namespace ManageWalla
         public void UploadImageStateInProgress_Filter(object sender, FilterEventArgs e)
         {
             UploadImageState item = e.Item as UploadImageState;
-            if (item.uploadState != UploadImage.UploadState.Complete && item.uploadState != UploadImage.UploadState.Inactive)
+            if (item.status != UploadImage.ImageStatus.Complete && item.status != UploadImage.ImageStatus.Inactive)
             {
                 e.Accepted = true;
             }
@@ -5061,7 +5075,7 @@ namespace ManageWalla
         public void UploadImageStateComplete_Filter(object sender, FilterEventArgs e)
         {
             UploadImageState item = e.Item as UploadImageState;
-            if (item.uploadState == UploadImage.UploadState.Complete)
+            if (item.status == UploadImage.ImageStatus.Complete)
             {
                 e.Accepted = true;
             }
@@ -5228,8 +5242,10 @@ namespace ManageWalla
 
                 await controller.AccountDetailsGet(cancelTokenSource.Token);
                 state.account.Password = password;
-                await controller.SetPlatform();
+                
                 await controller.SetUserApp(cancelTokenSource.Token);
+
+                ResetUploadState();
 
                 ConcludeBusyProcess();
 

@@ -32,17 +32,11 @@ namespace ManageWalla
                 state.categoryImageList = new List<ImageList>();
                 state.galleryImageList = new List<ImageList>();
                 state.imageMetaList = new List<ImageMeta>();
-                //state.mainCopyCacheList = new List<MainCopyCache>();
                 state.connectionState = GlobalState.ConnectionState.NoAccount;
-                //state.mainCopyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Copies");
-                //state.mainCopyCacheSizeMB = Properties.Settings.Default.MainCopyCacheSizeMB;
                 state.account = new Account();
                 state.account.ProfileName = "";
                 state.account.Password = "";
             }
-
-            //state.imageFetchSize = Properties.Settings.Default.ImageFetchSize;
-            //state.thumbCacheSizeMB = Properties.Settings.Default.ThumbCacheSizeMB;
 
             state.categoryLoadState = GlobalState.DataLoadState.No;
             state.tagLoadState = GlobalState.DataLoadState.No;
@@ -88,6 +82,12 @@ namespace ManageWalla
             }
 
             return null;
+        }
+
+        public static bool CacheFilesPresent(string profileName)
+        {
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
+            return File.Exists(fileName);
         }
         #endregion
 
@@ -300,9 +300,9 @@ namespace ManageWalla
         public static long[] GetUploadImageListQueryIds(UploadImageStateList uploadImageStateList)
         {
             var queryItems = uploadImageStateList.Where(
-                                            r => (r.uploadState == UploadImage.UploadState.AwaitingProcessed
-                                            || r.uploadState == UploadImage.UploadState.BeingProcessed
-                                            || r.uploadState == UploadImage.UploadState.FileReceived) 
+                                            r => (r.status == UploadImage.ImageStatus.AwaitingProcessed
+                                            || r.status == UploadImage.ImageStatus.BeingProcessed
+                                            || r.status == UploadImage.ImageStatus.FileReceived) 
                                             && r.lastUpdated > DateTime.Now.AddMonths(-1));
 
             return queryItems.Select(r => r.imageId).ToArray();
@@ -318,7 +318,7 @@ namespace ManageWalla
         public static void DeleteUploadedFiles(UploadImageStateList uploadImageStateList, string autoUploadFolder)
         {
             var needDeletingItems = uploadImageStateList.Where(
-                                            r => r.uploadState == UploadImage.UploadState.Complete
+                                            r => r.status == UploadImage.ImageStatus.Complete
                                             && r.isDeleted == false);
 
             foreach (UploadImageState uploadedItem in needDeletingItems)
@@ -344,8 +344,8 @@ namespace ManageWalla
         public static void ClearUploadImageStateListOldEntries(UploadImageStateList uploadImageStateList)
         {
             var clearItems = uploadImageStateList.Where(
-                                            r => (r.uploadState == UploadImage.UploadState.FileReceived
-                                            || r.uploadState == UploadImage.UploadState.None)
+                                            r => (r.status == UploadImage.ImageStatus.FileReceived
+                                            || r.status == UploadImage.ImageStatus.None)
                                             && r.lastUpdated < DateTime.Now.AddMonths(-1));
 
             foreach (UploadImageState remove in clearItems)
@@ -357,10 +357,9 @@ namespace ManageWalla
         public static UploadImageState GetOrCreateCacheItem(UploadImageStateList uploadImageStateList, string fileName, string fullPath, string name, long size, bool isAuto, long userAppId, string machineName)
         {
             //Method checks for existing entries.  Adds in a new entry if none is found.
-
             var existingItem = uploadImageStateList.FirstOrDefault(r => r.fileName.ToUpper() == fileName.ToUpper() 
                 && r.sizeBytes == size 
-                && (r.uploadState == UploadImage.UploadState.None));
+                && (r.status == UploadImage.ImageStatus.None));
 
             if (existingItem != null)
             {
@@ -371,7 +370,7 @@ namespace ManageWalla
                 UploadImageState newUploadEntry = new UploadImageState();
                 newUploadEntry.imageId = 0;
                 newUploadEntry.errorMessage = "";
-                newUploadEntry.hasError = false;
+                newUploadEntry.error = false;
                 newUploadEntry.fileName = fileName;
                 newUploadEntry.fullPath = fullPath;
                 newUploadEntry.isAutoUpload = isAuto;
@@ -380,7 +379,7 @@ namespace ManageWalla
                 newUploadEntry.name = name;
                 newUploadEntry.sizeBytes = size;
                 newUploadEntry.uploadDate = DateTime.Now;
-                newUploadEntry.uploadState = UploadImage.UploadState.None;
+                newUploadEntry.status = UploadImage.ImageStatus.None;
                 newUploadEntry.userAppId = userAppId;
                 newUploadEntry.machineName = machineName;
 

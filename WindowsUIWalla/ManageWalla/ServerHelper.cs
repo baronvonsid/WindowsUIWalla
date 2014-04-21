@@ -47,8 +47,6 @@ namespace ManageWalla
         {
             try
             {
-                return true;
-
                 IPAddress[] addresslist = await Dns.GetHostAddressesAsync(webServerTest);
                 if (addresslist[0].ToString().Length > 6)
                 {
@@ -125,7 +123,7 @@ namespace ManageWalla
             return "http://" + hostName + ":" + port.ToString() + webPath + userId.ToString() + "/";
         }
 
-        async public Task<bool> VerifyApp(string validation, string userName) // Remove userName
+        async public Task<bool> VerifyApp(string validation)
         {
             try
             {
@@ -151,13 +149,17 @@ namespace ManageWalla
         {
             try
             {
-                // POST /{userName}/platform?OS={OS}&machine={machine}&major={major}&minor={minor}
+
+                HttpClient initialHttp = new HttpClient();
+                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
+
+                // POST /platform?OS={OS}&machine={machine}&major={major}&minor={minor}
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,
-                    "platform?OS=" + os + "&machineType=" + machineType + 
+                    "platform?OS=" + os + "&machineType=" + machineType +
                     "&major=" + majorVersion.ToString() + "&minor=" + minorVersion.ToString());
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request);
+                HttpResponseMessage response = await initialHttp.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
                 return true;
@@ -374,7 +376,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task TagAddRemoveImagesAsync(string tagName, ImageMoveList imagesToMove, bool add, CancellationToken cancelToken)
+        async public Task TagAddRemoveImagesAsync(string tagName, ImageIdList imagesToMove, bool add, CancellationToken cancelToken)
         {
             try
             {
@@ -393,7 +395,7 @@ namespace ManageWalla
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
                 xmlFormatter.UseXmlSerializer = true;
-                HttpContent content = new ObjectContent<ImageMoveList>(imagesToMove, xmlFormatter);
+                HttpContent content = new ObjectContent<ImageIdList>(imagesToMove, xmlFormatter);
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
@@ -588,7 +590,8 @@ namespace ManageWalla
 
                 newUploadEntry.lastUpdated = DateTime.Now;
                 newUploadEntry.imageId = imageId;
-                newUploadEntry.uploadState = UploadImage.UploadState.FileReceived;
+                newUploadEntry.status = UploadImage.ImageStatus.FileReceived;
+                image.Meta.Status = 1;
 
                 HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, "image/" + imageId.ToString() + "/meta");
                 requestMeta.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
@@ -631,7 +634,7 @@ namespace ManageWalla
         {
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "image/uploadstatus");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "image/uploadstatus");
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
@@ -808,7 +811,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageMoveList imagesToMove, CancellationToken cancelToken)
+        async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageIdList imagesToMove, CancellationToken cancelToken)
         {
             try
             {
@@ -820,7 +823,7 @@ namespace ManageWalla
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
                 xmlFormatter.UseXmlSerializer = true;
-                HttpContent content = new ObjectContent<ImageMoveList>(imagesToMove, xmlFormatter);
+                HttpContent content = new ObjectContent<ImageIdList>(imagesToMove, xmlFormatter);
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();

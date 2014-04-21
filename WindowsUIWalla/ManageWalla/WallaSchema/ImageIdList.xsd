@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/ImageMoveList"
-	xmlns:tns="http://www.example.org/ImageMoveList" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/ImageIdList"
+	xmlns:tns="http://www.example.org/ImageIdList" elementFormDefault="qualified">
 
-	<element name="ImageMoveList">
+	<element name="ImageIdList">
 	<complexType>
 	<sequence>
 		<element name="ImageRef" maxOccurs="unbounded" minOccurs="0">

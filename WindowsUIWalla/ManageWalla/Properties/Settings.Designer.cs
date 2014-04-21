@@ -25,15 +25,6 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
-        public string WallaWSHostname {
-            get {
-                return ((string)(this["WallaWSHostname"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("8081")]
         public int WallaWSPort {
             get {
@@ -56,15 +47,6 @@ namespace ManageWalla.Properties {
         public string WallaWebPath {
             get {
                 return ((string)(this["WallaWebPath"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("www.google.com")]
-        public string WebServerTest {
-            get {
-                return ((string)(this["WebServerTest"]));
             }
         }
         
@@ -131,6 +113,24 @@ namespace ManageWalla.Properties {
             }
             set {
                 this["LastUser"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("www.google.com")]
+        public string WebServerTest {
+            get {
+                return ((string)(this["WebServerTest"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
+        public string WallaWSHostname {
+            get {
+                return ((string)(this["WallaWSHostname"]));
             }
         }
     }
