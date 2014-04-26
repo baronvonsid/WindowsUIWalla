@@ -302,7 +302,8 @@ namespace ManageWalla
             var queryItems = uploadImageStateList.Where(
                                             r => (r.status == UploadImage.ImageStatus.AwaitingProcessed
                                             || r.status == UploadImage.ImageStatus.BeingProcessed
-                                            || r.status == UploadImage.ImageStatus.FileReceived) 
+                                            || r.status == UploadImage.ImageStatus.FileReceived
+                                            || r.status == UploadImage.ImageStatus.Complete) 
                                             && r.lastUpdated > DateTime.Now.AddMonths(-1));
 
             return queryItems.Select(r => r.imageId).ToArray();

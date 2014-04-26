@@ -281,7 +281,7 @@
                             <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
                                 <Button x:Name="cmdGalleryRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Hidden" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdGalleryRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
 
-                                <Image x:Name="imgGallery" Source="{StaticResource galleryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Image x:Name="imgGallery" Source="{StaticResource galleryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
                                 <Label Content="Gallery" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
@@ -407,7 +407,7 @@
                             <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
                                 <Button x:Name="cmdCategoryRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Hidden" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdCategoryRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
 
-                                <Image x:Name="imgCategory" Source="{StaticResource categoryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Image x:Name="imgCategory" Source="{StaticResource categoryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
                                 <Label Content="Category" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
@@ -500,7 +500,7 @@
                             <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
                                 <Button x:Name="cmdTagRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Hidden" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdTagRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
 
-                                <Image x:Name="imgTag" Source="{StaticResource tagImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Image x:Name="imgTag" Source="{StaticResource tagImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
                                 <Label Content="Tag" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
@@ -582,7 +582,7 @@
 
             </Grid>
 
-            <RadioButton x:Name="radUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Tag="False"  Margin="8,5,5,5" Checked="radUpload_Checked" Style="{StaticResource styleMainSectionRadioButton}">
+            <RadioButton x:Name="radUpload" GroupName="MainSection" Grid.Column="1" Grid.Row="7" Tag="False"  Checked="radUpload_Checked" Style="{StaticResource styleMainSectionRadioButton}">
                 <RadioButton.Template>
                     <ControlTemplate TargetType="{x:Type RadioButton}">
                         <Grid>
@@ -604,7 +604,7 @@
                                     </Label.Content>
                                 </Label>
                                 
-                                <Image x:Name="imgUpload" Source="{StaticResource uploadImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="29" />
+                                <Image x:Name="imgUpload" Source="{StaticResource uploadImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
                                 <Label Content="Upload" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
@@ -1231,7 +1231,7 @@
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
                                         SelectionChanged="lstUploadImageFileList_SelectionChanged"
-                                        Visibility="Collapsed">
+                                        Visibility="Collapsed" HorizontalContentAlignment="Center">
 
                     <ListBox.ItemTemplate>
                         <DataTemplate>

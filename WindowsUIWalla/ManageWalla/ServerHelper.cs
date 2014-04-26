@@ -630,13 +630,17 @@ namespace ManageWalla
             }
         }
 
-        async public Task<UploadStatusList> UploadGetStatusListAsync(CancellationToken cancelToken)
+        async public Task<UploadStatusList> UploadGetStatusListAsync(ImageIdList orderIdList, CancellationToken cancelToken)
         {
             try
             {
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "image/uploadstatus");
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<ImageIdList>(orderIdList, xmlFormatter);
+                request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
                 response.EnsureSuccessStatusCode();
 

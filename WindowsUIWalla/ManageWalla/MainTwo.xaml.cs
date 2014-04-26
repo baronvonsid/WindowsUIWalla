@@ -1640,7 +1640,7 @@ namespace ManageWalla
 
         public async Task WaitAsynchronouslyAsync()
         {
-            await Task.Delay(500);
+            await Task.Delay(750);
         }
 
         private bool IsScrollBarVisible()
@@ -1694,6 +1694,8 @@ namespace ManageWalla
 
         private void TweakUploadImageListMargin()
         {
+            return;
+
             /* Upload image list margin */
             double paneWidth = lstUploadImageFileList.ActualWidth - 22.0;
             double imageWidth = 130.0;
@@ -1745,6 +1747,9 @@ namespace ManageWalla
 
             if (isDetail)
                 newThickness = new Thickness(newMargin, 2, newMargin, 2);
+
+            if (imageMainViewerList.Count <= imageWidthCount)
+                newThickness = new Thickness(2);
 
             newStyle.Setters.Add(new Setter(MarginProperty, newThickness));
             lstImageMainViewerList.ItemContainerStyle = newStyle;
@@ -3716,6 +3721,8 @@ namespace ManageWalla
         #region Account Methods and Handlers
         private void RefreshUploadStatusFromStateList()
         {
+            return;
+
             /* Clear list and add local image load errors */
             //uploadStatusListBind.Clear();
 
@@ -3753,7 +3760,7 @@ namespace ManageWalla
         {
             if (tabAccount.SelectedIndex == 1)
             {
-                await RefreshUploadStatusStateAsync();
+                await RefreshUploadStatusStateAsync(false);
             }
         }
 
@@ -5268,12 +5275,24 @@ namespace ManageWalla
             }
         }
 
-        async private Task RefreshUploadStatusStateAsync()
+        private bool UploadStatusListNeedRefresh()
+        {
+            return true;
+
+        }
+
+        async private Task RefreshUploadStatusStateAsync(bool force)
         {
             try
             {
                 bool isBusy = bool.Parse(cmdAccountRefresh.Tag.ToString());
                 if (isBusy) { return; }
+
+
+                long[] orderIds = CacheHelper.GetUploadImageListQueryIds(uploadImageStateList);
+
+                if (!force && orderIds.Length == 0)
+                    return;
 
                 ShowMessage(MessageType.Busy, "Refreshing upload history list");
 
@@ -5285,7 +5304,7 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                await controller.RefreshUploadStatusListAsync(cancelTokenSource.Token);
+                await controller.RefreshUploadStatusListAsync(orderIds, cancelTokenSource.Token);
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
@@ -5327,7 +5346,7 @@ namespace ManageWalla
             }
             else if (tabAccount.SelectedIndex == 1)
             {
-                await RefreshUploadStatusStateAsync();
+                await RefreshUploadStatusStateAsync(true);
             }
             else
             {

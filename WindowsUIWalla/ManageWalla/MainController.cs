@@ -577,13 +577,20 @@ namespace ManageWalla
         }
 
         //TODO Sort out with date modified and to use local version.
-        async public Task RefreshUploadStatusListAsync(CancellationToken cancelToken)
+        async public Task RefreshUploadStatusListAsync(long[] orderIds, CancellationToken cancelToken)
         {
             try
             {
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
-                    state.uploadStatusList = await serverHelper.UploadGetStatusListAsync(cancelToken);
+                    ImageIdList orderIdList = new ImageIdList();
+                    orderIdList.ImageRef = orderIds;
+
+                    //for (int i = 0; i < orderIds.Length; i++)
+                    //{  
+                    //}
+
+                    state.uploadStatusList = await serverHelper.UploadGetStatusListAsync(orderIdList, cancelToken);
                     state.uploadStatusListState = GlobalState.DataLoadState.Loaded;
                 }
                 else
