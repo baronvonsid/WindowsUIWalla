@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/CategoryList"
-	xmlns:tns="http://www.example.org/CategoryList" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ws.fotowalla.com/CategoryList"
+	xmlns:tns="http://ws.fotowalla.com/CategoryList" elementFormDefault="qualified">
 
 	<element name="CategoryList">
 		<complexType>

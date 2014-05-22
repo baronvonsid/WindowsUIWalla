@@ -20,8 +20,8 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/UserApp")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/UserApp", IsNullable=false)]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/UserApp")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/UserApp", IsNullable=false)]
     public partial class UserApp {
         
         private int appIdField;

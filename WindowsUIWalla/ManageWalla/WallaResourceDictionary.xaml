@@ -19,19 +19,22 @@
     <walla:WallaByteToMBConverter x:Key="WallaByteToMBConverterKey" />
     <walla:WallaCacheSizeConverter x:Key="WallaCacheSizeConverterKey" />
     
+    <!--
     <XmlNamespaceMappingCollection x:Key="wallaNamespaceMappingKey">
         <XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
     </XmlNamespaceMappingCollection>
 
     <XmlDataProvider x:Key="uploadStatusListXmlKey"  XmlNamespaceManager="{StaticResource wallaNamespaceMappingKey}" />
-
+-->
 
 
     <!--<ImageSource x:Key="loadingImageSrc">resources/anim/loading.gif</ImageSource>
     <ImageSource x:Key="infoImageSrc">resources/icons/info.gif</ImageSource>-->
     <ImageSource x:Key="errorImageSrc">resources/icons/error.gif</ImageSource>
     <ImageSource x:Key="warningImageSrc">resources/icons/warning.gif</ImageSource>
+    <ImageSource x:Key="busyImageAnimSrc">resources/anim/busy.gif</ImageSource>
     <ImageSource x:Key="busyImageSrc">resources/anim/busy.gif</ImageSource>
+    
 
     <ImageSource x:Key="accountCloseImageSrc">resources/icons/error.gif</ImageSource>
     <ImageSource x:Key="accountCloseSelectedImageSrc">resources/icons/warning.gif</ImageSource>

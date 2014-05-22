@@ -20,8 +20,8 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/CategoryList")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/CategoryList", IsNullable=false)]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/CategoryList")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/CategoryList", IsNullable=false)]
     public partial class CategoryList {
         
         private CategoryListCategoryRef[] categoryRefField;
@@ -69,7 +69,7 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/CategoryList")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/CategoryList")]
     public partial class CategoryListCategoryRef {
         
         private long idField;

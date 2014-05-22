@@ -20,8 +20,8 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageMeta")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/ImageMeta", IsNullable=false)]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/ImageMeta")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/ImageMeta", IsNullable=false)]
     public partial class ImageMeta {
         
         private string nameField;
@@ -56,7 +56,7 @@ namespace ManageWalla {
         
         private System.DateTime takenDateField;
         
-        private bool takenDateSpecified1Field;
+        private bool takenDateSetField;
         
         private System.DateTime takenDateFileField;
         
@@ -263,13 +263,12 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("TakenDateSpecified")]
-        public bool TakenDateSpecified1 {
+        public bool TakenDateSet {
             get {
-                return this.takenDateSpecified1Field;
+                return this.takenDateSetField;
             }
             set {
-                this.takenDateSpecified1Field = value;
+                this.takenDateSetField = value;
             }
         }
         
@@ -456,7 +455,7 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/ImageMeta")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/ImageMeta")]
     public partial class ImageMetaTagRef {
         
         private long idField;

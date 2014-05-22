@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+//using System.Windows.Threading;
 using log4net;
 using log4net.Config;
 using System.Configuration;
@@ -86,6 +87,7 @@ namespace ManageWalla
         public GlobalState state = null;
         public List<ThumbCache> thumbCacheList = null;
         public List<MainCopyCache> mainCopyCacheList = null;
+        public System.Timers.Timer timer = null;
 
         private bool cacheFilesSetup = false;
         public ImageList currentImageList = null;
@@ -98,7 +100,7 @@ namespace ManageWalla
         private bool tweakUploadImageSize = true;
         private bool startingApplication = true;
         private DateTime lastMarginTweakTime = DateTime.Now;
-
+        private bool isContracted = false;
         private MessageType currentDialogType = MessageType.None;
         #endregion
 
@@ -144,6 +146,15 @@ namespace ManageWalla
                     await Login(state.account.ProfileName, state.account.Password);
                 }
 
+                timer = new System.Timers.Timer();
+                timer.Elapsed += timer_Elapsed;
+                timer.Interval = 10000.0;
+                timer.Start();
+
+                //dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
+                //dispatcherTimer.Interval = new TimeSpan(0, 0, 10);
+                //dispatcherTimer.Start();
+
                 ConcludeBusyProcess();
             }
             catch (Exception ex)
@@ -154,6 +165,26 @@ namespace ManageWalla
                 //Application.Current.Shutdown();
             }
         }
+
+        async private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Console.WriteLine("I am a timer event!");
+            try
+            {
+                if (currentPane != PaneMode.Upload && currentPane != PaneMode.AccountEdit && uploadUIState.Mode == UploadUIState.UploadMode.None && state.userApp.AutoUpload)
+                    Dispatcher.Invoke(new Action(() => { DoAutoUploadAsync(false); }));
+
+
+                Dispatcher.Invoke(new Action(() => { RefreshUploadStatusStateAsync(false, true); }));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unexpected error from timer event!");
+                logger.Error(ex);
+            }
+        }
+
+
 
         async private Task<bool> ApplicationInit(string profileName)
         {
@@ -417,6 +448,7 @@ namespace ManageWalla
 
         private void RefreshOverallPanesStructure(PaneMode mode)
         {
+
             //Ensure panes are all correctly setup each time a refresh is called.
             gridLeft.ColumnDefinitions[0].Width = new GridLength(0); //Sidebar
             gridLeft.ColumnDefinitions[1].Width = new GridLength(300); //Main control
@@ -451,7 +483,7 @@ namespace ManageWalla
                 case PaneMode.GalleryEdit:
                 case PaneMode.GalleryAdd:
                     gridRight.RowDefinitions[0].Height = new GridLength(2, GridUnitType.Star);
-                    gridRight.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
+                    gridRight.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
 
                     lstImageMainViewerList.Visibility = Visibility.Collapsed;
 
@@ -528,7 +560,7 @@ namespace ManageWalla
                     grdImageView.Visibility = Visibility.Visible;
                     break;
             }
-            TweakImageMarginSize(DateTime.Now, mode);
+            //TweakImageMarginSize(DateTime.Now, mode);
         }
 
         private void RefreshPanesAllControls(PaneMode mode)
@@ -784,8 +816,8 @@ namespace ManageWalla
                         lstUploadImageFileList.IsEnabled = false;
                         cmdUploadImportFiles.Visibility = Visibility.Collapsed;
                         cmdUploadImportFolder.Visibility = Visibility.Collapsed;
-                        cmdUploadClear.Visibility = Visibility.Visible;
-                        cmdUploadClear.IsEnabled = true;
+                        cmdUploadResumePauseClear.Visibility = Visibility.Visible;
+                        cmdUploadResumePauseClear.IsEnabled = true;
                         cmdUploadChangeCategory.Visibility = Visibility.Collapsed;
                         if (uploadUIState.Mode != UploadUIState.UploadMode.Auto)
                         {
@@ -794,7 +826,7 @@ namespace ManageWalla
                             grdUploadSettings.RowDefinitions[5].Height = new GridLength(40);
 
                             lblUploadType.Content = "Uploading images...";
-                            cmdUploadClear.Content = "Pause Upload";
+                            cmdUploadResumePauseClear.Content = "Pause Upload";
                         }
                         else
                         {
@@ -803,7 +835,7 @@ namespace ManageWalla
                             grdUploadSettings.RowDefinitions[4].Height = new GridLength(30.0);
 
                             lblUploadType.Content = "Uploading images (auto)...";
-                            cmdUploadClear.Content = "Pause Upload";
+                            cmdUploadResumePauseClear.Content = "Pause Upload";
                             cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
                         }
                         break;
@@ -828,7 +860,7 @@ namespace ManageWalla
                         lstUploadImageFileList.IsEnabled = false;
                         cmdUploadImportFolder.Visibility = Visibility.Visible;
                         cmdUploadImportFiles.Visibility = Visibility.Visible;
-                        cmdUploadClear.Visibility = Visibility.Collapsed;
+                        cmdUploadResumePauseClear.Visibility = Visibility.Collapsed;
                         cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
                         cmdUploadAll.Visibility = Visibility.Visible;
                         cmdUploadAll.IsEnabled = false;
@@ -847,7 +879,7 @@ namespace ManageWalla
                         grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
 
                         cmdUploadAll.Visibility = Visibility.Collapsed;
-                        cmdUploadClear.Content = "Resume";
+                        cmdUploadResumePauseClear.Content = "Resume";
                         cmdUploadTurnAutoOff.Visibility = Visibility.Visible;
                     }
                     else
@@ -875,9 +907,9 @@ namespace ManageWalla
 
                         cmdUploadAll.Visibility = Visibility.Visible;
                         cmdUploadAll.IsEnabled = true;
-                        cmdUploadClear.Content = "Clear";
-                        cmdUploadClear.IsEnabled = true;
-                        cmdUploadClear.Visibility = Visibility.Visible;
+                        cmdUploadResumePauseClear.Content = "Clear";
+                        cmdUploadResumePauseClear.IsEnabled = true;
+                        cmdUploadResumePauseClear.Visibility = Visibility.Visible;
                         cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
                         //cmdUploadChangeCategory.IsEnabled = true;
                         cmdUploadChangeCategory.Visibility = Visibility.Visible;
@@ -1095,6 +1127,8 @@ namespace ManageWalla
             gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
 
             gridRight.RowDefinitions[0].Height = new GridLength(0);
+
+            isContracted = true;
         }
 
         private void cmdExpand_Click(object sender, RoutedEventArgs e)
@@ -1110,6 +1144,8 @@ namespace ManageWalla
                 gridLeft.ColumnDefinitions[1].Width = new GridLength(300);
                 gridRight.RowDefinitions[0].Height = new GridLength(60);
             }
+
+            isContracted = false;
         }
 
         async private void ImageView_Click(object sender, RoutedEventArgs e)
@@ -1334,7 +1370,10 @@ namespace ManageWalla
         {
             RefreshPanesAllControls(PaneMode.ImageView);
             GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
-            current.LoadMeta(true, cancelTokenSource.Token);
+            if (current != null)
+            {
+                current.LoadMeta(true, cancelTokenSource.Token);
+            }
         }
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
@@ -2084,6 +2123,7 @@ namespace ManageWalla
 
                         await controller.DeleteImagesAsync(deleteList, cancelTokenSource.Token);
 
+
                         foreach (GeneralImage current in toRemoveList)
                         {
                             imageMainViewerList.Remove(current);
@@ -2129,6 +2169,7 @@ namespace ManageWalla
         private void cmdMultiSelectionMode_Unchecked(object sender, RoutedEventArgs e)
         {
             lstImageMainViewerList.SelectionMode = SelectionMode.Single;
+            lstImageMainViewerList.SelectedItem = null;
         }
 
         private void Image_MouseUp(object sender, MouseButtonEventArgs e)
@@ -2234,7 +2275,7 @@ namespace ManageWalla
 
             if (categoryId > 0)
             {
-                CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
+                  CategorySelect(categoryId, null, treeCategoryView);
             }
 
             //TreeViewItem baseItem = (TreeViewItem)treeCategoryView.Items[0];
@@ -2299,18 +2340,38 @@ namespace ManageWalla
 
         private void CategorySelect(long categoryId, TreeViewItem currentHeader, TreeView treeViewToUpdate)
         {
-            foreach (TreeViewItem item in currentHeader.Items)
+            if (currentHeader == null)
             {
-                CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
-                if (category.id == categoryId)
+                foreach (TreeViewItem item in treeViewToUpdate.Items)
                 {
-                    item.IsSelected = true;
-                    treeViewToUpdate.Items.MoveCurrentTo(item);
-                    return;
+                    CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+                    if (category.id == categoryId)
+                    {
+                        item.IsSelected = true;
+                        treeViewToUpdate.Items.MoveCurrentTo(item);
+                        return;
+                    }
+                    if (item.HasItems)
+                    {
+                        CategorySelect(categoryId, item, treeViewToUpdate);
+                    }
                 }
-                if (item.HasItems)
+            }
+            else
+            {
+                foreach (TreeViewItem item in currentHeader.Items)
                 {
-                    CategorySelect(categoryId, item, treeViewToUpdate);
+                    CategoryListCategoryRef category = (CategoryListCategoryRef)item.Tag;
+                    if (category.id == categoryId)
+                    {
+                        item.IsSelected = true;
+                        treeViewToUpdate.Items.MoveCurrentTo(item);
+                        return;
+                    }
+                    if (item.HasItems)
+                    {
+                        CategorySelect(categoryId, item, treeViewToUpdate);
+                    }
                 }
             }
         }
@@ -3068,6 +3129,7 @@ namespace ManageWalla
 
         private void ResetAllMetaUpdates()
         {
+
             uploadUIState.MetaUdfChar1 = null;
             uploadUIState.MetaUdfChar2 = null;
             uploadUIState.MetaUdfChar3 = null;
@@ -3075,9 +3137,9 @@ namespace ManageWalla
             uploadUIState.MetaUdfNum1 = 0;
             uploadUIState.MetaUdfNum2 = 0;
             uploadUIState.MetaUdfNum3 = 0;
-            uploadUIState.MetaUdfDate1 = new DateTime(1900, 01, 01);
-            uploadUIState.MetaUdfDate2 = new DateTime(1900, 01, 01);
-            uploadUIState.MetaUdfDate3 = new DateTime(1900, 01, 01);
+            uploadUIState.MetaUdfDate1 = DateTime.Now;
+            uploadUIState.MetaUdfDate2 = DateTime.Now;
+            uploadUIState.MetaUdfDate3 = DateTime.Now;
 
             uploadUIState.MetaUdfChar1All = false;
             uploadUIState.MetaUdfChar2All = false;
@@ -3367,7 +3429,7 @@ namespace ManageWalla
             RefreshOverallPanesStructure(currentPane);
         }
 
-        async private void cmdUploadClear_Click(object sender, RoutedEventArgs e)
+        async private void cmdUploadResumePauseClear_Click(object sender, RoutedEventArgs e)
         {
             if (uploadUIState.Uploading)
             {
@@ -3499,23 +3561,8 @@ namespace ManageWalla
         {
             UpdateUploadTagCollection();
             UploadTagListReload();
-            //UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-            //uploadUIState.MetaTagRef = current.Meta.Tags;
-
-            //BindingOperations.ClearBinding(lstUploadTagList, ListBox.ItemsSourceProperty);
-            //Binding binding = new Binding("MetaTagRef");
-            //binding.Mode = BindingMode.TwoWay;
-            //binding.Source = uploadUIState;
-            //BindingOperations.SetBinding(lstUploadTagList, ListBox.ItemsSourceProperty, binding);
         }
 
-        private void chkUploadTagsAll_Unchecked(object sender, RoutedEventArgs e)
-        {
-            //BindingOperations.ClearBinding(lstUploadTagList, ListBox.ItemsSourceProperty);
-            //Binding binding = new Binding("/Meta.Tags");
-            //binding.Mode = BindingMode.TwoWay;
-            //BindingOperations.SetBinding(lstUploadTagList, ListBox.ItemsSourceProperty, binding);
-        }
 
         private void chkUploadUdfChar1All_Checked(object sender, RoutedEventArgs e)
         {
@@ -3719,49 +3766,38 @@ namespace ManageWalla
         #endregion
 
         #region Account Methods and Handlers
-        private void RefreshUploadStatusFromStateList()
+
+
+        public void RefreshUploadStatusListBinding()
         {
-            return;
+            //bool simon1 = (bool)datUploadsInProgress.Items.IsLiveFiltering;
+            //bool simon = (bool)datUploadCompletedList.Items.IsLiveFiltering;
 
-            /* Clear list and add local image load errors */
-            //uploadStatusListBind.Clear();
-
-            datUploadsInProgress.GetBindingExpression(DataGrid.ItemsSourceProperty).UpdateTarget();
-            return;
-
-            //foreach (UploadImage currentUploadImage in uploadFots.Where(r => r.State == UploadImage.UploadState.ClientError))
-            foreach (UploadImage currentUploadImage in uploadFots)
-            {
-                UploadStatusListImageUploadRef newImageRef = new UploadStatusListImageUploadRef();
-                newImageRef.status = -1;
-                newImageRef.name = currentUploadImage.Meta.Name;
-                newImageRef.lastUpdated = DateTime.Now;
-                //newImageRef.errorMessage = currentUploadImage.;
-
-                //uploadStatusListBind.Add(newImageRef);
-            }
-
-            /* Load in existing upload entries */
-            if (state.uploadStatusList != null)
-            {
-                foreach (UploadStatusListImageUploadRef currentImageUploadRef in state.uploadStatusList.ImageUploadRef)
-                {
-                    //uploadStatusListBind.Add(currentImageUploadRef);
-                }
-            }
-
-            /* Refresh message and icon */
+            Dispatcher.Invoke(RefreshUploadStatusListBindingDispatcher);
             
 
-            //TODO update message and icon
+            //Dispatcher.Invoke(datUploadsInProgress.Items.Refresh);
+            //Dispatcher.Invoke(datUploadCompletedList.Items.Refresh);
+
+            
         }
+
+        private void RefreshUploadStatusListBindingDispatcher()
+        {
+            CollectionViewSource pendingFilter = (CollectionViewSource)FindResource("uploadImageStateListInProgressKey");
+            pendingFilter.View.Refresh();
+
+            CollectionViewSource completedFilter = (CollectionViewSource)FindResource("uploadImageStateListCompleteKey");
+            completedFilter.View.Refresh();
+        }
+
 
         async private void tabAccount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (tabAccount.SelectedIndex == 1)
-            {
-                await RefreshUploadStatusStateAsync(false);
-            }
+            //if (tabAccount.SelectedIndex == 1)
+            //{
+            //    await RefreshUploadStatusStateAsync(false);
+            //}
         }
 
         private void cmdUserAppCancel_Click(object sender, RoutedEventArgs e)
@@ -3966,7 +4002,6 @@ namespace ManageWalla
         {
             try
             {
-
                 bool isBusy = bool.Parse(radGallery.Tag.ToString());
                 if (isBusy) { return; }
 
@@ -4128,6 +4163,9 @@ namespace ManageWalla
                 GalleryRefreshCategoryList();
 
                 Gallery gallery = await controller.GalleryGetMetaAsync(galleryListGalleryRef, cancelTokenSource.Token);
+
+                webGalleryPreview.Visibility = Visibility.Collapsed;
+                paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
 
                 txtGalleryName.Text = gallery.Name;
                 txtGalleryDescription.Text = gallery.Desc;
@@ -4674,6 +4712,9 @@ namespace ManageWalla
             chkGalleryShowImageDesc.IsChecked = false;
             chkGalleryShowImageMeta.IsChecked = false;
 
+            webGalleryPreview.Visibility = Visibility.Collapsed;
+            paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
+
             GalleryRefreshTagsListFromState();
             GalleryRefreshCategoryList();
 
@@ -5113,7 +5154,7 @@ namespace ManageWalla
 
         }
 
-        async private void DoAutoUploadAsync(bool resume)
+        async private Task DoAutoUploadAsync(bool resume)
         {
             if (!resume)
             {
@@ -5128,6 +5169,7 @@ namespace ManageWalla
 
                 if (uploadFots.Count > 0)
                     return;
+
             }
 
             if (cancelUploadTokenSource != null)
@@ -5192,7 +5234,9 @@ namespace ManageWalla
             {
                 uploadUIState.Uploading = false;
                 RefreshPanesAllControls(currentPane);
-                RefreshOverallPanesStructure(currentPane);
+
+                if (!isContracted)
+                    RefreshOverallPanesStructure(currentPane);
             }
         }
 
@@ -5249,7 +5293,11 @@ namespace ManageWalla
 
                 await controller.AccountDetailsGet(cancelTokenSource.Token);
                 state.account.Password = password;
-                
+
+                lblTagProfileNameLabel.Content = state.account.ProfileName + " Tags";
+                lblGalleryTagIncProfileNameLabel.Content = state.account.ProfileName + " Tags";
+                lblGalleryTagExcProfileNameLabel.Content = state.account.ProfileName + " Tags";
+
                 await controller.SetUserApp(cancelTokenSource.Token);
 
                 ResetUploadState();
@@ -5281,39 +5329,41 @@ namespace ManageWalla
 
         }
 
-        async private Task RefreshUploadStatusStateAsync(bool force)
+        async private Task RefreshUploadStatusStateAsync(bool force, bool silent)
         {
             try
             {
                 bool isBusy = bool.Parse(cmdAccountRefresh.Tag.ToString());
                 if (isBusy) { return; }
 
+                if (!force && cancelUploadTokenSource != null)
+                    return;
 
                 long[] orderIds = CacheHelper.GetUploadImageListQueryIds(uploadImageStateList);
 
                 if (!force && orderIds.Length == 0)
                     return;
 
-                ShowMessage(MessageType.Busy, "Refreshing upload history list");
+                if (!silent)
+                    ShowMessage(MessageType.Busy, "Refreshing upload history list");
 
                 cmdAccountRefresh.Tag = true;
 
-                if (cancelTokenSource != null)
-                    cancelTokenSource.Cancel();
+                CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
+                cancelUploadTokenSource = newCancelUploadTokenSource;
 
-                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                cancelTokenSource = newCancelTokenSource;
+                await controller.RefreshUploadStatusListAsync(orderIds, cancelUploadTokenSource.Token, uploadImageStateList);
 
-                await controller.RefreshUploadStatusListAsync(orderIds, cancelTokenSource.Token);
+                CacheHelper.DeleteUploadedFiles(uploadImageStateList, uploadUIState.AutoUploadFolder);
 
-                if (newCancelTokenSource == cancelTokenSource)
-                    cancelTokenSource = null;
+                if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                    cancelUploadTokenSource = null;
 
                 switch (state.uploadStatusListState)
                 {
                     case GlobalState.DataLoadState.Loaded:
                     case GlobalState.DataLoadState.LocalCache:
-                        RefreshUploadStatusFromStateList();
+                        RefreshUploadStatusListBinding();
                         panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Collapsed;
                         break;
                     case GlobalState.DataLoadState.Unavailable:
@@ -5321,7 +5371,8 @@ namespace ManageWalla
                         break;
                 }
 
-                ConcludeBusyProcess();
+                if (!silent)
+                    ConcludeBusyProcess();
             }
             catch (OperationCanceledException)
             {
@@ -5346,12 +5397,85 @@ namespace ManageWalla
             }
             else if (tabAccount.SelectedIndex == 1)
             {
-                await RefreshUploadStatusStateAsync(true);
+                await RefreshUploadStatusStateAsync(true, false);
             }
             else
             {
                 //TODO
             }
+        }
+
+        private void chkUploadOverrideDateAll_Checked(object sender, RoutedEventArgs e)
+        {
+            if (uploadUIState.MetaTakenDateSetAll)
+            {
+                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                uploadUIState.MetaTakenDate = current.Meta.TakenDate;
+
+                BindingOperations.ClearBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty);
+                Binding binding = new Binding("MetaTakenDate");
+                binding.Mode = BindingMode.TwoWay;
+                binding.Source = uploadUIState;
+                BindingOperations.SetBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty, binding);
+
+                grdUploadImageDetails.RowDefinitions[6].Height = new GridLength(0);
+                lblUploadOverrideDateAll.Content = "Override date (All fotos)";
+            }
+            else
+            {
+                BindingOperations.ClearBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty);
+                Binding binding = new Binding("/Meta.TakenDate");
+                binding.Mode = BindingMode.TwoWay;
+                BindingOperations.SetBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty, binding);
+
+                grdUploadImageDetails.RowDefinitions[6].Height = new GridLength(30);
+                lblUploadOverrideDateAll.Content = "Apply to all";
+            }
+        }
+
+        private void chkUploadOverrideDate_Checked(object sender, RoutedEventArgs e)
+        {
+            grdUploadImageDetails.RowDefinitions[7].Height = new GridLength(30);
+            datUploadOverrideDate.IsEnabled = true;
+        }
+
+        private void chkUploadOverrideDate_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!uploadUIState.MetaTakenDateSetAll)
+            {
+                grdUploadImageDetails.RowDefinitions[7].Height = new GridLength(0);
+                datUploadOverrideDate.IsEnabled = false;
+            }
+        }
+
+        private void cmdGalleryPreview_Click(object sender, RoutedEventArgs e)
+        {
+            Gallery previewGallery = new Gallery();
+
+            //TODO - change current gasllery object population to use shared method.
+
+
+
+            //previewGallery.Name = txtGalleryName.Text;
+            //previewGallery.Desc = txtGalleryDescription.Text;
+            previewGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
+
+            //TODO Approx number of sections.
+
+            //currentGallery.SelectionType = cmbGallerySelectionType.SelectedIndex;
+            //currentGallery.PresentationId = cmbGalleryPresentationType.SelectedIndex;
+            previewGallery.StyleId = cmbGalleryStyleType.SelectedIndex;
+
+            previewGallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
+            previewGallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
+            previewGallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
+            previewGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
+            previewGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
+
+
+            webGalleryPreview.Source = new Uri(controller.GetGalleryPreviewUrl(previewGallery));
+            webGalleryPreview.Visibility = Visibility.Visible;
+            paneGalleryPreviewNotLoaded.Visibility = Visibility.Collapsed;
         }
 
     }

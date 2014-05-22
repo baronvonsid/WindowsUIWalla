@@ -151,6 +151,7 @@
     <Compile Include="WallaDataType\CategoryList.cs" />
     <Compile Include="WallaDataType\Gallery.cs" />
     <Compile Include="WallaDataType\GalleryList.cs" />
+    <Compile Include="WallaDataType\GalleryOptions.cs" />
     <Compile Include="WallaDataType\ImageIdList.cs" />
     <Compile Include="WallaDataType\ImageList.cs" />
     <Compile Include="WallaDataType\Tag.cs" />
@@ -217,6 +218,7 @@
     <None Include="WallaSchema\CategoryList.xsd" />
     <None Include="WallaSchema\Gallery.xsd" />
     <None Include="WallaSchema\GalleryList.xsd" />
+    <None Include="WallaSchema\GalleryOptions.xsd" />
     <None Include="WallaSchema\ImageIdList.xsd" />
     <None Include="WallaSchema\ImageList.xsd" />
     <None Include="WallaSchema\ImageMeta.xsd" />
@@ -244,108 +246,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Icons\add-item.gif" />
-    <Resource Include="Icons\addressbook.gif" />
-    <Resource Include="Icons\agent.gif" />
-    <Resource Include="Icons\apple.gif" />
-    <Resource Include="Icons\arrow-round.gif" />
-    <Resource Include="Icons\badge.gif" />
-    <Resource Include="Icons\bar-chart-02.gif" />
-    <Resource Include="Icons\bar-chart.gif" />
-    <Resource Include="Icons\battery-full.gif" />
-    <Resource Include="Icons\bird.gif" />
-    <Resource Include="Icons\boat.gif" />
-    <Resource Include="Icons\bookmark.gif" />
-    <Resource Include="Icons\briefcase.gif" />
-    <Resource Include="Icons\calculator.gif" />
-    <Resource Include="Icons\calendar.gif" />
-    <Resource Include="Icons\cassette.gif" />
-    <Resource Include="Icons\chain.gif" />
-    <Resource Include="Icons\chat-.gif" />
-    <Resource Include="Icons\chat-02.gif" />
-    <Resource Include="Icons\cloud-filled.gif" />
-    <Resource Include="Icons\cloud-outline.gif" />
-    <Resource Include="Icons\computer.gif" />
-    <Resource Include="Icons\configuration.gif" />
-    <Resource Include="Icons\configuration02.gif" />
-    <Resource Include="Icons\connected.gif" />
-    <Resource Include="Icons\connections.gif" />
-    <Resource Include="Icons\container.gif" />
-    <Resource Include="Icons\copy-item.gif" />
-    <Resource Include="Icons\database.gif" />
-    <Resource Include="Icons\delete-item.gif" />
-    <Resource Include="Icons\disc.gif" />
-    <Resource Include="Icons\dollar.gif" />
-    <Resource Include="Icons\download.gif" />
-    <Resource Include="Icons\edit.gif" />
-    <Resource Include="Icons\email.gif" />
-    <Resource Include="Icons\fan.gif" />
-    <Resource Include="Icons\fancy-globe.gif" />
-    <Resource Include="Icons\female-user.gif" />
-    <Resource Include="Icons\fire.gif" />
-    <Resource Include="Icons\ErrorThumbnail.gif" />
-    <Resource Include="Icons\flag.gif" />
-    <Resource Include="Icons\flower.gif" />
-    <Resource Include="Icons\full-screen.gif" />
-    <Resource Include="Icons\glasses.gif" />
-    <Resource Include="Icons\globe.gif" />
-    <Resource Include="Icons\happy-face.gif" />
-    <Resource Include="Icons\headphone.gif" />
-    <Resource Include="Icons\heart.gif" />
-    <Resource Include="Icons\home.gif" />
-    <Resource Include="Icons\ID.gif" />
-    <Resource Include="Icons\ipod.gif" />
-    <Resource Include="Icons\lab.gif" />
-    <Resource Include="Icons\lady.gif" />
-    <Resource Include="Icons\lamp.gif" />
-    <Resource Include="Icons\leaves.gif" />
-    <Resource Include="Icons\light.gif" />
-    <Resource Include="Icons\line-globe.gif" />
-    <Resource Include="Icons\lock.gif" />
-    <Resource Include="Icons\lookup.gif" />
-    <Resource Include="Icons\male-user.gif" />
-    <Resource Include="Icons\microphone.gif" />
-    <Resource Include="Icons\mobile.gif" />
-    <Resource Include="Icons\mobile2.gif" />
-    <Resource Include="Icons\mouse.gif" />
-    <Resource Include="Icons\multi-agents.gif" />
-    <Resource Include="Icons\music-node.gif" />
-    <Resource Include="Icons\network-pc.gif" />
-    <Resource Include="Icons\network.gif" />
-    <Resource Include="Icons\next-item.gif" />
-    <Resource Include="Icons\phone.gif" />
-    <Resource Include="Icons\pie-chart.gif" />
-    <Resource Include="Icons\pin.gif" />
-    <Resource Include="Icons\plane.gif" />
-    <Resource Include="Icons\print.gif" />
-    <Resource Include="Icons\processing-02.gif" />
-    <Resource Include="Icons\processing.gif" />
-    <Resource Include="Icons\push-pin.gif" />
-    <Resource Include="Icons\recycle-empty.gif" />
-    <Resource Include="Icons\recycle-full.gif" />
-    <Resource Include="Icons\reload.gif" />
-    <Resource Include="Icons\rss.gif" />
-    <Resource Include="Icons\satellite.gif" />
-    <Resource Include="Icons\save.gif" />
-    <Resource Include="Icons\scale.gif" />
-    <Resource Include="Icons\Scissors.gif" />
-    <Resource Include="Icons\screen.gif" />
-    <Resource Include="Icons\search.gif" />
-    <Resource Include="Icons\server.gif" />
-    <Resource Include="Icons\shield.gif" />
-    <Resource Include="Icons\shut-down.gif" />
-    <Resource Include="Icons\star.gif" />
-    <Resource Include="Icons\tag.gif" />
-    <Resource Include="Icons\tap.gif" />
-    <Resource Include="Icons\tree.gif" />
-    <Resource Include="Icons\umbrella.gif" />
-    <Resource Include="Icons\unlock.gif" />
-    <Resource Include="Icons\usb.gif" />
-    <Resource Include="Icons\van.gif" />
-    <Resource Include="Icons\wifi.gif" />
-    <Resource Include="Icons\world.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
@@ -358,18 +258,6 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Icons\LoadingThumbnail.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Icons\UnavailableThumbnail.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Icons\LoadingMain.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Icons\ErrorMain.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\error.gif" />

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.example.org/ImageMeta"
-	xmlns:tns="http://www.example.org/ImageMeta" 
+targetNamespace="http://ws.fotowalla.com/ImageMeta"
+	xmlns:tns="http://ws.fotowalla.com/ImageMeta" 
 	elementFormDefault="qualified">
 
   <element name="ImageMeta">
@@ -23,7 +23,7 @@ targetNamespace="http://www.example.org/ImageMeta"
 	    <element type="int" name="ISO"/>
 	    <element type="int" name="Orientation"/>
 	    <element type="dateTime" name="TakenDate"/>
-	    <element type="boolean" name="TakenDateSpecified"/>
+	    <element type="boolean" name="TakenDateSet"/>
 	    <element type="dateTime" name="TakenDateFile"/>
 	    <element type="dateTime" name="TakenDateMeta"/>
 	    <element type="dateTime" name="UploadDate"/>

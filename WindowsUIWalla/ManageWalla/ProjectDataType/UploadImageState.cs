@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.ComponentModel;
 using System.Xml;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -16,8 +17,10 @@ using System.Runtime.Serialization;
 namespace ManageWalla
 {
     [System.SerializableAttribute()]
-    public class UploadImageState
+    public class UploadImageState //: INotifyPropertyChanged
     {
+        //public event PropertyChangedEventHandler PropertyChanged;
+
         public DateTime uploadDate { get; set; }
         public DateTime lastUpdated { get; set; }
         public long imageId { get; set; }

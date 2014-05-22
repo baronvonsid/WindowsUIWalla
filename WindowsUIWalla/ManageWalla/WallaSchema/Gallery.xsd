@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.example.org/Gallery"
-	xmlns:tns="http://www.example.org/Gallery" 
+targetNamespace="http://ws.fotowalla.com/Gallery"
+	xmlns:tns="http://ws.fotowalla.com/Gallery" 
 	elementFormDefault="qualified">
 
   <element name="Gallery">
@@ -81,10 +81,11 @@ targetNamespace="http://www.example.org/Gallery"
             <sequence>
               <element name="SectionRef" maxOccurs="unbounded" minOccurs="0">
               <complexType>
-                      <attribute type="long" name="sectionId" />
-                      <attribute type="string" name="Name"></attribute>
-                      <attribute type="string" name="Desc"></attribute>
+                      <attribute type="long" name="id" />
+                      <attribute type="string" name="name"></attribute>
+                      <attribute type="string" name="desc"></attribute>
                       <attribute type="int" name="imageCount"/>
+                      <attribute type="int" name="sequence" />
               </complexType>
               </element>
             </sequence>

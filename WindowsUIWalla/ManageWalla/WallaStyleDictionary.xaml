@@ -35,7 +35,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
                     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Rectangle x:Name="outerRectangle" StrokeThickness="0.5" Opacity="0.6">
+                        <Rectangle x:Name="outerRectangle" StrokeThickness="0.5" Opacity="1.0">
                             <Rectangle.Stroke>
                                 <SolidColorBrush x:Name="innerStrokeBrush" Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
                             </Rectangle.Stroke>
@@ -53,24 +53,32 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="innerImage" Property="Source" Value="{DynamicResource radioSelectedImageSrc}" />
-                            <Setter TargetName="outerRectangle" Property="Opacity" Value="1.0" />
+                            <!--<Setter TargetName="outerRectangle" Property="Opacity" Value="1.0" />-->
                         </Trigger>
+                        <!--
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="outerRectangle" Property="Opacity" Value="1.0" />
                         </Trigger>
+                        -->
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="true">
-                <Setter Property="Background" Value="{StaticResource ControlBackgroundMouseOverBrush}" />
-            </Trigger>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                <!--<Setter Property="Background" Value="{StaticResource ControlBackgroundMouseOverBrush}" />-->
                 <Setter Property="Background" Value="{StaticResource ControlSelectedItemBackgroundBrush}" />
                 <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrushSelected}" />
                 <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
-            </DataTrigger>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource ControlSelectedItemBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrushSelected}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+            </Trigger>
+            <!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+
+            </DataTrigger-->
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="Background" Value="{StaticResource ControlBackgroundDisabledBrush}" />
                 <Setter Property="Foreground" Value="{StaticResource FontBorderDisabledBrush}" />
@@ -535,7 +543,9 @@
         <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="true">
-                <Setter Property="Background" Value="{StaticResource ControlBackgroundMouseOverBrush}" />
+                <Setter Property="Background" Value="{StaticResource ControlSelectedItemBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrushSelected}" />
+                <Setter Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="true">
                 <Setter Property="Background" Value="{StaticResource ControlSelectedItemBackgroundBrush}" />

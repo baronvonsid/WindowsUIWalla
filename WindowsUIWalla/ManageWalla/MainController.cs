@@ -344,6 +344,15 @@ namespace ManageWalla
                     }
                 }
 
+                if (uploadState.MetaTakenDateSetAll)
+                {
+                    foreach (UploadImage currentImage in meFots)
+                    {
+                        currentImage.Meta.TakenDate = uploadState.MetaTakenDate;
+                        currentImage.Meta.TakenDateSet = true;
+                    }
+                }
+
                 foreach (UploadImage currentImage in meFots)
                 {
                     if (uploadState.MetaTagRefAll)
@@ -402,6 +411,8 @@ namespace ManageWalla
                         newUploadEntry.errorMessage = response;
                         responseErrors.Add(currentUpload.Meta.OriginalFileName + " error: " + response);
                     }
+                    currentMain.RefreshUploadStatusListBinding();
+                    
                     meFots.Remove(currentUpload);
                 }
                 return responseErrors;
@@ -577,7 +588,7 @@ namespace ManageWalla
         }
 
         //TODO Sort out with date modified and to use local version.
-        async public Task RefreshUploadStatusListAsync(long[] orderIds, CancellationToken cancelToken)
+        async public Task RefreshUploadStatusListAsync(long[] orderIds, CancellationToken cancelToken, UploadImageStateList currentUploadStatusList)
         {
             try
             {
@@ -590,7 +601,38 @@ namespace ManageWalla
                     //{  
                     //}
 
-                    state.uploadStatusList = await serverHelper.UploadGetStatusListAsync(orderIdList, cancelToken);
+                    UploadStatusList serverUploadStatusList = await serverHelper.UploadGetStatusListAsync(orderIdList, cancelToken);
+                    foreach (UploadStatusListImageUploadRef serverImageState in serverUploadStatusList.ImageUploadRef)
+                    {
+                        UploadImageState current = currentUploadStatusList.FirstOrDefault<UploadImageState>(r => r.imageId == serverImageState.imageId);
+                        if (current == null)
+                        {
+                            //Add to collection.
+                            UploadImageState newImage = new UploadImageState();
+                            newImage.error = serverImageState.error;
+                            newImage.errorMessage = serverImageState.errorMessage;
+                            newImage.lastUpdated = serverImageState.lastUpdated;
+                            newImage.status = (UploadImage.ImageStatus)serverImageState.status;
+                            newImage.name = serverImageState.name;
+                        }
+                        else
+                        {
+                            //Update current entry.
+                            if (serverImageState.error)
+                            {
+                                current.error = true;
+                                current.errorMessage = serverImageState.errorMessage;
+                            }
+                            else
+                            {
+                                current.error = false;
+                                current.errorMessage = "";
+                            }
+                            current.lastUpdated = serverImageState.lastUpdated;
+                            current.status = (UploadImage.ImageStatus)serverImageState.status;
+                        }
+                    }
+
                     state.uploadStatusListState = GlobalState.DataLoadState.Loaded;
                 }
                 else
@@ -1228,7 +1270,7 @@ namespace ManageWalla
             }
         }
 
-        public String GetGalleryUrl(string galleryName, string urlComplex)
+        public string GetGalleryUrl(string galleryName, string urlComplex)
         {
             if (urlComplex != null && urlComplex.Length > 0)
             {
@@ -1238,6 +1280,14 @@ namespace ManageWalla
             {
                 return serverHelper.GetWebUrl() + "gallery/" + galleryName;
             }
+        }
+
+        public string GetGalleryPreviewUrl(Gallery preview)
+        {
+            string queryString = "";
+            //TODO build gallery query string logic.
+
+            return serverHelper.GetWebUrl() + "galleryPreview?" + queryString;
         }
         #endregion
 

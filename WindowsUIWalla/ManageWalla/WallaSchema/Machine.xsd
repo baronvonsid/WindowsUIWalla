@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.example.org/UserApp"
-	xmlns:tns="http://www.example.org/UserApp" 
+targetNamespace="http://ws.fotowalla.com/UserApp"
+	xmlns:tns="http://ws.fotowalla.com/UserApp" 
 	elementFormDefault="qualified">
 
   <element name="UserApp555">

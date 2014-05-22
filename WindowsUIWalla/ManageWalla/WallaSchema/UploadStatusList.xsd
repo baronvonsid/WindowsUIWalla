@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/UploadStatusList"
-	xmlns:tns="http://www.example.org/UploadStatusList" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ws.fotowalla.com/UploadStatusList"
+	xmlns:tns="http://ws.fotowalla.com/UploadStatusList" elementFormDefault="qualified">
 
 	<element name="UploadStatusList">
 		<complexType>

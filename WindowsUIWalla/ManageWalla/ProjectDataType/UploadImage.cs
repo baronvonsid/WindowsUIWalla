@@ -73,10 +73,12 @@ namespace ManageWalla
                 meta.UploadDate = DateTime.Now;
                 meta.TakenDateFile = fileInfo.LastWriteTime;
 
-                meta.TakenDateMeta = DateTime.Parse("01/01/1900");
-                meta.UdfDate1 = DateTime.Parse("01/01/1900");
-                meta.UdfDate2 = DateTime.Parse("01/01/1900");
-                meta.UdfDate3 = DateTime.Parse("01/01/1900");
+                meta.TakenDate = DateTime.Now;
+                meta.TakenDateSet = false;
+
+                meta.UdfDate1 = DateTime.Now;
+                meta.UdfDate2 = DateTime.Now;
+                meta.UdfDate3 = DateTime.Now;
 
                 meta.Size = fileInfo.Length;
 

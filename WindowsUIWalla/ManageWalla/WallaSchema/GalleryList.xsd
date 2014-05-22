@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/GalleryList"
-	xmlns:tns="http://www.example.org/GalleryList" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ws.fotowalla.com/GalleryList"
+	xmlns:tns="http://ws.fotowalla.com/GalleryList" elementFormDefault="qualified">
 
 	<element name="GalleryList">
 		<complexType>
@@ -13,7 +13,9 @@
 
 						                  <attribute type="long" name="id" default="0" />
 						                  <attribute type="string" name="name" />
+						                  <attribute type="string" name="desc" />
 						                  <attribute type="int" name="imageCount" />
+						                  <attribute type="int" name="sequence" />
 
 						          </complexType>
 						        </element>

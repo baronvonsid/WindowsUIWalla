@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ws.fotowalla.com/GalleryOptions"
+	xmlns:tns="http://ws.fotowalla.com/GalleryOptions" elementFormDefault="qualified">
+
+  <element name="GalleryOptions">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="0">        
+        <element name="Presentation">
+          <complexType>
+            <sequence>
+              <element name="PresentationRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+              		<attribute type="long" name="presentationId" />
+                    <attribute type="string" name="name" />
+                    <attribute type="string" name="description" />
+                    <attribute type="int" name="maxSections" />
+              </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+        
+        <element name="Style">
+          <complexType>
+            <sequence>
+              <element name="StyleRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+                    <attribute type="long" name="styleId" />
+                    <attribute type="string" name="name" />
+                    <attribute type="string" name="description" />
+              </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+  
+      </sequence>
+    </complexType>
+  </element>
+</schema>

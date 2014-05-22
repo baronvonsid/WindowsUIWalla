@@ -20,8 +20,8 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/GalleryList")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.example.org/GalleryList", IsNullable=false)]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryList")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/GalleryList", IsNullable=false)]
     public partial class GalleryList {
         
         private GalleryListGalleryRef[] galleryRefField;
@@ -69,7 +69,7 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/GalleryList")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryList")]
     public partial class GalleryListGalleryRef {
         
         private GalleryListGalleryRefSectionRef[] sectionRefField;
@@ -208,16 +208,22 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.example.org/GalleryList")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryList")]
     public partial class GalleryListGalleryRefSectionRef {
         
         private long idField;
         
         private string nameField;
         
+        private string descField;
+        
         private int imageCountField;
         
         private bool imageCountFieldSpecified;
+        
+        private int sequenceField;
+        
+        private bool sequenceFieldSpecified;
         
         public GalleryListGalleryRefSectionRef() {
             this.idField = ((long)(0));
@@ -248,6 +254,17 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string desc {
+            get {
+                return this.descField;
+            }
+            set {
+                this.descField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
         public int imageCount {
             get {
                 return this.imageCountField;
@@ -265,6 +282,28 @@ namespace ManageWalla {
             }
             set {
                 this.imageCountFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public int sequence {
+            get {
+                return this.sequenceField;
+            }
+            set {
+                this.sequenceField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool sequenceSpecified {
+            get {
+                return this.sequenceFieldSpecified;
+            }
+            set {
+                this.sequenceFieldSpecified = value;
             }
         }
     }

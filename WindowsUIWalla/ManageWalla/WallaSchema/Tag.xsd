@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.example.org/Tag"
-	xmlns:tns="http://www.example.org/Tag" 
+targetNamespace="http://ws.fotowalla.com/Tag"
+	xmlns:tns="http://ws.fotowalla.com/Tag" 
 	elementFormDefault="qualified">
 
   <element name="Tag">

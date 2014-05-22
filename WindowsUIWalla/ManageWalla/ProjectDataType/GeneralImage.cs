@@ -30,9 +30,9 @@ namespace ManageWalla
         public DateTime uploadDate { get; set; }
         public int metaVersion { get; set; }
         //private LoadState mainImageLoadState;
-        public LoadState metaLoadState;
-        public LoadState mainImageLoadState;
-        public LoadState thumbImageLoadState;
+        public LoadState metaLoadState { get; set; }
+        public LoadState mainImageLoadState { get; set; }
+        public LoadState thumbImageLoadState { get; set; }
 
         public enum LoadState
         {

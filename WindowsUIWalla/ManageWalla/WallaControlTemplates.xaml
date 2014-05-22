@@ -7,7 +7,7 @@
 
     <ControlTemplate x:Key="templateRadioButton" TargetType="{x:Type RadioButton}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Rectangle x:Name="outerRectangle" StrokeThickness="0.5" Opacity="0.6">
+            <Rectangle x:Name="outerRectangle" StrokeThickness="0.5" Opacity="1.0">
 
                 <Rectangle.Stroke>
                     <SolidColorBrush x:Name="innerStrokeBrush" Color="{Binding RelativeSource={RelativeSource TemplatedParent},Path=BorderBrush.Color}" />
@@ -27,11 +27,12 @@
         <ControlTemplate.Triggers>
             <Trigger Property="IsChecked" Value="True">
                 <Setter TargetName="innerImage" Property="Source" Value="{DynamicResource radioSelectedImageSrc}" />
-                <Setter TargetName="outerRectangle" Property="Opacity" Value="1.0" />
+                <!--<Setter TargetName="outerRectangle" Property="Opacity" Value="1.0" />-->
             </Trigger>
+                <!--
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter TargetName="outerRectangle" Property="Opacity" Value="1.0" />
-            </Trigger>
+            </Trigger>-->
         </ControlTemplate.Triggers>
     </ControlTemplate>
 

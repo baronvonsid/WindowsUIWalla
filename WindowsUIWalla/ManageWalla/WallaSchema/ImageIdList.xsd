@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/ImageIdList"
-	xmlns:tns="http://www.example.org/ImageIdList" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ws.fotowalla.com/ImageIdList"
+	xmlns:tns="http://ws.fotowalla.com/ImageIdList" elementFormDefault="qualified">
 
 	<element name="ImageIdList">
 	<complexType>

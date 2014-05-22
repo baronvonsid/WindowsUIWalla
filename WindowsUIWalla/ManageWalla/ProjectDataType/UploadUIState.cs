@@ -36,6 +36,8 @@ namespace ManageWalla
         private DateTime metaUdfDate2;
         private DateTime metaUdfDate3;
         private ImageMetaTagRef[] metaTagRef = null;
+        private DateTime metaTakenDate;
+        private bool metaTakenDateSet = false;
 
         private bool metaUdfChar1All = false;
         private bool metaUdfChar2All = false;
@@ -48,6 +50,7 @@ namespace ManageWalla
         private bool metaUdfDate2All = false;
         private bool metaUdfDate3All = false;
         private bool metaTagRefAll = false;
+        private bool metaTakenDateSetAll = false;
 
         public enum UploadMode
         {
@@ -304,6 +307,16 @@ namespace ManageWalla
                 OnPropertyChanged("MetaTagRef");
             }
         }
+
+        public DateTime MetaTakenDate
+        {
+            get { return metaTakenDate; }
+            set
+            {
+                metaTakenDate = value;
+                OnPropertyChanged("MetaTakenDate");
+            }
+        }
         #endregion
 
         #region Meta All attributes
@@ -416,6 +429,17 @@ namespace ManageWalla
                 OnPropertyChanged("MetaTagRefAll");
             }
         }
+
+        public bool MetaTakenDateSetAll
+        {
+            get { return metaTakenDateSetAll; }
+            set
+            {
+                metaTakenDateSetAll = value;
+                OnPropertyChanged("MetaTakenDateSetAll");
+            }
+        }
+
         #endregion
 
         #region Propery Events

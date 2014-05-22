@@ -220,21 +220,24 @@ namespace ManageWalla
             //Check current size of cache, if exceeding limit then remove images.
             ReduceMainCopyCacheSize(mainCopyCacheList, folder, mainCopyCacheSizeMB);
 
-            string fileName = Path.Combine(folder, imageId.ToString()) + ".jpg";
-            if (!File.Exists(fileName))
+            if (mainCopyCacheSizeMB > 0)
             {
-                if (!Directory.Exists(folder))
+                string fileName = Path.Combine(folder, imageId.ToString()) + ".jpg";
+                if (!File.Exists(fileName))
                 {
-                    Directory.CreateDirectory(folder);
+                    if (!Directory.Exists(folder))
+                    {
+                        Directory.CreateDirectory(folder);
+                    }
+                    File.WriteAllBytes(fileName, mainCopyByteArray);
                 }
-                File.WriteAllBytes(fileName,mainCopyByteArray);
-            }
 
-            MainCopyCache newCacheItem = new MainCopyCache();
-            newCacheItem.imageId = imageId;
-            newCacheItem.lastAccessed = DateTime.Now;
-            newCacheItem.imageSize = mainCopyByteArray.LongLength;
-            mainCopyCacheList.Add(newCacheItem);
+                MainCopyCache newCacheItem = new MainCopyCache();
+                newCacheItem.imageId = imageId;
+                newCacheItem.lastAccessed = DateTime.Now;
+                newCacheItem.imageSize = mainCopyByteArray.LongLength;
+                mainCopyCacheList.Add(newCacheItem);
+            }
         }
 
         public static void ReduceMainCopyCacheSize(List<MainCopyCache> mainCopyCacheList, string folder, int mainCopyCacheSizeMB)
@@ -248,14 +251,25 @@ namespace ManageWalla
             long mainCopySize = 100000; //200KB average
             long buffer = mainCopySize * 10;
             long targetSizeBytes = mainCopyCacheSizeMB * 1024 * 1024;
-            while (totalSize > (targetSizeBytes - buffer))
+            while (totalSize > (targetSizeBytes - buffer) && mainCopyCacheList.Count > 0)
             {
                 //Find oldest entry and remove from list.
-                MainCopyCache oldest = mainCopyCacheList.First(m => m.lastAccessed == (mainCopyCacheList.Max(e => e.lastAccessed)));
-                mainCopyCacheList.Remove(oldest);
-                string path = Path.Combine(folder, oldest.imageId.ToString()) + ".jpg";
-                File.Delete(path);
-                targetSizeBytes = targetSizeBytes - oldest.imageSize;
+                MainCopyCache oldest = mainCopyCacheList.FirstOrDefault<MainCopyCache>(m => m.lastAccessed == (mainCopyCacheList.Max(e => e.lastAccessed)));
+                if (oldest != null)
+                {
+                    mainCopyCacheList.Remove(oldest);
+                    string path = Path.Combine(folder, oldest.imageId.ToString()) + ".jpg";
+                    if (File.Exists(path))
+                    {
+                        try
+                        {
+                            File.Delete(path);
+                        }
+                        catch (Exception ex) { }
+                    }
+
+                    targetSizeBytes = targetSizeBytes - oldest.imageSize;
+                }
             }
 
         }
@@ -302,8 +316,7 @@ namespace ManageWalla
             var queryItems = uploadImageStateList.Where(
                                             r => (r.status == UploadImage.ImageStatus.AwaitingProcessed
                                             || r.status == UploadImage.ImageStatus.BeingProcessed
-                                            || r.status == UploadImage.ImageStatus.FileReceived
-                                            || r.status == UploadImage.ImageStatus.Complete) 
+                                            || r.status == UploadImage.ImageStatus.FileReceived) 
                                             && r.lastUpdated > DateTime.Now.AddMonths(-1));
 
             return queryItems.Select(r => r.imageId).ToArray();
@@ -359,11 +372,16 @@ namespace ManageWalla
         {
             //Method checks for existing entries.  Adds in a new entry if none is found.
             var existingItem = uploadImageStateList.FirstOrDefault(r => r.fileName.ToUpper() == fileName.ToUpper() 
-                && r.sizeBytes == size 
-                && (r.status == UploadImage.ImageStatus.None));
+                && r.sizeBytes == size
+                && (r.status == UploadImage.ImageStatus.None || (r.status == UploadImage.ImageStatus.FileReceived && r.error == true)));
 
             if (existingItem != null)
             {
+                existingItem.error = false;
+                existingItem.errorMessage = "";
+                existingItem.imageId = 0;
+                existingItem.status = UploadImage.ImageStatus.None;
+
                 return existingItem;
             }
             else
