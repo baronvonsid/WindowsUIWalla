@@ -8,10 +8,15 @@
     
     <walla:UploadImageFileList x:Key="uploadImagefileListKey" />
     <walla:UploadUIState x:Key="uploadUIStateKey" />
+
+
+    <walla:GalleryOptions x:Key="galleryOptionsListKey" />
     
     <!--<walla:UploadStatusListBind x:Key="uploadStatusListBindKey"  />-->
     <walla:UploadImageStateList x:Key="uploadImageStateListKey"  />
 
+    
+    
     <walla:ImageMainViewerList x:Key="imageMainViewerListKey" />
     <walla:GalleryCategoryModel x:Key="galleryCategoryModelKey" />
 

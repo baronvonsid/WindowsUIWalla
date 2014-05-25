@@ -73,6 +73,7 @@ namespace ManageWalla
             Error = 3
         }
 
+        private bool galleryOptionsLoaded = false;
         private PaneMode currentPane;
         private PaneMode previousPane;
         private Tag currentTag = null;
@@ -483,7 +484,7 @@ namespace ManageWalla
                 case PaneMode.GalleryEdit:
                 case PaneMode.GalleryAdd:
                     gridRight.RowDefinitions[0].Height = new GridLength(2, GridUnitType.Star);
-                    gridRight.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
+                    gridRight.RowDefinitions[1].Height = new GridLength(0); //GridLength(1, GridUnitType.Star);
 
                     lstImageMainViewerList.Visibility = Visibility.Collapsed;
 
@@ -4159,6 +4160,9 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
+                if (galleryOptionsLoaded)
+                    await controller.GalleryOptionsRefreshAsync(cancelTokenSource.Token);
+
                 GalleryRefreshTagsListFromState();
                 GalleryRefreshCategoryList();
 
@@ -4171,17 +4175,17 @@ namespace ManageWalla
                 txtGalleryDescription.Text = gallery.Desc;
                 txtGalleryPassword.Text = gallery.Password;
                 cmbGalleryAccessType.SelectedIndex = gallery.AccessType;
-                cmbGalleryGroupingType.SelectedIndex = gallery.GroupingType;
+                //cmbGalleryGroupingType.SelectedIndex = gallery.GroupingType;
 
-                cmbGallerySelectionType.SelectedIndex = gallery.SelectionType;
-                cmbGalleryPresentationType.SelectedIndex = gallery.PresentationId;
-                cmbGalleryStyleType.SelectedIndex = gallery.StyleId;
+                //cmbGallerySelectionType.SelectedIndex = gallery.SelectionType;
+                //cmbGalleryPresentationType.SelectedIndex = gallery.PresentationId;
+                //cmbGalleryStyleType.SelectedIndex = gallery.StyleId;
 
-                chkGalleryShowName.IsChecked = gallery.ShowGalleryName;
-                chkGalleryShowDesc.IsChecked = gallery.ShowGalleryDesc;
-                chkGalleryShowImageName.IsChecked = gallery.ShowImageName;
-                chkGalleryShowImageDesc.IsChecked = gallery.ShowImageDesc;
-                chkGalleryShowImageMeta.IsChecked = gallery.ShowImageMeta;
+                //chkGalleryShowName.IsChecked = gallery.ShowGalleryName;
+                //chkGalleryShowDesc.IsChecked = gallery.ShowGalleryDesc;
+                //chkGalleryShowImageName.IsChecked = gallery.ShowImageName;
+                //chkGalleryShowImageDesc.IsChecked = gallery.ShowImageDesc;
+                //chkGalleryShowImageMeta.IsChecked = gallery.ShowImageMeta;
 
                 //TODO select radio buttons for tags.
                 foreach (GalleryTagRef tagRef in gallery.Tags)
@@ -4696,30 +4700,71 @@ namespace ManageWalla
             
         }
 
-        private void cmdGalleryAdd_Click(object sender, RoutedEventArgs e)
+        async private void LoadGalleryOptions()
         {
-            txtGalleryName.Text = "";
-            txtGalleryDescription.Text = "";
-            txtGalleryPassword.Text = "";
-            cmbGalleryAccessType.SelectedIndex = 0;
-            cmbGalleryGroupingType.SelectedIndex = 0;
-            cmbGalleryStyleType.SelectedIndex = 0;
-            cmbGalleryPresentationType.SelectedIndex = 0;
-            cmbGallerySelectionType.SelectedIndex = 0;
-            chkGalleryShowName.IsChecked = false;
-            chkGalleryShowDesc.IsChecked = false;
-            chkGalleryShowImageName.IsChecked = false;
-            chkGalleryShowImageDesc.IsChecked = false;
-            chkGalleryShowImageMeta.IsChecked = false;
+            galleryOptionsLoaded = true;
+        }
 
-            webGalleryPreview.Visibility = Visibility.Collapsed;
-            paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
+        async private Task InitNewGallery()
+        {
+            try
+            {
+                ShowMessage(MessageType.Busy, "Setting up gallery details");
 
-            GalleryRefreshTagsListFromState();
-            GalleryRefreshCategoryList();
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
 
-            RefreshOverallPanesStructure(PaneMode.GalleryAdd);
-            RefreshPanesAllControls(PaneMode.GalleryAdd);
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                if (galleryOptionsLoaded)
+                    await controller.GalleryOptionsRefreshAsync(cancelTokenSource.Token);
+
+                txtGalleryName.Text = "";
+                txtGalleryDescription.Text = "";
+                txtGalleryPassword.Text = "";
+                cmbGalleryAccessType.SelectedIndex = 0;
+                //cmbGalleryGroupingType.SelectedIndex = 0;
+                //cmbGalleryStyleType.SelectedIndex = 0;
+                //cmbGalleryPresentationType.SelectedIndex = 0;
+                //cmbGallerySelectionType.SelectedIndex = 0;
+                //chkGalleryShowName.IsChecked = false;
+                //chkGalleryShowDesc.IsChecked = false;
+                //chkGalleryShowImageName.IsChecked = false;
+                //chkGalleryShowImageDesc.IsChecked = false;
+                //chkGalleryShowImageMeta.IsChecked = false;
+
+                webGalleryPreview.Visibility = Visibility.Collapsed;
+                paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
+
+                GalleryRefreshTagsListFromState();
+                GalleryRefreshCategoryList();
+
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                RefreshOverallPanesStructure(PaneMode.GalleryAdd);
+                RefreshPanesAllControls(PaneMode.GalleryAdd);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("InitNewGallery has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the gallery options data.  Error: " + ex.Message);
+            }
+            finally
+            {
+                ConcludeBusyProcess();
+            }
+        }
+
+        async private void cmdGalleryAdd_Click(object sender, RoutedEventArgs e)
+        {
+            await InitNewGallery();
         }
 
         async private void cmdGalleryEdit_Click(object sender, RoutedEventArgs e)

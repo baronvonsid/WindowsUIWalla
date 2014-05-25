@@ -562,6 +562,11 @@ namespace ManageWalla {
         
         private bool sequenceFieldSpecified;
         
+        public GallerySectionRef() {
+            this.nameField = "";
+            this.descField = "";
+        }
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
         public long id {
@@ -586,6 +591,7 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.ComponentModel.DefaultValueAttribute("")]
         public string name {
             get {
                 return this.nameField;
@@ -597,6 +603,7 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.ComponentModel.DefaultValueAttribute("")]
         public string desc {
             get {
                 return this.descField;

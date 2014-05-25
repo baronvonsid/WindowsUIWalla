@@ -25,7 +25,7 @@ namespace ManageWalla
         //public string mainCopyFolder { get; set; }
         public Account account { get; set; }
         public UserApp userApp { get; set; }
-
+        public GalleryOptions galleryOptions { get; set; }
 
         //Complex-ify !!!
         //private static byte[] key = { 1, 2, 3, 4, 5, 6, 7, 8 };

@@ -28,6 +28,10 @@ namespace ManageWalla {
         
         private GalleryOptionsStyleRef[] styleField;
         
+        private System.DateTime lastChangedField;
+        
+        private bool lastChangedFieldSpecified;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayItemAttribute("PresentationRef", IsNullable=false)]
         public GalleryOptionsPresentationRef[] Presentation {
@@ -49,6 +53,28 @@ namespace ManageWalla {
                 this.styleField = value;
             }
         }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public System.DateTime lastChanged {
+            get {
+                return this.lastChangedField;
+            }
+            set {
+                this.lastChangedField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool lastChangedSpecified {
+            get {
+                return this.lastChangedFieldSpecified;
+            }
+            set {
+                this.lastChangedFieldSpecified = value;
+            }
+        }
     }
     
     /// <remarks/>
@@ -59,7 +85,7 @@ namespace ManageWalla {
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryOptions")]
     public partial class GalleryOptionsPresentationRef {
         
-        private long presentationIdField;
+        private int presentationIdField;
         
         private bool presentationIdFieldSpecified;
         
@@ -67,13 +93,17 @@ namespace ManageWalla {
         
         private string descriptionField;
         
+        private string jspNameField;
+        
+        private string cssExtensionField;
+        
         private int maxSectionsField;
         
         private bool maxSectionsFieldSpecified;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public long presentationId {
+        public int presentationId {
             get {
                 return this.presentationIdField;
             }
@@ -117,6 +147,28 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string jspName {
+            get {
+                return this.jspNameField;
+            }
+            set {
+                this.jspNameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string cssExtension {
+            get {
+                return this.cssExtensionField;
+            }
+            set {
+                this.cssExtensionField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
         public int maxSections {
             get {
                 return this.maxSectionsField;
@@ -146,7 +198,7 @@ namespace ManageWalla {
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryOptions")]
     public partial class GalleryOptionsStyleRef {
         
-        private long styleIdField;
+        private int styleIdField;
         
         private bool styleIdFieldSpecified;
         
@@ -154,9 +206,11 @@ namespace ManageWalla {
         
         private string descriptionField;
         
+        private string cssFolderField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public long styleId {
+        public int styleId {
             get {
                 return this.styleIdField;
             }
@@ -195,6 +249,17 @@ namespace ManageWalla {
             }
             set {
                 this.descriptionField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string cssFolder {
+            get {
+                return this.cssFolderField;
+            }
+            set {
+                this.cssFolderField = value;
             }
         }
     }

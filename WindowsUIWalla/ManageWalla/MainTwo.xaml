@@ -7,7 +7,9 @@
     xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary"
     x:Name="mainTwo" x:Class="ManageWalla.MainTwo"
     Title="fotowalla" FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" 
-    SizeChanged="mainTwo_SizeChanged" FontSize="18" TextOptions.TextFormattingMode="Display">
+    SizeChanged="mainTwo_SizeChanged" FontSize="18" TextOptions.TextFormattingMode="Display" Height="731" Width="968">
+
+    <!-- gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" -->
 
     <Window.Resources>
         <CollectionViewSource x:Key="uploadImageStateListInProgressKey"
@@ -24,13 +26,13 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="60" />
                 <RowDefinition Height="50" />
-                <RowDefinition Height="0"/>
-                <RowDefinition Height="50" />
-                <RowDefinition Height="0"/>
-                <RowDefinition Height="50" />
-                <RowDefinition Height="0"/>
-                <RowDefinition Height="50" />
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="0"/>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="0"/>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="0"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40" />
@@ -213,10 +215,10 @@
                 </StackPanel>
             </DockPanel>
 
-   
+
             <StackPanel  Orientation="Vertical" Grid.Column="1" Grid.Row="0" >
                 <DockPanel Margin="12,0,2,0" LastChildFill="True" Background="{StaticResource WallaBannerBackgroundBrush}" VerticalAlignment="Top" >
-                    
+
                     <Button x:Name="cmdContract" DockPanel.Dock="Right" Click="cmdContract_Click" Margin="0,0,4,0">
                         <Button.Template>
                             <ControlTemplate TargetType="{x:Type Button}">
@@ -240,7 +242,7 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-                
+
                     <!-- <Image Source="{StaticResource contractImageSrc}" Height="28" /> -->
                     <Button x:Name="cmdAccount" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Click="cmdAccount_Click" Padding="0" BorderThickness="0">
                         <Button.Template>
@@ -264,9 +266,9 @@
                     </Button>
                     <Label x:Name="lblFotoWalla" Content="" FontSize="24" VerticalContentAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="{StaticResource FontBorderBrush}">
                     </Label>
-            </DockPanel>
+                </DockPanel>
 
-                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="500" Y2="5" StrokeThickness="0.5" Margin="0,5,0,0" />
+                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="7" X2="500" Y2="7" StrokeThickness="0.5" Margin="0,5,0,0" />
 
             </StackPanel>
 
@@ -281,8 +283,8 @@
                             </Rectangle>
                             <DockPanel LastChildFill="True" Margin="{TemplateBinding Margin}">
                                 <Button x:Name="cmdGalleryRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Collapsed" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdGalleryRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
-                                
-                                    <Image x:Name="imgGallery" Source="{StaticResource galleryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
+
+                                <Image x:Name="imgGallery" Source="{StaticResource galleryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
                                 <Label Content="Gallery" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
@@ -352,7 +354,8 @@
                 </StackPanel>
 
                 <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-                <TextBox x:Name="txtGalleryName" Margin="2" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" />
+                <TextBox x:Name="txtGalleryName" Margin="2" Grid.Column="1" Grid.Row="2" MaxLines="1" Text="WSSsjnnsde" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" />
+
                 <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
                 <TextBox x:Name="txtGalleryDescription" Margin="2" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
 
@@ -363,19 +366,19 @@
                     <ComboBoxItem>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image Source="{StaticResource privateImageSrc}"  Height="20" Width="20" />
-                            <TextBlock Margin="4">Private</TextBlock>
+                            <TextBlock Foreground="{StaticResource FontBorderBrush}" Margin="10,0,0,0">Private</TextBlock>
                         </StackPanel>
                     </ComboBoxItem>
                     <ComboBoxItem>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image Source="{StaticResource sharedSecureImageSrc}"  Height="20" Width="20" />
-                            <TextBlock Margin="4">Shared (Password)</TextBlock>
+                            <TextBlock Foreground="{StaticResource FontBorderBrush}" Margin="10,0,0,0">Shared (Password)</TextBlock>
                         </StackPanel>
                     </ComboBoxItem>
                     <ComboBoxItem>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image Source="{StaticResource sharedOpenImageSrc}"  Height="20" Width="20" />
-                            <TextBlock Margin="4">Public (Complex Url)</TextBlock>
+                            <TextBlock Foreground="{StaticResource FontBorderBrush}" Margin="10,0,0,0">Public (Complex Url)</TextBlock>
                         </StackPanel>
                     </ComboBoxItem>
                 </ComboBox>
@@ -717,19 +720,19 @@
 
             <Grid x:Name="gridRight" Margin="0,0,0,0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="9">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="60" />
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="0"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="0"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" x:Name="panGridRightHeader" Visibility="Visible" Orientation="Vertical">
+                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" x:Name="panGridRightHeader" Visibility="Collapsed" Orientation="Vertical">
                     <DockPanel Margin="6,0,6,0" Background="{StaticResource WallaBannerBackgroundBrush}" HorizontalAlignment="Stretch" LastChildFill="True">
 
                         <Line  Stroke="{StaticResource FontBorderBrushSelected}" DockPanel.Dock="Right" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="0" />
-                        
+
                         <Slider x:Name="sldImageSize" DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
                             Value="130"
                             Delay="500"
@@ -905,28 +908,47 @@
 
                 </StackPanel>
 
-                <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Collapsed" x:Name="tabGalleryConfiguration" VerticalAlignment="Stretch" Margin="2" LastChildFill="True">
-                    <TabControl  Background="{StaticResource ImageViewBackgroundBrush}" >
-                        <TabItem Header="Gallery Presentation">
+                <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Visible" x:Name="tabGalleryConfiguration" VerticalAlignment="Stretch" Margin="2" LastChildFill="True">
+
+
+
+                    <TabControl Background="{StaticResource ImageViewBackgroundBrush}" >
+
+
+                        <TabItem Header="Display Options">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="32" />
                                     <RowDefinition Height="230" />
                                     <RowDefinition Height="10" />
                                     <RowDefinition Height="40" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="350"/>
-                                    <ColumnDefinition Width="2*"/>
-                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="300"/>
+                                    <ColumnDefinition Width="260"/>
+                                    <ColumnDefinition Width="40"/>
 
                                 </Grid.ColumnDefinitions>
 
-                                <Label FontWeight="Bold" Content="Gallery Options" Grid.Column="0" Grid.Row="0" />
-                                <Label FontWeight="Bold" Content="Gallery Display Type" Grid.Column="1" Grid.Row="0" />
-                                <Label FontWeight="Bold" Content="Gallery Style" Grid.Column="2" Grid.Row="0" />
+                                <Label FontWeight="Bold" Content="Gallery Styles" Grid.Column="0" Grid.Row="0" />
+                                <Label FontWeight="Bold" Content="Gallery Colours" Grid.Column="1" Grid.Row="0" />
 
+                                <Button x:Name="cmdGalleryAdvanced" Grid.Column="2" Grid.Row="0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Image x:Name="image" Source="{StaticResource dropDownMenuImageSrc}" Height="32" />
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="true">
+                                                    <Setter TargetName="image" Property="Source" Value="{StaticResource dropDownMenuSelectedImageSrc}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+<!--
                                 <Grid Grid.Column="0" Grid.Row="1" Margin="4">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="30" />
@@ -982,6 +1004,43 @@
                                     <CheckBox x:Name="chkGalleryShowImageMeta" Grid.Row="6" Grid.Column="1"  />
 
                                 </Grid>
+-->
+
+                                <ListBox  Grid.Column="1" Grid.Row="1"  
+                            		    x:Name ="lstGalleryStylesList" 
+                            		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryOptionsListKey}}"
+                            		    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                        SelectionMode="Single"
+                                        IsSynchronizedWithCurrentItem="True"
+                                        Visibility="Visible">
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Grid>
+                                                    <!--
+                                                    <Image x:Name="imageThumb" Source="{Binding thumbnailImage.Source}" Height="{Binding ElementName=sldImageSize, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    </Image>
+                                                    -->
+                                                </Grid>
+                                                <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane"  Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140" MouseUp="Image_MouseUp" >
+                                                    <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2" Foreground="{StaticResource FontBorderBrush}"/>
+                                                    <TextBlock Text="{Binding desc}" TextWrapping="Wrap" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <DataTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="true">
+                                                    <Setter TargetName="imageThumb" Property="Effect">
+                                                        <Setter.Value>
+                                                            <ShaderEffectLibrary:BloomEffect BaseIntensity="1" BaseSaturation="1" BloomIntensity="1" BloomSaturation="1" />
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
 
                                 <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
                                     <ComboBox x:Name="cmbGalleryPresentationType" Margin="2" SelectedIndex="0" Width="150" VerticalContentAlignment="Center" Height="26" SelectionChanged="cmbGalleryPresentationType_SelectionChanged" >
@@ -1047,7 +1106,7 @@
                             </Grid>
                         </TabItem>
 
-                        <TabItem Header="Gallery Foto Selection">
+                        <TabItem Header="Select Fotos">
                             <Grid x:Name="gridGallerySelection">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="30" />
@@ -1340,7 +1399,7 @@
 
                             <!-- Spacer -->
                             <RowDefinition Height="10"/>
-                            
+
                             <!-- Date -->
                             <RowDefinition Height="30" />
                             <RowDefinition Height="0" />
@@ -2052,7 +2111,8 @@
             <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5" StrokeThickness="2" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Image x:Name="imgBusy" gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" Height="30" />
+                <!-- Source="{DynamicResource busyImageAnimSrc}" -->
+                <Image x:Name="imgBusy" Source="{DynamicResource busyImageAnimSrc}" Height="30" />
                 <Image x:Name="imgAlert" Source="{StaticResource errorImageSrc}" Height="32" />
                 <TextBlock x:Name="lblAlertDialogHeader" TextWrapping="Wrap" Margin="20,0,0,0" Text="Loading.." Foreground="{StaticResource FontBorderBrush}" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
             </StackPanel>

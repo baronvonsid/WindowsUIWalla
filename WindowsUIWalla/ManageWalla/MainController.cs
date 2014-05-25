@@ -1289,6 +1289,42 @@ namespace ManageWalla
 
             return serverHelper.GetWebUrl() + "galleryPreview?" + queryString;
         }
+
+        async public Task GalleryOptionsRefreshAsync(CancellationToken cancelToken)
+        {
+            try
+            {
+                if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                {
+                    GalleryOptions galleryOptions;
+                    if (state.galleryOptions != null)
+                    {
+                        galleryOptions = await serverHelper.GalleryGetOptionsAsync(state.galleryOptions.lastChanged, cancelToken);
+                        if (galleryOptions != null)
+                        {
+                            state.galleryOptions = galleryOptions;
+                        }
+                    }
+                    else
+                    {
+                        galleryOptions = await serverHelper.GalleryGetOptionsAsync(null, cancelToken);
+                        if (galleryOptions != null)
+                        {
+                            state.galleryOptions = galleryOptions;
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryOptionsRefreshAsync has been cancelled.");
+                throw (cancelEx);
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+        }
         #endregion
 
         #region  Images Processing

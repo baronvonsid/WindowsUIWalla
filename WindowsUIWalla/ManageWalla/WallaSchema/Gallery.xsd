@@ -82,8 +82,8 @@ targetNamespace="http://ws.fotowalla.com/Gallery"
               <element name="SectionRef" maxOccurs="unbounded" minOccurs="0">
               <complexType>
                       <attribute type="long" name="id" />
-                      <attribute type="string" name="name"></attribute>
-                      <attribute type="string" name="desc"></attribute>
+                      <attribute type="string" name="name" default=""></attribute>
+                      <attribute type="string" name="desc" default=""></attribute>
                       <attribute type="int" name="imageCount"/>
                       <attribute type="int" name="sequence" />
               </complexType>
