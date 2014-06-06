@@ -89,6 +89,30 @@ namespace ManageWalla
             string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
             return File.Exists(fileName);
         }
+
+        public static void GalleryPresentationPopulateFromState(GlobalState state, GalleryPresentationList list)
+        {
+            if (state.galleryPresentationList != null)
+            {
+                list.Clear();
+                foreach (GalleryPresentationItem item in state.galleryPresentationList)
+                {
+                    list.Add(item);
+                }
+            }
+        }
+
+        public static void GalleryStylePopulateFromState(GlobalState state, GalleryStyleList list)
+        {
+            if (state.galleryStyleList != null)
+            {
+                list.Clear();
+                foreach (GalleryStyleItem item in state.galleryStyleList)
+                {
+                    list.Add(item);
+                }
+            }
+        }
         #endregion
 
         #region ThumbCache

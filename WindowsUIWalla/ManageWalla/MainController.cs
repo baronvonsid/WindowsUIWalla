@@ -33,6 +33,8 @@ namespace ManageWalla
         private List<ThumbCache> thumbCacheList = null;
         private List<MainCopyCache> mainCopyCacheList = null;
         private UploadImageStateList uploadImageStateList = null;
+        private GalleryStyleList galleryStyleList = null;
+        private GalleryPresentationList galleryPresentationList = null;
         private bool createdCategory = false;
 
         //private ThumbState thumbState = null;
@@ -72,10 +74,22 @@ namespace ManageWalla
             return mainCopyCacheList;
         }
 
-        //public UploadImageStateList UpdateFromStateUploadImageStateList()
-       // {
-         //   return uploadImageStateList;
-        //}
+        /*
+        public GalleryPresentationList GetGalleryPresentationList()
+        {
+            return galleryPresentationList;
+        }
+
+        public GalleryStyleList GetGalleryStyleList()
+        {
+            return galleryStyleList;
+        }
+
+        public UploadImageStateList UpdateFromStateUploadImageStateList()
+        {
+           return uploadImageStateList;
+        }
+        */
 
         public void Dispose()
         {
@@ -109,13 +123,21 @@ namespace ManageWalla
             return CacheHelper.CacheFilesPresent(profileName);
         }
 
-        public void SetUpCacheFiles(string profileName, UploadImageStateList uploadImageStateListParam)
+        public void SetUpCacheFiles(string profileName, UploadImageStateList uploadImageStateListParam, 
+            GalleryPresentationList presentationListParam, GalleryStyleList styleListParam)
         {
             state = CacheHelper.GetGlobalState(profileName);
             thumbCacheList = CacheHelper.GetThumbCacheList(profileName);
             mainCopyCacheList = CacheHelper.GetMainCopyCacheList(profileName);
+
             CacheHelper.GetUploadImageStateList(uploadImageStateListParam, profileName);
             uploadImageStateList = uploadImageStateListParam;
+
+            CacheHelper.GalleryPresentationPopulateFromState(state, presentationListParam);
+            galleryPresentationList = presentationListParam;
+
+            CacheHelper.GalleryStylePopulateFromState(state, styleListParam);
+            galleryStyleList = styleListParam;
         }
 
         async public Task<bool> SetPlatform()
@@ -614,6 +636,8 @@ namespace ManageWalla
                             newImage.lastUpdated = serverImageState.lastUpdated;
                             newImage.status = (UploadImage.ImageStatus)serverImageState.status;
                             newImage.name = serverImageState.name;
+
+                            currentUploadStatusList.Add(newImage);  //Check this is OK.
                         }
                         else
                         {
@@ -1290,7 +1314,7 @@ namespace ManageWalla
             return serverHelper.GetWebUrl() + "galleryPreview?" + queryString;
         }
 
-        async public Task GalleryOptionsRefreshAsync(CancellationToken cancelToken)
+        async public Task GalleryOptionsRefreshAsync(GalleryPresentationList presentationList, GalleryStyleList styleList, CancellationToken cancelToken)
         {
             try
             {
@@ -1300,7 +1324,11 @@ namespace ManageWalla
                     if (state.galleryOptions != null)
                     {
                         galleryOptions = await serverHelper.GalleryGetOptionsAsync(state.galleryOptions.lastChanged, cancelToken);
-                        if (galleryOptions != null)
+                        if (galleryOptions == null)
+                        {
+                            return;
+                        }
+                        else
                         {
                             state.galleryOptions = galleryOptions;
                         }
@@ -1308,11 +1336,51 @@ namespace ManageWalla
                     else
                     {
                         galleryOptions = await serverHelper.GalleryGetOptionsAsync(null, cancelToken);
-                        if (galleryOptions != null)
+                        if (galleryOptions == null)
+                        {
+                            throw new Exception("Unexpected problem loading the gallery options, none populated");
+                        }
+                        else
                         {
                             state.galleryOptions = galleryOptions;
                         }
                     }
+
+                    //Rebuild Prentation Object.
+                    presentationList.Clear();
+                    foreach (GalleryOptionsPresentationRef current in state.galleryOptions.Presentation)
+                    {
+                        GalleryPresentationItem newItem = new GalleryPresentationItem();
+                        newItem.PresentationId = current.presentationId;
+                        newItem.Name = current.name;
+                        newItem.Desc = current.description;
+                        newItem.MaxSections = current.maxSections;
+                        presentationList.Add(newItem);
+                    }
+
+                    styleList.Clear();
+                    foreach (GalleryOptionsStyleRef current in state.galleryOptions.Style)
+                    {
+                        GalleryStyleItem newItem = new GalleryStyleItem();
+                        newItem.StyleId = current.styleId;
+                        newItem.Name = current.name;
+                        newItem.Desc = current.description;
+                        styleList.Add(newItem);
+                    }
+
+                    //Load images.
+                    foreach (GalleryPresentationItem item in presentationList)
+                    {
+                        await item.LoadImageAsync(cancelToken,serverHelper);
+                    }
+
+                    foreach (GalleryStyleItem item in styleList)
+                    {
+                        await item.LoadImageAsync(cancelToken, serverHelper);
+                    }
+
+                    state.galleryPresentationList = presentationList;
+                    state.galleryStyleList = styleList;
                 }
             }
             catch (OperationCanceledException cancelEx)
@@ -1325,6 +1393,13 @@ namespace ManageWalla
                 throw (ex);
             }
         }
+
+        //TODO
+        async public Task GalleryGetSectionListAndMerge(Gallery gallery, GallerySectionList gallerySectionList, CancellationToken cancelToken)
+        {
+            // + server method.
+        }
+
         #endregion
 
         #region  Images Processing

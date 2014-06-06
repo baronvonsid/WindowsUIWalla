@@ -129,6 +129,12 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProjectDataType\GalleryPresentationItem.cs" />
+    <Compile Include="ProjectDataType\GalleryPresentationList.cs" />
+    <Compile Include="ProjectDataType\GallerySectionItem.cs" />
+    <Compile Include="ProjectDataType\GallerySectionList.cs" />
+    <Compile Include="ProjectDataType\GalleryStyleItem.cs" />
+    <Compile Include="ProjectDataType\GalleryStyleList.cs" />
     <Compile Include="ProjectDataType\UploadImageStateList.cs" />
     <Compile Include="ProjectDataType\UploadImageState.cs" />
     <Compile Include="ProjectDataType\MainCopyCache.cs" />
@@ -141,7 +147,6 @@
     <Compile Include="ProjectDataType\GeneralImage.cs" />
     <Compile Include="ProjectDataType\ImageMainViewerList.cs" />
     <Compile Include="ProjectDataType\ThumbCache.cs" />
-    <Compile Include="ProjectDataType\UploadStatusListBind.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ValueConverters\WallaLoadStateToVisibleConverter.cs" />
     <Compile Include="ValueConverters\WallaCacheSizeConverter.cs" />

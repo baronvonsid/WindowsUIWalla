@@ -576,7 +576,7 @@ namespace ManageWalla
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(GalleryList));
+                    XmlSerializer serialKiller = new XmlSerializer(typeof(GalleryOptions));
                     GalleryOptions galleryOptions = (GalleryOptions)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
                     return galleryOptions;
                 }

@@ -80,14 +80,23 @@ namespace ManageWalla
         private Gallery currentGallery = null;
         private Category currentCategory = null;
         private MainController controller = null;
+
         public UploadUIState uploadUIState = null;
         public UploadImageFileList uploadFots = null;
         public UploadImageStateList uploadImageStateList = null;
         public ImageMainViewerList imageMainViewerList = null;
         public GalleryCategoryModel galleryCategoriesList = null;
+        public GalleryPresentationList galleryPresentationList = null;
+        public GalleryStyleList galleryStyleList = null;
+        public GallerySectionList gallerySectionList = null;
+
+
         public GlobalState state = null;
         public List<ThumbCache> thumbCacheList = null;
         public List<MainCopyCache> mainCopyCacheList = null;
+
+
+
         public System.Timers.Timer timer = null;
 
         private bool cacheFilesSetup = false;
@@ -103,6 +112,7 @@ namespace ManageWalla
         private DateTime lastMarginTweakTime = DateTime.Now;
         private bool isContracted = false;
         private MessageType currentDialogType = MessageType.None;
+        private string existingGalleryName = "";
         #endregion
 
         #region Window Initialise and control.
@@ -115,6 +125,10 @@ namespace ManageWalla
             uploadImageStateList = (UploadImageStateList)FindResource("uploadImageStateListKey");
             imageMainViewerList = (ImageMainViewerList)FindResource("imageMainViewerListKey");
             galleryCategoriesList = (GalleryCategoryModel)FindResource("galleryCategoryModelKey");
+            galleryPresentationList = (GalleryPresentationList)FindResource("galleryPresentationListKey");
+            galleryStyleList = (GalleryStyleList)FindResource("galleryStyleListKey");
+
+            gallerySectionList = (GallerySectionList)FindResource("gallerySectionListKey");
         }
 
         private void mainTwo_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -236,7 +250,7 @@ namespace ManageWalla
 
         private void UseCreateLocalCacheFiles(string profileName)
         {
-            controller.SetUpCacheFiles(profileName, uploadImageStateList);
+            controller.SetUpCacheFiles(profileName, uploadImageStateList, galleryPresentationList, galleryStyleList);
             state = controller.GetState();
             thumbCacheList = controller.GetThumbCacheList();
             mainCopyCacheList = controller.GetMainCopyCacheList();
@@ -746,16 +760,17 @@ namespace ManageWalla
                         gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(40);
                         gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(3, GridUnitType.Star);
                     }
-
+                    /*
                     if (cmbGalleryPresentationType.SelectedIndex == 0)
                     {
-                        cmbGalleryGroupingType.IsEnabled = true;
+                        //cmbGalleryGroupingType.IsEnabled = true;
                     }
                     else
                     {
-                        cmbGalleryGroupingType.SelectedIndex = 0;
-                        cmbGalleryGroupingType.IsEnabled = false;
+                        //cmbGalleryGroupingType.SelectedIndex = 0;
+                        //cmbGalleryGroupingType.IsEnabled = false;
                     }
+                    */
 
                     if (cmbGalleryAccessType.SelectedIndex != 1)
                     {
@@ -1507,7 +1522,7 @@ namespace ManageWalla
             if (checkedButton != null)
             {
                 GalleryListGalleryRef galleryListRefTemp = (GalleryListGalleryRef)checkedButton.Tag;
-                if (!GalleryPopulateSectionList(galleryListRefTemp))
+                if (!GalleryPopulateSectionDropdown(galleryListRefTemp))
                 {
                     try
                     {
@@ -4114,7 +4129,7 @@ namespace ManageWalla
             }
         }
 
-        private bool GalleryPopulateSectionList(GalleryListGalleryRef galleryListRefTemp)
+        private bool GalleryPopulateSectionDropdown(GalleryListGalleryRef galleryListRefTemp)
         {
             if (galleryListRefTemp.SectionRef != null && galleryListRefTemp.SectionRef.Length > 0)
             {
@@ -4148,7 +4163,8 @@ namespace ManageWalla
             }
         }
 
-        async private Task PopulateGalleryMetaData(GalleryListGalleryRef galleryListGalleryRef)
+        //TODO
+        async private Task GalleryPopulateMetaData(GalleryListGalleryRef galleryListGalleryRef)
         {
             try
             {
@@ -4160,8 +4176,11 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                if (galleryOptionsLoaded)
-                    await controller.GalleryOptionsRefreshAsync(cancelTokenSource.Token);
+                if (!galleryOptionsLoaded)
+                {
+                    await controller.GalleryOptionsRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
+                    galleryOptionsLoaded = true;
+                }
 
                 GalleryRefreshTagsListFromState();
                 GalleryRefreshCategoryList();
@@ -4171,6 +4190,7 @@ namespace ManageWalla
                 webGalleryPreview.Visibility = Visibility.Collapsed;
                 paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
 
+                existingGalleryName = gallery.Name;
                 txtGalleryName.Text = gallery.Name;
                 txtGalleryDescription.Text = gallery.Desc;
                 txtGalleryPassword.Text = gallery.Password;
@@ -4370,7 +4390,7 @@ namespace ManageWalla
         {
             foreach (CategoryListCategoryRef current in state.categoryList.CategoryRef.Where(r => r.parentId == parentId))
             {
-                TreeViewItem newItem = GetTreeView(current.id, current.name, current.desc);
+                TreeViewItem newItem = GalleryGetTreeView(current.id, current.name, current.desc);
                 newItem.Tag = current.id;
 
                 if (currentHeader == null)
@@ -4386,7 +4406,7 @@ namespace ManageWalla
             }
         }
 
-        private TreeViewItem GetTreeView(long categoryId, string name, string desc)
+        private TreeViewItem GalleryGetTreeView(long categoryId, string name, string desc)
         {
             /*
                 <StackPanel Orientation="Horizontal">
@@ -4663,6 +4683,223 @@ namespace ManageWalla
             foreach (TreeViewItem child in currentItem.Items)
                 GalleryCategoryRecursiveRelatedUpdates(child, parentRecursive);
         }
+
+        async private Task GalleryInit()
+        {
+            try
+            {
+                ShowMessage(MessageType.Busy, "Setting up gallery details");
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                if (!galleryOptionsLoaded)
+                {
+                    await controller.GalleryOptionsRefreshAsync(cancelTokenSource.Token, galleryPresentationList, galleryStyleList);
+                    galleryOptionsLoaded = true;
+                    lstGalleryPresentationList.Items.Refresh();
+                    lstGalleryStylesList.Items.Refresh();
+                }
+
+                existingGalleryName = "";
+                txtGalleryName.Text = "";
+                txtGalleryDescription.Text = "";
+                txtGalleryPassword.Text = "";
+                cmbGalleryAccessType.SelectedIndex = 0;
+                //cmbGalleryGroupingType.SelectedIndex = 0;
+                //cmbGalleryStyleType.SelectedIndex = 0;
+                //cmbGalleryPresentationType.SelectedIndex = 0;
+                //cmbGallerySelectionType.SelectedIndex = 0;
+
+                chkGalleryShowName.IsChecked = true;
+                chkGalleryShowDesc.IsChecked = true;
+                chkGalleryShowImageName.IsChecked = false;
+                chkGalleryShowImageDesc.IsChecked = false;
+                chkGalleryShowImageMeta.IsChecked = false;
+                chkGalleryShowGroupingDesc.IsChecked = false;
+
+                webGalleryPreview.Visibility = Visibility.Collapsed;
+                paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
+
+                GalleryRefreshTagsListFromState();
+                GalleryRefreshCategoryList();
+
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                RefreshOverallPanesStructure(PaneMode.GalleryAdd);
+                RefreshPanesAllControls(PaneMode.GalleryAdd);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("InitNewGallery has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the gallery options data.  Error: " + ex.Message);
+            }
+            finally
+            {
+                ConcludeBusyProcess();
+            }
+        }
+
+        async private Task GallerySave()
+        {
+            Gallery gallery = GalleryCreateFromGUI();
+
+            if (!GalleryValidate(gallery))
+                return;
+
+            try
+            {
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                if (currentPane == PaneMode.GalleryAdd)
+                {
+                    await controller.GalleryCreateAsync(currentGallery, cancelTokenSource.Token);
+                }
+                else
+                {
+                    await controller.GalleryUpdateAsync(currentGallery, existingGalleryName, cancelTokenSource.Token);
+                }
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("cmdGallerySave_Click has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Gallery could not be saved, there was an error on the server:" + ex.Message);
+            }
+            finally
+            {
+                RefreshOverallPanesStructure(PaneMode.GalleryView);
+                RefreshPanesAllControls(PaneMode.GalleryView);
+                RefreshAndDisplayGalleryList(true);
+            }
+        }
+
+        async private Task GalleryReloadSection()
+        {
+            try
+            {
+                ShowMessage(MessageType.Busy, "Gallery sections being refreshed");
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                await controller.GalleryGetSectionListAndMerge(GalleryCreateFromGUI(), gallerySectionList, cancelTokenSource.Token);
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                datGallerySections.Items.Refresh();
+
+                ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("GalleryReloadSection has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Gallery sections could not be refreshed, error:" + ex.Message);
+            }
+        }
+
+        //TODO
+        private Gallery GalleryCreateFromGUI()
+        {
+            if (currentPane == PaneMode.GalleryAdd)
+            {
+                currentGallery = new Gallery();
+            }
+
+            currentGallery.Name = txtGalleryName.Text;
+            currentGallery.Desc = txtGalleryDescription.Text;
+            currentGallery.Password = txtGalleryPassword.Text;
+            currentGallery.AccessType = cmbGalleryAccessType.SelectedIndex;
+
+            //TODO
+            //currentGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
+            //currentGallery.SelectionType = cmbGallerySelectionType.SelectedIndex;
+
+            //TODO get from radio buttons.
+            //currentGallery.PresentationId = cmbGalleryPresentationType.SelectedIndex;
+            //currentGallery.StyleId = cmbGalleryStyleType.SelectedIndex;
+
+            //TODO populate sections.
+
+            currentGallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
+            currentGallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
+            currentGallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
+            currentGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
+            currentGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
+
+            /* Category add to object ************************************************ */
+            if (currentGallery.SelectionType != 1)
+                currentGallery.Categories = GalleryCategoryGetUpdateList();
+
+            /* Tags add to object ************************************************ */
+            currentGallery.Tags = GalleryTagsUpdateList(currentGallery.SelectionType);
+
+            return currentGallery;
+        }
+
+        private bool GalleryValidate(Gallery gallery)
+        {
+            if (gallery.SelectionType == 0 && (gallery.Categories == null || gallery.Categories.Length == 0))
+            {
+                ShowMessage(MessageType.Warning, "The gallery is invalid.  Its is setup for Category selection, but does not have any catgories associated with it.");
+                return false;
+            }
+            
+            if (gallery.SelectionType == 1 && (gallery.Tags == null || gallery.Tags.Length == 0))
+            {
+                ShowMessage(MessageType.Warning, "The gallery is invalid.  Its is setup for Tag selection, but does not have any tags associated with it.");
+                return false;
+            }
+            
+            if ((gallery.Categories == null || gallery.Categories.Length == 0) && (gallery.Tags == null || gallery.Tags.Length == 0))
+            {
+                ShowMessage(MessageType.Warning, "The gallery is invalid.  The gallery does not have any Catgories or Tags associated with it, so cannot be saved.");
+                return false;
+            }
+
+            if (gallery.AccessType == 1 && gallery.Password.Length == 0)
+            {
+                ShowMessage(MessageType.Warning, "This gallery has been marked as password protected, but the password does not meet the minumimum criteria of being 8 charactors long.");
+                return false;
+            }
+
+            if (gallery.Name.Length == 0)
+            {
+                ShowMessage(MessageType.Warning, "You must select a name for your Gallery to continue.");
+                return false;
+            }
+
+            return true;
+        }
         #endregion
 
         #region Gallery Event Handlers
@@ -4700,71 +4937,9 @@ namespace ManageWalla
             
         }
 
-        async private void LoadGalleryOptions()
-        {
-            galleryOptionsLoaded = true;
-        }
-
-        async private Task InitNewGallery()
-        {
-            try
-            {
-                ShowMessage(MessageType.Busy, "Setting up gallery details");
-
-                if (cancelTokenSource != null)
-                    cancelTokenSource.Cancel();
-
-                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                cancelTokenSource = newCancelTokenSource;
-
-                if (galleryOptionsLoaded)
-                    await controller.GalleryOptionsRefreshAsync(cancelTokenSource.Token);
-
-                txtGalleryName.Text = "";
-                txtGalleryDescription.Text = "";
-                txtGalleryPassword.Text = "";
-                cmbGalleryAccessType.SelectedIndex = 0;
-                //cmbGalleryGroupingType.SelectedIndex = 0;
-                //cmbGalleryStyleType.SelectedIndex = 0;
-                //cmbGalleryPresentationType.SelectedIndex = 0;
-                //cmbGallerySelectionType.SelectedIndex = 0;
-                //chkGalleryShowName.IsChecked = false;
-                //chkGalleryShowDesc.IsChecked = false;
-                //chkGalleryShowImageName.IsChecked = false;
-                //chkGalleryShowImageDesc.IsChecked = false;
-                //chkGalleryShowImageMeta.IsChecked = false;
-
-                webGalleryPreview.Visibility = Visibility.Collapsed;
-                paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
-
-                GalleryRefreshTagsListFromState();
-                GalleryRefreshCategoryList();
-
-
-                if (newCancelTokenSource == cancelTokenSource)
-                    cancelTokenSource = null;
-
-                RefreshOverallPanesStructure(PaneMode.GalleryAdd);
-                RefreshPanesAllControls(PaneMode.GalleryAdd);
-            }
-            catch (OperationCanceledException)
-            {
-                logger.Debug("InitNewGallery has been cancelled.");
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the gallery options data.  Error: " + ex.Message);
-            }
-            finally
-            {
-                ConcludeBusyProcess();
-            }
-        }
-
         async private void cmdGalleryAdd_Click(object sender, RoutedEventArgs e)
         {
-            await InitNewGallery();
+            await GalleryInit();
         }
 
         async private void cmdGalleryEdit_Click(object sender, RoutedEventArgs e)
@@ -4774,7 +4949,7 @@ namespace ManageWalla
             if (checkedButton != null)
             {
                 GalleryListGalleryRef galleryListGalleryRef = (GalleryListGalleryRef)checkedButton.Tag;
-                await PopulateGalleryMetaData(galleryListGalleryRef);
+                await GalleryPopulateMetaData(galleryListGalleryRef);
             }
             else
             {
@@ -4799,115 +4974,9 @@ namespace ManageWalla
                 RefreshPanesAllControls(currentPane);
         }
 
-        async private void cmdGallerySave_Click(object sender, RoutedEventArgs e)
+        async private Task GallerySave_Click(object sender, RoutedEventArgs e)
         {
-            GalleryCategoryRef[] galleryCategories = null;
-            int excludeCount = lstGalleryMyTagListExclude.SelectedItems.Count + lstGallerySystemTagListExclude.SelectedItems.Count;
-            int includeCount = lstGalleryMyTagListInclude.SelectedItems.Count + lstGallerySystemTagListInclude.SelectedItems.Count;
-            
-
-            if (cmbGallerySelectionType.SelectedIndex != 1)
-                galleryCategories = GalleryCategoryGetUpdateList();
-
-            if (cmbGallerySelectionType.SelectedIndex == 0 && (galleryCategories == null || galleryCategories.Length == 0))
-            {
-                ShowMessage(MessageType.Warning, "The gallery does not have any catgories associated with it, so cannot be saved.");
-                return;
-            }
-            else if (cmbGallerySelectionType.SelectedIndex == 1 && includeCount == 0)
-            {
-                ShowMessage(MessageType.Warning, "The gallery does not have any tags associated with it, so cannot be saved.");
-                return;
-            }
-            else if (includeCount == 0 && galleryCategories.Length == 0)
-            {
-                ShowMessage(MessageType.Warning, "The gallery does not have any catgories or tags associated with it, so cannot be saved.");
-                return;
-            }
-
-            if (cmbGalleryAccessType.SelectedIndex == 1 && txtGalleryPassword.Text.Length == 0)
-            {
-                ShowMessage(MessageType.Warning, "This gallery has been marked as password protected, but the password does not meet the minumimum criteria of being 8 charactors long.");
-                return;
-            }
-
-            if (txtGalleryName.Text.Length == 0)
-            {
-                ShowMessage(MessageType.Warning, "You must select a name for your Gallery to continue.");
-                return;
-            }
-
-            ShowMessage(MessageType.Busy, "Saving Gallery data");
-
-            if (currentPane == PaneMode.GalleryAdd)
-            {
-                currentGallery = new Gallery();
-            }
-
-            string oldGalleryName = currentGallery.Name;
-            currentGallery.Name = txtGalleryName.Text;
-            currentGallery.Desc = txtGalleryDescription.Text;
-            currentGallery.Password = txtGalleryPassword.Text;
-            currentGallery.AccessType = cmbGalleryAccessType.SelectedIndex;
-            currentGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
-            currentGallery.SelectionType = cmbGallerySelectionType.SelectedIndex;
-            currentGallery.PresentationId = cmbGalleryPresentationType.SelectedIndex;
-            currentGallery.StyleId = cmbGalleryStyleType.SelectedIndex;
-
-            currentGallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
-            currentGallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
-            currentGallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
-            currentGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
-            currentGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
-
-            /* Category add to object ************************************************ */
-            if (currentGallery.SelectionType != 1)
-                currentGallery.Categories = galleryCategories;
-
-            /* Tags add to object ************************************************ */
-            currentGallery.Tags = GalleryTagsUpdateList(currentGallery.SelectionType);
-
-            /* Sorts add to object ************************************************ */
-            //TODO
-
-
-            try
-            {
-                if (cancelTokenSource != null)
-                    cancelTokenSource.Cancel();
-
-                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                cancelTokenSource = newCancelTokenSource;
-                
-                if (currentPane == PaneMode.GalleryAdd)
-                {
-                    await controller.GalleryCreateAsync(currentGallery, cancelTokenSource.Token);
-                }
-                else
-                {
-                    await controller.GalleryUpdateAsync(currentGallery, oldGalleryName, cancelTokenSource.Token);
-                }
-
-                if (newCancelTokenSource == cancelTokenSource)
-                    cancelTokenSource = null;
-
-                ConcludeBusyProcess();
-            }
-            catch (OperationCanceledException)
-            {
-                logger.Debug("cmdGallerySave_Click has been cancelled.");
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                ShowMessage(MessageType.Error, "Gallery could not be saved, there was an error on the server:" + ex.Message);
-            }
-            finally
-            {
-                RefreshOverallPanesStructure(PaneMode.GalleryView);
-                RefreshPanesAllControls(PaneMode.GalleryView);
-                RefreshAndDisplayGalleryList(true);
-            }
+            await GallerySave();
         }
 
         private void cmdGalleryCancel_Click(object sender, RoutedEventArgs e)
@@ -5503,24 +5572,29 @@ namespace ManageWalla
 
             //previewGallery.Name = txtGalleryName.Text;
             //previewGallery.Desc = txtGalleryDescription.Text;
-            previewGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
+            //previewGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
 
             //TODO Approx number of sections.
 
             //currentGallery.SelectionType = cmbGallerySelectionType.SelectedIndex;
             //currentGallery.PresentationId = cmbGalleryPresentationType.SelectedIndex;
-            previewGallery.StyleId = cmbGalleryStyleType.SelectedIndex;
+            //previewGallery.StyleId = cmbGalleryStyleType.SelectedIndex;
 
-            previewGallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
-            previewGallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
-            previewGallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
-            previewGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
-            previewGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
+            //previewGallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
+            //previewGallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
+            //previewGallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
+            //previewGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
+            //previewGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
 
 
             webGalleryPreview.Source = new Uri(controller.GetGalleryPreviewUrl(previewGallery));
             webGalleryPreview.Visibility = Visibility.Visible;
             paneGalleryPreviewNotLoaded.Visibility = Visibility.Collapsed;
+        }
+
+        async private void Label_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            await GalleryReloadSection();
         }
 
     }

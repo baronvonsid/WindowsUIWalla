@@ -17,33 +17,24 @@ namespace ManageWalla
     //[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/GlobalState", IsNullable = false)]
     public class GlobalState
     {
-        
-        //public int imageFetchSize { get; set; }
         public DateTime lastLoggedIn { get; set; }
-        //public int mainCopyCacheSizeMB { get; set; }
-        //public int thumbCacheSizeMB { get; set; }
-        //public string mainCopyFolder { get; set; }
         public Account account { get; set; }
         public UserApp userApp { get; set; }
         public GalleryOptions galleryOptions { get; set; }
-
-        //Complex-ify !!!
-        //private static byte[] key = { 1, 2, 3, 4, 5, 6, 7, 8 };
-        //private static byte[] iv = { 1, 2, 3, 4, 5, 6, 7, 8 };
 
         //Business Objects
         public TagList tagList { get; set; }
         public CategoryList categoryList { get; set; }
         public GalleryList galleryList { get; set; }
 
-        //public String categoryXml { get; set; }
         public UploadStatusList uploadStatusList { get; set; }
         public List<ImageList> tagImageList { get; set; }
         public List<ImageList> categoryImageList { get; set; }
         public List<ImageList> galleryImageList { get; set; }
         public List<ImageMeta> imageMetaList { get; set; }
-        //public List<MainCopyCache> mainCopyCacheList { get; set; }
 
+        public GalleryStyleList galleryStyleList { get; set; }
+        public GalleryPresentationList galleryPresentationList { get; set; }
         public DataLoadState categoryLoadState { get; set; }
         public DataLoadState tagLoadState { get; set; }
         public DataLoadState galleryLoadState { get; set; }
@@ -68,74 +59,5 @@ namespace ManageWalla
         }
 
         public GlobalState() { }
-
-        /*
-        public static GlobalState GetState()
-        {
-            // Try to load from File
-            state = RetreiveFromFile();
-            if (state == null)
-            {
-                state = new GlobalState();
-
-                state.tagImageList = new List<ImageList>();
-                state.categoryImageList = new List<ImageList>();
-                state.galleryImageList = new List<ImageList>();
-                state.imageMetaList = new List<ImageMeta>();
-                state.mainCopyCacheList = new List<MainCopyCache>();
-            }
-
-            //TODO - delete
-            state.userName = "Simon";
-            state.password = "simon";
-            state.imageFetchSize = 50;
-            state.mainCopyCacheSizeMB = 100;
-
-            state.categoryLoadState = GlobalState.DataLoadState.No;
-            state.tagLoadState = GlobalState.DataLoadState.No;
-            state.galleryLoadState = GlobalState.DataLoadState.No;
-            state.uploadStatusListState = GlobalState.DataLoadState.No;
-
-            return state;
-        }
-
-        private static GlobalState RetreiveFromFile()
-        {
-            string fileName = Path.Combine(Application.UserAppDataPath, "Walla-LocalCache.config");
-            GlobalState stateTemp = null;
-
-            DESCryptoServiceProvider des = new DESCryptoServiceProvider();
-
-            if (File.Exists(fileName))
-            {
-                using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-                {
-                    var cryptoStream = new CryptoStream(fs, des.CreateDecryptor(key, iv), CryptoStreamMode.Read);
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    stateTemp = (GlobalState)formatter.Deserialize(cryptoStream);
-                }
-
-                return stateTemp;
-            }
-
-            return null;
-        }
-
-        public void SaveState()
-        {
-            string fileName = Path.Combine(Application.UserAppDataPath, "Walla-LocalCache.config");
-            DESCryptoServiceProvider des = new DESCryptoServiceProvider();
-
-            using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                var cryptoStream = new CryptoStream(fs, des.CreateEncryptor(key, iv), CryptoStreamMode.Write);
-                BinaryFormatter formatter = new BinaryFormatter();
-
-                // This is where you serialize the class
-                formatter.Serialize(cryptoStream, this);
-                cryptoStream.FlushFinalBlock();
-            }
-        }
-        */
     }
 }

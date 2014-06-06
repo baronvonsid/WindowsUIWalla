@@ -12,7 +12,7 @@
     <!-- gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" -->
 
     <Window.Resources>
-        <CollectionViewSource x:Key="uploadImageStateListInProgressKey"
+        <CollectionViewSource x:Key="uploadImageStateListInProgressKey" 
                               Source="{StaticResource uploadImageStateListKey}"
                               Filter="UploadImageStateInProgress_Filter" IsLiveFilteringRequested="True" />
 
@@ -910,10 +910,7 @@
 
                 <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Visible" x:Name="tabGalleryConfiguration" VerticalAlignment="Stretch" Margin="2" LastChildFill="True">
 
-
-
                     <TabControl Background="{StaticResource ImageViewBackgroundBrush}" >
-
 
                         <TabItem Header="Display Options">
                             <Grid>
@@ -925,90 +922,17 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="300"/>
-                                    <ColumnDefinition Width="260"/>
-                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition MinWidth="300"/>
+                                    <ColumnDefinition MinWidth="300"/>
 
                                 </Grid.ColumnDefinitions>
 
-                                <Label FontWeight="Bold" Content="Gallery Styles" Grid.Column="0" Grid.Row="0" />
-                                <Label FontWeight="Bold" Content="Gallery Colours" Grid.Column="1" Grid.Row="0" />
-
-                                <Button x:Name="cmdGalleryAdvanced" Grid.Column="2" Grid.Row="0">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <Image x:Name="image" Source="{StaticResource dropDownMenuImageSrc}" Height="32" />
-                                            </Grid>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="true">
-                                                    <Setter TargetName="image" Property="Source" Value="{StaticResource dropDownMenuSelectedImageSrc}" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-<!--
-                                <Grid Grid.Column="0" Grid.Row="1" Margin="4">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="2*" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="200"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <Label Content="Group Fotos" Grid.Column="0" Grid.Row="0" />
-                                    <ComboBox x:Name="cmbGalleryGroupingType" SelectedIndex="1" Margin="2" Width="150" Height="26" Grid.Column="1" Grid.Row="0" VerticalContentAlignment="Center">
-                                        <ComboBoxItem ToolTip="Fotos will not be grouped">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">No Grouping</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem ToolTip="Fotos will be displayed within their Category">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">Group by Category</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem ToolTip="Fotos will be displayed by their tags">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">Group by Tag</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                    </ComboBox>
-
-                                    <Label FontWeight="Bold" Content="Show fields" Grid.Column="0" Grid.Row="1" />
-                                    <Label Content="Gallery name" Grid.Column="0" Grid.Row="2" />
-                                    <CheckBox x:Name="chkGalleryShowName" Grid.Row="2" Grid.Column="1"  />
-
-                                    <Label Content="Gallery Description" Grid.Column="0" Grid.Row="3" />
-                                    <CheckBox x:Name="chkGalleryShowDesc" Grid.Row="3" Grid.Column="1"  />
-
-                                    <Label Content="Image name" Grid.Column="0" Grid.Row="4" />
-                                    <CheckBox x:Name="chkGalleryShowImageName" Grid.Row="4" Grid.Column="1"  />
-
-                                    <Label Content="Image Description" Grid.Column="0" Grid.Row="5" />
-                                    <CheckBox x:Name="chkGalleryShowImageDesc" Grid.Row="5" Grid.Column="1"  />
-
-                                    <Label Content="Image Meta data" Grid.Column="0" Grid.Row="6" />
-                                    <CheckBox x:Name="chkGalleryShowImageMeta" Grid.Row="6" Grid.Column="1"  />
-
-                                </Grid>
--->
-
-                                <ListBox  Grid.Column="1" Grid.Row="1"  
-                            		    x:Name ="lstGalleryStylesList" 
-                            		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryOptionsListKey}}"
+                                <Label FontWeight="Bold" Content="Gallery Types" Grid.Column="0" Grid.Row="0" />
+                                <Label FontWeight="Bold" Content="Gallery Styles" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" />
+                                
+                                <ListBox  Grid.Column="0" Grid.Row="1"  
+                            		    x:Name ="lstGalleryPresentationList" 
+                            		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryPresentationListKey}}"
                             		    ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
@@ -1016,18 +940,22 @@
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
                                                 <Grid>
-                                                    <!--
-                                                    <Image x:Name="imageThumb" Source="{Binding thumbnailImage.Source}" Height="{Binding ElementName=sldImageSize, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    </Image>
-                                                    -->
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="100" />
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="200"/>
+                                                        <ColumnDefinition Width="100"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Image x:Name="imageThumb" Source="{Binding PresentationImage.Source}" Grid.Column="0" Grid.Row="0" Margin="4" />
+                                                
+                                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
+                                                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource FontBorderBrush}"/>
+                                                        <TextBlock Text="{Binding Desc}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                                    </StackPanel>
                                                 </Grid>
-                                                <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane"  Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140" MouseUp="Image_MouseUp" >
-                                                    <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2" Foreground="{StaticResource FontBorderBrush}"/>
-                                                    <TextBlock Text="{Binding desc}" TextWrapping="Wrap" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
-                                                </StackPanel>
-                                            </StackPanel>
                                             <DataTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="true">
                                                     <Setter TargetName="imageThumb" Property="Effect">
@@ -1042,6 +970,46 @@
                                 </ListBox>
 
 
+                                <ListBox  Grid.Column="1" Grid.Row="1"  
+                            		    x:Name ="lstGalleryStylesList" 
+                            		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryStyleListKey}}"
+                            		    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                        SelectionMode="Single"
+                                        IsSynchronizedWithCurrentItem="True"
+                                        Visibility="Visible">
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="100" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="200"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Image x:Name="imageThumb" Source="{Binding StyleImage.Source}" Grid.Column="0" Grid.Row="0" Margin="4" />
+
+                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
+                                                    <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource FontBorderBrush}"/>
+                                                    <TextBlock Text="{Binding Desc}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                                </StackPanel>
+                                            </Grid>
+                                            <DataTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="true">
+                                                    <Setter TargetName="imageThumb" Property="Effect">
+                                                        <Setter.Value>
+                                                            <ShaderEffectLibrary:BloomEffect BaseIntensity="1" BaseSaturation="1" BloomIntensity="1" BloomSaturation="1" />
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+<!--
                                 <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
                                     <ComboBox x:Name="cmbGalleryPresentationType" Margin="2" SelectedIndex="0" Width="150" VerticalContentAlignment="Center" Height="26" SelectionChanged="cmbGalleryPresentationType_SelectionChanged" >
                                         <ComboBoxItem>
@@ -1059,6 +1027,7 @@
                                     </ComboBox>
                                 </StackPanel>
 
+                                
                                 <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
                                     <ComboBox x:Name="cmbGalleryStyleType" Margin="2" SelectedIndex="0" Width="150" Height="26" VerticalContentAlignment="Center">
                                         <ComboBoxItem>
@@ -1087,7 +1056,7 @@
                                         </ComboBoxItem>
                                     </ComboBox>
                                 </StackPanel>
-
+-->
 
                                 <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="2000" Y2="1" StrokeThickness="0.5" Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" />
 
@@ -1230,6 +1199,91 @@
                             </Grid>
                         </TabItem>
 
+                        <TabItem Header="Advanced">
+
+                            <Grid Grid.Column="0" Grid.Row="1" Margin="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition MinWidth="300"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label FontWeight="Bold" Content="Show fields" Grid.Column="0" Grid.Row="0" />
+                                <Label Content="Gallery name" Grid.Column="0" Grid.Row="1" />
+                                <CheckBox x:Name="chkGalleryShowName" Grid.Row="1" Grid.Column="1"  />
+
+                                <Label Content="Gallery Description" Grid.Column="0" Grid.Row="2" />
+                                <CheckBox x:Name="chkGalleryShowDesc" Grid.Row="2" Grid.Column="1"  />
+
+                                <Label Content="Image name" Grid.Column="0" Grid.Row="3" />
+                                <CheckBox x:Name="chkGalleryShowImageName" Grid.Row="3" Grid.Column="1"  />
+
+                                <Label Content="Image Description" Grid.Column="0" Grid.Row="4" />
+                                <CheckBox x:Name="chkGalleryShowImageDesc" Grid.Row="4" Grid.Column="1"  />
+
+                                <Label Content="Image Meta data" Grid.Column="0" Grid.Row="5" />
+                                <CheckBox x:Name="chkGalleryShowImageMeta" Grid.Row="5" Grid.Column="1"  />
+
+                                <Label Content="Grouping Description" Grid.Column="0" Grid.Row="6" />
+                                <CheckBox x:Name="chkGalleryShowGroupingDesc" Grid.Row="6" Grid.Column="1"  />
+
+                                <Label Content="Group Fotos" Grid.Column="3" Grid.Row="0" FontWeight="Bold" MouseUp="Label_MouseUp" />
+                                
+                                <WrapPanel x:Name="wrapGalleryGroupOptions" Orientation="Horizontal" Grid.Column="3" Grid.Row="1">
+                                    <RadioButton x:Name="radGalleryGroupNoGroup" GroupName="galleryGroupOptions" Content="No Grouping" 
+                                                 Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}"
+                                                 ToolTip="Fotos will not be grouped" Tag="0"></RadioButton>
+                                    
+                                    <RadioButton x:Name="radGalleryGroupCategory" GroupName="galleryGroupOptions" Content="Use Category" 
+                                                 Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}"
+                                                 ToolTip="Fotos will be displayed within their Category" Tag="1"></RadioButton>
+                                    
+                                    <RadioButton x:Name="radGalleryGroupTag" GroupName="galleryGroupOptions" Content="Use Tag" 
+                                                 Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}"
+                                                 ToolTip="Fotos will be displayed by their tags" Tag="2"></RadioButton>
+                                </WrapPanel>
+
+                                <DataGrid x:Name="datGallerySections" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible" 
+                                        SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="False" 
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="3" Grid.Row="2" Grid.RowSpan="6"
+                                          ItemsSource="{Binding Source={StaticResource gallerySectionListKey}}" RowHeaderWidth="0" BorderThickness="0.5">
+                                    <DataGrid.Columns>
+
+                                        <DataGridTemplateColumn Header="Name" Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name, Mode=TwoWay}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Description" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name, Mode=TwoWay}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                
+                            </Grid>
+
+
+                        </TabItem>
+                        
                     </TabControl>
                 </DockPanel>
 
@@ -2208,5 +2262,11 @@
             </StackPanel>
         </Grid>
 
+        <Grid Panel.ZIndex="998" Opacity="100.0" x:Name="gridGalleryStyleAdvancedDialog" Visibility="Collapsed" Background="{StaticResource AlertBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" >
+
+
+
+        </Grid>
+        
     </Grid>
 </Window>
