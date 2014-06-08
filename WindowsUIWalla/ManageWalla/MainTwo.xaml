@@ -912,7 +912,7 @@
 
                     <TabControl Background="{StaticResource ImageViewBackgroundBrush}" >
 
-                        <TabItem Header="Display Options">
+                        <TabItem Header="Display">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="32" />
@@ -929,33 +929,33 @@
 
                                 <Label FontWeight="Bold" Content="Gallery Types" Grid.Column="0" Grid.Row="0" />
                                 <Label FontWeight="Bold" Content="Gallery Styles" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" />
-                                
+
                                 <ListBox  Grid.Column="0" Grid.Row="1"  
                             		    x:Name ="lstGalleryPresentationList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryPresentationListKey}}"
                             		    ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
-                                        Visibility="Visible">
+                                        Visibility="Visible" SelectionChanged="lstGalleryPresentationList_SelectionChanged">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                                <Grid>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="100" />
-                                                    </Grid.RowDefinitions>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="200"/>
-                                                        <ColumnDefinition Width="100"/>
-                                                    </Grid.ColumnDefinitions>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="100" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="200"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                </Grid.ColumnDefinitions>
 
-                                                    <Image x:Name="imageThumb" Source="{Binding PresentationImage.Source}" Grid.Column="0" Grid.Row="0" Margin="4" />
-                                                
-                                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
-                                                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource FontBorderBrush}"/>
-                                                        <TextBlock Text="{Binding Desc}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
-                                                    </StackPanel>
-                                                </Grid>
+                                                <Image x:Name="imageThumb" Source="{Binding PresentationImage.Source}" Grid.Column="0" Grid.Row="0" Margin="4" />
+
+                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
+                                                    <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource FontBorderBrush}"/>
+                                                    <TextBlock Text="{Binding Desc}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                                </StackPanel>
+                                            </Grid>
                                             <DataTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="true">
                                                     <Setter TargetName="imageThumb" Property="Effect">
@@ -969,14 +969,13 @@
                                     </ListBox.ItemTemplate>
                                 </ListBox>
 
-
                                 <ListBox  Grid.Column="1" Grid.Row="1"  
                             		    x:Name ="lstGalleryStylesList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryStyleListKey}}"
                             		    ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
-                                        Visibility="Visible">
+                                        Visibility="Visible" SelectionChanged="lstGalleryStylesList_SelectionChanged">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -1009,55 +1008,6 @@
                                     </ListBox.ItemTemplate>
                                 </ListBox>
 
-<!--
-                                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                    <ComboBox x:Name="cmbGalleryPresentationType" Margin="2" SelectedIndex="0" Width="150" VerticalContentAlignment="Center" Height="26" SelectionChanged="cmbGalleryPresentationType_SelectionChanged" >
-                                        <ComboBoxItem>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">Standard</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">Lightbox</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                    </ComboBox>
-                                </StackPanel>
-
-                                
-                                <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
-                                    <ComboBox x:Name="cmbGalleryStyleType" Margin="2" SelectedIndex="0" Width="150" Height="26" VerticalContentAlignment="Center">
-                                        <ComboBoxItem>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">Dark Grey</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">Light Grey</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">Sky Blue</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Image Source="{StaticResource menuItemImageSrc}" Height="20" Width="20" />
-                                                <TextBlock Margin="4">Black and White</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                    </ComboBox>
-                                </StackPanel>
--->
-
                                 <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="2000" Y2="1" StrokeThickness="0.5" Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" />
 
                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3">
@@ -1075,66 +1025,52 @@
                             </Grid>
                         </TabItem>
 
-                        <TabItem Header="Select Fotos">
+                        <TabItem Header="Selection">
                             <Grid x:Name="gridGallerySelection">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="30" />
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="10" />
                                     <RowDefinition Height="30" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3*" MaxWidth="300"/>
-                                    <ColumnDefinition Width="25"/>
-                                    <ColumnDefinition Width="3*" MaxWidth="300"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="3*" MaxWidth="300"/>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="3*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal">
-                                    <!--<Label Content="Selection Type" FontSize="24"/>-->
+                                <Label Content="Foto selection" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="4" FontWeight="Bold" ToolTip="Choose how to select fotos shown in the gallery"/>
 
-                                    <ComboBox x:Name="cmbGallerySelectionType" SelectedIndex="2" Height="26" Width="150" Margin="2" Grid.Column="1" Grid.Row="4" SelectionChanged="cmbGallerySelectionType_SelectionChanged">
-                                        <ComboBoxItem ToolTip="Fotos will be included from selected categories">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Margin="4">Category</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem ToolTip="Fotos will be included from selected tags">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Margin="4">Tags</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem ToolTip="Fotos will be included when they are present in selected categories AND tags">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Margin="4">Category AND Tag</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem ToolTip="Fotos will be included when they are present in either the selected categories OR tags">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Margin="4">Category OR Tag</TextBlock>
-                                            </StackPanel>
-                                        </ComboBoxItem>
-                                    </ComboBox>
+                                <ListBox Style="{DynamicResource TagListStyle}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4"
+                            	        x:Name ="lstGallerySelectionOptions" 
+                            	        ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                        SelectionMode="Single" 
+                                        ItemContainerStyle="{DynamicResource TagListItem}" SelectionChanged="lstGallerySelectionOptions_SelectionChanged">
+                                    <ListBoxItem x:Name="itemGallerySelectionCategory" Content="Category" ToolTip="Fotos will be included from selected Categories" Tag="0" IsSelected="True" />
+                                    <ListBoxItem x:Name="itemGallerySelectionTag" Content="Tag" ToolTip="Fotos will be included from selected Tags" Tag="1" />
+                                    <!--
+                                    2 "Fotos will be included when they are present in selected categories AND tags"
+                                    3 "Fotos will be included when they are present in either the selected categories OR tags">
+                                    -->
+                                </ListBox>
 
-                                </StackPanel>
+                                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="3000" Y2="5" StrokeThickness="0.5" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="6" />
 
-                                <Label Content="Categories to include" FontSize="20" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="1" FontWeight="SemiBold" />
+                                <Label Content="Categories to include" FontWeight="Bold" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="3" />
 
-                                <ScrollViewer  x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="2" Grid.RowSpan="1" Margin="2,0,0,2">
+                                <ScrollViewer  x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="4" Margin="2,0,0,2" Background="{StaticResource GroupControlBackgroundBrush}" Grid.ColumnSpan="2">
                                     <TreeView x:Name="treeGalleryCategoryView" ItemContainerStyle="{StaticResource styleTreeViewItemWithCombo}">
 
                                     </TreeView>
                                 </ScrollViewer>
 
-                                <StackPanel Grid.Column="1" Grid.Row="2" Grid.RowSpan="1" Margin="0" VerticalAlignment="Center" >
-                                    <Label x:Name="lblGallerySelectionAndOr" Content="AND"   HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0" FontSize="16" FontWeight="SemiBold" />
-                                </StackPanel>
+                                <Label Content="Tags to include" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="3" FontWeight="Bold"/>
 
-                                <Label Content="Tags to include" VerticalContentAlignment="Center" Grid.Column="2" FontSize="20" Grid.Row="1" FontWeight="SemiBold"/>
-
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="2" Margin="0,0,0,2" HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="4" Margin="0,0,0,2" HorizontalScrollBarVisibility="Disabled" Background="{StaticResource GroupControlBackgroundBrush}">
                                     <StackPanel Orientation="Vertical">
-                                        <Label x:Name="lblGalleryTagIncProfileNameLabel" Content="User Tags" FontWeight="SemiBold"/>
                                         <ListBox Style="{DynamicResource TagListStyle}" 
                             	        x:Name ="lstGalleryMyTagListInclude" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -1143,7 +1079,6 @@
                                         </ListBox>
                                         <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,5,0,5" />
 
-                                        <Label Content="Auto tags" FontWeight="SemiBold"/>
                                         <ListBox Style="{DynamicResource TagListStyle}" 
                             	        x:Name ="lstGallerySystemTagListInclude" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -1153,25 +1088,11 @@
                                     </StackPanel>
                                 </ScrollViewer>
 
+                                <Label Content="Tags to exclude" Grid.Column="4" Grid.Row="3" VerticalContentAlignment="Center" FontWeight="Bold" />
 
-
-
-                                <!--
-                            <ScrollViewer x:Name="scrollGalleryMyTagInclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="2" Grid.Row="2" Margin="0,0,0,2">
-
-                            </ScrollViewer>
-
-                            <ScrollViewer x:Name="scrollGallerySystemTagInclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="2" Grid.Row="3" Margin="0,0,0,2">
-
-                            </ScrollViewer>
--->
-
-                                <Label Content="Tags to exclude" Grid.Column="4" Grid.Row="1" VerticalContentAlignment="Center" FontSize="20" FontWeight="SemiBold" />
-
-                                <ScrollViewer x:Name="scrollGalleryMyTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="2" Margin="0,0,2,2">
+                                <ScrollViewer x:Name="scrollGalleryMyTagExclude" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Grid.Column="4" Grid.Row="4" Margin="0,0,2,2" Background="{StaticResource GalleryExcludeBackgroundBrush}">
 
                                     <StackPanel Orientation="Vertical">
-                                        <Label x:Name="lblGalleryTagExcProfileNameLabel" Content="User Tags" FontWeight="SemiBold"/>
 
                                         <ListBox Style="{DynamicResource TagListStyle}" 
                             	        x:Name ="lstGalleryMyTagListExclude" 
@@ -1181,7 +1102,6 @@
                                         </ListBox>
                                         <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,5,0,5" />
 
-                                        <Label Content="Auto tags" FontWeight="SemiBold"/>
                                         <ListBox Style="{DynamicResource TagListStyle}" 
                             	        x:Name ="lstGallerySystemTagListExclude" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -1215,7 +1135,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="150"/>
                                     <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="30"/>
                                     <ColumnDefinition MinWidth="300"/>
                                 </Grid.ColumnDefinitions>
 
@@ -1238,8 +1158,23 @@
                                 <Label Content="Grouping Description" Grid.Column="0" Grid.Row="6" />
                                 <CheckBox x:Name="chkGalleryShowGroupingDesc" Grid.Row="6" Grid.Column="1"  />
 
+                                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="15" Y1="0" X2="15" Y2="2000" StrokeThickness="0.5"  Grid.Column="2" Grid.Row="0" Grid.RowSpan="8" />
+
                                 <Label Content="Group Fotos" Grid.Column="3" Grid.Row="0" FontWeight="Bold" MouseUp="Label_MouseUp" />
-                                
+
+                                <ListBox Style="{DynamicResource TagListStyle}" Grid.Column="3" Grid.Row="1" Grid.RowSpan="2"
+                            	        x:Name ="lstGalleryGroupOptions" 
+                            	        ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                        SelectionMode="Single" 
+                                        ItemContainerStyle="{DynamicResource TagListItem}">
+                                    <ListBoxItem x:Name="itemGalleryGroupNoGroup" Content="No Grouping" ToolTip="Fotos will not be grouped" Tag="0" IsSelected="True" />
+                                    <ListBoxItem x:Name="itemGalleryGroupCategory" Content="Use Category" ToolTip="Fotos will be displayed within their Category" Tag="1" />
+                                    <ListBoxItem x:Name="itemGalleryGroupTag" Content="Use Tag" ToolTip="Fotos will be displayed by their tags" Tag="2" />
+                                </ListBox>
+
+                                <Label Content="Groups to be displayed" Grid.Column="3" Grid.Row="3" FontWeight="Bold" MouseUp="Label_MouseUp_1" />
+
+                                <!--
                                 <WrapPanel x:Name="wrapGalleryGroupOptions" Orientation="Horizontal" Grid.Column="3" Grid.Row="1">
                                     <RadioButton x:Name="radGalleryGroupNoGroup" GroupName="galleryGroupOptions" Content="No Grouping" 
                                                  Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}"
@@ -1252,18 +1187,18 @@
                                     <RadioButton x:Name="radGalleryGroupTag" GroupName="galleryGroupOptions" Content="Use Tag" 
                                                  Template="{StaticResource templateRadioButton}" Style="{StaticResource styleRadioButton}"
                                                  ToolTip="Fotos will be displayed by their tags" Tag="2"></RadioButton>
-                                </WrapPanel>
+                                </WrapPanel>-->
 
                                 <DataGrid x:Name="datGallerySections" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible" 
                                         SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="False" 
-                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="3" Grid.Row="2" Grid.RowSpan="6"
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="3" Grid.Row="4" Grid.RowSpan="6"
                                           ItemsSource="{Binding Source={StaticResource gallerySectionListKey}}" RowHeaderWidth="0" BorderThickness="0.5">
                                     <DataGrid.Columns>
 
                                         <DataGridTemplateColumn Header="Name" Width="100">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Name, Mode=TwoWay}" />
+                                                    <TextBlock Text="{Binding nameOveride, Mode=TwoWay}" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -1271,19 +1206,19 @@
                                         <DataGridTemplateColumn Header="Description" Width="*">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Name, Mode=TwoWay}" />
+                                                    <TextBlock Text="{Binding descOveride, Mode=TwoWay}" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-                                        
+
                                     </DataGrid.Columns>
                                 </DataGrid>
-                                
+
                             </Grid>
 
 
                         </TabItem>
-                        
+
                     </TabControl>
                 </DockPanel>
 
@@ -2267,6 +2202,6 @@
 
 
         </Grid>
-        
+
     </Grid>
 </Window>

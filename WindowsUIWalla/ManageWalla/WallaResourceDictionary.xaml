@@ -15,7 +15,6 @@
     <walla:GalleryStyleList x:Key="galleryStyleListKey"  />
     <walla:GallerySectionList x:Key="gallerySectionListKey" />
     
-    
     <walla:ImageMainViewerList x:Key="imageMainViewerListKey" />
     <walla:GalleryCategoryModel x:Key="galleryCategoryModelKey" />
 
@@ -145,11 +144,13 @@
     <Color x:Key="ControlSelectedItemBackgroundColour">White</Color>
 
     <SolidColorBrush x:Key="AlertBackgroundBrush" Color="White" />
-  
+
+    <SolidColorBrush x:Key="GroupControlBackgroundBrush" Color="#FFECECEC" />
+    <SolidColorBrush x:Key="GalleryExcludeBackgroundBrush" Color="#FFFFE9E9" />
     
-    
-    
-    
+
+
+
     <!--
 
     <SolidColorBrush x:Key="BackgroundBrush" Color="#FFFFFFFA" />

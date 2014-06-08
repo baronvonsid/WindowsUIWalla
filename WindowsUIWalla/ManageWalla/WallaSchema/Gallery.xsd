@@ -23,6 +23,7 @@ targetNamespace="http://ws.fotowalla.com/Gallery"
         <element type="boolean" name="ShowImageName" />
         <element type="boolean" name="ShowImageDesc" />
         <element type="boolean" name="ShowImageMeta" />
+        <element type="boolean" name="ShowGroupingDesc" />
         <element type="boolean" name="SystemOwned" />
         
         <element name="Users">

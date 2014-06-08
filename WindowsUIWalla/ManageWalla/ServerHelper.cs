@@ -597,6 +597,38 @@ namespace ManageWalla
                 throw ex;
             }
         }
+
+        async public Task<Gallery> GalleryGetSections(Gallery gallery, CancellationToken cancelToken)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "gallery/gallerysections");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
+                request.Content = content;
+
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                response.EnsureSuccessStatusCode();
+
+                XmlSerializer serialKiller = new XmlSerializer(typeof(Gallery));
+                Gallery newGallery = (Gallery)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+
+                return newGallery;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryGetSections has been cancelled.");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
         #endregion
 
         #region Upload

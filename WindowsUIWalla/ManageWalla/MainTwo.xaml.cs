@@ -717,60 +717,48 @@ namespace ManageWalla
 
                     wrapMyGalleries.IsEnabled = false;
 
-                    if (cmbGallerySelectionType.SelectedIndex == 0)
+                    if (GalleryGetSelectionType() == 0)
                     {
                         //categories ONLY
-                        lblGallerySelectionAndOr.Content = "";
-
                         gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(2, GridUnitType.Star);
-                        gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(0);
+                        gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(30);
                         gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(0);
-                        gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(40);
+                        gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(0);
                         gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2, GridUnitType.Star);
-
                     }
-                    else if (cmbGallerySelectionType.SelectedIndex == 1)
+                    else if (GalleryGetSelectionType() == 1)
                     {
                         //Tags only
-                        lblGallerySelectionAndOr.Content = "";
-
                         gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(0);
                         gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(0);
                         gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(2, GridUnitType.Star);
-                        gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(40);
-                        gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2, GridUnitType.Star);
+                        gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(30);
+                        gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2,GridUnitType.Star);
 
+                    }
+
+                    GalleryPresentationItem presentation = (GalleryPresentationItem)lstGalleryPresentationList.SelectedItem;
+                    if (presentation.MaxSections == 0)
+                    {
+                        GallerySetGroupingType(0);
+                        lstGalleryGroupOptions.IsEnabled = false;
                     }
                     else
                     {
-                        //Categories AND Tags only
-                        if (cmbGallerySelectionType.SelectedIndex == 2)
-                        {
-                            lblGallerySelectionAndOr.Content = "AND";
-                        }
-                        else
-                        {
-                            //Categories OR Tags only
-                            lblGallerySelectionAndOr.Content = "OR";
-                        }
-
-                        gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(3, GridUnitType.Star);
-                        gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(40);
-                        gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(3, GridUnitType.Star);
-                        gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(40);
-                        gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(3, GridUnitType.Star);
+                        lstGalleryGroupOptions.IsEnabled = true;
                     }
-                    /*
-                    if (cmbGalleryPresentationType.SelectedIndex == 0)
+
+                    if (GalleryGetGroupingType() == 0)
                     {
-                        //cmbGalleryGroupingType.IsEnabled = true;
+                        //No grouping, so hide the grouping options.
+                        chkGalleryShowGroupingDesc.IsEnabled = false;
                     }
                     else
                     {
-                        //cmbGalleryGroupingType.SelectedIndex = 0;
-                        //cmbGalleryGroupingType.IsEnabled = false;
+                        //Show grouping options.
+                        chkGalleryShowGroupingDesc.IsEnabled = true;
                     }
-                    */
+
 
                     if (cmbGalleryAccessType.SelectedIndex != 1)
                     {
@@ -1359,7 +1347,7 @@ namespace ManageWalla
                 }
                 catch (OperationCanceledException)
                 {
-                    logger.Debug("cmdGallerySave_Click has been cancelled.");
+                    logger.Debug("ImageViewEditSave_Click has been cancelled.");
                 }
                 catch (Exception ex)
                 {
@@ -3169,7 +3157,6 @@ namespace ManageWalla
             uploadUIState.MetaUdfDate3All = false;
             uploadUIState.MetaTagRefAll = false;
 
-            //TODO clear down each images meta data changes.
             for (int i = 0; i < uploadFots.Count; i++)
             {
                 uploadFots[i].ResetMeta();
@@ -4163,7 +4150,6 @@ namespace ManageWalla
             }
         }
 
-        //TODO
         async private Task GalleryPopulateMetaData(GalleryListGalleryRef galleryListGalleryRef)
         {
             try
@@ -4195,19 +4181,33 @@ namespace ManageWalla
                 txtGalleryDescription.Text = gallery.Desc;
                 txtGalleryPassword.Text = gallery.Password;
                 cmbGalleryAccessType.SelectedIndex = gallery.AccessType;
-                //cmbGalleryGroupingType.SelectedIndex = gallery.GroupingType;
 
-                //cmbGallerySelectionType.SelectedIndex = gallery.SelectionType;
-                //cmbGalleryPresentationType.SelectedIndex = gallery.PresentationId;
-                //cmbGalleryStyleType.SelectedIndex = gallery.StyleId;
+                GallerySetGroupingType(gallery.GroupingType);
+                GallerySetSelectionType(gallery.SelectionType);
+                GallerySetPresentationType(gallery.PresentationId);
+                GallerySetStyleType(gallery.StyleId);
 
-                //chkGalleryShowName.IsChecked = gallery.ShowGalleryName;
-                //chkGalleryShowDesc.IsChecked = gallery.ShowGalleryDesc;
-                //chkGalleryShowImageName.IsChecked = gallery.ShowImageName;
-                //chkGalleryShowImageDesc.IsChecked = gallery.ShowImageDesc;
-                //chkGalleryShowImageMeta.IsChecked = gallery.ShowImageMeta;
+                chkGalleryShowName.IsChecked = gallery.ShowGalleryName;
+                chkGalleryShowDesc.IsChecked = gallery.ShowGalleryDesc;
+                chkGalleryShowImageName.IsChecked = gallery.ShowImageName;
+                chkGalleryShowImageDesc.IsChecked = gallery.ShowImageDesc;
+                chkGalleryShowImageMeta.IsChecked = gallery.ShowImageMeta;
+                chkGalleryShowGroupingDesc.IsChecked = gallery.ShowGroupingDesc;
 
-                //TODO select radio buttons for tags.
+                gallerySectionList.Clear();
+                foreach (GallerySectionRef current in gallery.Sections)
+                {
+                    GallerySectionItem newSection = new GallerySectionItem();
+                    newSection.sectionId = current.id;
+                    newSection.name = current.name;
+                    newSection.nameOveride = current.name;
+                    newSection.desc = current.desc;
+                    newSection.descOveride = current.desc;
+                    newSection.sequence = 0;
+
+                    gallerySectionList.Add(newSection);
+                }
+
                 foreach (GalleryTagRef tagRef in gallery.Tags)
                 {
                     if (tagRef.exclude)
@@ -4698,7 +4698,7 @@ namespace ManageWalla
 
                 if (!galleryOptionsLoaded)
                 {
-                    await controller.GalleryOptionsRefreshAsync(cancelTokenSource.Token, galleryPresentationList, galleryStyleList);
+                    await controller.GalleryOptionsRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
                     galleryOptionsLoaded = true;
                     lstGalleryPresentationList.Items.Refresh();
                     lstGalleryStylesList.Items.Refresh();
@@ -4709,10 +4709,11 @@ namespace ManageWalla
                 txtGalleryDescription.Text = "";
                 txtGalleryPassword.Text = "";
                 cmbGalleryAccessType.SelectedIndex = 0;
-                //cmbGalleryGroupingType.SelectedIndex = 0;
-                //cmbGalleryStyleType.SelectedIndex = 0;
-                //cmbGalleryPresentationType.SelectedIndex = 0;
-                //cmbGallerySelectionType.SelectedIndex = 0;
+
+                GallerySetGroupingType(0);
+                GallerySetSelectionType(0);
+                GallerySetPresentationType(1);
+                GallerySetStyleType(1);
 
                 chkGalleryShowName.IsChecked = true;
                 chkGalleryShowDesc.IsChecked = true;
@@ -4721,12 +4722,13 @@ namespace ManageWalla
                 chkGalleryShowImageMeta.IsChecked = false;
                 chkGalleryShowGroupingDesc.IsChecked = false;
 
+                gallerySectionList.Clear();
+
                 webGalleryPreview.Visibility = Visibility.Collapsed;
                 paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
 
                 GalleryRefreshTagsListFromState();
                 GalleryRefreshCategoryList();
-
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
@@ -4751,13 +4753,13 @@ namespace ManageWalla
 
         async private Task GallerySave()
         {
-            Gallery gallery = GalleryCreateFromGUI();
-
-            if (!GalleryValidate(gallery))
-                return;
-
             try
             {
+                Gallery gallery = GalleryCreateFromGUI();
+
+                if (!GalleryValidate(gallery))
+                    return;
+
                 if (cancelTokenSource != null)
                     cancelTokenSource.Cancel();
 
@@ -4780,7 +4782,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("cmdGallerySave_Click has been cancelled.");
+                logger.Debug("GallerySave has been cancelled.");
             }
             catch (Exception ex)
             {
@@ -4827,7 +4829,6 @@ namespace ManageWalla
             }
         }
 
-        //TODO
         private Gallery GalleryCreateFromGUI()
         {
             if (currentPane == PaneMode.GalleryAdd)
@@ -4840,21 +4841,40 @@ namespace ManageWalla
             currentGallery.Password = txtGalleryPassword.Text;
             currentGallery.AccessType = cmbGalleryAccessType.SelectedIndex;
 
-            //TODO
-            //currentGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
-            //currentGallery.SelectionType = cmbGallerySelectionType.SelectedIndex;
+            currentGallery.GroupingType = GalleryGetGroupingType();
+            currentGallery.SelectionType = GalleryGetSelectionType();
+            currentGallery.PresentationId = GalleryGetPresentationType();
+            currentGallery.StyleId = GalleryGetStyleType();
 
-            //TODO get from radio buttons.
-            //currentGallery.PresentationId = cmbGalleryPresentationType.SelectedIndex;
-            //currentGallery.StyleId = cmbGalleryStyleType.SelectedIndex;
+            int sectionCount = gallerySectionList.Count<GallerySectionItem>(r => (r.sequence > 0 || r.name != r.nameOveride || r.desc != r.descOveride));
+            if (sectionCount > 0)
+            {
+                int i = 0;
+                currentGallery.Sections = new GallerySectionRef[sectionCount];
+                foreach (GallerySectionItem item in gallerySectionList.Where<GallerySectionItem>(r => (r.sequence > 0 || r.name != r.nameOveride || r.desc != r.descOveride)))
+                {
+                    GallerySectionRef newSection = new GallerySectionRef();
+                    newSection.id = item.sectionId;
+                    newSection.idSpecified = true;
+                    newSection.name = (item.nameOveride != item.name) ? item.nameOveride : "";
+                    newSection.desc = (item.descOveride != item.desc) ? item.descOveride : "";
+                    if (item.sequence > 0)
+                    {
+                        newSection.sequence = item.sequence;
+                        newSection.sequenceSpecified = true;
+                    }
 
-            //TODO populate sections.
+                    currentGallery.Sections[i] = newSection;
+                    i++;
+                }
+            }
 
             currentGallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
             currentGallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
             currentGallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
             currentGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
             currentGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
+            currentGallery.ShowGroupingDesc = (bool)chkGalleryShowGroupingDesc.IsChecked;
 
             /* Category add to object ************************************************ */
             if (currentGallery.SelectionType != 1)
@@ -4866,8 +4886,11 @@ namespace ManageWalla
             return currentGallery;
         }
 
+        //TODO
         private bool GalleryValidate(Gallery gallery)
         {
+            //TODO add exclude filter to searches.
+
             if (gallery.SelectionType == 0 && (gallery.Categories == null || gallery.Categories.Length == 0))
             {
                 ShowMessage(MessageType.Warning, "The gallery is invalid.  Its is setup for Category selection, but does not have any catgories associated with it.");
@@ -4899,6 +4922,87 @@ namespace ManageWalla
             }
 
             return true;
+        }
+
+        private int GalleryGetGroupingType()
+        {
+            ListBoxItem current = (ListBoxItem)lstGalleryGroupOptions.SelectedItem;
+            if (current == null)
+            {
+                throw new Exception("Could not retrieve the grouping type.");
+            }
+            return int.Parse(current.Tag.ToString());
+        }
+
+        private void GallerySetGroupingType(int value)
+        {
+            foreach (ListBoxItem current in lstGalleryGroupOptions.Items.OfType<ListBoxItem>())
+            {
+                if (value == int.Parse(current.Tag.ToString()))
+                    current.IsSelected = true;
+            }
+        }
+
+        private int GalleryGetSelectionType()
+        {
+            ListBoxItem current = (ListBoxItem)lstGallerySelectionOptions.SelectedItem;
+            if (current == null)
+            {
+                throw new Exception("Could not retrieve the selection type.");
+            }
+            return int.Parse(current.Tag.ToString());
+        }
+
+        private void GallerySetSelectionType(int value)
+        {
+            foreach (ListBoxItem current in lstGallerySelectionOptions.Items.OfType<ListBoxItem>())
+            {
+                if (value == int.Parse(current.Tag.ToString()))
+                    current.IsSelected = true;
+            }
+        }
+
+        private int GalleryGetPresentationType()
+        {
+            GalleryPresentationItem current = (GalleryPresentationItem)lstGalleryPresentationList.SelectedItem;
+            if (current == null)
+            {
+                throw new Exception("Could not retrieve the presentation type.");
+            }
+            return current.PresentationId;
+        }
+
+        private void GallerySetPresentationType(int value)
+        {
+            
+            foreach (GalleryPresentationItem current in lstGalleryPresentationList.Items.OfType<GalleryPresentationItem>())
+            {
+                if (value == current.PresentationId)
+                {
+                    lstGalleryPresentationList.SelectedItem = current;
+                }
+            }
+        }
+
+        private int GalleryGetStyleType()
+        {
+            GalleryStyleItem current = (GalleryStyleItem)lstGalleryStylesList.SelectedItem;
+            if (current == null)
+            {
+                throw new Exception("Could not retrieve the style type.");
+            }
+            return current.StyleId;
+        }
+
+        private void GallerySetStyleType(int value)
+        {
+            foreach (GalleryStyleItem current in lstGalleryStylesList.Items.OfType<GalleryStyleItem>())
+            {
+                if (value == current.StyleId)
+                {
+                    lstGalleryStylesList.SelectedItem = current;
+                }
+            }
         }
         #endregion
 
@@ -4973,8 +5077,8 @@ namespace ManageWalla
             if (currentPane == PaneMode.GalleryAdd || currentPane == PaneMode.GalleryEdit)
                 RefreshPanesAllControls(currentPane);
         }
-
-        async private Task GallerySave_Click(object sender, RoutedEventArgs e)
+        
+        async private void cmdGallerySave_Click(object sender, RoutedEventArgs e)
         {
             await GallerySave();
         }
@@ -5026,11 +5130,6 @@ namespace ManageWalla
             RefreshAndDisplayGalleryList(true);
         }
 
-        private void cmbGallerySelectionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            RefreshPanesAllControls(currentPane);
-        }
-
         private void cmbGallerySection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox sections = (ComboBox)sender;
@@ -5048,16 +5147,18 @@ namespace ManageWalla
                 cmbGallerySection.SelectedIndex = cmbGallerySectionVert.SelectedIndex;
         }
 
-        private void cmbGalleryPresentationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            RefreshPanesAllControls(currentPane);
-        }
+        //private void cmbGalleryPresentationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    RefreshPanesAllControls(currentPane);
+        //}
 
         private void GalleryCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             foreach (TreeViewItem child in treeGalleryCategoryView.Items)
                 GalleryCategoryRecursiveRelatedUpdates(child, false);
         }
+
+
         #endregion
 
         private void cmdUploadRemoveImage_Click(object sender, RoutedEventArgs e)
@@ -5409,8 +5510,6 @@ namespace ManageWalla
                 state.account.Password = password;
 
                 lblTagProfileNameLabel.Content = state.account.ProfileName + " Tags";
-                lblGalleryTagIncProfileNameLabel.Content = state.account.ProfileName + " Tags";
-                lblGalleryTagExcProfileNameLabel.Content = state.account.ProfileName + " Tags";
 
                 await controller.SetUserApp(cancelTokenSource.Token);
 
@@ -5596,6 +5695,32 @@ namespace ManageWalla
         {
             await GalleryReloadSection();
         }
+
+        private void lstGallerySelectionOptions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshPanesAllControls(currentPane);
+        }
+
+        private void lstGalleryPresentationList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshPanesAllControls(currentPane);
+        }
+
+        private void lstGalleryStylesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshPanesAllControls(currentPane);
+        }
+
+        private void Label_MouseUp_1(object sender, MouseButtonEventArgs e)
+        {
+            gallerySectionList[0].nameOveride = gallerySectionList[0].name + "1";
+            gallerySectionList[1].descOveride = gallerySectionList[1].desc + "1";
+            gallerySectionList[2].sequence = 1;
+            gallerySectionList[3].sequence = 2;
+
+            datGallerySections.Items.Refresh();
+        }
+
 
     }
 }

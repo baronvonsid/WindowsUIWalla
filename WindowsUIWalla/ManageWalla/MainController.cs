@@ -1394,10 +1394,56 @@ namespace ManageWalla
             }
         }
 
-        //TODO
         async public Task GalleryGetSectionListAndMerge(Gallery gallery, GallerySectionList gallerySectionList, CancellationToken cancelToken)
         {
-            // + server method.
+            try
+            {
+                //Retrieve server sections list.
+                Gallery serverGallery = await serverHelper.GalleryGetSections(gallery, cancelToken);
+
+                //Loop through existing list, remove entries not present server side.
+                int existingCounter = gallerySectionList.Count-1;
+                while (existingCounter >= 0)
+                {
+                    GallerySectionItem current = gallerySectionList[existingCounter];
+
+                    GallerySectionRef found = serverGallery.Sections.FirstOrDefault<GallerySectionRef>(r => r.id == current.sectionId);
+                    if (found == null)
+                        gallerySectionList.Remove(current);
+
+                    existingCounter--;
+                }
+
+                //Loop through server list and add any new entries.
+                foreach (GallerySectionRef current in serverGallery.Sections)
+                {
+                    GallerySectionItem found = gallerySectionList.FirstOrDefault<GallerySectionItem>(r => r.sectionId == current.id);
+                    if (found == null)
+                    {
+                        GallerySectionItem newSection = new GallerySectionItem();
+                        newSection.sectionId = current.id;
+                        newSection.name = current.name;
+                        newSection.nameOveride = current.name;
+                        newSection.desc = current.desc;
+                        newSection.descOveride = current.desc;
+                        newSection.sequence = 0;
+
+                        gallerySectionList.Add(newSection);
+                    }
+                }
+
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryGetSectionListAndMerge has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+
         }
 
         #endregion

@@ -56,6 +56,8 @@ namespace ManageWalla {
         
         private bool showImageMetaField;
         
+        private bool showGroupingDescField;
+        
         private bool systemOwnedField;
         
         private GalleryUserRef[] usersField;
@@ -233,6 +235,16 @@ namespace ManageWalla {
             }
             set {
                 this.showImageMetaField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public bool ShowGroupingDesc {
+            get {
+                return this.showGroupingDescField;
+            }
+            set {
+                this.showGroupingDescField = value;
             }
         }
         
