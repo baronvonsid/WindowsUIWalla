@@ -7,7 +7,7 @@
     xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary"
     x:Name="mainTwo" x:Class="ManageWalla.MainTwo"
     Title="fotowalla" FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" 
-    SizeChanged="mainTwo_SizeChanged" FontSize="18" TextOptions.TextFormattingMode="Display" Height="731" Width="968">
+    SizeChanged="mainTwo_SizeChanged" FontSize="18" TextOptions.TextFormattingMode="Display" Height="650" Width="1000">
 
     <!-- gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" -->
 
@@ -346,15 +346,15 @@
                 <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                     <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,10,0,4" />
                     <StackPanel Orientation="Horizontal" >
-                        <Button x:Name="cmdGalleryView" Content="View" ToolTip="Open Gallery in your Browser" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryView_Click"  />
-                        <Button x:Name="cmdGalleryCopyUrl" Content="Copy Url" ToolTip="Copy Url to your Clipboard" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCopyUrl_Click"  />
                         <Button x:Name="cmdGalleryAdd" Content="Add" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryAdd_Click"  />
                         <Button x:Name="cmdGalleryEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryEdit_Click" />
+                        <Button x:Name="cmdGalleryCopyUrl" Content="Copy Url" ToolTip="Copy Url to your Clipboard" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCopyUrl_Click"  />
+                        <Button x:Name="cmdGalleryView" Content="View" ToolTip="Open Gallery in your Browser" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryView_Click"  />
                     </StackPanel>
                 </StackPanel>
 
                 <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
-                <TextBox x:Name="txtGalleryName" Margin="2" Grid.Column="1" Grid.Row="2" MaxLines="1" Text="WSSsjnnsde" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" />
+                <TextBox x:Name="txtGalleryName" Margin="2" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" />
 
                 <Label Grid.Column="0" Grid.Row="3" Content="Description"/>
                 <TextBox x:Name="txtGalleryDescription" Margin="2" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="75" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLines="1" MaxLength="200"/>
@@ -393,6 +393,7 @@
                         <Button x:Name="cmdGallerySave" Content="Save Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGallerySave_Click" />
                         <Button x:Name="cmdGalleryCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryCancel_Click"  />
                         <Button x:Name="cmdGalleryDelete" Content="Delete" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryDelete_Click" />
+                        <Button x:Name="cmdGalleryPreviewView" Content="Preview" ToolTip="Open Gallery preview in your Browser" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryPreviewView_Click" />
                     </StackPanel>
                 </StackPanel>
 
@@ -552,12 +553,12 @@
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Orientation="Vertical">
-                        <Label x:Name="lblTagProfileNameLabel" Grid.Column="0" Grid.Row="2" Content="User Tags" FontWeight="SemiBold"/>
+                        <!--<Label x:Name="lblTagProfileNameLabel" Grid.Column="0" Grid.Row="2" Content="User Tags" FontWeight="SemiBold"/>-->
                         <WrapPanel x:Name="wrapMyTags" Orientation="Horizontal">
                         </WrapPanel>
                         <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,5,0,5" />
 
-                        <Label Grid.Column="0" Grid.Row="2" Content="Auto tags" FontWeight="SemiBold"/>
+                        <Label Grid.Column="0" Grid.Row="2" Content="Auto updated tags" FontWeight="SemiBold"/>
                         <WrapPanel x:Name="wrapSystemTags" Orientation="Horizontal">
                         </WrapPanel>
                     </StackPanel>
@@ -720,8 +721,8 @@
 
             <Grid x:Name="gridRight" Margin="0,0,0,0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="9">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="0"/>
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -916,15 +917,12 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="32" />
-                                    <RowDefinition Height="230" />
-                                    <RowDefinition Height="10" />
-                                    <RowDefinition Height="40" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition MinWidth="300"/>
-                                    <ColumnDefinition MinWidth="300"/>
-
+                                    <ColumnDefinition Width="340"/>
+                                    <ColumnDefinition Width="340"/>
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
                                 <Label FontWeight="Bold" Content="Gallery Types" Grid.Column="0" Grid.Row="0" />
@@ -933,10 +931,11 @@
                                 <ListBox  Grid.Column="0" Grid.Row="1"  
                             		    x:Name ="lstGalleryPresentationList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryPresentationListKey}}"
-                            		    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                            		    ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
-                                        Visibility="Visible" SelectionChanged="lstGalleryPresentationList_SelectionChanged">
+                                        Visibility="Visible" SelectionChanged="lstGalleryPresentationList_SelectionChanged"
+                                        Margin="4">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -972,10 +971,10 @@
                                 <ListBox  Grid.Column="1" Grid.Row="1"  
                             		    x:Name ="lstGalleryStylesList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryStyleListKey}}"
-                            		    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                            		    ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
-                                        Visibility="Visible" SelectionChanged="lstGalleryStylesList_SelectionChanged">
+                                        Visibility="Visible" SelectionChanged="lstGalleryStylesList_SelectionChanged" Margin="4">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -1008,20 +1007,6 @@
                                     </ListBox.ItemTemplate>
                                 </ListBox>
 
-                                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="1" X2="2000" Y2="1" StrokeThickness="0.5" Margin="0,2,0,2" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" />
-
-                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3">
-                                    <Button x:Name="cmdGalleryPreview" Content="Preview" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryPreview_Click" />
-                                    <Label Content="View gallery with example fotos" Margin="10,0,0,0" />
-                                </StackPanel>
-
-                                <DockPanel x:Name="paneGalleryPreviewNotLoaded" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" VerticalAlignment="Stretch" Background="{StaticResource PaneBodyBackgroundBrush}" Margin="2" Visibility="Visible">
-                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <TextBlock Text="preview not loaded..." TextAlignment="Center" />
-                                    </StackPanel>
-                                </DockPanel>
-
-                                <WebBrowser x:Name="webGalleryPreview" Source="http://www.google.com" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" Visibility="Collapsed" />
                             </Grid>
                         </TabItem>
 
@@ -1133,7 +1118,8 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="105"/>
+                                    <ColumnDefinition Width="45"/>
                                     <ColumnDefinition Width="20"/>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition MinWidth="300"/>
@@ -1141,28 +1127,28 @@
 
                                 <Label FontWeight="Bold" Content="Show fields" Grid.Column="0" Grid.Row="0" />
                                 <Label Content="Gallery name" Grid.Column="0" Grid.Row="1" />
-                                <CheckBox x:Name="chkGalleryShowName" Grid.Row="1" Grid.Column="1"  />
+                                <CheckBox x:Name="chkGalleryShowName" Grid.Row="1" Grid.Column="2" Margin="4,8"  />
 
-                                <Label Content="Gallery Description" Grid.Column="0" Grid.Row="2" />
-                                <CheckBox x:Name="chkGalleryShowDesc" Grid.Row="2" Grid.Column="1"  />
+                                <Label Content="Gallery Description" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" />
+                                <CheckBox x:Name="chkGalleryShowDesc" Grid.Row="2" Grid.Column="2" Margin="4,8"  />
 
                                 <Label Content="Image name" Grid.Column="0" Grid.Row="3" />
-                                <CheckBox x:Name="chkGalleryShowImageName" Grid.Row="3" Grid.Column="1"  />
+                                <CheckBox x:Name="chkGalleryShowImageName" Grid.Row="3" Grid.Column="2" Margin="4,8"  />
 
-                                <Label Content="Image Description" Grid.Column="0" Grid.Row="4" />
-                                <CheckBox x:Name="chkGalleryShowImageDesc" Grid.Row="4" Grid.Column="1"  />
+                                <Label Content="Image Description" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" />
+                                <CheckBox x:Name="chkGalleryShowImageDesc" Grid.Row="4" Grid.Column="2" Margin="4,8"  />
 
                                 <Label Content="Image Meta data" Grid.Column="0" Grid.Row="5" />
-                                <CheckBox x:Name="chkGalleryShowImageMeta" Grid.Row="5" Grid.Column="1"  />
+                                <CheckBox x:Name="chkGalleryShowImageMeta" Grid.Row="5" Grid.Column="2" Margin="4,8"  />
 
-                                <Label Content="Grouping Description" Grid.Column="0" Grid.Row="6" />
-                                <CheckBox x:Name="chkGalleryShowGroupingDesc" Grid.Row="6" Grid.Column="1"  />
+                                <Label Content="Grouping Description" Grid.Column="0" Grid.Row="6" Visibility="Hidden" Grid.ColumnSpan="2"/>
+                                <CheckBox x:Name="chkGalleryShowGroupingDesc" Grid.Row="6" Grid.Column="2" Visibility="Hidden" Margin="4,8" />
 
-                                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="15" Y1="0" X2="15" Y2="2000" StrokeThickness="0.5"  Grid.Column="2" Grid.Row="0" Grid.RowSpan="8" />
+                                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="15" Y1="0" X2="15" Y2="2000" StrokeThickness="0.5"  Grid.Column="3" Grid.Row="0" Grid.RowSpan="8" />
 
-                                <Label Content="Group Fotos" Grid.Column="3" Grid.Row="0" FontWeight="Bold" MouseUp="Label_MouseUp" />
+                                <Label Content="Group Fotos" Grid.Column="4" Grid.Row="0" FontWeight="Bold" MouseUp="Label_MouseUp" />
 
-                                <ListBox Style="{DynamicResource TagListStyle}" Grid.Column="3" Grid.Row="1" Grid.RowSpan="2"
+                                <ListBox Style="{DynamicResource TagListStyle}" Grid.Column="4" Grid.Row="1" Grid.RowSpan="2"
                             	        x:Name ="lstGalleryGroupOptions" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                         SelectionMode="Single" 
@@ -1172,7 +1158,7 @@
                                     <ListBoxItem x:Name="itemGalleryGroupTag" Content="Use Tag" ToolTip="Fotos will be displayed by their tags" Tag="2" />
                                 </ListBox>
 
-                                <Label Content="Groups to be displayed" Grid.Column="3" Grid.Row="3" FontWeight="Bold" MouseUp="Label_MouseUp_1" />
+                                <Label Content="Groups to be displayed" Grid.Column="4" Grid.Row="3" FontWeight="Bold" MouseUp="Label_MouseUp_1" />
 
                                 <!--
                                 <WrapPanel x:Name="wrapGalleryGroupOptions" Orientation="Horizontal" Grid.Column="3" Grid.Row="1">
@@ -1191,7 +1177,7 @@
 
                                 <DataGrid x:Name="datGallerySections" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible" 
                                         SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="False" 
-                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="3" Grid.Row="4" Grid.RowSpan="6"
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="4" Grid.Row="4" Grid.RowSpan="4"
                                           ItemsSource="{Binding Source={StaticResource gallerySectionListKey}}" RowHeaderWidth="0" BorderThickness="0.5">
                                     <DataGrid.Columns>
 
@@ -1220,6 +1206,61 @@
                         </TabItem>
 
                     </TabControl>
+                </DockPanel>
+
+                <DockPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Visible" x:Name="tabGalleryPreview" VerticalAlignment="Stretch" Margin="2" LastChildFill="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ToggleButton x:Name="cmdGalleryPreview" Grid.Column="0" Grid.Row="0" Checked="cmdGalleryPreview_Checked" Unchecked="cmdGalleryPreview_Checked">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <StackPanel Orientation="Horizontal" Margin="6,2,2,2">
+                                        <Image x:Name="imageShowHidePreview" Source="{StaticResource dropDownMenuImageSrc}" Height="32" />
+                                        <Label x:Name="lblShowHidePreview" Content="Show gallery preview" Margin="5,0,0,0" />
+                                    </StackPanel>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="imageShowHidePreview" Property="Source" Value="{StaticResource dropDownMenuSelectedImageSrc}" />
+                                            <Setter TargetName="lblShowHidePreview" Property="Content" Value="Hide gallery preview" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="imageShowHidePreview" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="imageShowHidePreview" Property="Source" Value="{StaticResource dropDownMenuSelectedImageSrc}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <Button x:Name="cmdGalleryPreviewRefresh" Tag="false" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" Visibility="{Binding ElementName=cmdGalleryPreview, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" >
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid>
+                                        <Button x:Name="cmdRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Visible" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Padding="0" Margin="0" BorderThickness="0" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <!--
+                    <DockPanel x:Name="paneGalleryPreviewNotLoaded" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="2" Background="{StaticResource PaneBodyBackgroundBrush}" DockPanel.Dock="Bottom">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="Preview not loaded..." TextAlignment="Center" />
+                        </StackPanel>
+                    </DockPanel>
+                    -->
+                        <WebBrowser x:Name="webGalleryPreview" Visibility="Collapsed" DockPanel.Dock="Bottom" Panel.ZIndex="1" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"  />
+                    </Grid>
                 </DockPanel>
 
                 <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
@@ -1751,7 +1792,7 @@
 
             </Grid>
 
-            <Grid x:Name="gridAccount" Margin="12,0,10,0" Grid.Column="3" Grid.Row="0" Grid.RowSpan="9">
+            <Grid x:Name="gridAccount" Margin="12,0,10,0" Grid.Column="3" Grid.Row="0" Grid.RowSpan="9" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="60"/>
                     <RowDefinition Height="*"/>
@@ -1856,7 +1897,7 @@
                                     <TextBox x:Name="txtAccountProfileName" Grid.Column="1" Grid.Row="0" MaxLength="100" Margin="2" />
 
                                     <Label Grid.Column="0" Grid.Row="1" Content="Password" FontWeight="SemiBold"/>
-                                    <PasswordBox x:Name="txtAccountPassword" Grid.Column="1" Grid.Row="1" MaxLength="20" Margin="2" />
+                                    <PasswordBox x:Name="txtAccountPassword" Grid.Column="1" FontSize="16" Grid.Row="1" MaxLength="20" Margin="2" />
 
                                     <Label Grid.Column="0" Grid.Row="2" Content="Email Address" FontWeight="SemiBold"/>
                                     <Label x:Name="lblAccountEmail" Grid.Column="1" Grid.Row="2" />

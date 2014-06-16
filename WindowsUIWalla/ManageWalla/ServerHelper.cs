@@ -31,6 +31,7 @@ namespace ManageWalla
         private string wsPath;
         private string appKey;
         private long userId;
+        private string userName;
         private string webPath;
         private string sessionKey;
 
@@ -79,7 +80,7 @@ namespace ManageWalla
 
                 http = new HttpClient();
                 http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
-
+                this.userName = userName;
                 //TODO get session returned to Walla for use in all subsequent requests.
 
                 return true;
@@ -120,7 +121,7 @@ namespace ManageWalla
 
         public string GetWebUrl()
         {
-            return "http://" + hostName + ":" + port.ToString() + webPath + userId.ToString() + "/";
+            return "http://" + hostName + ":" + port.ToString() + webPath + userName + "/";
         }
 
         async public Task<bool> VerifyApp(string validation)
@@ -621,6 +622,39 @@ namespace ManageWalla
             catch (OperationCanceledException cancelEx)
             {
                 logger.Debug("GalleryGetSections has been cancelled.");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
+
+        async public Task<string> GalleryCreatePreviewAsync(Gallery gallery, CancellationToken cancelToken)
+        {
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "gallerypreview");
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+                //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
+                request.Content = content;
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                response.EnsureSuccessStatusCode();
+
+                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                reader.MoveToContent();
+                string galleryPreviewKey = reader.ReadElementContentAsString();
+
+                return galleryPreviewKey;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryCreateAsync has been cancelled.");
                 throw cancelEx;
             }
             catch (Exception ex)

@@ -112,7 +112,6 @@ namespace ManageWalla
         private DateTime lastMarginTweakTime = DateTime.Now;
         private bool isContracted = false;
         private MessageType currentDialogType = MessageType.None;
-        private string existingGalleryName = "";
         #endregion
 
         #region Window Initialise and control.
@@ -463,7 +462,6 @@ namespace ManageWalla
 
         private void RefreshOverallPanesStructure(PaneMode mode)
         {
-
             //Ensure panes are all correctly setup each time a refresh is called.
             gridLeft.ColumnDefinitions[0].Width = new GridLength(0); //Sidebar
             gridLeft.ColumnDefinitions[1].Width = new GridLength(300); //Main control
@@ -492,18 +490,28 @@ namespace ManageWalla
                     gridRight.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
 
                     gridGallerySelection.Visibility = Visibility.Collapsed;
+                    tabGalleryPreview.Visibility = Visibility.Collapsed;
                     tabGalleryConfiguration.Visibility = Visibility.Collapsed;
                     panGridRightHeader.Visibility = Visibility.Visible;
                     break;
                 case PaneMode.GalleryEdit:
                 case PaneMode.GalleryAdd:
-                    gridRight.RowDefinitions[0].Height = new GridLength(2, GridUnitType.Star);
-                    gridRight.RowDefinitions[1].Height = new GridLength(0); //GridLength(1, GridUnitType.Star);
+                    gridRight.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
+                    gridRight.RowDefinitions[1].Height = new GridLength(0);
+                    //if ((bool)cmdGalleryPreview.IsChecked)
+                    //{
+                    //    gridRight.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
+                    //}
+                    //else
+                    //{
+                    //   gridRight.RowDefinitions[1].Height = new GridLength(40);
+                    //}
 
                     lstImageMainViewerList.Visibility = Visibility.Collapsed;
 
                     gridGallerySelection.Visibility = Visibility.Visible;
                     tabGalleryConfiguration.Visibility = Visibility.Visible;
+                    tabGalleryPreview.Visibility = Visibility.Visible;
                     panGridRightHeader.Visibility = Visibility.Collapsed;
                     break;
                 case PaneMode.CategoryView:
@@ -693,6 +701,7 @@ namespace ManageWalla
                     gridGallery.RowDefinitions[5].MaxHeight = 0;
                     gridGallery.RowDefinitions[6].Height = new GridLength(0);
 
+                    cmdGalleryPreview.IsChecked = false;
                     radCategory.IsEnabled = true;
                     radTag.IsEnabled = true;
                     radUpload.IsEnabled = true;
@@ -719,22 +728,27 @@ namespace ManageWalla
 
                     if (GalleryGetSelectionType() == 0)
                     {
-                        //categories ONLY
+                        //Categories ONLY
                         gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(2, GridUnitType.Star);
                         gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(30);
                         gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(0);
                         gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(0);
                         gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2, GridUnitType.Star);
+
+                        itemGalleryGroupCategory.IsEnabled = true;
+                        itemGalleryGroupTag.IsEnabled = false;
+
                     }
                     else if (GalleryGetSelectionType() == 1)
                     {
-                        //Tags only
+                        //Tags ONLY
                         gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(0);
                         gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(0);
                         gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(2, GridUnitType.Star);
                         gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(30);
                         gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2,GridUnitType.Star);
-
+                        itemGalleryGroupCategory.IsEnabled = false;
+                        itemGalleryGroupTag.IsEnabled = true;
                     }
 
                     GalleryPresentationItem presentation = (GalleryPresentationItem)lstGalleryPresentationList.SelectedItem;
@@ -4173,10 +4187,6 @@ namespace ManageWalla
 
                 Gallery gallery = await controller.GalleryGetMetaAsync(galleryListGalleryRef, cancelTokenSource.Token);
 
-                webGalleryPreview.Visibility = Visibility.Collapsed;
-                paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
-
-                existingGalleryName = gallery.Name;
                 txtGalleryName.Text = gallery.Name;
                 txtGalleryDescription.Text = gallery.Desc;
                 txtGalleryPassword.Text = gallery.Password;
@@ -4704,7 +4714,6 @@ namespace ManageWalla
                     lstGalleryStylesList.Items.Refresh();
                 }
 
-                existingGalleryName = "";
                 txtGalleryName.Text = "";
                 txtGalleryDescription.Text = "";
                 txtGalleryPassword.Text = "";
@@ -4724,8 +4733,8 @@ namespace ManageWalla
 
                 gallerySectionList.Clear();
 
-                webGalleryPreview.Visibility = Visibility.Collapsed;
-                paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
+                //webGalleryPreview.Visibility = Visibility.Collapsed;
+                //paneGalleryPreviewNotLoaded.Visibility = Visibility.Visible;
 
                 GalleryRefreshTagsListFromState();
                 GalleryRefreshCategoryList();
@@ -4755,9 +4764,9 @@ namespace ManageWalla
         {
             try
             {
-                Gallery gallery = GalleryCreateFromGUI();
+                Gallery gallery = GalleryCreateFromGUI(false);
 
-                if (!GalleryValidate(gallery))
+                if (!GalleryValidate(gallery, false))
                     return;
 
                 if (cancelTokenSource != null)
@@ -4768,11 +4777,11 @@ namespace ManageWalla
 
                 if (currentPane == PaneMode.GalleryAdd)
                 {
-                    await controller.GalleryCreateAsync(currentGallery, cancelTokenSource.Token);
+                    await controller.GalleryCreateAsync(gallery, cancelTokenSource.Token);
                 }
                 else
                 {
-                    await controller.GalleryUpdateAsync(currentGallery, existingGalleryName, cancelTokenSource.Token);
+                    await controller.GalleryUpdateAsync(gallery, currentGallery.Name, cancelTokenSource.Token);
                 }
 
                 if (newCancelTokenSource == cancelTokenSource)
@@ -4809,7 +4818,7 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                await controller.GalleryGetSectionListAndMerge(GalleryCreateFromGUI(), gallerySectionList, cancelTokenSource.Token);
+                await controller.GalleryGetSectionListAndMerge(GalleryCreateFromGUI(false), gallerySectionList, cancelTokenSource.Token);
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
@@ -4829,65 +4838,100 @@ namespace ManageWalla
             }
         }
 
-        private Gallery GalleryCreateFromGUI()
+        private Gallery GalleryCreateFromGUI(bool preview)
         {
-            if (currentPane == PaneMode.GalleryAdd)
+            Gallery gallery = new Gallery();
+            gallery.Name = txtGalleryName.Text;
+            gallery.Desc = txtGalleryDescription.Text;
+            gallery.Password = txtGalleryPassword.Text;
+            gallery.AccessType = cmbGalleryAccessType.SelectedIndex;
+
+            gallery.GroupingType = GalleryGetGroupingType();
+            gallery.SelectionType = GalleryGetSelectionType();
+            gallery.PresentationId = GalleryGetPresentationType();
+            gallery.StyleId = GalleryGetStyleType();
+
+            if (gallery.GroupingType > 0)
             {
-                currentGallery = new Gallery();
-            }
-
-            currentGallery.Name = txtGalleryName.Text;
-            currentGallery.Desc = txtGalleryDescription.Text;
-            currentGallery.Password = txtGalleryPassword.Text;
-            currentGallery.AccessType = cmbGalleryAccessType.SelectedIndex;
-
-            currentGallery.GroupingType = GalleryGetGroupingType();
-            currentGallery.SelectionType = GalleryGetSelectionType();
-            currentGallery.PresentationId = GalleryGetPresentationType();
-            currentGallery.StyleId = GalleryGetStyleType();
-
-            int sectionCount = gallerySectionList.Count<GallerySectionItem>(r => (r.sequence > 0 || r.name != r.nameOveride || r.desc != r.descOveride));
-            if (sectionCount > 0)
-            {
-                int i = 0;
-                currentGallery.Sections = new GallerySectionRef[sectionCount];
-                foreach (GallerySectionItem item in gallerySectionList.Where<GallerySectionItem>(r => (r.sequence > 0 || r.name != r.nameOveride || r.desc != r.descOveride)))
+                if (preview)
                 {
-                    GallerySectionRef newSection = new GallerySectionRef();
-                    newSection.id = item.sectionId;
-                    newSection.idSpecified = true;
-                    newSection.name = (item.nameOveride != item.name) ? item.nameOveride : "";
-                    newSection.desc = (item.descOveride != item.desc) ? item.descOveride : "";
-                    if (item.sequence > 0)
+                    int sectionCount = gallerySectionList.Count<GallerySectionItem>();
+                    if (sectionCount > 0)
                     {
-                        newSection.sequence = item.sequence;
-                        newSection.sequenceSpecified = true;
-                    }
+                        int i = 0;
+                        gallery.Sections = new GallerySectionRef[sectionCount];
+                        foreach (GallerySectionItem item in gallerySectionList.OrderBy(r => r.sequence))
+                        {
+                            GallerySectionRef newSection = new GallerySectionRef();
+                            newSection.id = i;
+                            newSection.idSpecified = true;
+                            newSection.name = (item.nameOveride != item.name) ? item.nameOveride : item.name;
+                            newSection.desc = (item.descOveride != item.desc) ? item.descOveride : item.desc;
+                            if (item.sequence > 0)
+                            {
+                                newSection.sequence = item.sequence;
+                                newSection.sequenceSpecified = true;
+                            }
 
-                    currentGallery.Sections[i] = newSection;
-                    i++;
+                            gallery.Sections[i] = newSection;
+                            i++;
+                        }
+                    }
+                }
+                else
+                {
+                    int sectionCount = gallerySectionList.Count<GallerySectionItem>(r => (r.sequence > 0 || r.name != r.nameOveride || r.desc != r.descOveride));
+                    if (sectionCount > 0)
+                    {
+                        int i = 0;
+                        gallery.Sections = new GallerySectionRef[sectionCount];
+                        foreach (GallerySectionItem item in gallerySectionList.Where<GallerySectionItem>(r => (r.sequence > 0 || r.name != r.nameOveride || r.desc != r.descOveride)))
+                        {
+                            GallerySectionRef newSection = new GallerySectionRef();
+                            newSection.id = item.sectionId;
+                            newSection.idSpecified = true;
+                            newSection.name = (item.nameOveride != item.name) ? item.nameOveride : "";
+                            newSection.desc = (item.descOveride != item.desc) ? item.descOveride : "";
+                            if (item.sequence > 0)
+                            {
+                                newSection.sequence = item.sequence;
+                                newSection.sequenceSpecified = true;
+                            }
+
+                            gallery.Sections[i] = newSection;
+                            i++;
+                        }
+                    }
                 }
             }
 
-            currentGallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
-            currentGallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
-            currentGallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
-            currentGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
-            currentGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
-            currentGallery.ShowGroupingDesc = (bool)chkGalleryShowGroupingDesc.IsChecked;
+            gallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
+            gallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
+            gallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
+            gallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
+            gallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
+            gallery.ShowGroupingDesc = (bool)chkGalleryShowGroupingDesc.IsChecked;
 
             /* Category add to object ************************************************ */
-            if (currentGallery.SelectionType != 1)
-                currentGallery.Categories = GalleryCategoryGetUpdateList();
+            if (gallery.SelectionType != 1)
+                gallery.Categories = GalleryCategoryGetUpdateList();
 
             /* Tags add to object ************************************************ */
-            currentGallery.Tags = GalleryTagsUpdateList(currentGallery.SelectionType);
+            gallery.Tags = GalleryTagsUpdateList(gallery.SelectionType);
 
-            return currentGallery;
+            if (currentPane == PaneMode.GalleryEdit)
+            {
+                gallery.id = currentGallery.id;
+                gallery.idSpecified = true;
+                gallery.version = currentGallery.version;
+                gallery.versionSpecified = true;
+            }
+
+            return gallery;
         }
 
         //TODO
-        private bool GalleryValidate(Gallery gallery)
+        private bool GalleryValidate(Gallery gallery, bool isPreview)
         {
             //TODO add exclude filter to searches.
 
@@ -4909,23 +4953,26 @@ namespace ManageWalla
                 return false;
             }
 
-            if (gallery.AccessType == 1 && gallery.Password.Length == 0)
+            if (!isPreview)
             {
-                ShowMessage(MessageType.Warning, "This gallery has been marked as password protected, but the password does not meet the minumimum criteria of being 8 charactors long.");
-                return false;
-            }
+                if (gallery.AccessType == 1 && gallery.Password.Length == 0)
+                {
+                    ShowMessage(MessageType.Warning, "This gallery has been marked as password protected, but the password does not meet the minumimum criteria of being 8 charactors long.");
+                    return false;
+                }
 
-            if (gallery.Name.Length == 0)
-            {
-                ShowMessage(MessageType.Warning, "You must select a name for your Gallery to continue.");
-                return false;
+                if (gallery.Name.Length == 0)
+                {
+                    ShowMessage(MessageType.Warning, "You must select a name for your Gallery to continue.");
+                    return false;
+                }
             }
-
             return true;
         }
 
         private int GalleryGetGroupingType()
         {
+
             ListBoxItem current = (ListBoxItem)lstGalleryGroupOptions.SelectedItem;
             if (current == null)
             {
@@ -5007,20 +5054,25 @@ namespace ManageWalla
         #endregion
 
         #region Gallery Event Handlers
-        private void cmdGalleryView_Click(object sender, RoutedEventArgs e)
+        async private void cmdGalleryView_Click(object sender, RoutedEventArgs e)
         {
+            string url = "";
             RadioButton checkedButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-
             if (checkedButton != null)
             {
                 GalleryListGalleryRef galleryListGalleryRef = (GalleryListGalleryRef)checkedButton.Tag;
-                string url = controller.GetGalleryUrl(galleryListGalleryRef.name, galleryListGalleryRef.urlComplex);
-                System.Diagnostics.Process.Start(url);
-                ShowMessage(MessageType.Info, "Browser will load web site");
+                url = controller.GetGalleryUrl(galleryListGalleryRef.name, galleryListGalleryRef.urlComplex);
             }
             else
             {
                 ShowMessage(MessageType.Info, "No Gallery selected to view");
+                return;
+            }
+
+            if (url.Length > 0)
+            {
+                System.Diagnostics.Process.Start(url);
+                ShowMessage(MessageType.Info, "Browser will load web site");
             }
         }
 
@@ -5509,7 +5561,7 @@ namespace ManageWalla
                 await controller.AccountDetailsGet(cancelTokenSource.Token);
                 state.account.Password = password;
 
-                lblTagProfileNameLabel.Content = state.account.ProfileName + " Tags";
+                //lblTagProfileNameLabel.Content = state.account.ProfileName + " Tags";
 
                 await controller.SetUserApp(cancelTokenSource.Token);
 
@@ -5661,35 +5713,7 @@ namespace ManageWalla
             }
         }
 
-        private void cmdGalleryPreview_Click(object sender, RoutedEventArgs e)
-        {
-            Gallery previewGallery = new Gallery();
 
-            //TODO - change current gasllery object population to use shared method.
-
-
-
-            //previewGallery.Name = txtGalleryName.Text;
-            //previewGallery.Desc = txtGalleryDescription.Text;
-            //previewGallery.GroupingType = cmbGalleryGroupingType.SelectedIndex;
-
-            //TODO Approx number of sections.
-
-            //currentGallery.SelectionType = cmbGallerySelectionType.SelectedIndex;
-            //currentGallery.PresentationId = cmbGalleryPresentationType.SelectedIndex;
-            //previewGallery.StyleId = cmbGalleryStyleType.SelectedIndex;
-
-            //previewGallery.ShowGalleryName = (bool)chkGalleryShowName.IsChecked;
-            //previewGallery.ShowGalleryDesc = (bool)chkGalleryShowDesc.IsChecked;
-            //previewGallery.ShowImageName = (bool)chkGalleryShowImageName.IsChecked;
-            //previewGallery.ShowImageDesc = (bool)chkGalleryShowImageDesc.IsChecked;
-            //previewGallery.ShowImageMeta = (bool)chkGalleryShowImageMeta.IsChecked;
-
-
-            webGalleryPreview.Source = new Uri(controller.GetGalleryPreviewUrl(previewGallery));
-            webGalleryPreview.Visibility = Visibility.Visible;
-            paneGalleryPreviewNotLoaded.Visibility = Visibility.Collapsed;
-        }
 
         async private void Label_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -5698,6 +5722,17 @@ namespace ManageWalla
 
         private void lstGallerySelectionOptions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (lstGalleryGroupOptions == null || lstGallerySelectionOptions == null)
+                return;
+
+            //Category.
+            if (GalleryGetSelectionType() == 0 && GalleryGetGroupingType() == 2)
+                GallerySetGroupingType(0);
+
+            //Tag
+            if (GalleryGetSelectionType() == 1 && GalleryGetGroupingType() == 1)
+                GallerySetGroupingType(0);
+
             RefreshPanesAllControls(currentPane);
         }
 
@@ -5719,6 +5754,64 @@ namespace ManageWalla
             gallerySectionList[3].sequence = 2;
 
             datGallerySections.Items.Refresh();
+        }
+
+        private void cmdGalleryPreview_Checked(object sender, RoutedEventArgs e)
+        {
+            RefreshOverallPanesStructure(currentPane);
+        }
+
+        async private Task<string> GallerySetupPreview()
+        {
+            try
+            {
+                ShowMessage(MessageType.Busy, "Creating preview");
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                Gallery gallery = GalleryCreateFromGUI(true);
+
+                if (!GalleryValidate(gallery, true))
+                    return "";
+
+                string galleryPreviewKey = await controller.GalleryCreatePreviewAsync(gallery, cancelTokenSource.Token);
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                return controller.GetGalleryPreviewUrl(galleryPreviewKey);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug("GallerySetupPreview has been cancelled.");
+                return "";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Gallery preview could not be generated, there was an error:" + ex.Message);
+                return "";
+            }
+            finally
+            {
+                ConcludeBusyProcess();
+            }
+        }
+
+        async private void cmdGalleryPreviewView_Click(object sender, RoutedEventArgs e)
+        {
+            string url = await GallerySetupPreview();
+            if (url.Length > 0)
+            {
+                System.Diagnostics.Process.Start(url);
+                ShowMessage(MessageType.Info, "Browser will load web site");
+            }
+
+            
         }
 
 

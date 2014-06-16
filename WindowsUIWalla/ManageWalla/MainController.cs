@@ -1306,12 +1306,27 @@ namespace ManageWalla
             }
         }
 
-        public string GetGalleryPreviewUrl(Gallery preview)
+        async public Task<string> GalleryCreatePreviewAsync(Gallery gallery, CancellationToken cancelToken)
         {
-            string queryString = "";
-            //TODO build gallery query string logic.
+            try
+            {
+                return await serverHelper.GalleryCreatePreviewAsync(gallery, cancelToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryCreatePreviewAsync has been cancelled");
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+        }
 
-            return serverHelper.GetWebUrl() + "galleryPreview?" + queryString;
+        public string GetGalleryPreviewUrl(string galleryPreviewKey)
+        {
+            return serverHelper.GetWebUrl() + "gallerypreview/sample?key=" + galleryPreviewKey;
         }
 
         async public Task GalleryOptionsRefreshAsync(GalleryPresentationList presentationList, GalleryStyleList styleList, CancellationToken cancelToken)
