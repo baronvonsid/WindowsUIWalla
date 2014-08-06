@@ -64,7 +64,8 @@
 
     <ControlTemplate x:Key="templateRefreshButton" TargetType="{x:Type Button}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Image x:Name="imageRefresh" Source="{StaticResource refreshImageSelectedSrc}" Height="29"  />
+            <!--<Image x:Name="imageRefresh" Source="{StaticResource refreshImageSelectedSrc}" Height="29"  />-->
+            <Image x:Name="imageRefresh" gif:ImageBehavior.AnimatedSource="{StaticResource refreshImageSelectedSrc}"  Height="29" />
         </Grid>
         <ControlTemplate.Triggers>
             <MultiTrigger>
@@ -77,14 +78,14 @@
                     </Condition>
                 </MultiTrigger.Conditions>
                 <MultiTrigger.Setters>
-                <Setter TargetName="imageRefresh" Property="Source" Value="{StaticResource refreshImageSrc}" />
+                    <Setter TargetName="imageRefresh" Property="gif:ImageBehavior.AnimatedSource" Value="{StaticResource refreshImageSrc}" />
                 </MultiTrigger.Setters>
             </MultiTrigger>
             <Trigger Property="Tag">
                 <Trigger.Value>
                     <sys:Boolean>True</sys:Boolean>
                 </Trigger.Value>
-            <Setter TargetName="imageRefresh" Property="Source" Value="{StaticResource refreshImageRotatingSrc}" />
+                <Setter TargetName="imageRefresh" Property="gif:ImageBehavior.AnimatedSource" Value="{StaticResource refreshImageRotatingSrc}" />
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
             <Setter TargetName="imageRefresh" Property="Height" Value="28" />

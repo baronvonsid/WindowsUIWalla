@@ -9,7 +9,12 @@
     Title="fotowalla" FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" 
     SizeChanged="mainTwo_SizeChanged" FontSize="18" TextOptions.TextFormattingMode="Display" Height="650" Width="1000">
 
-    <!-- gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" -->
+    <!-- gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" 
+    Source="{StaticResource busyImageSrc}"
+    
+   <Image x:Name="imgBusy" Source="{DynamicResource busyImageAnimSrc}" Height="30" />
+    <Image x:Name="imgBusy" gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" Height="30" />
+    -->
 
     <Window.Resources>
         <CollectionViewSource x:Key="uploadImageStateListInProgressKey" 
@@ -42,13 +47,13 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0" Grid.Row="0" Grid.RowSpan="9" Margin="2,2,2,2" Background="{StaticResource WallaBannerBackgroundBrush}" LastChildFill="True">
-                <!-- <Button x:Name="cmdExpand" DockPanel.Dock="Top" Margin="2,3,2,2" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdExpand_Click" Padding="0">
+                <!-- <Button x:Name="cmdShowMenuLayout" DockPanel.Dock="Top" Margin="2,3,2,2" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdShowMenuLayout_Click" Padding="0">
                     <Button.Content>
                         <Image Source="{StaticResource expandImageSrc}" Height="28" />
                     </Button.Content>
                 </Button>-->
 
-                <Button x:Name="cmdExpand" Margin="2" DockPanel.Dock="Top"  Click="cmdExpand_Click">
+                <Button x:Name="cmdShowMenuLayout" Margin="2" DockPanel.Dock="Top"  Click="cmdShowMenuLayout_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="{x:Type Button}">
                             <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -206,7 +211,6 @@
                             <RotateTransform Angle="-90"></RotateTransform>
                         </TextBlock.LayoutTransform>
                     </TextBlock>
-
                     <TextBlock x:Name="lblImageViewNameVert" DataContext="{StaticResource imageMainViewerListKey}" Text="{Binding Mode=OneWay, Path=/Meta.Name}" Background="Transparent" FontSize="24"  Margin="0,20,0,0" HorizontalAlignment="Left" Visibility="Collapsed">
                         <TextBlock.LayoutTransform>
                             <RotateTransform Angle="-90"></RotateTransform>
@@ -215,11 +219,10 @@
                 </StackPanel>
             </DockPanel>
 
-
             <StackPanel  Orientation="Vertical" Grid.Column="1" Grid.Row="0" >
                 <DockPanel Margin="12,0,2,0" LastChildFill="True" Background="{StaticResource WallaBannerBackgroundBrush}" VerticalAlignment="Top" >
 
-                    <Button x:Name="cmdContract" DockPanel.Dock="Right" Click="cmdContract_Click" Margin="0,0,4,0">
+                    <Button x:Name="cmdShowExpandedLayout" DockPanel.Dock="Right" Click="cmdShowExpandedLayout_Click" Margin="0,0,4,0">
                         <Button.Template>
                             <ControlTemplate TargetType="{x:Type Button}">
                                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -732,7 +735,7 @@
                 <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" x:Name="panGridRightHeader" Visibility="Collapsed" Orientation="Vertical">
                     <DockPanel Margin="6,0,6,0" Background="{StaticResource WallaBannerBackgroundBrush}" HorizontalAlignment="Stretch" LastChildFill="True">
 
-                        <Line  Stroke="{StaticResource FontBorderBrushSelected}" DockPanel.Dock="Right" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="0" />
+                        <Line Visibility="Collapsed" Stroke="{StaticResource FontBorderBrushSelected}" DockPanel.Dock="Right" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="0" />
 
                         <Slider x:Name="sldImageSize" DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
                             Value="130"
@@ -911,7 +914,7 @@
 
                 <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Visible" x:Name="tabGalleryConfiguration" VerticalAlignment="Stretch" Margin="2" LastChildFill="True">
 
-                    <TabControl Background="{StaticResource ImageViewBackgroundBrush}" >
+                    <TabControl x:Name="tabGallery" Background="{StaticResource ImageViewBackgroundBrush}" SelectionChanged="tabGallery_SelectionChanged">
 
                         <TabItem Header="Display">
                             <Grid>
@@ -920,8 +923,8 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="340"/>
-                                    <ColumnDefinition Width="340"/>
+                                    <ColumnDefinition MinWidth="340" MaxWidth="400"/>
+                                    <ColumnDefinition MinWidth="340" MaxWidth="400"/>
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
@@ -934,6 +937,7 @@
                             		    ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                         Visibility="Visible" SelectionChanged="lstGalleryPresentationList_SelectionChanged"
                                         Margin="4">
 
@@ -945,14 +949,14 @@
                                                 </Grid.RowDefinitions>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="200"/>
-                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition MinWidth="100"/>
                                                 </Grid.ColumnDefinitions>
 
                                                 <Image x:Name="imageThumb" Source="{Binding PresentationImage.Source}" Grid.Column="0" Grid.Row="0" Margin="4" />
 
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
                                                     <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource FontBorderBrush}"/>
-                                                    <TextBlock Text="{Binding Desc}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                                    <TextBlock Text="{Binding Desc}" FontSize="14" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
                                                 </StackPanel>
                                             </Grid>
                                             <DataTemplate.Triggers>
@@ -974,6 +978,7 @@
                             		    ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                         Visibility="Visible" SelectionChanged="lstGalleryStylesList_SelectionChanged" Margin="4">
 
                                     <ListBox.ItemTemplate>
@@ -984,14 +989,14 @@
                                                 </Grid.RowDefinitions>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="200"/>
-                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition MinWidth="100"/>
                                                 </Grid.ColumnDefinitions>
 
                                                 <Image x:Name="imageThumb" Source="{Binding StyleImage.Source}" Grid.Column="0" Grid.Row="0" Margin="4" />
 
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
                                                     <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource FontBorderBrush}"/>
-                                                    <TextBlock Text="{Binding Desc}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                                    <TextBlock Text="{Binding Desc}" FontSize="14" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
                                                 </StackPanel>
                                             </Grid>
                                             <DataTemplate.Triggers>
@@ -1046,29 +1051,32 @@
 
                                 <Label Content="Categories to include" FontWeight="Bold" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="3" />
 
-                                <ScrollViewer  x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="4" Margin="2,0,0,2" Background="{StaticResource GroupControlBackgroundBrush}" Grid.ColumnSpan="2">
-                                    <TreeView x:Name="treeGalleryCategoryView" ItemContainerStyle="{StaticResource styleTreeViewItemWithCombo}">
-
+                                <ScrollViewer x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="4" Margin="2,0,0,2" Background="{StaticResource GroupControlBackgroundBrush}" Grid.ColumnSpan="2">
+                                    <TreeView x:Name="treeGalleryCategoryView" >
+                                        <!-- ItemContainerStyle="{StaticResource styleTreeViewItemWithCombo}" --> 
                                     </TreeView>
                                 </ScrollViewer>
 
                                 <Label Content="Tags to include" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="3" FontWeight="Bold"/>
 
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="4" Margin="0,0,0,2" HorizontalScrollBarVisibility="Disabled" Background="{StaticResource GroupControlBackgroundBrush}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="4" Margin="0" 
+                                              HorizontalScrollBarVisibility="Disabled" Background="{StaticResource GroupControlBackgroundBrush}">
                                     <StackPanel Orientation="Vertical">
                                         <ListBox Style="{DynamicResource TagListStyle}" 
                             	        x:Name ="lstGalleryMyTagListInclude" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Multiple" 
-                                        ItemContainerStyle="{DynamicResource TagListItem}">
+                                        ItemContainerStyle="{DynamicResource TagListItem}"
+                                        SelectionChanged="GalleryTags_SelectionChanged">
                                         </ListBox>
-                                        <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,5,0,5" />
+                                        <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="2000" Y2="2" StrokeThickness="0.5" Margin="0,10,0,10" />
 
                                         <ListBox Style="{DynamicResource TagListStyle}" 
                             	        x:Name ="lstGallerySystemTagListInclude" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Multiple" 
-                                        ItemContainerStyle="{DynamicResource TagListItem}">
+                                        ItemContainerStyle="{DynamicResource TagListItem}"
+                                        SelectionChanged="GalleryTags_SelectionChanged">
                                         </ListBox>
                                     </StackPanel>
                                 </ScrollViewer>
@@ -1083,15 +1091,15 @@
                             	        x:Name ="lstGalleryMyTagListExclude" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         SelectionMode="Multiple" 
-                                        ItemContainerStyle="{DynamicResource TagListItem}">
+                                        ItemContainerStyle="{DynamicResource TagListItem}" SelectionChanged="GalleryTags_SelectionChanged" >
                                         </ListBox>
-                                        <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0,5,0,5" />
+                                        <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="2000" Y2="2" StrokeThickness="0.5" Margin="0,10,0,10" />
 
                                         <ListBox Style="{DynamicResource TagListStyle}" 
                             	        x:Name ="lstGallerySystemTagListExclude" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         SelectionMode="Multiple" 
-                                        ItemContainerStyle="{DynamicResource TagListItem}">
+                                        ItemContainerStyle="{DynamicResource TagListItem}" SelectionChanged="GalleryTags_SelectionChanged">
                                         </ListBox>
                                     </StackPanel>
 
@@ -1104,7 +1112,7 @@
                             </Grid>
                         </TabItem>
 
-                        <TabItem Header="Advanced">
+                        <TabItem Header="Advanced" >
 
                             <Grid Grid.Column="0" Grid.Row="1" Margin="4">
                                 <Grid.RowDefinitions>
@@ -1116,11 +1124,12 @@
                                     <RowDefinition Height="30" />
                                     <RowDefinition Height="30" />
                                     <RowDefinition Height="*" />
+                                    <RowDefinition Height="32" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="105"/>
                                     <ColumnDefinition Width="45"/>
-                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="22"/>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition MinWidth="300"/>
                                 </Grid.ColumnDefinitions>
@@ -1144,15 +1153,15 @@
                                 <Label Content="Grouping Description" Grid.Column="0" Grid.Row="6" Visibility="Hidden" Grid.ColumnSpan="2"/>
                                 <CheckBox x:Name="chkGalleryShowGroupingDesc" Grid.Row="6" Grid.Column="2" Visibility="Hidden" Margin="4,8" />
 
-                                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="15" Y1="0" X2="15" Y2="2000" StrokeThickness="0.5"  Grid.Column="3" Grid.Row="0" Grid.RowSpan="8" />
+                                <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="15" Y1="0" X2="15" Y2="2000" StrokeThickness="0.5"  Grid.Column="3" Grid.Row="0" Grid.RowSpan="9" />
 
-                                <Label Content="Group Fotos" Grid.Column="4" Grid.Row="0" FontWeight="Bold" MouseUp="Label_MouseUp" />
+                                <Label Content="Group Fotos" Grid.Column="4" Grid.Row="0" FontWeight="Bold" />
 
                                 <ListBox Style="{DynamicResource TagListStyle}" Grid.Column="4" Grid.Row="1" Grid.RowSpan="2"
                             	        x:Name ="lstGalleryGroupOptions" 
                             	        ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                         SelectionMode="Single" 
-                                        ItemContainerStyle="{DynamicResource TagListItem}">
+                                        ItemContainerStyle="{DynamicResource TagListItem}" SelectionChanged="lstGalleryGroupOptions_SelectionChanged" >
                                     <ListBoxItem x:Name="itemGalleryGroupNoGroup" Content="No Grouping" ToolTip="Fotos will not be grouped" Tag="0" IsSelected="True" />
                                     <ListBoxItem x:Name="itemGalleryGroupCategory" Content="Use Category" ToolTip="Fotos will be displayed within their Category" Tag="1" />
                                     <ListBoxItem x:Name="itemGalleryGroupTag" Content="Use Tag" ToolTip="Fotos will be displayed by their tags" Tag="2" />
@@ -1175,16 +1184,18 @@
                                                  ToolTip="Fotos will be displayed by their tags" Tag="2"></RadioButton>
                                 </WrapPanel>-->
 
-                                <DataGrid x:Name="datGallerySections" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible" 
-                                        SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="False" 
-                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="4" Grid.Row="4" Grid.RowSpan="4"
-                                          ItemsSource="{Binding Source={StaticResource gallerySectionListKey}}" RowHeaderWidth="0" BorderThickness="0.5">
+                                <DataGrid x:Name="datGallerySections" AutoGenerateColumns="False" SelectionUnit="Cell"  Visibility="Visible" 
+                                        SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="False" Background="{StaticResource GroupControlBackgroundBrush}"
+                                        CanUserAddRows="False" CanUserDeleteRows="False" Grid.Column="4" Grid.Row="4" Grid.RowSpan="4" Margin="0,0,0,10"
+                                          ItemsSource="{Binding Source={StaticResource gallerySectionListKey}}" RowHeaderWidth="0" >
                                     <DataGrid.Columns>
-
-                                        <DataGridTemplateColumn Header="Name" Width="100">
+                                        <DataGridTextColumn Header="Name" Width="100" Binding="{Binding nameOveride, Mode=TwoWay}" />
+                                        <DataGridTextColumn Header="Description" Width="*" Binding="{Binding descOveride, Mode=TwoWay}" />
+                                        <!--
+                                        <DataGridTemplateColumn Header="Name" Width="100" >
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding nameOveride, Mode=TwoWay}" />
+                                                    <TextBox Text="{Binding nameOveride, Mode=TwoWay}" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -1192,13 +1203,20 @@
                                         <DataGridTemplateColumn Header="Description" Width="*">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding descOveride, Mode=TwoWay}" />
+                                                    <TextBox Text="{Binding descOveride, Mode=TwoWay}" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-
+                                        -->
                                     </DataGrid.Columns>
                                 </DataGrid>
+
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Left" Grid.Column="4" Grid.Row="8">
+                                    <!--<Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="2000" Y2="2" StrokeThickness="0.5" Margin="0,5,0,5" />-->
+                                    <Button x:Name="cmdGallerySectionReset" Content="Reset" 
+                                        ToolTip="Reset any updates back to the default values" HorizontalAlignment="Left"
+                                        Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGallerySectionReset_Click"  />
+                                </StackPanel>
 
                             </Grid>
 
@@ -1285,14 +1303,14 @@
                                     </Grid>
 
                                     <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}">
-                                        <Image x:Name="imageThumbLoading" Source="{StaticResource busyImageSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        <Image x:Name="imageThumbLoading" Source="{StaticResource busyImageAnimSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Visibility="{Binding Path=thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='1'}">
                                         </Image>
                                     </Grid>
 
                                     <Image x:Name="imageThumb" Source="{Binding thumbnailImage.Source}" Height="{Binding ElementName=sldImageSize, Path=Value}" HorizontalAlignment="Center" VerticalAlignment="Center"
                                             Visibility="{Binding Path=thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='2'}"
-                                            MouseMove="Image_MouseMove" MouseUp="Image_MouseUp">
+                                            MouseUp="Image_MouseUp">
                                     </Image>
 
 
@@ -1378,11 +1396,11 @@
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadImagefileListKey}}"
                             		    ItemContainerStyle="{DynamicResource UploadPhotoListItem}" 
                             		    SelectedIndex="0"
-                            		    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                            		    ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Single"
                                         IsSynchronizedWithCurrentItem="True"
                                         SelectionChanged="lstUploadImageFileList_SelectionChanged"
-                                        Visibility="Collapsed" HorizontalContentAlignment="Center">
+                                        Visibility="Collapsed" HorizontalContentAlignment="Center" Margin="0">
 
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -1456,7 +1474,19 @@
                             <ColumnDefinition Width="20"/>
                         </Grid.ColumnDefinitions>
 
-                        <Line Grid.Column="0" Grid.Row="0" Grid.RowSpan="18" Stroke="{StaticResource FontBorderBrushSelected}" X1="2.5" Y1="0" X2="2.5" Y2="3000" StrokeThickness="0.5" Margin="0" />
+                        <Line Grid.Column="0" Grid.Row="0" Grid.RowSpan="18" Stroke="{StaticResource FontBorderBrushSelected}" X1="2.5" Y1="0" X2="2.5" Y2="3000" StrokeThickness="0.5" Margin="0">
+                            <Line.Style>
+                                <!-- This doesn't work! -->
+                                <Style TargetType="{x:Type Line}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=lstUploadImageFileList, Path=ComputedVerticalScrollBarVisibility}" Value="Collapsed">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Line.Style>
+                        </Line>
 
                         <Label Grid.Column="1" Grid.Row="0" Content="File" FontWeight="SemiBold" />
                         <Label x:Name="lblUploadImageFileName" Grid.Column="2" Grid.Row="0" Grid.ColumnSpan="2" Content="{Binding Mode=OneWay, Path=/Meta.OriginalFileName}" />
@@ -1612,7 +1642,7 @@
                     </Grid>
 
                     <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="0">
-                        <Image Source="{StaticResource busyImageSrc}"
+                        <Image gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" 
                                Visibility="{Binding Path=/mainImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='1'}" 
                                Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
                         </Image>
@@ -2141,8 +2171,8 @@
             <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5" StrokeThickness="2" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <!-- Source="{DynamicResource busyImageAnimSrc}" -->
-                <Image x:Name="imgBusy" Source="{DynamicResource busyImageAnimSrc}" Height="30" />
+                <!-- <Image x:Name="imgBusy" Source="{DynamicResource busyImageAnimSrc}" Height="30" /> -->
+                <Image x:Name="imgBusy" gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" Height="30" />
                 <Image x:Name="imgAlert" Source="{StaticResource errorImageSrc}" Height="32" />
                 <TextBlock x:Name="lblAlertDialogHeader" TextWrapping="Wrap" Margin="20,0,0,0" Text="Loading.." Foreground="{StaticResource FontBorderBrush}" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
             </StackPanel>

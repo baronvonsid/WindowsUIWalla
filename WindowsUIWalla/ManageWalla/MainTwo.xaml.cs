@@ -110,8 +110,10 @@ namespace ManageWalla
         private bool tweakUploadImageSize = true;
         private bool startingApplication = true;
         private DateTime lastMarginTweakTime = DateTime.Now;
-        private bool isContracted = false;
+        private bool isExpanded = false;
         private MessageType currentDialogType = MessageType.None;
+        private bool gallerySectionNeedRefresh = true;
+
         #endregion
 
         #region Window Initialise and control.
@@ -463,13 +465,26 @@ namespace ManageWalla
         private void RefreshOverallPanesStructure(PaneMode mode)
         {
             //Ensure panes are all correctly setup each time a refresh is called.
-            gridLeft.ColumnDefinitions[0].Width = new GridLength(0); //Sidebar
-            gridLeft.ColumnDefinitions[1].Width = new GridLength(300); //Main control
+            //gridLeft.ColumnDefinitions[0].Width = new GridLength(0); //Sidebar
+            //gridLeft.ColumnDefinitions[1].Width = new GridLength(300); //Main control
             gridLeft.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star); //Image display grid
             gridLeft.ColumnDefinitions[3].Width = new GridLength(0);
-            gridRight.RowDefinitions[0].Height = new GridLength(60); //Working Pane
+            //gridRight.RowDefinitions[0].Height = new GridLength(60); //Working Pane
             gridRight.ColumnDefinitions[1].Width = new GridLength(0);
             grdImageView.Visibility = Visibility.Collapsed;
+
+            if (isExpanded || mode == PaneMode.ImageEdit || mode == PaneMode.ImageView)
+            {
+                gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
+                gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
+                gridRight.RowDefinitions[0].Height = new GridLength(0);
+            }
+            else
+            {
+                gridLeft.ColumnDefinitions[0].Width = new GridLength(0);
+                gridLeft.ColumnDefinitions[1].Width = new GridLength(300);
+                gridRight.RowDefinitions[0].Height = new GridLength(60);
+            }
 
             switch (mode)
             {
@@ -576,14 +591,13 @@ namespace ManageWalla
                 case PaneMode.ImageView:
                 case PaneMode.ImageEdit:
                     //Switch to full width mode.
-                    gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
-                    gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
-                    gridRight.RowDefinitions[0].Height = new GridLength(0); //Hide header
+                    //gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
+                    //gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
+                    //gridRight.RowDefinitions[0].Height = new GridLength(0); //Hide header
                     lstImageMainViewerList.Visibility = Visibility.Hidden;
                     grdImageView.Visibility = Visibility.Visible;
                     break;
             }
-            //TweakImageMarginSize(DateTime.Now, mode);
         }
 
         private void RefreshPanesAllControls(PaneMode mode)
@@ -605,8 +619,8 @@ namespace ManageWalla
                     radTag.IsEnabled = true;
                     radGallery.IsEnabled = true;
 
-                    //radUpload.IsEnabled = true;
-                    cmdAccount.IsEnabled = true;
+                    PaneEnablePageControls(true);
+
                     break;
                 case PaneMode.CategoryAdd:
                 case PaneMode.CategoryEdit:
@@ -633,7 +647,8 @@ namespace ManageWalla
                     radTag.IsEnabled = false;
                     radGallery.IsEnabled = false;
                     radUpload.IsEnabled = false;
-                    cmdAccount.IsEnabled = false;
+
+                    PaneEnablePageControls(false);
                     break;
                 #endregion
 
@@ -652,8 +667,8 @@ namespace ManageWalla
                     radCategory.IsEnabled = true;
                     radGallery.IsEnabled = true;
                     radUpload.IsEnabled = true;
-                    cmdAccount.IsEnabled = true;
 
+                    PaneEnablePageControls(true);
                     break;
                 case PaneMode.TagAdd:
                 case PaneMode.TagEdit:
@@ -667,7 +682,8 @@ namespace ManageWalla
                     radCategory.IsEnabled = false;
                     radGallery.IsEnabled = false;
                     radUpload.IsEnabled = false;
-                    cmdAccount.IsEnabled = false;
+
+                    PaneEnablePageControls(false);
 
                     if (mode == PaneMode.TagAdd)
                     {
@@ -705,7 +721,7 @@ namespace ManageWalla
                     radCategory.IsEnabled = true;
                     radTag.IsEnabled = true;
                     radUpload.IsEnabled = true;
-                    cmdAccount.IsEnabled = true;
+                    PaneEnablePageControls(true);
                     wrapMyGalleries.IsEnabled = true;
 
                     break;
@@ -722,8 +738,7 @@ namespace ManageWalla
                     radCategory.IsEnabled = false;
                     radTag.IsEnabled = false;
                     radUpload.IsEnabled = false;
-                    cmdAccount.IsEnabled = false;
-
+                    PaneEnablePageControls(false);
                     wrapMyGalleries.IsEnabled = false;
 
                     if (GalleryGetSelectionType() == 0)
@@ -766,11 +781,15 @@ namespace ManageWalla
                     {
                         //No grouping, so hide the grouping options.
                         chkGalleryShowGroupingDesc.IsEnabled = false;
+                        datGallerySections.IsEnabled = false;
+                        cmdGallerySectionReset.IsEnabled = false;
                     }
                     else
                     {
                         //Show grouping options.
                         chkGalleryShowGroupingDesc.IsEnabled = true;
+                        datGallerySections.IsEnabled = true;
+                        cmdGallerySectionReset.IsEnabled = true;
                     }
 
 
@@ -858,8 +877,6 @@ namespace ManageWalla
                         }
                         break;
                     }
-
-
 
                     //Initialise upload controls, no state to consider.
                     if (uploadUIState.Mode == UploadUIState.UploadMode.None)
@@ -1052,6 +1069,8 @@ namespace ManageWalla
                         cmdImageViewNext.IsEnabled = false;
                         cmdImageViewPrevious.IsEnabled = false;
                         lstImageViewTagList.IsEnabled = true;
+
+                        
                     }
                     else
                     {
@@ -1064,7 +1083,10 @@ namespace ManageWalla
                         cmdImageViewNext.IsEnabled = true;
                         cmdImageViewPrevious.IsEnabled = true;
                         lstImageViewTagList.IsEnabled = false;
+
+                        //PaneEnablePageControls(true);
                     }
+                    PaneEnablePageControls(false);
 
                     break;
                 #endregion
@@ -1072,6 +1094,36 @@ namespace ManageWalla
 
             currentPane = mode;
            // TweakImageMarginSize(DateTime.Now, currentPane);
+        }
+
+        private void PaneEnablePageControls(bool enable)
+        {
+            cmdShowMenuLayout.IsEnabled = enable;
+            cmdShowExpandedLayout.IsEnabled = enable;
+            cmdAccount.IsEnabled = enable;
+            sldImageSize.IsEnabled = enable;
+            cmdShowActionsMenu.IsEnabled = enable;
+            cmbGallerySection.IsEnabled = enable;
+
+            if (lstImageMainViewerList != null)
+                lstImageMainViewerList.IsEnabled = enable; 
+
+            if (enable)
+            {
+                ImagesSetNavigationButtons();
+            }
+            else
+            {
+                cmdImageNavigationLast.IsEnabled = enable;
+                cmdImageNavigationNext.IsEnabled = enable;
+                cmdImageNavigationPrevious.IsEnabled = enable;
+                cmdImageNavigationBegin.IsEnabled = enable;
+
+                cmdImageNavigationLastVert.IsEnabled = enable;
+                cmdImageNavigationNextVert.IsEnabled = enable;
+                cmdImageNavigationPreviousVert.IsEnabled = enable;
+                cmdImageNavigationBeginVert.IsEnabled = enable;
+            }
         }
         #endregion
 
@@ -1134,23 +1186,31 @@ namespace ManageWalla
             RefreshPanesAllControls(previousPane);
         }
 
-        private void cmdContract_Click(object sender, RoutedEventArgs e)
+        async private void cmdShowExpandedLayout_Click(object sender, RoutedEventArgs e)
         {
-            panNavigationVert.Visibility = Visibility.Visible;
-            lblImageViewNameVert.Visibility = Visibility.Collapsed;
-            lblImageListNameVert.Visibility = Visibility.Visible;
+            isExpanded = true;
+
+            //panNavigationVert.Visibility = Visibility.Visible;
+            //lblImageViewNameVert.Visibility = Visibility.Collapsed;
+            //lblImageListNameVert.Visibility = Visibility.Visible;
             //cmbGallerySectionVert.Visibility = Visibility.Visible;
 
-            gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
-            gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
+            //gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
+            //gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
+            //gridRight.RowDefinitions[0].Height = new GridLength(0);
 
-            gridRight.RowDefinitions[0].Height = new GridLength(0);
+            
+            RefreshOverallPanesStructure(currentPane);
+            RefreshPanesAllControls(currentPane);
 
-            isContracted = true;
+            DateTime eventTime = DateTime.Now;
+            await WaitAsynchronouslyAsync();
+            TweakImageMarginSize(eventTime, currentPane);
         }
 
-        private void cmdExpand_Click(object sender, RoutedEventArgs e)
+        async private void cmdShowMenuLayout_Click(object sender, RoutedEventArgs e)
         {
+            /*
             if (currentPane == PaneMode.ImageEdit || currentPane == PaneMode.ImageView)
             {
                 RefreshPanesAllControls(previousPane);
@@ -1162,8 +1222,16 @@ namespace ManageWalla
                 gridLeft.ColumnDefinitions[1].Width = new GridLength(300);
                 gridRight.RowDefinitions[0].Height = new GridLength(60);
             }
+            */
 
-            isContracted = false;
+            isExpanded = false;
+
+            //RefreshPanesAllControls(previousPane);
+            RefreshOverallPanesStructure(currentPane);
+
+            DateTime eventTime = DateTime.Now;
+            await WaitAsynchronouslyAsync();
+            TweakImageMarginSize(eventTime, currentPane);
         }
 
         async private void ImageView_Click(object sender, RoutedEventArgs e)
@@ -1394,6 +1462,7 @@ namespace ManageWalla
             }
         }
 
+        /*
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
             Image meImage = sender as Image;
@@ -1402,6 +1471,7 @@ namespace ManageWalla
                 DragDrop.DoDragDrop(meImage, "dunno", DragDropEffects.Copy);
             }
         }
+        */
 
         private void cmdShowActionsMenu_Click(object sender, RoutedEventArgs e)
         {
@@ -1751,11 +1821,11 @@ namespace ManageWalla
 
         private void TweakUploadImageListMargin()
         {
-            return;
+            //return;
 
             /* Upload image list margin */
             double paneWidth = lstUploadImageFileList.ActualWidth - 22.0;
-            double imageWidth = 130.0;
+            double imageWidth = 131.0;
             double imageWidthWithMargin = imageWidth + 4.0;
 
             double imageWidthCount = Math.Floor(paneWidth / (imageWidthWithMargin));
@@ -1915,14 +1985,12 @@ namespace ManageWalla
 
                 if (tweakMainImageSize)
                 {
-                    TweakImageMarginSize(DateTime.Now, currentPane);
+                    
                     tweakMainImageSize = false;
                 }
 
                 if (currentImageList == null)
                     return;
-
-
 
                 string bannerName = "";
                 menuTagRemoveFrom.Header = "Remove images from tag";
@@ -1970,66 +2038,9 @@ namespace ManageWalla
                 lblImageListName.Content = bannerName;
                 lblImageListNameVert.Text = bannerName;
 
-                if ((currentImageList.sectionId > 0 && currentImageList.sectionImageCount > currentImageList.imageCount)
-                    || (currentImageList.sectionId < 1 && currentImageList.totalImageCount > currentImageList.imageCount))
-                {
-                    cmdImageNavigationBegin.Visibility = Visibility.Visible;
-                    cmdImageNavigationPrevious.Visibility = Visibility.Visible;
-                    cmdImageNavigationLast.Visibility = Visibility.Visible;
-                    cmdImageNavigationNext.Visibility = Visibility.Visible;
+                ImagesSetNavigationButtons();
 
-                    cmdImageNavigationBeginVert.Visibility = Visibility.Visible;
-                    cmdImageNavigationPreviousVert.Visibility = Visibility.Visible;
-                    cmdImageNavigationLastVert.Visibility = Visibility.Visible;
-                    cmdImageNavigationNextVert.Visibility = Visibility.Visible;
-
-                    lineActionsMenu.Visibility = Visibility.Visible;
-
-                    if (currentImageList.imageCursor == 0)
-                    {
-                        cmdImageNavigationBegin.IsEnabled = false;
-                        cmdImageNavigationPrevious.IsEnabled = false;
-                        cmdImageNavigationBeginVert.IsEnabled = false;
-                        cmdImageNavigationPreviousVert.IsEnabled = false;
-                    }
-                    else
-                    {
-                        cmdImageNavigationBegin.IsEnabled = true;
-                        cmdImageNavigationPrevious.IsEnabled = true;
-                        cmdImageNavigationBeginVert.IsEnabled = true;
-                        cmdImageNavigationPreviousVert.IsEnabled = true;
-                    }
-
-                    if ((currentImageList.sectionId > 0 && currentImageList.sectionImageCount > (currentImageList.imageCursor + state.userApp.FetchSize))
-                        || (currentImageList.sectionId < 1 && currentImageList.totalImageCount > (currentImageList.imageCursor + state.userApp.FetchSize)))
-                    {
-                        cmdImageNavigationLast.IsEnabled = true;
-                        cmdImageNavigationNext.IsEnabled = true;
-                        cmdImageNavigationLastVert.IsEnabled = true;
-                        cmdImageNavigationNextVert.IsEnabled = true;
-                    }
-                    else
-                    {
-                        cmdImageNavigationLast.IsEnabled = false;
-                        cmdImageNavigationNext.IsEnabled = false;
-                        cmdImageNavigationLastVert.IsEnabled = false;
-                        cmdImageNavigationNextVert.IsEnabled = false;
-                    }
-                }
-                else
-                {
-                    cmdImageNavigationBegin.Visibility = Visibility.Hidden;
-                    cmdImageNavigationPrevious.Visibility = Visibility.Hidden;
-                    cmdImageNavigationLast.Visibility = Visibility.Hidden;
-                    cmdImageNavigationNext.Visibility = Visibility.Hidden;
-
-                    cmdImageNavigationBeginVert.Visibility = Visibility.Hidden;
-                    cmdImageNavigationPreviousVert.Visibility = Visibility.Hidden;
-                    cmdImageNavigationLastVert.Visibility = Visibility.Hidden;
-                    cmdImageNavigationNextVert.Visibility = Visibility.Hidden;
-
-                    lineActionsMenu.Visibility = Visibility.Hidden;
-                }
+                TweakImageMarginSize(DateTime.Now, currentPane);
 
                 if (currentImageList.Images == null)
                     return;
@@ -2077,6 +2088,73 @@ namespace ManageWalla
             {
                 logger.Debug("ImageListUpdateControls has been cancelled.");
                 throw (cancelEx);
+            }
+        }
+
+        private void ImagesSetNavigationButtons()
+        {
+            if (currentImageList == null)
+                return;
+
+            if ((currentImageList.sectionId > 0 && currentImageList.sectionImageCount > currentImageList.imageCount)
+                || (currentImageList.sectionId < 1 && currentImageList.totalImageCount > currentImageList.imageCount))
+            {
+                cmdImageNavigationBegin.Visibility = Visibility.Visible;
+                cmdImageNavigationPrevious.Visibility = Visibility.Visible;
+                cmdImageNavigationLast.Visibility = Visibility.Visible;
+                cmdImageNavigationNext.Visibility = Visibility.Visible;
+
+                cmdImageNavigationBeginVert.Visibility = Visibility.Visible;
+                cmdImageNavigationPreviousVert.Visibility = Visibility.Visible;
+                cmdImageNavigationLastVert.Visibility = Visibility.Visible;
+                cmdImageNavigationNextVert.Visibility = Visibility.Visible;
+
+                lineActionsMenu.Visibility = Visibility.Visible;
+
+                if (currentImageList.imageCursor == 0)
+                {
+                    cmdImageNavigationBegin.IsEnabled = false;
+                    cmdImageNavigationPrevious.IsEnabled = false;
+                    cmdImageNavigationBeginVert.IsEnabled = false;
+                    cmdImageNavigationPreviousVert.IsEnabled = false;
+                }
+                else
+                {
+                    cmdImageNavigationBegin.IsEnabled = true;
+                    cmdImageNavigationPrevious.IsEnabled = true;
+                    cmdImageNavigationBeginVert.IsEnabled = true;
+                    cmdImageNavigationPreviousVert.IsEnabled = true;
+                }
+
+                if ((currentImageList.sectionId > 0 && currentImageList.sectionImageCount > (currentImageList.imageCursor + state.userApp.FetchSize))
+                    || (currentImageList.sectionId < 1 && currentImageList.totalImageCount > (currentImageList.imageCursor + state.userApp.FetchSize)))
+                {
+                    cmdImageNavigationLast.IsEnabled = true;
+                    cmdImageNavigationNext.IsEnabled = true;
+                    cmdImageNavigationLastVert.IsEnabled = true;
+                    cmdImageNavigationNextVert.IsEnabled = true;
+                }
+                else
+                {
+                    cmdImageNavigationLast.IsEnabled = false;
+                    cmdImageNavigationNext.IsEnabled = false;
+                    cmdImageNavigationLastVert.IsEnabled = false;
+                    cmdImageNavigationNextVert.IsEnabled = false;
+                }
+            }
+            else
+            {
+                cmdImageNavigationBegin.Visibility = Visibility.Hidden;
+                cmdImageNavigationPrevious.Visibility = Visibility.Hidden;
+                cmdImageNavigationLast.Visibility = Visibility.Hidden;
+                cmdImageNavigationNext.Visibility = Visibility.Hidden;
+
+                cmdImageNavigationBeginVert.Visibility = Visibility.Hidden;
+                cmdImageNavigationPreviousVert.Visibility = Visibility.Hidden;
+                cmdImageNavigationLastVert.Visibility = Visibility.Hidden;
+                cmdImageNavigationNextVert.Visibility = Visibility.Hidden;
+
+                lineActionsMenu.Visibility = Visibility.Hidden;
             }
         }
 
@@ -2194,6 +2272,7 @@ namespace ManageWalla
         {
             if (lstImageMainViewerList.SelectionMode == SelectionMode.Single)
             {
+                //isExpanded = true;
                 previousPane = currentPane;
                 cmdImageViewDetailToggle.IsChecked = false;
 
@@ -3297,11 +3376,11 @@ namespace ManageWalla
             System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
             if (folderDialog.SelectedPath.Length > 0)
             {
-                if (tweakUploadImageSize)
-                {
-                    TweakImageMarginSize(DateTime.Now, currentPane);
-                    tweakUploadImageSize = false;
-                }
+                //if (tweakUploadImageSize)
+                //{
+                //    TweakImageMarginSize(DateTime.Now, currentPane);
+                //    tweakUploadImageSize = false;
+                //}
 
                 if (cancelUploadTokenSource != null)
                     cancelUploadTokenSource.Cancel();
@@ -3368,12 +3447,15 @@ namespace ManageWalla
 
                 if (lstUploadImageFileList.Items.Count > 0) //&& lstUploadImageFileList.SelectedItems.Count == 0
                 {
-                    TweakImageMarginSize(DateTime.Now, currentPane);  
                     uploadUIState.Mode = UploadUIState.UploadMode.Folder;
                     RefreshPanesAllControls(PaneMode.Upload);
                     lstUploadImageFileList.SelectedIndex = 0;
                 }
                 RefreshOverallPanesStructure(currentPane);
+
+                DateTime eventTime = DateTime.Now;
+                await WaitAsynchronouslyAsync();
+                TweakImageMarginSize(eventTime, currentPane); 
             }
         }
 
@@ -3387,11 +3469,11 @@ namespace ManageWalla
             System.Windows.Forms.DialogResult result = openDialog.ShowDialog();
             if (openDialog.FileNames.Length > 0)
             {
-                if (tweakUploadImageSize)
-                {
-                    TweakImageMarginSize(DateTime.Now, currentPane);
-                    tweakUploadImageSize = false;
-                }
+                //if (tweakUploadImageSize)
+                //{
+                //    TweakImageMarginSize(DateTime.Now, currentPane);
+                //    tweakUploadImageSize = false;
+                //}
 
                 if (cancelUploadTokenSource != null)
                     cancelUploadTokenSource.Cancel();
@@ -3437,13 +3519,16 @@ namespace ManageWalla
 
             if (lstUploadImageFileList.Items.Count > 0) //&& lstUploadImageFileList.SelectedItems.Count == 0
             {
-                TweakImageMarginSize(DateTime.Now, currentPane);  
                 uploadUIState.GotSubFolders = false;
                 uploadUIState.Mode = UploadUIState.UploadMode.Images;
                 RefreshPanesAllControls(PaneMode.Upload);
                 lstUploadImageFileList.SelectedIndex = 0;
             }
             RefreshOverallPanesStructure(currentPane);
+
+            DateTime eventTime = DateTime.Now;
+            await WaitAsynchronouslyAsync();
+            TweakImageMarginSize(eventTime, currentPane);  
         }
 
         async private void cmdUploadResumePauseClear_Click(object sender, RoutedEventArgs e)
@@ -4187,6 +4272,8 @@ namespace ManageWalla
 
                 Gallery gallery = await controller.GalleryGetMetaAsync(galleryListGalleryRef, cancelTokenSource.Token);
 
+                gallerySectionNeedRefresh = true;
+                tabGallery.SelectedIndex = 0;
                 txtGalleryName.Text = gallery.Name;
                 txtGalleryDescription.Text = gallery.Desc;
                 txtGalleryPassword.Text = gallery.Password;
@@ -4442,7 +4529,7 @@ namespace ManageWalla
             newCmb.Name = "cmbGalleryCategoryItem" + categoryId.ToString();
             newCmb.Style = (Style)FindResource("styleComboBoxInTreeView");
             newCmb.SelectedIndex = 0;
-            newCmb.Width = 70.0;
+            newCmb.Width = 40.0;
 
             try { this.UnregisterName(newCmb.Name); }
             catch { }
@@ -4463,7 +4550,7 @@ namespace ManageWalla
             txtEntryNone.Text = "N";
             txtEntryNone.Margin = new Thickness(4.0);
 
-            stackEntryNone.Children.Add(imgEntryNone);
+            //stackEntryNone.Children.Add(imgEntryNone);
             stackEntryNone.Children.Add(txtEntryNone);
             entryNone.Content = stackEntryNone;
 
@@ -4482,7 +4569,7 @@ namespace ManageWalla
             txtEntryInclude.Text = "Y";
             txtEntryInclude.Margin = new Thickness(4.0);
 
-            stackInclude.Children.Add(imgEntryInclude);
+            //stackInclude.Children.Add(imgEntryInclude);
             stackInclude.Children.Add(txtEntryInclude);
             entryInclude.Content = stackInclude;
 
@@ -4501,7 +4588,7 @@ namespace ManageWalla
             txtEntryAll.Text = "All";
             txtEntryAll.Margin = new Thickness(4.0);
 
-            stackEntryAll.Children.Add(imgEntryAll);
+            //stackEntryAll.Children.Add(imgEntryAll);
             stackEntryAll.Children.Add(txtEntryAll);
             entryAll.Content = stackEntryAll;
 
@@ -4681,13 +4768,24 @@ namespace ManageWalla
             if (parentRecursive)
             {
                 currentItem.IsEnabled = false;
-                cmbCurrent.SelectedIndex = 0;
+                cmbCurrent.SelectedIndex = 1;
+                currentItem.Foreground = (Brush)FindResource("FontBorderBrushSelected");
             }
             else
             {
                 currentItem.IsEnabled = true;
-                if (cmbCurrent.SelectedIndex == 2)
-                    parentRecursive = true;
+
+
+                if (cmbCurrent.SelectedIndex == 0)
+                {
+                    currentItem.Foreground = (Brush)FindResource("FontBorderBrush");
+                }
+                else
+                {
+                    currentItem.Foreground = (Brush)FindResource("FontBorderBrushSelected");
+                    if (cmbCurrent.SelectedIndex == 2)
+                        parentRecursive = true;
+                }
             }
 
             foreach (TreeViewItem child in currentItem.Items)
@@ -4713,6 +4811,9 @@ namespace ManageWalla
                     lstGalleryPresentationList.Items.Refresh();
                     lstGalleryStylesList.Items.Refresh();
                 }
+
+                gallerySectionNeedRefresh = true;
+                tabGallery.SelectedIndex = 0;
 
                 txtGalleryName.Text = "";
                 txtGalleryDescription.Text = "";
@@ -4764,6 +4865,9 @@ namespace ManageWalla
         {
             try
             {
+                if (gallerySectionNeedRefresh)
+                    await GalleryReloadSection(false);
+
                 Gallery gallery = GalleryCreateFromGUI(false);
 
                 if (!GalleryValidate(gallery, false))
@@ -4806,10 +4910,13 @@ namespace ManageWalla
             }
         }
 
-        async private Task GalleryReloadSection()
+        async private Task GalleryReloadSection(bool isReset)
         {
             try
             {
+                if (!gallerySectionNeedRefresh && !isReset)
+                    return;
+
                 ShowMessage(MessageType.Busy, "Gallery sections being refreshed");
 
                 if (cancelTokenSource != null)
@@ -4818,7 +4925,7 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                await controller.GalleryGetSectionListAndMerge(GalleryCreateFromGUI(false), gallerySectionList, cancelTokenSource.Token);
+                await controller.GalleryGetSectionListAndMerge(GalleryCreateFromGUI(false), gallerySectionList, isReset, cancelTokenSource.Token);
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
@@ -4835,6 +4942,10 @@ namespace ManageWalla
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "Gallery sections could not be refreshed, error:" + ex.Message);
+            }
+            finally
+            {
+                gallerySectionNeedRefresh = false;
             }
         }
 
@@ -5208,6 +5319,8 @@ namespace ManageWalla
         {
             foreach (TreeViewItem child in treeGalleryCategoryView.Items)
                 GalleryCategoryRecursiveRelatedUpdates(child, false);
+
+            gallerySectionNeedRefresh = true;
         }
 
 
@@ -5365,11 +5478,16 @@ namespace ManageWalla
             }
         }
 
-        private void RevertFromImageView_MouseUp(object sender, MouseButtonEventArgs e)
+        async private void RevertFromImageView_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            //isExpanded = false;
+
             RefreshPanesAllControls(previousPane);
             RefreshOverallPanesStructure(currentPane);
-            TweakImageMarginSize(DateTime.Now, currentPane);   
+
+            DateTime eventTime = DateTime.Now;
+            await WaitAsynchronouslyAsync();
+            TweakImageMarginSize(eventTime, currentPane); 
         }
 
 
@@ -5500,10 +5618,10 @@ namespace ManageWalla
             finally
             {
                 uploadUIState.Uploading = false;
-                RefreshPanesAllControls(currentPane);
+                //RefreshPanesAllControls(currentPane);
 
-                if (!isContracted)
-                    RefreshOverallPanesStructure(currentPane);
+                //if (!isExpanded)
+                //    RefreshOverallPanesStructure(currentPane);
             }
         }
 
@@ -5713,15 +5831,10 @@ namespace ManageWalla
             }
         }
 
-
-
-        async private void Label_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            await GalleryReloadSection();
-        }
-
         private void lstGallerySelectionOptions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            gallerySectionNeedRefresh = true;
+
             if (lstGalleryGroupOptions == null || lstGallerySelectionOptions == null)
                 return;
 
@@ -5814,6 +5927,26 @@ namespace ManageWalla
             
         }
 
+        async private void tabGallery_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (tabGallery.SelectedIndex == 2)
+                await GalleryReloadSection(false);
+        }
+
+        private void GalleryTags_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            gallerySectionNeedRefresh = true;
+        }
+
+        private void lstGalleryGroupOptions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshPanesAllControls(currentPane);
+        }
+
+        async private void cmdGallerySectionReset_Click(object sender, RoutedEventArgs e)
+        {
+            await GalleryReloadSection(true);
+        }
 
     }
 }

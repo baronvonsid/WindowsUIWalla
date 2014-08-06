@@ -1409,12 +1409,15 @@ namespace ManageWalla
             }
         }
 
-        async public Task GalleryGetSectionListAndMerge(Gallery gallery, GallerySectionList gallerySectionList, CancellationToken cancelToken)
+        async public Task GalleryGetSectionListAndMerge(Gallery gallery, GallerySectionList gallerySectionList, bool isReset, CancellationToken cancelToken)
         {
             try
             {
                 //Retrieve server sections list.
                 Gallery serverGallery = await serverHelper.GalleryGetSections(gallery, cancelToken);
+
+                if (isReset)
+                    gallerySectionList.Clear();
 
                 //Loop through existing list, remove entries not present server side.
                 int existingCounter = gallerySectionList.Count-1;

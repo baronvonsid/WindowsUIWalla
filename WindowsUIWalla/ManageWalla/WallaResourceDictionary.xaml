@@ -36,7 +36,7 @@
     <ImageSource x:Key="errorImageSrc">resources/icons/error.gif</ImageSource>
     <ImageSource x:Key="warningImageSrc">resources/icons/warning.gif</ImageSource>
     <ImageSource x:Key="busyImageAnimSrc">resources/anim/busy.gif</ImageSource>
-    <ImageSource x:Key="busyImageSrc">resources/anim/busy.gif</ImageSource>
+    <!--<ImageSource x:Key="busyImageSrc">resources/anim/busy.gif</ImageSource>-->
     
 
     <ImageSource x:Key="accountCloseImageSrc">resources/icons/error.gif</ImageSource>
@@ -145,8 +145,8 @@
 
     <SolidColorBrush x:Key="AlertBackgroundBrush" Color="White" />
 
-    <SolidColorBrush x:Key="GroupControlBackgroundBrush" Color="#FFECECEC" />
-    <SolidColorBrush x:Key="GalleryExcludeBackgroundBrush" Color="#FFFFE9E9" />
+    <SolidColorBrush x:Key="GroupControlBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="GalleryExcludeBackgroundBrush" Color="#FFFFFBFB" />
     
 
 

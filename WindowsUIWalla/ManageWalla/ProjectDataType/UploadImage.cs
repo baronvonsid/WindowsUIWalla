@@ -141,9 +141,9 @@ namespace ManageWalla
                 myBitmapImage.BeginInit();
 
                 if (isLandscape)
-                    myBitmapImage.DecodePixelHeight = 140;
+                    myBitmapImage.DecodePixelHeight = 130;
                 else
-                    myBitmapImage.DecodePixelWidth = 140;
+                    myBitmapImage.DecodePixelWidth = 130;
                     
                 myBitmapImage.UriSource = new Uri(filePath);
                 myBitmapImage.EndInit();
