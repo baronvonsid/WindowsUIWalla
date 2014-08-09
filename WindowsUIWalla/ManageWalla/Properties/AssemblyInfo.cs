@@ -13,7 +13,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("fotowalla ltd.")]
 [assembly: AssemblyProduct("ManageWalla")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -57,3 +57,4 @@ using System.Windows;
 
 //ConfigFile = "ManageWalla.exe.config"
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
+//[assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config", Watch = true)]

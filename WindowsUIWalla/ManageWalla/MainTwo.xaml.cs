@@ -1273,6 +1273,9 @@ namespace ManageWalla
         async private void ImageViewUpdateNextPrevious()
         {
             GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
+            if (current == null)
+                return;
+
             cancelTokenSource = new CancellationTokenSource();
             await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
             await current.LoadMeta(false, cancelTokenSource.Token);
