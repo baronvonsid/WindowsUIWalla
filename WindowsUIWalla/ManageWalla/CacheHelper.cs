@@ -13,11 +13,8 @@ namespace ManageWalla
 {
     static public class CacheHelper
     {
-        //static List<ThumbCache> thumbCacheList = null;
-    
-        private static byte[] key = { 9, 2, 7, 1, 5, 4, 7, 8 };
-        private static byte[] iv = { 1, 8, 3, 4, 1, 6, 5, 9 };
-        //private static string cacheFileLocation = Application.UserAppDataPath;
+        private static byte[] key = { 9, 2, 7, 1, 5, 4, 7, 8, 5, 7, 9, 2, 7, 1, 5, 4, 7, 8, 5, 7, 9, 2, 7, 1, 5, 4, 7, 8, 5, 7, 3, 4 };
+        private static byte[] iv = { 9, 2, 7, 1, 5, 4, 7, 8, 5, 7, 9, 2, 7, 1, 5, 4 };
 
         #region GlobalState
         public static GlobalState GetGlobalState(string profileName)
@@ -49,11 +46,12 @@ namespace ManageWalla
         public static void SaveGlobalState(GlobalState state, string profileName)
         {
             string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
-            DESCryptoServiceProvider des = new DESCryptoServiceProvider();
+            AesCryptoServiceProvider aes = new AesCryptoServiceProvider();
+            aes.KeySize = 256;
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
             {
-                var cryptoStream = new CryptoStream(fs, des.CreateEncryptor(key, iv), CryptoStreamMode.Write);
+                var cryptoStream = new CryptoStream(fs, aes.CreateEncryptor(key, iv), CryptoStreamMode.Write);
                 BinaryFormatter formatter = new BinaryFormatter();
 
                 // This is where you serialize the class
@@ -67,13 +65,14 @@ namespace ManageWalla
             string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
             GlobalState stateTemp = null;
 
-            DESCryptoServiceProvider des = new DESCryptoServiceProvider();
+            AesCryptoServiceProvider aes = new AesCryptoServiceProvider();
+            aes.KeySize = 256;
 
             if (File.Exists(fileName))
             {
                 using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
                 {
-                    var cryptoStream = new CryptoStream(fs, des.CreateDecryptor(key, iv), CryptoStreamMode.Read);
+                    var cryptoStream = new CryptoStream(fs, aes.CreateDecryptor(key, iv), CryptoStreamMode.Read);
                     BinaryFormatter formatter = new BinaryFormatter();
                     stateTemp = (GlobalState)formatter.Deserialize(cryptoStream);
                 }
@@ -459,125 +458,4 @@ namespace ManageWalla
         }
         #endregion
     }
-
-
-
-
-
-
-
-
-
-
-
-            //Infra Properties
-        
-    /*
-        private const long cacheSize = 14000000; //3072000; 14,000 average thumb size array length.
-
-        //Business Objects
-        public List<ThumbnailCache> thumbList { get; set; }
-
-
-        #region InfraCodes
-        public ThumbState() { }
-
-
-        protected ThumbState(SerializationInfo info, StreamingContext context)
-        {
-            thumbList = (List<ThumbnailCache>)info.GetValue("thumbList", typeof(List<ThumbnailCache>));
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("thumbList", thumbList);
-        }
-
-        public static ThumbState GetThumbs()
-        {
-            // Try to load from File
-            thumbState = RetreiveFromFile();
-            if (thumbState == null)
-            {
-                thumbState = new ThumbState();
-                thumbState.thumbList = new List<ThumbnailCache>();
-            }
-
-            return thumbState;
-        }
-
-        public static Byte[] GetImageArray(long imageId)
-        {
-            ThumbnailCache current = thumbState.thumbList.Find(m => (m.imageId == imageId));
-            if (current != null)
-            {
-                current.lastAccessed = DateTime.Now;
-                return current.imageArray;
-            }
-            return null;
-        }
-
-        public static void SaveImageArray(long imageId, Byte[] newImageArray)
-        {
-            //Check current size of cache, if exceeding limit then remove images.
-            ReduceCacheSize(cacheSize);
-            ThumbnailCache newCacheItem = new ThumbnailCache();
-            newCacheItem.imageId = imageId;
-            newCacheItem.lastAccessed = DateTime.Now;
-            newCacheItem.imageArray = newImageArray;
-
-            thumbState.thumbList.Add(newCacheItem);
-        }
-
-        public static void ReduceCacheSize(long targetSize)
-        {
-            long totalSize = (long)thumbState.thumbList.Sum(r => r.imageSize);
-
-            long thumbSize = 14000; //30KB average
-            long buffer = thumbSize * 10;
-
-            while (totalSize > (targetSize - buffer))
-            {
-                //Find oldest entry and remove form list.
-                ThumbnailCache oldest = thumbState.thumbList.First(m => m.lastAccessed == (thumbState.thumbList.Max(e => e.lastAccessed)));
-                thumbState.thumbList.Remove(oldest);
-                totalSize = totalSize - oldest.imageSize;
-            }
-
-        }
-
-        private static ThumbState RetreiveFromFile()
-        {
-            string fileName = Path.Combine(Application.UserAppDataPath, "Walla-LocalThumbCache.db");
-            ThumbState thumbStateTemp = null;
-
-            if (File.Exists(fileName))
-            {
-                using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    thumbStateTemp = formatter.Deserialize(fs) as ThumbState;
-                    fs.Close();
-                }
-
-                return thumbStateTemp;
-            }
-
-            return null;
-        }
-
-        public void SaveState()
-        {
-            string fileName = Path.Combine(Application.UserAppDataPath, "Walla-LocalThumbCache.db");
-
-            using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(fs, this);
-                fs.Close();
-            }
-        }
-
-    */
-
 }

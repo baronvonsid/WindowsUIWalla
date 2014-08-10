@@ -30,10 +30,10 @@ namespace ManageWalla
         private long port;
         private string wsPath;
         private string appKey;
-        private long userId;
+        //private long userId;
         private string userName;
         private string webPath;
-        private string sessionKey;
+        //private string sessionKey;
 
         public ServerHelper(string hostNameParam, int portParam, string wsPathParam, string appKeyParam, string webPathParam)
         {
@@ -66,18 +66,21 @@ namespace ManageWalla
 
         async public Task<bool> Logon(string userName, string passwordParam)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
                 HttpClient initialHttp = new HttpClient();
-                
                 initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
 
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,"logon?userName=" + userName);
+                url = "logon?userName=" + userName;
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await initialHttp.SendAsync(request);
                 response.EnsureSuccessStatusCode();
-
+                
                 http = new HttpClient();
                 http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
                 this.userName = userName;
@@ -90,10 +93,16 @@ namespace ManageWalla
                 logger.Error(ex);
                 return false;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.Logon()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<Account> AccountGet(CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "");
@@ -109,13 +118,18 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("AccountGet has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("AccountGet has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 throw ex;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.AccountGet()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -126,6 +140,7 @@ namespace ManageWalla
 
         async public Task<bool> VerifyApp(string validation)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 HttpClient initialHttp = new HttpClient();
@@ -144,20 +159,25 @@ namespace ManageWalla
                 logger.Error(ex);
                 return false;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.VerifyApp()", (int)duration.TotalMilliseconds, ""); }
+            }
         }
 
         async public Task<bool> VerifyPlatform(string os, string machineType, int majorVersion, int minorVersion)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
 
                 HttpClient initialHttp = new HttpClient();
                 initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
 
-                // POST /platform?OS={OS}&machine={machine}&major={major}&minor={minor}
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,
-                    "platform?OS=" + os + "&machineType=" + machineType +
-                    "&major=" + majorVersion.ToString() + "&minor=" + minorVersion.ToString());
+                url = "platform?OS=" + os + "&machineType=" + machineType + "&major=" + majorVersion.ToString() + "&minor=" + minorVersion.ToString();
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await initialHttp.SendAsync(request);
@@ -170,13 +190,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 return false;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.VerifyPlatform()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<UserApp> UserAppGet(long userAppId)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "userapp/" + userAppId.ToString());
+                url = "userapp/" + userAppId.ToString();
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await http.SendAsync(request);
@@ -192,13 +220,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.UserAppGet()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<long> UserAppCreateUpdateAsync(UserApp userApp, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "userapp");
+                url = "userapp";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -214,7 +250,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("UserAppCreateUpdateAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("UserAppCreateUpdateAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -222,15 +258,23 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.UserAppCreateUpdateAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
         #endregion
 
         #region Tag
         async public Task<TagList> TagGetListAsync(DateTime? lastModified, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tags");
+                url = "tags";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
@@ -258,7 +302,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("TagGetListAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("TagGetListAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -266,13 +310,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.TagGetListAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task TagUpdateAsync(Tag newTag, string oldTagName, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "tag/" + Uri.EscapeUriString(oldTagName));
+                url = "tag/" + Uri.EscapeUriString(oldTagName);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
@@ -285,7 +337,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("TagUpdateAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("TagUpdateAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -293,13 +345,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.TagUpdateAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task TagCreateAsync(Tag tag, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "tag/" + Uri.EscapeUriString(tag.Name));
+                url = "tag/" + Uri.EscapeUriString(tag.Name);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
@@ -312,7 +372,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("TagCreateAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("TagCreateAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -320,13 +380,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.TagCreateAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<Tag> TagGetMeta(string tagName, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "tag/" + Uri.EscapeUriString(tagName));
+                url = "tag/" + Uri.EscapeUriString(tagName);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
@@ -341,7 +409,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("TagGetMeta has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("TagGetMeta has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -349,13 +417,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.TagGetMeta()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task TagDeleteAsync(Tag tag, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "tag/" + Uri.EscapeUriString(tag.Name));
+                url = "tag/" + Uri.EscapeUriString(tag.Name);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -367,7 +443,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("TagDeleteAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("TagDeleteAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -375,14 +451,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.TagDeleteAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task TagAddRemoveImagesAsync(string tagName, ImageIdList imagesToMove, bool add, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
                 HttpRequestMessage request = null;
-                string url =  "tag/" + Uri.EscapeUriString(tagName) + "/images";
+                url =  "tag/" + Uri.EscapeUriString(tagName) + "/images";
                 if (add)
                 {
                     request = new HttpRequestMessage(HttpMethod.Put, url);
@@ -403,7 +486,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("TagAddRemoveImagesAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("TagAddRemoveImagesAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -411,15 +494,23 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.TagAddRemoveImagesAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
         #endregion
 
         #region Gallery
         async public Task<GalleryList> GalleryGetListAsync(DateTime? lastModified, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "galleries");
+                url = "galleries";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
@@ -444,21 +535,29 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GalleryGetListAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GalleryGetListAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 throw ex;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryGetListAsync()", (int)duration.TotalMilliseconds, url); }
             }
         }
 
         async public Task GalleryUpdateAsync(Gallery gallery, string oldGalleryName, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "gallery/" + Uri.EscapeUriString(oldGalleryName));
+                url = "gallery/" + Uri.EscapeUriString(oldGalleryName);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
@@ -471,21 +570,29 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GalleryUpdateAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GalleryUpdateAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 throw ex;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryUpdateAsync()", (int)duration.TotalMilliseconds, url); }
             }
         }
 
         async public Task GalleryCreateAsync(Gallery gallery, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "gallery/" + Uri.EscapeUriString(gallery.Name));
+                url = "gallery/" + Uri.EscapeUriString(gallery.Name);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
@@ -498,7 +605,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GalleryCreateAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GalleryCreateAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -506,13 +613,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryCreateAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<Gallery> GalleryGetMeta(string galleryName, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "gallery/" + Uri.EscapeUriString(galleryName));
+                url = "gallery/" + Uri.EscapeUriString(galleryName);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
@@ -525,7 +640,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GalleryGetMeta has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GalleryGetMeta has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -533,13 +648,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryGetMeta()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task GalleryDeleteAsync(Gallery gallery, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "gallery/" + Uri.EscapeUriString(gallery.Name));
+                url = "gallery/" + Uri.EscapeUriString(gallery.Name);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -551,20 +674,28 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("GalleryDeleteAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GalleryDeleteAsync has been cancelled.");}
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryDeleteAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<GalleryOptions> GalleryGetOptionsAsync(DateTime? lastModified, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "gallery/galleryoptions");
+                url = "gallery/galleryoptions";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
@@ -589,7 +720,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GalleryGetOptionsAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GalleryGetOptionsAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -597,13 +728,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryGetOptionsAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<Gallery> GalleryGetSections(Gallery gallery, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "gallery/gallerysections");
+                url = "gallery/gallerysections";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -621,7 +760,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GalleryGetSections has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GalleryGetSections has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -629,13 +768,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryGetSections()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<string> GalleryCreatePreviewAsync(Gallery gallery, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "gallerypreview");
+                url = "gallerypreview";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
 
@@ -654,7 +801,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GalleryCreateAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GalleryCreateAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -662,18 +809,24 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryCreatePreviewAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
         #endregion
 
         #region Upload
         async public Task<string> UploadImageAsync(UploadImage image, UploadImageState newUploadEntry, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                //Preparing + image.Meta.Name
-
                 //Initial Request setup
-                HttpRequestMessage requestImage = new HttpRequestMessage(HttpMethod.Post, "image");
+                url = "image";
+                HttpRequestMessage requestImage = new HttpRequestMessage(HttpMethod.Post, url);
                 requestImage.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 //Associate file to upload.
@@ -698,7 +851,8 @@ namespace ManageWalla
                 newUploadEntry.status = UploadImage.ImageStatus.FileReceived;
                 image.Meta.Status = 1;
 
-                HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, "image/" + imageId.ToString() + "/meta");
+                url = "image/" + imageId.ToString() + "/meta";
+                HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, url);
                 requestMeta.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -711,11 +865,6 @@ namespace ManageWalla
                 HttpResponseMessage responseMeta = await http.SendAsync(requestMeta, cancelToken);
                 responseMeta.EnsureSuccessStatusCode();
 
-
-
-                //System.Threading.Thread.Sleep(1000);
-
-                //Uploaded + image.Meta.Name
                 return null;
             }
             catch (HttpRequestException httpEx)
@@ -725,7 +874,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("UploadImageAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("UploadImageAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -733,13 +882,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 return ex.Message;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.UploadImageAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<UploadStatusList> UploadGetStatusListAsync(ImageIdList orderIdList, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "image/uploadstatus");
+                url = "image/uploadstatus";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -759,7 +916,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("UploadGetStatusListAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("UploadGetStatusListAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -767,15 +924,23 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.UploadGetStatusListAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
         #endregion
 
         #region Category
         async public Task<long> CategoryCreateAsync(Category category, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "category");
+                url = "category";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -792,7 +957,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("CategoryCreateAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("CategoryCreateAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -800,13 +965,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.CategoryCreateAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<CategoryList> CategoryGetListAsync(DateTime? lastModified, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "categories");
+                url = "categories";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 if (lastModified.HasValue)
@@ -831,7 +1004,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("CategoryGetListAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("CategoryGetListAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -839,13 +1012,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.CategoryGetListAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task CategoryUpdateAsync(Category category, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "category/" + Uri.EscapeUriString(category.id.ToString()));
+                url = "category/" + Uri.EscapeUriString(category.id.ToString());
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -857,7 +1038,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("CategoryUpdateAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("CategoryUpdateAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -865,13 +1046,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.CategoryUpdateAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<Category> CategoryGetMeta(long categoryId, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "category/" + Uri.EscapeUriString(categoryId.ToString()));
+                url = "category/" + Uri.EscapeUriString(categoryId.ToString());
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
@@ -884,7 +1073,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("CategoryGetMeta has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("CategoryGetMeta has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -892,13 +1081,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.CategoryGetMeta()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task CategoryDeleteAsync(Category category, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "category/" + Uri.EscapeUriString(category.id.ToString()));
+                url = "category/" + Uri.EscapeUriString(category.id.ToString());
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -910,7 +1107,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("CategoryDeleteAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("CategoryDeleteAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -918,13 +1115,20 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.CategoryDeleteAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<string> CategoryMoveImagesAsync(long categoryId, ImageIdList imagesToMove, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            String url = "";
             try
             {
-                string url = "category/" + Uri.EscapeUriString(categoryId.ToString()) + "/images";
+                url = "category/" + Uri.EscapeUriString(categoryId.ToString()) + "/images";
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
 
@@ -941,7 +1145,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("CategoryMoveImagesAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("CategoryMoveImagesAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -949,12 +1153,18 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.CategoryMoveImagesAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
         #endregion
 
         #region Images
         async public Task<Byte[]> GetByteArray(string requestUrl, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 MemoryStream memory;
@@ -969,7 +1179,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GetByteArray has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GetByteArray has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -977,20 +1187,27 @@ namespace ManageWalla
                 logger.Error(ex);
                 return null;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GetByteArray()", (int)duration.TotalMilliseconds, requestUrl); }
+            }
         }
  
         async public Task<ImageList> GetImageListAsync(string type, string id, DateTime? lastModified, int cursor, int size, string searchQueryString, long sectionId, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
                 /* GET /{userName}/{type}/{identity}/{imageCursor}/{size} */
 
-                string requestUrl = type + "/" + id + "/" + cursor.ToString() + "/" + size.ToString(); // +"?" + searchQueryString ?? "";
+                url = type + "/" + id + "/" + cursor.ToString() + "/" + size.ToString(); // +"?" + searchQueryString ?? "";
 
                 if (sectionId > 0)
-                    requestUrl = requestUrl + "?sectionId=" + sectionId.ToString();
+                    url = url + "?sectionId=" + sectionId.ToString();
 
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 if (lastModified.HasValue)
@@ -1014,7 +1231,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GetImageListAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("GetImageListAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -1022,12 +1239,20 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GetImageListAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
+                url = "images";
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "images");
 
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
@@ -1041,7 +1266,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("DeleteImagesAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("DeleteImagesAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -1049,13 +1274,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.DeleteImagesAsync()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task<ImageMeta> ImageGetMeta(long imageId, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "image/" + imageId.ToString() + "/meta");
+                url = "image/" + imageId.ToString() + "/meta";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await http.SendAsync(request, cancelToken);
@@ -1068,7 +1301,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("ImageGetMeta has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("ImageGetMeta has been cancelled."); }
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -1076,13 +1309,21 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.ImageGetMeta()", (int)duration.TotalMilliseconds, url); }
+            }
         }
 
         async public Task ImageUpdateMetaAsync(ImageMeta imageMeta, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
+            string url = "";
             try
             {
-                HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, "image/" + imageMeta.id.ToString() + "/meta");
+                url = "image/" + imageMeta.id.ToString() + "/meta";
+                HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, url);
                 requestMeta.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
@@ -1094,13 +1335,18 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("ImageUpdateMetaAsync has been cancelled.");
+                if (logger.IsDebugEnabled) {logger.Debug("ImageUpdateMetaAsync has been cancelled.");}
                 throw cancelEx;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 throw ex;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.ImageUpdateMetaAsync()", (int)duration.TotalMilliseconds, url); }
             }
         }
         

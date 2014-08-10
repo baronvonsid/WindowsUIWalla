@@ -37,7 +37,7 @@ namespace ManageWalla
         private DateTime metaUdfDate3;
         private ImageMetaTagRef[] metaTagRef = null;
         private DateTime metaTakenDate;
-        private bool metaTakenDateSet = false;
+        //private bool metaTakenDateSet = false;
 
         private bool metaUdfChar1All = false;
         private bool metaUdfChar2All = false;

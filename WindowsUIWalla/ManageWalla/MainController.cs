@@ -36,16 +36,11 @@ namespace ManageWalla
         private GalleryStyleList galleryStyleList = null;
         private GalleryPresentationList galleryPresentationList = null;
         private bool createdCategory = false;
-
-        //private ThumbState thumbState = null;
         private ServerHelper serverHelper = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainController));
-        private CancellationTokenSource cancelTokenSourceToDel = new CancellationTokenSource(); //TODO delete this.
 
         public MainController() 
-        {//MainWindow currentMainParam
-            //Set a reference to the main window for two way comms.
-            //currentMain = currentMainParam;
+        {
         }
 
         public MainController(MainTwo currentMainParam)
@@ -73,23 +68,6 @@ namespace ManageWalla
         {
             return mainCopyCacheList;
         }
-
-        /*
-        public GalleryPresentationList GetGalleryPresentationList()
-        {
-            return galleryPresentationList;
-        }
-
-        public GalleryStyleList GetGalleryStyleList()
-        {
-            return galleryStyleList;
-        }
-
-        public UploadImageStateList UpdateFromStateUploadImageStateList()
-        {
-           return uploadImageStateList;
-        }
-        */
 
         public void Dispose()
         {

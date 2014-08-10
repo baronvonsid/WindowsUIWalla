@@ -12,7 +12,7 @@ using System.Windows.Controls;
 
 namespace ManageWalla
 {
-    public class UploadImage : INotifyPropertyChanged
+    public class UploadImage // : INotifyPropertyChanged
     {
         private Image image;
         private ImageMeta meta;
@@ -28,7 +28,7 @@ namespace ManageWalla
             Inactive = 5
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        //public event PropertyChangedEventHandler PropertyChanged;
 
         public String FilePath { get; set; }
         public Image Image { get { return image; } }

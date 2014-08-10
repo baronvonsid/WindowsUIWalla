@@ -11,7 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-//using System.Windows.Threading;
+using System.Windows.Threading;
 using log4net;
 using log4net.Config;
 using System.Configuration;
@@ -21,11 +21,20 @@ using System.Threading;
 using System.Windows.Media.Animation; 
 using System.Runtime.Serialization.Formatters.Binary;
 
+/*
+
+TODO - Error handlers
+ * Category onwards
+
+DONE
+ * Window init, controls, pane, image - Double check for event handlers that might need an exception message.
+ * 
+
+TODO - Code Updates
+ */
+
 namespace ManageWalla
 {
-    /// <summary>
-    /// Interaction logic for MainTwo.xaml
-    /// </summary>
     public partial class MainTwo : Window
     {
         #region Variables
@@ -89,13 +98,9 @@ namespace ManageWalla
         public GalleryPresentationList galleryPresentationList = null;
         public GalleryStyleList galleryStyleList = null;
         public GallerySectionList gallerySectionList = null;
-
-
         public GlobalState state = null;
         public List<ThumbCache> thumbCacheList = null;
         public List<MainCopyCache> mainCopyCacheList = null;
-
-
 
         public System.Timers.Timer timer = null;
 
@@ -106,8 +111,8 @@ namespace ManageWalla
         public CancellationTokenSource cancelUploadTokenSource = null;
         private static readonly ILog logger = LogManager.GetLogger(typeof(MainTwo));
         private double previousImageSize = 0.0;
-        private bool tweakMainImageSize = true;
-        private bool tweakUploadImageSize = true;
+        //private bool tweakMainImageSize = true;
+        //private bool tweakUploadImageSize = true;
         private bool startingApplication = true;
         private DateTime lastMarginTweakTime = DateTime.Now;
         private bool isExpanded = false;
@@ -116,7 +121,7 @@ namespace ManageWalla
 
         #endregion
 
-        #region Window Initialise and control.
+        #region Window Initialisation.
         public MainTwo()
         {
             InitializeComponent();
@@ -139,8 +144,8 @@ namespace ManageWalla
 
         async private void mainTwo_Loaded(object sender, RoutedEventArgs e)
         {
+            DateTime startTime = DateTime.Now;
             controller = new MainController(this);
-
             try
             {
                 paneBusy.Opacity = 1.0;
@@ -167,40 +172,43 @@ namespace ManageWalla
                 timer.Interval = 10000.0;
                 timer.Start();
 
-                //dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-                //dispatcherTimer.Interval = new TimeSpan(0, 0, 10);
-                //dispatcherTimer.Start();
-
                 ConcludeBusyProcess();
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                ShowMessage(MessageType.Error, "There was a problem starting fotowalla and will now close.  " + ex.Message);
-                //Thread.Sleep(10000);
-                //Application.Current.Shutdown();
+                this.Hide();
+                MessageBoxResult result = MessageBox.Show("There was a problem starting fotowalla and will now close.  " + ex.Message, "Problem loading the app.",MessageBoxButton.OK);
+                if (result == MessageBoxResult.OK)
+                    Application.Current.Shutdown();
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.mainTwo_Loaded()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
         async private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            Console.WriteLine("I am a timer event!");
+            DateTime startTime = DateTime.Now;
             try
             {
                 if (currentPane != PaneMode.Upload && currentPane != PaneMode.AccountEdit && uploadUIState.Mode == UploadUIState.UploadMode.None && state.userApp.AutoUpload)
                     Dispatcher.Invoke(new Action(() => { DoAutoUploadAsync(false); }));
 
-
                 Dispatcher.Invoke(new Action(() => { RefreshUploadStatusStateAsync(false, true); }));
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Unexpected error from timer event!");
                 logger.Error(ex);
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.timer_Elapsed()", (int)duration.TotalMilliseconds, ""); }
+            }
         }
-
-
 
         async private Task<bool> ApplicationInit(string profileName)
         {
@@ -251,14 +259,25 @@ namespace ManageWalla
 
         private void UseCreateLocalCacheFiles(string profileName)
         {
-            controller.SetUpCacheFiles(profileName, uploadImageStateList, galleryPresentationList, galleryStyleList);
-            state = controller.GetState();
-            thumbCacheList = controller.GetThumbCacheList();
-            mainCopyCacheList = controller.GetMainCopyCacheList();
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                controller.SetUpCacheFiles(profileName, uploadImageStateList, galleryPresentationList, galleryStyleList);
+                state = controller.GetState();
+                thumbCacheList = controller.GetThumbCacheList();
+                mainCopyCacheList = controller.GetMainCopyCacheList();
 
-            cacheFilesSetup = true;
+                cacheFilesSetup = true;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.UseCreateLocalCacheFiles()", (int)duration.TotalMilliseconds, ""); }
+            }
         }
+        #endregion
 
+        #region Controls display methods
         public void UserConcludeProcess()
         {
             Dispatcher.Invoke(UserConcludeProcessApply);
@@ -271,22 +290,7 @@ namespace ManageWalla
 
         public void ShowMessage(MessageType messageType, string message)
         {
-
             Dispatcher.Invoke(new Action(() => { UpdateDialogsAndShow(messageType, message); }));
-
-
-            //cmdAlertDialogResponse.Click += cmdDialogResponse_Click;
-            /*
-            if (messageType == MessageType.Info)
-            {
-                
-            }
-            else
-            {
-                Dispatcher.Invoke(new Action(() => { UpdateAlertDialog(messageType, message); }));
-            }
-            Dispatcher.Invoke(new Action(() => { ShowBusyApply(messageType); }));
-             */
         }
 
         private void ConcludeBusyProcessApply()
@@ -315,133 +319,142 @@ namespace ManageWalla
 
         private void UpdateDialogsAndShow(MessageType messageType, string message)
         {
-            switch (messageType)
+            DateTime startTime = DateTime.Now;
+            try
             {
-                case MessageType.Info:
-                    if (currentDialogType == MessageType.Busy)
-                    {
-                        ConcludeBusyProcessApply();
-                    }
+                switch (messageType)
+                {
+                    case MessageType.Info:
+                        if (currentDialogType == MessageType.Busy)
+                        {
+                            ConcludeBusyProcessApply();
+                        }
 
-                    if (currentDialogType != MessageType.None) { return; }
+                        if (currentDialogType != MessageType.None) { return; }
 
-                    lblInfoDialogMessage.Text = message;
+                        lblInfoDialogMessage.Text = message;
 
-                    gridInfoAlert.BeginAnimation(Grid.OpacityProperty, null);
-                    gridInfoAlert.BeginAnimation(Grid.VisibilityProperty, null);
-                    gridInfoAlert.Opacity = 0.0;
-                    gridInfoAlert.Visibility = Visibility.Collapsed;
+                        gridInfoAlert.BeginAnimation(Grid.OpacityProperty, null);
+                        gridInfoAlert.BeginAnimation(Grid.VisibilityProperty, null);
+                        gridInfoAlert.Opacity = 0.0;
+                        gridInfoAlert.Visibility = Visibility.Collapsed;
 
-                    DoubleAnimationUsingKeyFrames opacityFrameAnimInfo = new DoubleAnimationUsingKeyFrames();
-                    opacityFrameAnimInfo.FillBehavior = FillBehavior.HoldEnd;
-                    opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(2.0)));
-                    opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(6.0)));
-                    opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(7.0)));
-                    gridInfoAlert.BeginAnimation(Border.OpacityProperty, opacityFrameAnimInfo);
+                        DoubleAnimationUsingKeyFrames opacityFrameAnimInfo = new DoubleAnimationUsingKeyFrames();
+                        opacityFrameAnimInfo.FillBehavior = FillBehavior.HoldEnd;
+                        opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(2.0)));
+                        opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(6.0)));
+                        opacityFrameAnimInfo.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(7.0)));
+                        gridInfoAlert.BeginAnimation(Border.OpacityProperty, opacityFrameAnimInfo);
 
-                    ObjectAnimationUsingKeyFrames visibilityAnimInfo = new ObjectAnimationUsingKeyFrames();
-                    visibilityAnimInfo.KeyFrames.Add(new DiscreteObjectKeyFrame(Visibility.Visible, TimeSpan.FromSeconds(0.1)));
-                    visibilityAnimInfo.KeyFrames.Add(new DiscreteObjectKeyFrame(Visibility.Collapsed, TimeSpan.FromSeconds(7.0)));
-                    gridInfoAlert.BeginAnimation(Grid.VisibilityProperty, visibilityAnimInfo);
+                        ObjectAnimationUsingKeyFrames visibilityAnimInfo = new ObjectAnimationUsingKeyFrames();
+                        visibilityAnimInfo.KeyFrames.Add(new DiscreteObjectKeyFrame(Visibility.Visible, TimeSpan.FromSeconds(0.1)));
+                        visibilityAnimInfo.KeyFrames.Add(new DiscreteObjectKeyFrame(Visibility.Collapsed, TimeSpan.FromSeconds(7.0)));
+                        gridInfoAlert.BeginAnimation(Grid.VisibilityProperty, visibilityAnimInfo);
 
-                    currentDialogType = MessageType.None;
-                    break;
-                case MessageType.Busy:
-                    if (currentDialogType == MessageType.Busy) { return; }
+                        currentDialogType = MessageType.None;
+                        break;
+                    case MessageType.Busy:
+                        if (currentDialogType == MessageType.Busy) { return; }
 
-                    if (currentDialogType != MessageType.Other)
-                    {
-                        //Special clause, if moving from dialog box to busy.
+                        if (currentDialogType != MessageType.Other)
+                        {
+                            //Special clause, if moving from dialog box to busy.
+                            paneBusy.BeginAnimation(Border.OpacityProperty, null);
+                            paneBusy.Opacity = 0.0;
+                            paneBusy.Visibility = Visibility.Visible;
+
+                            DoubleAnimationUsingKeyFrames opacityBusyFrameAnim = new DoubleAnimationUsingKeyFrames();
+                            opacityBusyFrameAnim.FillBehavior = FillBehavior.HoldEnd;
+                            opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
+                            opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(4.0)));
+                            paneBusy.BeginAnimation(Border.OpacityProperty, opacityBusyFrameAnim);
+                        }
+
+                        currentDialogType = messageType;
+                        lblAlertDialogMessage.Text = message;
+                        lblAlertDialogHeader.Text = "Processing request...";
+                        cmdAlertDialogResponse.Content = "Cancel";
+                        imgAlert.Visibility = Visibility.Collapsed;
+                        imgBusy.Visibility = Visibility.Visible;
+                        gridAlertDialog.BeginAnimation(Grid.OpacityProperty, null);
+                        gridAlertDialog.Opacity = 0.0;
+                        gridAlertDialog.Visibility = Visibility.Visible;
+
+                        DoubleAnimationUsingKeyFrames opacityBusyActionsAnim = new DoubleAnimationUsingKeyFrames();
+                        opacityBusyActionsAnim.FillBehavior = FillBehavior.HoldEnd;
+                        opacityBusyActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
+                        opacityBusyActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(2.5)));
+                        gridAlertDialog.BeginAnimation(Grid.OpacityProperty, opacityBusyActionsAnim);
+
+                        break;
+                    case MessageType.Warning:
+                    case MessageType.Error:
+                        if (currentDialogType == MessageType.Warning || currentDialogType == MessageType.Error) { return; }
+
+                        currentDialogType = messageType;
+                        paneBusy.BeginAnimation(Border.OpacityProperty, null);
+                        gridAlertDialog.BeginAnimation(Grid.OpacityProperty, null);
+
+                        lblAlertDialogMessage.Text = message;
+                        cmdAlertDialogResponse.Content = "OK";
+
+                        imgAlert.Visibility = Visibility.Visible;
+                        imgBusy.Visibility = Visibility.Collapsed;
+                        if (messageType == MessageType.Warning)
+                        {
+                            imgAlert.Source = (ImageSource)FindResource("warningImageSrc");
+                            lblAlertDialogHeader.Text = "Warning";
+                        }
+                        else
+                        {
+                            imgAlert.Source = (ImageSource)FindResource("errorImageSrc");
+                            lblAlertDialogHeader.Text = "Error";
+                        }
+
+                        if (currentDialogType == MessageType.Busy)
+                        {
+                            //Existing working dialog, switch to Error\Warning without animations.
+                            gridAlertDialog.Opacity = 1.0;
+                            gridAlertDialog.Visibility = Visibility.Visible;
+                            paneBusy.Opacity = 0.5;
+                            paneBusy.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            paneBusy.Opacity = 0.0;
+                            paneBusy.Visibility = Visibility.Visible;
+                            gridAlertDialog.Opacity = 0.0;
+                            gridAlertDialog.Visibility = Visibility.Visible;
+
+                            DoubleAnimationUsingKeyFrames opacityFrameAnim = new DoubleAnimationUsingKeyFrames();
+                            opacityFrameAnim.FillBehavior = FillBehavior.HoldEnd;
+                            opacityFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(0.5)));
+                            paneBusy.BeginAnimation(Border.OpacityProperty, opacityFrameAnim);
+
+                            DoubleAnimationUsingKeyFrames opacityActionsAnim = new DoubleAnimationUsingKeyFrames();
+                            opacityActionsAnim.FillBehavior = FillBehavior.HoldEnd;
+                            opacityActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(0.5)));
+                            gridAlertDialog.BeginAnimation(Grid.OpacityProperty, opacityActionsAnim);
+                        }
+                        break;
+                    case MessageType.Other:
+                        currentDialogType = MessageType.Other;
+
                         paneBusy.BeginAnimation(Border.OpacityProperty, null);
                         paneBusy.Opacity = 0.0;
                         paneBusy.Visibility = Visibility.Visible;
 
-                        DoubleAnimationUsingKeyFrames opacityBusyFrameAnim = new DoubleAnimationUsingKeyFrames();
-                        opacityBusyFrameAnim.FillBehavior = FillBehavior.HoldEnd;
-                        opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
-                        opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(4.0)));
-                        paneBusy.BeginAnimation(Border.OpacityProperty, opacityBusyFrameAnim);
-                    }
-
-                    currentDialogType = messageType;
-                    lblAlertDialogMessage.Text = message;
-                    lblAlertDialogHeader.Text = "Processing request...";
-                    cmdAlertDialogResponse.Content = "Cancel";
-                    imgAlert.Visibility = Visibility.Collapsed;
-                    imgBusy.Visibility = Visibility.Visible;
-                    gridAlertDialog.BeginAnimation(Grid.OpacityProperty, null);
-                    gridAlertDialog.Opacity = 0.0;
-                    gridAlertDialog.Visibility = Visibility.Visible;
-
-                    DoubleAnimationUsingKeyFrames opacityBusyActionsAnim = new DoubleAnimationUsingKeyFrames();
-                    opacityBusyActionsAnim.FillBehavior = FillBehavior.HoldEnd;
-                    opacityBusyActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
-                    opacityBusyActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(2.5)));
-                    gridAlertDialog.BeginAnimation(Grid.OpacityProperty, opacityBusyActionsAnim);
-
-                    break;
-                case MessageType.Warning:
-                case MessageType.Error:
-                    if (currentDialogType == MessageType.Warning || currentDialogType == MessageType.Error) { return; }
-
-                    currentDialogType = messageType;
-                    paneBusy.BeginAnimation(Border.OpacityProperty, null);
-                    gridAlertDialog.BeginAnimation(Grid.OpacityProperty, null);
-
-                    lblAlertDialogMessage.Text = message;
-                    cmdAlertDialogResponse.Content = "OK";
-
-                    imgAlert.Visibility = Visibility.Visible;
-                    imgBusy.Visibility = Visibility.Collapsed;
-                    if (messageType == MessageType.Warning)
-                    {
-                        imgAlert.Source = (ImageSource)FindResource("warningImageSrc");
-                        lblAlertDialogHeader.Text = "Warning";
-                    }
-                    else
-                    {
-                        imgAlert.Source = (ImageSource)FindResource("errorImageSrc");
-                        lblAlertDialogHeader.Text = "Error";
-                    }
-
-                    if (currentDialogType == MessageType.Busy)
-                    {
-                        //Existing working dialog, switch to Error\Warning without animations.
-                        gridAlertDialog.Opacity = 1.0;
-                        gridAlertDialog.Visibility = Visibility.Visible;
-                        paneBusy.Opacity = 0.5;
-                        paneBusy.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        paneBusy.Opacity = 0.0;
-                        paneBusy.Visibility = Visibility.Visible;
-                        gridAlertDialog.Opacity = 0.0;
-                        gridAlertDialog.Visibility = Visibility.Visible;
-
-                        DoubleAnimationUsingKeyFrames opacityFrameAnim = new DoubleAnimationUsingKeyFrames();
-                        opacityFrameAnim.FillBehavior = FillBehavior.HoldEnd;
-                        opacityFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(0.5)));
-                        paneBusy.BeginAnimation(Border.OpacityProperty, opacityFrameAnim);
-
-                        DoubleAnimationUsingKeyFrames opacityActionsAnim = new DoubleAnimationUsingKeyFrames();
-                        opacityActionsAnim.FillBehavior = FillBehavior.HoldEnd;
-                        opacityActionsAnim.KeyFrames.Add(new LinearDoubleKeyFrame(1.0, TimeSpan.FromSeconds(0.5)));
-                        gridAlertDialog.BeginAnimation(Grid.OpacityProperty, opacityActionsAnim);
-                    }
-                    break;
-                case MessageType.Other:
-                    currentDialogType = MessageType.Other;
-
-                    paneBusy.BeginAnimation(Border.OpacityProperty, null);
-                    paneBusy.Opacity = 0.0;
-                    paneBusy.Visibility = Visibility.Visible;
-
-                    DoubleAnimationUsingKeyFrames opacityPaneFrameAnim = new DoubleAnimationUsingKeyFrames();
-                    opacityPaneFrameAnim.FillBehavior = FillBehavior.HoldEnd;
-                    opacityPaneFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(2.0)));
-                    paneBusy.BeginAnimation(Border.OpacityProperty, opacityPaneFrameAnim);
-                    break;
+                        DoubleAnimationUsingKeyFrames opacityPaneFrameAnim = new DoubleAnimationUsingKeyFrames();
+                        opacityPaneFrameAnim.FillBehavior = FillBehavior.HoldEnd;
+                        opacityPaneFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(2.0)));
+                        paneBusy.BeginAnimation(Border.OpacityProperty, opacityPaneFrameAnim);
+                        break;
+                }
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.UpdateDialogsAndShow()", (int)duration.TotalMilliseconds, message); }
             }
         }
 
@@ -464,670 +477,687 @@ namespace ManageWalla
 
         private void RefreshOverallPanesStructure(PaneMode mode)
         {
-            //Ensure panes are all correctly setup each time a refresh is called.
-            //gridLeft.ColumnDefinitions[0].Width = new GridLength(0); //Sidebar
-            //gridLeft.ColumnDefinitions[1].Width = new GridLength(300); //Main control
-            gridLeft.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star); //Image display grid
-            gridLeft.ColumnDefinitions[3].Width = new GridLength(0);
-            //gridRight.RowDefinitions[0].Height = new GridLength(60); //Working Pane
-            gridRight.ColumnDefinitions[1].Width = new GridLength(0);
-            grdImageView.Visibility = Visibility.Collapsed;
-
-            if (isExpanded || mode == PaneMode.ImageEdit || mode == PaneMode.ImageView)
+            DateTime startTime = DateTime.Now;
+            try
             {
-                gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
-                gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
-                gridRight.RowDefinitions[0].Height = new GridLength(0);
+                //Ensure panes are all correctly setup each time a refresh is called.
+                //gridLeft.ColumnDefinitions[0].Width = new GridLength(0); //Sidebar
+                //gridLeft.ColumnDefinitions[1].Width = new GridLength(300); //Main control
+                gridLeft.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star); //Image display grid
+                gridLeft.ColumnDefinitions[3].Width = new GridLength(0);
+                //gridRight.RowDefinitions[0].Height = new GridLength(60); //Working Pane
+                gridRight.ColumnDefinitions[1].Width = new GridLength(0);
+                grdImageView.Visibility = Visibility.Collapsed;
+
+                if (isExpanded || mode == PaneMode.ImageEdit || mode == PaneMode.ImageView)
+                {
+                    gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
+                    gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
+                    gridRight.RowDefinitions[0].Height = new GridLength(0);
+                }
+                else
+                {
+                    gridLeft.ColumnDefinitions[0].Width = new GridLength(0);
+                    gridLeft.ColumnDefinitions[1].Width = new GridLength(300);
+                    gridRight.RowDefinitions[0].Height = new GridLength(60);
+                }
+
+                switch (mode)
+                {
+                    case PaneMode.GalleryView:
+                        panGalleryUnavailable.Visibility = Visibility.Visible;
+                        panCategoryUnavailable.Visibility = Visibility.Collapsed;
+                        panTagUnavailable.Visibility = Visibility.Collapsed;
+                        lstImageMainViewerList.Visibility = Visibility.Visible;
+                        lstUploadImageFileList.Visibility = Visibility.Collapsed;
+                        panUpload.Visibility = System.Windows.Visibility.Collapsed;
+
+                        gridLeft.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Star);
+                        gridLeft.RowDefinitions[4].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[6].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[8].Height = new GridLength(0);
+
+                        gridRight.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
+
+                        gridGallerySelection.Visibility = Visibility.Collapsed;
+                        tabGalleryPreview.Visibility = Visibility.Collapsed;
+                        tabGalleryConfiguration.Visibility = Visibility.Collapsed;
+                        panGridRightHeader.Visibility = Visibility.Visible;
+                        break;
+                    case PaneMode.GalleryEdit:
+                    case PaneMode.GalleryAdd:
+                        gridRight.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
+                        gridRight.RowDefinitions[1].Height = new GridLength(0);
+
+                        lstImageMainViewerList.Visibility = Visibility.Collapsed;
+
+                        gridGallerySelection.Visibility = Visibility.Visible;
+                        tabGalleryConfiguration.Visibility = Visibility.Visible;
+                        tabGalleryPreview.Visibility = Visibility.Visible;
+                        panGridRightHeader.Visibility = Visibility.Collapsed;
+                        break;
+                    case PaneMode.CategoryView:
+                    case PaneMode.CategoryAdd:
+                    case PaneMode.CategoryEdit:
+                        panCategoryUnavailable.Visibility = Visibility.Visible;
+                        panTagUnavailable.Visibility = Visibility.Collapsed;
+                        panGalleryUnavailable.Visibility = Visibility.Collapsed;
+                        lstImageMainViewerList.Visibility = Visibility.Visible;
+                        lstUploadImageFileList.Visibility = Visibility.Collapsed;
+                        panUpload.Visibility = System.Windows.Visibility.Collapsed;
+
+                        panGridRightHeader.Visibility = Visibility.Visible;
+                        gridGallerySelection.Visibility = Visibility.Collapsed;
+                        tabGalleryConfiguration.Visibility = Visibility.Collapsed;
+
+                        gridLeft.RowDefinitions[2].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[4].Height = new GridLength(1, GridUnitType.Star);
+                        gridLeft.RowDefinitions[6].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[8].Height = new GridLength(0);
+                        break;
+                    case PaneMode.TagView:
+                    case PaneMode.TagAdd:
+                    case PaneMode.TagEdit:
+                        panTagUnavailable.Visibility = Visibility.Visible;
+                        panCategoryUnavailable.Visibility = Visibility.Collapsed;
+                        panGalleryUnavailable.Visibility = Visibility.Collapsed;
+                        lstImageMainViewerList.Visibility = Visibility.Visible;
+                        lstUploadImageFileList.Visibility = Visibility.Collapsed;
+                        panUpload.Visibility = System.Windows.Visibility.Collapsed;
+                        panGridRightHeader.Visibility = Visibility.Visible;
+
+                        gridLeft.RowDefinitions[2].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[4].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Star);
+                        gridLeft.RowDefinitions[8].Height = new GridLength(0);
+                        break;
+                    case PaneMode.Upload:
+                        panCategoryUnavailable.Visibility = Visibility.Collapsed;
+                        panTagUnavailable.Visibility = Visibility.Collapsed;
+                        panGalleryUnavailable.Visibility = Visibility.Collapsed;
+                        lstImageMainViewerList.Visibility = Visibility.Collapsed;
+                        lstUploadImageFileList.Visibility = Visibility.Visible;
+                        panUpload.Visibility = System.Windows.Visibility.Visible;
+
+                        gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
+
+                        if (uploadFots.Count > 0 && uploadUIState.Mode != UploadUIState.UploadMode.Auto && uploadUIState.Uploading == false)
+                            gridRight.ColumnDefinitions[1].Width = new GridLength(255);
+
+                        gridLeft.RowDefinitions[2].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[4].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[6].Height = new GridLength(0);
+                        gridLeft.RowDefinitions[8].Height = new GridLength(1, GridUnitType.Star);
+                        break;
+                    case PaneMode.Account:
+                        gridLeft.ColumnDefinitions[1].Width = new GridLength(0); //Main control
+                        gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
+                        gridLeft.ColumnDefinitions[2].Width = new GridLength(0); //Image display grid
+                        gridLeft.ColumnDefinitions[3].Width = new GridLength(1, GridUnitType.Star); //Account grid
+                        break;
+                    case PaneMode.ImageView:
+                    case PaneMode.ImageEdit:
+                        //Switch to full width mode.
+                        //gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
+                        //gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
+                        //gridRight.RowDefinitions[0].Height = new GridLength(0); //Hide header
+                        lstImageMainViewerList.Visibility = Visibility.Hidden;
+                        grdImageView.Visibility = Visibility.Visible;
+                        break;
+                }
             }
-            else
+            finally
             {
-                gridLeft.ColumnDefinitions[0].Width = new GridLength(0);
-                gridLeft.ColumnDefinitions[1].Width = new GridLength(300);
-                gridRight.RowDefinitions[0].Height = new GridLength(60);
-            }
-
-            switch (mode)
-            {
-                case PaneMode.GalleryView:
-                    panGalleryUnavailable.Visibility = Visibility.Visible;
-                    panCategoryUnavailable.Visibility = Visibility.Collapsed;
-                    panTagUnavailable.Visibility = Visibility.Collapsed;
-                    lstImageMainViewerList.Visibility = Visibility.Visible;
-                    lstUploadImageFileList.Visibility = Visibility.Collapsed;
-                    panUpload.Visibility = System.Windows.Visibility.Collapsed;
-
-                    gridLeft.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Star);
-                    gridLeft.RowDefinitions[4].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[6].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[8].Height = new GridLength(0);
-
-                    //gridRight.RowDefinitions[0].Height = new GridLength(40);
-                    gridRight.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
-
-                    gridGallerySelection.Visibility = Visibility.Collapsed;
-                    tabGalleryPreview.Visibility = Visibility.Collapsed;
-                    tabGalleryConfiguration.Visibility = Visibility.Collapsed;
-                    panGridRightHeader.Visibility = Visibility.Visible;
-                    break;
-                case PaneMode.GalleryEdit:
-                case PaneMode.GalleryAdd:
-                    gridRight.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
-                    gridRight.RowDefinitions[1].Height = new GridLength(0);
-                    //if ((bool)cmdGalleryPreview.IsChecked)
-                    //{
-                    //    gridRight.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
-                    //}
-                    //else
-                    //{
-                    //   gridRight.RowDefinitions[1].Height = new GridLength(40);
-                    //}
-
-                    lstImageMainViewerList.Visibility = Visibility.Collapsed;
-
-                    gridGallerySelection.Visibility = Visibility.Visible;
-                    tabGalleryConfiguration.Visibility = Visibility.Visible;
-                    tabGalleryPreview.Visibility = Visibility.Visible;
-                    panGridRightHeader.Visibility = Visibility.Collapsed;
-                    break;
-                case PaneMode.CategoryView:
-                case PaneMode.CategoryAdd:
-                case PaneMode.CategoryEdit:
-                    panCategoryUnavailable.Visibility = Visibility.Visible;
-                    panTagUnavailable.Visibility = Visibility.Collapsed;
-                    panGalleryUnavailable.Visibility = Visibility.Collapsed;
-                    lstImageMainViewerList.Visibility = Visibility.Visible;
-                    lstUploadImageFileList.Visibility = Visibility.Collapsed;
-                    panUpload.Visibility = System.Windows.Visibility.Collapsed;
-
-                    panGridRightHeader.Visibility = Visibility.Visible;
-                    gridGallerySelection.Visibility = Visibility.Collapsed;
-                    tabGalleryConfiguration.Visibility = Visibility.Collapsed;
-
-                    gridLeft.RowDefinitions[2].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[4].Height = new GridLength(1, GridUnitType.Star);
-                    gridLeft.RowDefinitions[6].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[8].Height = new GridLength(0);
-                    break;
-                case PaneMode.TagView:
-                case PaneMode.TagAdd:
-                case PaneMode.TagEdit:
-                    panTagUnavailable.Visibility = Visibility.Visible;
-                    panCategoryUnavailable.Visibility = Visibility.Collapsed;
-                    panGalleryUnavailable.Visibility = Visibility.Collapsed;
-                    lstImageMainViewerList.Visibility = Visibility.Visible;
-                    lstUploadImageFileList.Visibility = Visibility.Collapsed;
-                    panUpload.Visibility = System.Windows.Visibility.Collapsed;
-                    panGridRightHeader.Visibility = Visibility.Visible;
-
-                    gridLeft.RowDefinitions[2].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[4].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Star);
-                    gridLeft.RowDefinitions[8].Height = new GridLength(0);
-                    break;
-                case PaneMode.Upload:
-                    panCategoryUnavailable.Visibility = Visibility.Collapsed;
-                    panTagUnavailable.Visibility = Visibility.Collapsed;
-                    panGalleryUnavailable.Visibility = Visibility.Collapsed;
-                    lstImageMainViewerList.Visibility = Visibility.Collapsed;
-                    lstUploadImageFileList.Visibility = Visibility.Visible;
-                    panUpload.Visibility = System.Windows.Visibility.Visible;
-
-                    gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
-
-                    if (uploadFots.Count > 0 && uploadUIState.Mode != UploadUIState.UploadMode.Auto && uploadUIState.Uploading == false)
-                        gridRight.ColumnDefinitions[1].Width = new GridLength(255);
-                    
-                    gridLeft.RowDefinitions[2].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[4].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[6].Height = new GridLength(0);
-                    gridLeft.RowDefinitions[8].Height = new GridLength(1, GridUnitType.Star);
-                    break;
-                case PaneMode.Account:
-                    gridLeft.ColumnDefinitions[1].Width = new GridLength(0); //Main control
-                    gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
-                    gridLeft.ColumnDefinitions[2].Width = new GridLength(0); //Image display grid
-                    gridLeft.ColumnDefinitions[3].Width = new GridLength(1, GridUnitType.Star); //Account grid
-                    break;
-                case PaneMode.ImageView:
-                case PaneMode.ImageEdit:
-                    //Switch to full width mode.
-                    //gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
-                    //gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
-                    //gridRight.RowDefinitions[0].Height = new GridLength(0); //Hide header
-                    lstImageMainViewerList.Visibility = Visibility.Hidden;
-                    grdImageView.Visibility = Visibility.Visible;
-                    break;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.RefreshOverallPanesStructure()", (int)duration.TotalMilliseconds, mode.ToString()); }
             }
         }
 
         private void RefreshPanesAllControls(PaneMode mode)
         {
-            switch (mode)
+            DateTime startTime = DateTime.Now;
+            try
             {
-                #region Category
-                case PaneMode.CategoryView:
-                    gridCategory.RowDefinitions[1].Height = new GridLength(48.0);
-                    gridCategory.RowDefinitions[2].MaxHeight = 0;
-                    gridCategory.RowDefinitions[3].MaxHeight = 0;
-                    gridCategory.RowDefinitions[4].MaxHeight = 0;
-                    gridCategory.RowDefinitions[5].Height = new GridLength(0.0);
+                switch (mode)
+                {
+                    #region Category
+                    case PaneMode.CategoryView:
+                        gridCategory.RowDefinitions[1].Height = new GridLength(48.0);
+                        gridCategory.RowDefinitions[2].MaxHeight = 0;
+                        gridCategory.RowDefinitions[3].MaxHeight = 0;
+                        gridCategory.RowDefinitions[4].MaxHeight = 0;
+                        gridCategory.RowDefinitions[5].Height = new GridLength(0.0);
 
-                    treeCategoryView.IsEnabled = true;
-                    cmdCategoryAdd.IsEnabled = true;
-                    cmdCategoryEdit.IsEnabled = true;
+                        treeCategoryView.IsEnabled = true;
+                        cmdCategoryAdd.IsEnabled = true;
+                        cmdCategoryEdit.IsEnabled = true;
 
-                    radTag.IsEnabled = true;
-                    radGallery.IsEnabled = true;
+                        radTag.IsEnabled = true;
+                        radGallery.IsEnabled = true;
 
-                    PaneEnablePageControls(true);
+                        PaneEnablePageControls(true);
 
-                    break;
-                case PaneMode.CategoryAdd:
-                case PaneMode.CategoryEdit:
-                    gridCategory.RowDefinitions[1].Height = new GridLength(0.0);
-                    gridCategory.RowDefinitions[2].MaxHeight = 30;
-                    gridCategory.RowDefinitions[3].MaxHeight = 80;
-                    gridCategory.RowDefinitions[4].MaxHeight = 30;
-                    gridCategory.RowDefinitions[5].Height = new GridLength(48.0);
+                        break;
+                    case PaneMode.CategoryAdd:
+                    case PaneMode.CategoryEdit:
+                        gridCategory.RowDefinitions[1].Height = new GridLength(0.0);
+                        gridCategory.RowDefinitions[2].MaxHeight = 30;
+                        gridCategory.RowDefinitions[3].MaxHeight = 80;
+                        gridCategory.RowDefinitions[4].MaxHeight = 30;
+                        gridCategory.RowDefinitions[5].Height = new GridLength(48.0);
 
-                    cmdCategoryCancel.Visibility = Visibility.Visible;
-                    treeCategoryView.IsEnabled = false;
+                        cmdCategoryCancel.Visibility = Visibility.Visible;
+                        treeCategoryView.IsEnabled = false;
 
-                    if (mode == PaneMode.CategoryAdd)
-                    {
-                        cmdCategorySave.Content = "Save New";
-                        cmdCategoryDelete.Visibility = Visibility.Collapsed;
-                    }
-                    else
-                    {
-                        cmdCategorySave.Content = "Save Edit";
-                        cmdCategoryDelete.Visibility = Visibility.Visible;
-                    }
-
-                    radTag.IsEnabled = false;
-                    radGallery.IsEnabled = false;
-                    radUpload.IsEnabled = false;
-
-                    PaneEnablePageControls(false);
-                    break;
-                #endregion
-
-                #region Tag
-                case PaneMode.TagView:
-                    gridTag.RowDefinitions[1].Height = new GridLength(48.0);
-                    gridTag.RowDefinitions[2].MaxHeight = 0;
-                    gridTag.RowDefinitions[3].MaxHeight = 0;
-                    gridTag.RowDefinitions[4].Height = new GridLength(0.0);
-
-                    cmdTagAdd.Visibility = Visibility.Visible;
-                    cmdTagEdit.Visibility = Visibility.Visible;
-                    wrapMyTags.IsEnabled = true;
-                    wrapSystemTags.IsEnabled = true;
-
-                    radCategory.IsEnabled = true;
-                    radGallery.IsEnabled = true;
-                    radUpload.IsEnabled = true;
-
-                    PaneEnablePageControls(true);
-                    break;
-                case PaneMode.TagAdd:
-                case PaneMode.TagEdit:
-                    gridTag.RowDefinitions[1].Height = new GridLength(0.0);
-                    gridTag.RowDefinitions[2].MaxHeight = 30;
-                    gridTag.RowDefinitions[3].MaxHeight = 80;
-                    gridTag.RowDefinitions[4].Height = new GridLength(48.0);
-                    wrapMyTags.IsEnabled = false;
-                    wrapSystemTags.IsEnabled = false;
-
-                    radCategory.IsEnabled = false;
-                    radGallery.IsEnabled = false;
-                    radUpload.IsEnabled = false;
-
-                    PaneEnablePageControls(false);
-
-                    if (mode == PaneMode.TagAdd)
-                    {
-                        this.cmdTagSave.Content = "Save New";
-                        cmdTagDelete.Visibility = System.Windows.Visibility.Collapsed;
-                    }
-                    else
-                    {
-                        this.cmdTagSave.Content = "Save Edit";
-                        cmdTagDelete.Visibility = System.Windows.Visibility.Visible;
-                    }
-                    break;
-                #endregion
-
-                #region Gallery
-                case PaneMode.GalleryView:
-                    /*
-                <!-- wrap galleries --> *
-                <!-- add edit buttons --> 34
-                <!-- Name --> 25
-                <!-- Desc --> 81
-                <!-- Access Type --> 25
-                <!-- Password --> 25
-                <!-- Save buttons --> 34
-                    */
-                    gridGallery.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);  //Working Pane
-                    gridGallery.RowDefinitions[1].Height = new GridLength(48.0);
-                    gridGallery.RowDefinitions[2].Height = new GridLength(0.0);
-                    gridGallery.RowDefinitions[3].MaxHeight = 0;
-                    gridGallery.RowDefinitions[4].MaxHeight = 0;
-                    gridGallery.RowDefinitions[5].MaxHeight = 0;
-                    gridGallery.RowDefinitions[6].Height = new GridLength(0);
-
-                    cmdGalleryPreview.IsChecked = false;
-                    radCategory.IsEnabled = true;
-                    radTag.IsEnabled = true;
-                    radUpload.IsEnabled = true;
-                    PaneEnablePageControls(true);
-                    wrapMyGalleries.IsEnabled = true;
-
-                    break;
-                case PaneMode.GalleryEdit:
-                case PaneMode.GalleryAdd:
-                    gridGallery.RowDefinitions[0].Height = new GridLength(0);
-                    gridGallery.RowDefinitions[1].Height = new GridLength(0);
-                    gridGallery.RowDefinitions[2].Height = new GridLength(30.0);
-                    gridGallery.RowDefinitions[3].MaxHeight = 80;
-                    gridGallery.RowDefinitions[4].MaxHeight = 50;
-                    gridGallery.RowDefinitions[5].MaxHeight = 30;
-                    gridGallery.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Star);
-
-                    radCategory.IsEnabled = false;
-                    radTag.IsEnabled = false;
-                    radUpload.IsEnabled = false;
-                    PaneEnablePageControls(false);
-                    wrapMyGalleries.IsEnabled = false;
-
-                    if (GalleryGetSelectionType() == 0)
-                    {
-                        //Categories ONLY
-                        gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(2, GridUnitType.Star);
-                        gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(30);
-                        gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(0);
-                        gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(0);
-                        gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2, GridUnitType.Star);
-
-                        itemGalleryGroupCategory.IsEnabled = true;
-                        itemGalleryGroupTag.IsEnabled = false;
-
-                    }
-                    else if (GalleryGetSelectionType() == 1)
-                    {
-                        //Tags ONLY
-                        gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(0);
-                        gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(0);
-                        gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(2, GridUnitType.Star);
-                        gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(30);
-                        gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2,GridUnitType.Star);
-                        itemGalleryGroupCategory.IsEnabled = false;
-                        itemGalleryGroupTag.IsEnabled = true;
-                    }
-
-                    GalleryPresentationItem presentation = (GalleryPresentationItem)lstGalleryPresentationList.SelectedItem;
-                    if (presentation.MaxSections == 0)
-                    {
-                        GallerySetGroupingType(0);
-                        lstGalleryGroupOptions.IsEnabled = false;
-                    }
-                    else
-                    {
-                        lstGalleryGroupOptions.IsEnabled = true;
-                    }
-
-                    if (GalleryGetGroupingType() == 0)
-                    {
-                        //No grouping, so hide the grouping options.
-                        chkGalleryShowGroupingDesc.IsEnabled = false;
-                        datGallerySections.IsEnabled = false;
-                        cmdGallerySectionReset.IsEnabled = false;
-                    }
-                    else
-                    {
-                        //Show grouping options.
-                        chkGalleryShowGroupingDesc.IsEnabled = true;
-                        datGallerySections.IsEnabled = true;
-                        cmdGallerySectionReset.IsEnabled = true;
-                    }
-
-
-                    if (cmbGalleryAccessType.SelectedIndex != 1)
-                    {
-                        txtGalleryPassword.Text = "";
-                        txtGalleryPassword.IsEnabled = false;
-                    }
-                    else
-                    {
-                        txtGalleryPassword.IsEnabled = true;
-                    }
-
-                    if (mode == PaneMode.GalleryAdd)
-                    {
-                        this.cmdGallerySave.Content = "Save New";
-                        cmdGalleryDelete.Visibility = System.Windows.Visibility.Collapsed;
-                    }
-                    else
-                    {
-                        this.cmdGallerySave.Content = "Save Edit";
-                        cmdGalleryDelete.Visibility = System.Windows.Visibility.Visible;
-                    }
-                    break;
-                #endregion
-
-                #region Upload
-                case PaneMode.Upload:
-                    /*
-                    <RowDefinition Height="30" /> <!-- Upload Type -->
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="30" /> <!-- Auto folder details -->
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" /> <!-- Auto category details -->
-                    <RowDefinition Height="30" />
-
-                    <RowDefinition Height="40" /> <!-- 5 Root category -->
-                    <RowDefinition Height="30" /> <!-- New Category -->
-                    <RowDefinition Height="30" /> <!-- New category Name -->
-                    <RowDefinition Height="80" /> <!-- New category Desc -->
-                    <RowDefinition Height="60" /> <!-- Map sub Folders -->
-
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="50" />  <!-- Buttons -->
-                    */
-
-                    cmbGallerySectionVert.Visibility = Visibility.Collapsed;
-                    cmbGallerySection.Visibility = Visibility.Collapsed;
-
-                    if (uploadUIState.Uploading == true)
-                    {
-                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
-
-                        lstUploadImageFileList.IsEnabled = false;
-                        cmdUploadImportFiles.Visibility = Visibility.Collapsed;
-                        cmdUploadImportFolder.Visibility = Visibility.Collapsed;
-                        cmdUploadResumePauseClear.Visibility = Visibility.Visible;
-                        cmdUploadResumePauseClear.IsEnabled = true;
-                        cmdUploadChangeCategory.Visibility = Visibility.Collapsed;
-                        if (uploadUIState.Mode != UploadUIState.UploadMode.Auto)
+                        if (mode == PaneMode.CategoryAdd)
                         {
-                            //cmdUploadChangeCategory.IsEnabled = true;
-                            //grdUploadSettings.RowDefinitions[9].Height = new GridLength(60);
-                            grdUploadSettings.RowDefinitions[5].Height = new GridLength(40);
-
-                            lblUploadType.Content = "Uploading images...";
-                            cmdUploadResumePauseClear.Content = "Pause Upload";
+                            cmdCategorySave.Content = "Save New";
+                            cmdCategoryDelete.Visibility = Visibility.Collapsed;
                         }
                         else
                         {
-                            grdUploadSettings.RowDefinitions[2].Height = new GridLength(30.0);
-                            grdUploadSettings.RowDefinitions[3].Height = new GridLength(30.0);
-                            grdUploadSettings.RowDefinitions[4].Height = new GridLength(30.0);
+                            cmdCategorySave.Content = "Save Edit";
+                            cmdCategoryDelete.Visibility = Visibility.Visible;
+                        }
 
-                            lblUploadType.Content = "Uploading images (auto)...";
-                            cmdUploadResumePauseClear.Content = "Pause Upload";
-                            cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
+                        radTag.IsEnabled = false;
+                        radGallery.IsEnabled = false;
+                        radUpload.IsEnabled = false;
+
+                        PaneEnablePageControls(false);
+                        break;
+                    #endregion
+
+                    #region Tag
+                    case PaneMode.TagView:
+                        gridTag.RowDefinitions[1].Height = new GridLength(48.0);
+                        gridTag.RowDefinitions[2].MaxHeight = 0;
+                        gridTag.RowDefinitions[3].MaxHeight = 0;
+                        gridTag.RowDefinitions[4].Height = new GridLength(0.0);
+
+                        cmdTagAdd.Visibility = Visibility.Visible;
+                        cmdTagEdit.Visibility = Visibility.Visible;
+                        wrapMyTags.IsEnabled = true;
+                        wrapSystemTags.IsEnabled = true;
+
+                        radCategory.IsEnabled = true;
+                        radGallery.IsEnabled = true;
+                        radUpload.IsEnabled = true;
+
+                        PaneEnablePageControls(true);
+                        break;
+                    case PaneMode.TagAdd:
+                    case PaneMode.TagEdit:
+                        gridTag.RowDefinitions[1].Height = new GridLength(0.0);
+                        gridTag.RowDefinitions[2].MaxHeight = 30;
+                        gridTag.RowDefinitions[3].MaxHeight = 80;
+                        gridTag.RowDefinitions[4].Height = new GridLength(48.0);
+                        wrapMyTags.IsEnabled = false;
+                        wrapSystemTags.IsEnabled = false;
+
+                        radCategory.IsEnabled = false;
+                        radGallery.IsEnabled = false;
+                        radUpload.IsEnabled = false;
+
+                        PaneEnablePageControls(false);
+
+                        if (mode == PaneMode.TagAdd)
+                        {
+                            this.cmdTagSave.Content = "Save New";
+                            cmdTagDelete.Visibility = System.Windows.Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            this.cmdTagSave.Content = "Save Edit";
+                            cmdTagDelete.Visibility = System.Windows.Visibility.Visible;
                         }
                         break;
-                    }
+                    #endregion
 
-                    //Initialise upload controls, no state to consider.
-                    if (uploadUIState.Mode == UploadUIState.UploadMode.None)
-                    {
-                        lblUploadType.Content = "Choose images or folders to upload";
-                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
+                    #region Gallery
+                    case PaneMode.GalleryView:
+                        /*
+                    <!-- wrap galleries --> *
+                    <!-- add edit buttons --> 34
+                    <!-- Name --> 25
+                    <!-- Desc --> 81
+                    <!-- Access Type --> 25
+                    <!-- Password --> 25
+                    <!-- Save buttons --> 34
+                        */
+                        gridGallery.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);  //Working Pane
+                        gridGallery.RowDefinitions[1].Height = new GridLength(48.0);
+                        gridGallery.RowDefinitions[2].Height = new GridLength(0.0);
+                        gridGallery.RowDefinitions[3].MaxHeight = 0;
+                        gridGallery.RowDefinitions[4].MaxHeight = 0;
+                        gridGallery.RowDefinitions[5].MaxHeight = 0;
+                        gridGallery.RowDefinitions[6].Height = new GridLength(0);
 
-                        //Upload controls setup
-                        lstUploadImageFileList.IsEnabled = false;
-                        cmdUploadImportFolder.Visibility = Visibility.Visible;
-                        cmdUploadImportFiles.Visibility = Visibility.Visible;
-                        cmdUploadResumePauseClear.Visibility = Visibility.Collapsed;
-                        cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
-                        cmdUploadAll.Visibility = Visibility.Visible;
-                        cmdUploadAll.IsEnabled = false;
-                        panUpload.IsEnabled = false;
-                    }
-                    else if (uploadUIState.Mode == UploadUIState.UploadMode.Auto)
-                    {
-                        lblUploadType.Content = "Auto upload - paused";
-                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(30.0);
-                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(30.0);
-                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(30.0);
-                        grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
+                        cmdGalleryPreview.IsChecked = false;
+                        radCategory.IsEnabled = true;
+                        radTag.IsEnabled = true;
+                        radUpload.IsEnabled = true;
+                        PaneEnablePageControls(true);
+                        wrapMyGalleries.IsEnabled = true;
 
-                        cmdUploadAll.Visibility = Visibility.Collapsed;
-                        cmdUploadResumePauseClear.Content = "Resume";
-                        cmdUploadTurnAutoOff.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
-                        grdUploadSettings.RowDefinitions[5].Height = new GridLength(40);
-                        if (uploadUIState.UploadToNewCategory)
+                        break;
+                    case PaneMode.GalleryEdit:
+                    case PaneMode.GalleryAdd:
+                        gridGallery.RowDefinitions[0].Height = new GridLength(0);
+                        gridGallery.RowDefinitions[1].Height = new GridLength(0);
+                        gridGallery.RowDefinitions[2].Height = new GridLength(30.0);
+                        gridGallery.RowDefinitions[3].MaxHeight = 80;
+                        gridGallery.RowDefinitions[4].MaxHeight = 50;
+                        gridGallery.RowDefinitions[5].MaxHeight = 30;
+                        gridGallery.RowDefinitions[6].Height = new GridLength(1, GridUnitType.Star);
+
+                        radCategory.IsEnabled = false;
+                        radTag.IsEnabled = false;
+                        radUpload.IsEnabled = false;
+                        PaneEnablePageControls(false);
+                        wrapMyGalleries.IsEnabled = false;
+
+                        if (GalleryGetSelectionType() == 0)
                         {
-                            grdUploadSettings.RowDefinitions[7].Height = new GridLength(30.0); //Category Name
-                            grdUploadSettings.RowDefinitions[8].Height = new GridLength(80.0); //Category Description
+                            //Categories ONLY
+                            gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(2, GridUnitType.Star);
+                            gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(30);
+                            gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(0);
+                            gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(0);
+                            gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2, GridUnitType.Star);
+
+                            itemGalleryGroupCategory.IsEnabled = true;
+                            itemGalleryGroupTag.IsEnabled = false;
+
+                        }
+                        else if (GalleryGetSelectionType() == 1)
+                        {
+                            //Tags ONLY
+                            gridGallerySelection.ColumnDefinitions[0].Width = new GridLength(0);
+                            gridGallerySelection.ColumnDefinitions[1].Width = new GridLength(0);
+                            gridGallerySelection.ColumnDefinitions[2].Width = new GridLength(2, GridUnitType.Star);
+                            gridGallerySelection.ColumnDefinitions[3].Width = new GridLength(30);
+                            gridGallerySelection.ColumnDefinitions[4].Width = new GridLength(2, GridUnitType.Star);
+                            itemGalleryGroupCategory.IsEnabled = false;
+                            itemGalleryGroupTag.IsEnabled = true;
+                        }
+
+                        GalleryPresentationItem presentation = (GalleryPresentationItem)lstGalleryPresentationList.SelectedItem;
+                        if (presentation.MaxSections == 0)
+                        {
+                            GallerySetGroupingType(0);
+                            lstGalleryGroupOptions.IsEnabled = false;
                         }
                         else
                         {
+                            lstGalleryGroupOptions.IsEnabled = true;
+                        }
+
+                        if (GalleryGetGroupingType() == 0)
+                        {
+                            //No grouping, so hide the grouping options.
+                            chkGalleryShowGroupingDesc.IsEnabled = false;
+                            datGallerySections.IsEnabled = false;
+                            cmdGallerySectionReset.IsEnabled = false;
+                        }
+                        else
+                        {
+                            //Show grouping options.
+                            chkGalleryShowGroupingDesc.IsEnabled = true;
+                            datGallerySections.IsEnabled = true;
+                            cmdGallerySectionReset.IsEnabled = true;
+                        }
+
+
+                        if (cmbGalleryAccessType.SelectedIndex != 1)
+                        {
+                            txtGalleryPassword.Text = "";
+                            txtGalleryPassword.IsEnabled = false;
+                        }
+                        else
+                        {
+                            txtGalleryPassword.IsEnabled = true;
+                        }
+
+                        if (mode == PaneMode.GalleryAdd)
+                        {
+                            this.cmdGallerySave.Content = "Save New";
+                            cmdGalleryDelete.Visibility = System.Windows.Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            this.cmdGallerySave.Content = "Save Edit";
+                            cmdGalleryDelete.Visibility = System.Windows.Visibility.Visible;
+                        }
+                        break;
+                    #endregion
+
+                    #region Upload
+                    case PaneMode.Upload:
+                        /*
+                        <RowDefinition Height="30" /> <!-- Upload Type -->
+                        <RowDefinition Height="5" />
+                        <RowDefinition Height="30" /> <!-- Auto folder details -->
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" /> <!-- Auto category details -->
+                        <RowDefinition Height="30" />
+
+                        <RowDefinition Height="40" /> <!-- 5 Root category -->
+                        <RowDefinition Height="30" /> <!-- New Category -->
+                        <RowDefinition Height="30" /> <!-- New category Name -->
+                        <RowDefinition Height="80" /> <!-- New category Desc -->
+                        <RowDefinition Height="60" /> <!-- Map sub Folders -->
+
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="50" />  <!-- Buttons -->
+                        */
+
+                        cmbGallerySectionVert.Visibility = Visibility.Collapsed;
+                        cmbGallerySection.Visibility = Visibility.Collapsed;
+
+                        if (uploadUIState.Uploading == true)
+                        {
+                            grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
                             grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
                             grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
-                        }
-                        grdUploadSettings.RowDefinitions[6].Height = new GridLength(30);
-                        grdUploadSettings.RowDefinitions[9].Height = new GridLength(30);
+                            grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
 
-                        //Upload has been initialised, set controls to reflect upload options.
-                        lstUploadImageFileList.IsEnabled = true;
-                        panUpload.IsEnabled = true;
-
-                        cmdUploadAll.Visibility = Visibility.Visible;
-                        cmdUploadAll.IsEnabled = true;
-                        cmdUploadResumePauseClear.Content = "Clear";
-                        cmdUploadResumePauseClear.IsEnabled = true;
-                        cmdUploadResumePauseClear.Visibility = Visibility.Visible;
-                        cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
-                        //cmdUploadChangeCategory.IsEnabled = true;
-                        cmdUploadChangeCategory.Visibility = Visibility.Visible;
-                        //Enable Tags
-                        //wrapMyTags.IsEnabled = true;
-                        //cmdAssociateTag.IsEnabled = true;
-
-                        if (uploadUIState.Mode == UploadUIState.UploadMode.Images)
-                        {
-                            lblUploadType.Content = "Upload - Files";
-                            grdUploadSettings.RowDefinitions[9].Height = new GridLength(0); //Map to sub folders
-                            chkUploadMapToSubFolders.IsChecked = false;
-
-                            cmdUploadImportFolder.Visibility = Visibility.Hidden;
-                        }
-                        else if (uploadUIState.Mode == UploadUIState.UploadMode.Folder)
-                        {
-                            lblUploadType.Content = "Upload - Folders";
-                            if (uploadUIState.GotSubFolders)
+                            lstUploadImageFileList.IsEnabled = false;
+                            cmdUploadImportFiles.Visibility = Visibility.Collapsed;
+                            cmdUploadImportFolder.Visibility = Visibility.Collapsed;
+                            cmdUploadResumePauseClear.Visibility = Visibility.Visible;
+                            cmdUploadResumePauseClear.IsEnabled = true;
+                            cmdUploadChangeCategory.Visibility = Visibility.Collapsed;
+                            if (uploadUIState.Mode != UploadUIState.UploadMode.Auto)
                             {
-                                grdUploadSettings.RowDefinitions[9].Height = new GridLength(60);
+                                //cmdUploadChangeCategory.IsEnabled = true;
+                                //grdUploadSettings.RowDefinitions[9].Height = new GridLength(60);
+                                grdUploadSettings.RowDefinitions[5].Height = new GridLength(40);
+
+                                lblUploadType.Content = "Uploading images...";
+                                cmdUploadResumePauseClear.Content = "Pause Upload";
                             }
                             else
                             {
+                                grdUploadSettings.RowDefinitions[2].Height = new GridLength(30.0);
+                                grdUploadSettings.RowDefinitions[3].Height = new GridLength(30.0);
+                                grdUploadSettings.RowDefinitions[4].Height = new GridLength(30.0);
+
+                                lblUploadType.Content = "Uploading images (auto)...";
+                                cmdUploadResumePauseClear.Content = "Pause Upload";
+                                cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
+                            }
+                            break;
+                        }
+
+                        //Initialise upload controls, no state to consider.
+                        if (uploadUIState.Mode == UploadUIState.UploadMode.None)
+                        {
+                            lblUploadType.Content = "Choose images or folders to upload";
+                            grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
+
+                            //Upload controls setup
+                            lstUploadImageFileList.IsEnabled = false;
+                            cmdUploadImportFolder.Visibility = Visibility.Visible;
+                            cmdUploadImportFiles.Visibility = Visibility.Visible;
+                            cmdUploadResumePauseClear.Visibility = Visibility.Collapsed;
+                            cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
+                            cmdUploadAll.Visibility = Visibility.Visible;
+                            cmdUploadAll.IsEnabled = false;
+                            panUpload.IsEnabled = false;
+                        }
+                        else if (uploadUIState.Mode == UploadUIState.UploadMode.Auto)
+                        {
+                            lblUploadType.Content = "Auto upload - paused";
+                            grdUploadSettings.RowDefinitions[2].Height = new GridLength(30.0);
+                            grdUploadSettings.RowDefinitions[3].Height = new GridLength(30.0);
+                            grdUploadSettings.RowDefinitions[4].Height = new GridLength(30.0);
+                            grdUploadSettings.RowDefinitions[5].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[6].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[9].Height = new GridLength(0);
+
+                            cmdUploadAll.Visibility = Visibility.Collapsed;
+                            cmdUploadResumePauseClear.Content = "Resume";
+                            cmdUploadTurnAutoOff.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            grdUploadSettings.RowDefinitions[2].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[3].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[4].Height = new GridLength(0);
+                            grdUploadSettings.RowDefinitions[5].Height = new GridLength(40);
+                            if (uploadUIState.UploadToNewCategory)
+                            {
+                                grdUploadSettings.RowDefinitions[7].Height = new GridLength(30.0); //Category Name
+                                grdUploadSettings.RowDefinitions[8].Height = new GridLength(80.0); //Category Description
+                            }
+                            else
+                            {
+                                grdUploadSettings.RowDefinitions[7].Height = new GridLength(0);
+                                grdUploadSettings.RowDefinitions[8].Height = new GridLength(0);
+                            }
+                            grdUploadSettings.RowDefinitions[6].Height = new GridLength(30);
+                            grdUploadSettings.RowDefinitions[9].Height = new GridLength(30);
+
+                            //Upload has been initialised, set controls to reflect upload options.
+                            lstUploadImageFileList.IsEnabled = true;
+                            panUpload.IsEnabled = true;
+
+                            cmdUploadAll.Visibility = Visibility.Visible;
+                            cmdUploadAll.IsEnabled = true;
+                            cmdUploadResumePauseClear.Content = "Clear";
+                            cmdUploadResumePauseClear.IsEnabled = true;
+                            cmdUploadResumePauseClear.Visibility = Visibility.Visible;
+                            cmdUploadTurnAutoOff.Visibility = Visibility.Collapsed;
+                            //cmdUploadChangeCategory.IsEnabled = true;
+                            cmdUploadChangeCategory.Visibility = Visibility.Visible;
+                            //Enable Tags
+                            //wrapMyTags.IsEnabled = true;
+                            //cmdAssociateTag.IsEnabled = true;
+
+                            if (uploadUIState.Mode == UploadUIState.UploadMode.Images)
+                            {
+                                lblUploadType.Content = "Upload - Files";
                                 grdUploadSettings.RowDefinitions[9].Height = new GridLength(0); //Map to sub folders
                                 chkUploadMapToSubFolders.IsChecked = false;
+
+                                cmdUploadImportFolder.Visibility = Visibility.Hidden;
                             }
-                            cmdUploadImportFiles.Visibility = Visibility.Hidden;
+                            else if (uploadUIState.Mode == UploadUIState.UploadMode.Folder)
+                            {
+                                lblUploadType.Content = "Upload - Folders";
+                                if (uploadUIState.GotSubFolders)
+                                {
+                                    grdUploadSettings.RowDefinitions[9].Height = new GridLength(60);
+                                }
+                                else
+                                {
+                                    grdUploadSettings.RowDefinitions[9].Height = new GridLength(0); //Map to sub folders
+                                    chkUploadMapToSubFolders.IsChecked = false;
+                                }
+                                cmdUploadImportFiles.Visibility = Visibility.Hidden;
+                            }
                         }
-                    }
 
-                    break;
-                #endregion
+                        break;
+                    #endregion
 
-                #region Account
-                case PaneMode.Account:
-                    if (state != null && state.connectionState == GlobalState.ConnectionState.LoggedOn)
-                    {
-                        //tabAccount.IsEnabled = true;
-                        //cmdAccountClose.IsEnabled = true;
-                        cmdUserAppEdit.Visibility = Visibility.Visible;
-                        cmdUserAppSave.Visibility = Visibility.Collapsed;
-                        cmdUserAppCancel.Visibility = Visibility.Collapsed;
-                        cmdAccountLogin.Visibility = Visibility.Collapsed;
-                        cmdAccount.IsEnabled = true;
-                        cmdAccountRefresh.IsEnabled = true;
-                        tabDownloadList.IsEnabled = true;
-                        tabUploadStatusList.IsEnabled = true;
-                        cmdAccountFotoWallaClose.IsEnabled = true;
+                    #region Account
+                    case PaneMode.Account:
+                        if (state != null && state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                        {
+                            //tabAccount.IsEnabled = true;
+                            //cmdAccountClose.IsEnabled = true;
+                            cmdUserAppEdit.Visibility = Visibility.Visible;
+                            cmdUserAppSave.Visibility = Visibility.Collapsed;
+                            cmdUserAppCancel.Visibility = Visibility.Collapsed;
+                            cmdAccountLogin.Visibility = Visibility.Collapsed;
+                            cmdAccount.IsEnabled = true;
+                            cmdAccountRefresh.IsEnabled = true;
+                            tabDownloadList.IsEnabled = true;
+                            tabUploadStatusList.IsEnabled = true;
+                            cmdAccountFotoWallaClose.IsEnabled = true;
 
-                    }
-                    else
-                    {
+                        }
+                        else
+                        {
+                            //tabAccount.IsEnabled = false;
+                            cmdAccountRefresh.IsEnabled = false;
+                            cmdUserAppEdit.Visibility = Visibility.Collapsed;
+                            cmdUserAppCancel.Visibility = Visibility.Collapsed;
+                            cmdUserAppSave.Visibility = Visibility.Collapsed;
+                            cmdAccountLogin.Visibility = Visibility.Visible;
+                            cmdAccount.IsEnabled = false;
+                            tabDownloadList.IsEnabled = false;
+                            tabUploadStatusList.IsEnabled = false;
+                            cmdAccountFotoWallaClose.IsEnabled = false;
+                        }
+
+                        cmdUseOffline.IsEnabled = true;
+                        cmdAccountUpdateOnWeb.IsEnabled = true;
+                        chkAccountAutoUpload.IsEnabled = false;
+                        sldAccountImageCopySize.IsEnabled = false;
+                        cmdAccountChangeAutoUploadFolder.IsEnabled = false;
+                        cmdAccountChangeImageCopyFolder.IsEnabled = false;
+
+                        break;
+                    case PaneMode.AccountEdit:
                         //tabAccount.IsEnabled = false;
-                        cmdAccountRefresh.IsEnabled = false;
+                        //cmdAccountClose.IsEnabled = false;
                         cmdUserAppEdit.Visibility = Visibility.Collapsed;
-                        cmdUserAppCancel.Visibility = Visibility.Collapsed;
-                        cmdUserAppSave.Visibility = Visibility.Collapsed;
-                        cmdAccountLogin.Visibility = Visibility.Visible;
-                        cmdAccount.IsEnabled = false;
+                        cmdUserAppCancel.Visibility = Visibility.Visible;
+                        cmdUserAppSave.Visibility = Visibility.Visible;
+                        cmdAccountLogin.Visibility = Visibility.Collapsed;
+
+                        cmdAccountRefresh.IsEnabled = false;
+                        cmdAccountClose.IsEnabled = false;
                         tabDownloadList.IsEnabled = false;
                         tabUploadStatusList.IsEnabled = false;
+
                         cmdAccountFotoWallaClose.IsEnabled = false;
-                    }
+                        cmdUseOffline.IsEnabled = false;
+                        cmdAccountUpdateOnWeb.IsEnabled = false;
+                        chkAccountAutoUpload.IsEnabled = true;
+                        sldAccountImageCopySize.IsEnabled = true;
+                        cmdAccountChangeAutoUploadFolder.IsEnabled = true;
+                        cmdAccountChangeImageCopyFolder.IsEnabled = true;
+                        break;
+                    #endregion
 
-                    cmdUseOffline.IsEnabled = true;
-                    cmdAccountUpdateOnWeb.IsEnabled = true;
-                    chkAccountAutoUpload.IsEnabled = false;
-                    sldAccountImageCopySize.IsEnabled = false;
-                    cmdAccountChangeAutoUploadFolder.IsEnabled = false;
-                    cmdAccountChangeImageCopyFolder.IsEnabled = false;
+                    #region Image
+                    case PaneMode.ImageView:
+                    case PaneMode.ImageEdit:
+                        panNavigationVert.Visibility = Visibility.Hidden;
+                        lblImageViewNameVert.Visibility = Visibility.Visible;
+                        lblImageListNameVert.Visibility = Visibility.Collapsed;
+                        cmbGallerySectionVert.Visibility = Visibility.Collapsed;
 
-                    break;
-                case PaneMode.AccountEdit:
-                    //tabAccount.IsEnabled = false;
-                    //cmdAccountClose.IsEnabled = false;
-                    cmdUserAppEdit.Visibility = Visibility.Collapsed;
-                    cmdUserAppCancel.Visibility = Visibility.Visible;
-                    cmdUserAppSave.Visibility = Visibility.Visible;
-                    cmdAccountLogin.Visibility = Visibility.Collapsed;
+                        if (cmdImageViewDetailToggle.IsChecked == true)
+                        {
+                            grdImageView.ColumnDefinitions[1].Width = new GridLength(240);
+                        }
+                        else
+                        {
+                            grdImageView.ColumnDefinitions[1].Width = new GridLength(0);
+                        }
 
-                    cmdAccountRefresh.IsEnabled = false;
-                    cmdAccountClose.IsEnabled = false;
-                    tabDownloadList.IsEnabled = false;
-                    tabUploadStatusList.IsEnabled = false;
+                        if (mode == PaneMode.ImageEdit)
+                        {
+                            txtImageViewName.IsEnabled = true;
+                            txtImageViewDescription.IsEnabled = true;
+                            datImageViewDate.IsEnabled = true;
+                            cmdImageViewEdit.Content = "Save";
+                            cmdImageViewCancel.IsEnabled = true;
+                            cmdImageViewDetailToggle.IsEnabled = false;
+                            cmdImageViewNext.IsEnabled = false;
+                            cmdImageViewPrevious.IsEnabled = false;
+                            lstImageViewTagList.IsEnabled = true;
 
-                    cmdAccountFotoWallaClose.IsEnabled = false;
-                    cmdUseOffline.IsEnabled = false;
-                    cmdAccountUpdateOnWeb.IsEnabled = false;
-                    chkAccountAutoUpload.IsEnabled = true;
-                    sldAccountImageCopySize.IsEnabled = true;
-                    cmdAccountChangeAutoUploadFolder.IsEnabled = true;
-                    cmdAccountChangeImageCopyFolder.IsEnabled = true;
-                    break;
-                #endregion
 
-                #region Image
-                case PaneMode.ImageView:
-                case PaneMode.ImageEdit:
-                    panNavigationVert.Visibility = Visibility.Hidden;
-                    lblImageViewNameVert.Visibility = Visibility.Visible;
-                    lblImageListNameVert.Visibility = Visibility.Collapsed;
-                    cmbGallerySectionVert.Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            txtImageViewName.IsEnabled = false;
+                            txtImageViewDescription.IsEnabled = false;
+                            datImageViewDate.IsEnabled = false;
+                            cmdImageViewEdit.Content = "Edit";
+                            cmdImageViewCancel.IsEnabled = false;
+                            cmdImageViewDetailToggle.IsEnabled = true;
+                            cmdImageViewNext.IsEnabled = true;
+                            cmdImageViewPrevious.IsEnabled = true;
+                            lstImageViewTagList.IsEnabled = false;
 
-                    if (cmdImageViewDetailToggle.IsChecked == true)
-                    {
-                        grdImageView.ColumnDefinitions[1].Width = new GridLength(240);
-                    }
-                    else
-                    {
-                        grdImageView.ColumnDefinitions[1].Width = new GridLength(0);
-                    }
+                            //PaneEnablePageControls(true);
+                        }
+                        PaneEnablePageControls(false);
 
-                    if (mode == PaneMode.ImageEdit)
-                    {
-                        txtImageViewName.IsEnabled = true;
-                        txtImageViewDescription.IsEnabled = true;
-                        datImageViewDate.IsEnabled = true;
-                        cmdImageViewEdit.Content = "Save";
-                        cmdImageViewCancel.IsEnabled = true;
-                        cmdImageViewDetailToggle.IsEnabled = false;
-                        cmdImageViewNext.IsEnabled = false;
-                        cmdImageViewPrevious.IsEnabled = false;
-                        lstImageViewTagList.IsEnabled = true;
+                        break;
+                    #endregion
+                }
 
-                        
-                    }
-                    else
-                    {
-                        txtImageViewName.IsEnabled = false;
-                        txtImageViewDescription.IsEnabled = false;
-                        datImageViewDate.IsEnabled = false;
-                        cmdImageViewEdit.Content = "Edit";
-                        cmdImageViewCancel.IsEnabled = false;
-                        cmdImageViewDetailToggle.IsEnabled = true;
-                        cmdImageViewNext.IsEnabled = true;
-                        cmdImageViewPrevious.IsEnabled = true;
-                        lstImageViewTagList.IsEnabled = false;
-
-                        //PaneEnablePageControls(true);
-                    }
-                    PaneEnablePageControls(false);
-
-                    break;
-                #endregion
+                currentPane = mode;
             }
-
-            currentPane = mode;
-           // TweakImageMarginSize(DateTime.Now, currentPane);
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.RefreshPanesAllControls()", (int)duration.TotalMilliseconds, mode.ToString()); }
+            }
         }
 
         private void PaneEnablePageControls(bool enable)
         {
-            cmdShowMenuLayout.IsEnabled = enable;
-            cmdShowExpandedLayout.IsEnabled = enable;
-            cmdAccount.IsEnabled = enable;
-            sldImageSize.IsEnabled = enable;
-            cmdShowActionsMenu.IsEnabled = enable;
-            cmbGallerySection.IsEnabled = enable;
-
-            if (lstImageMainViewerList != null)
-                lstImageMainViewerList.IsEnabled = enable; 
-
-            if (enable)
+            DateTime startTime = DateTime.Now;
+            try
             {
-                ImagesSetNavigationButtons();
+                cmdShowMenuLayout.IsEnabled = enable;
+                cmdShowExpandedLayout.IsEnabled = enable;
+                cmdAccount.IsEnabled = enable;
+                sldImageSize.IsEnabled = enable;
+                cmdShowActionsMenu.IsEnabled = enable;
+                cmbGallerySection.IsEnabled = enable;
+
+                if (lstImageMainViewerList != null)
+                    lstImageMainViewerList.IsEnabled = enable; 
+
+                if (enable)
+                {
+                    ImagesSetNavigationButtons();
+                }
+                else
+                {
+                    cmdImageNavigationLast.IsEnabled = enable;
+                    cmdImageNavigationNext.IsEnabled = enable;
+                    cmdImageNavigationPrevious.IsEnabled = enable;
+                    cmdImageNavigationBegin.IsEnabled = enable;
+
+                    cmdImageNavigationLastVert.IsEnabled = enable;
+                    cmdImageNavigationNextVert.IsEnabled = enable;
+                    cmdImageNavigationPreviousVert.IsEnabled = enable;
+                    cmdImageNavigationBeginVert.IsEnabled = enable;
+                }
             }
-            else
+            finally
             {
-                cmdImageNavigationLast.IsEnabled = enable;
-                cmdImageNavigationNext.IsEnabled = enable;
-                cmdImageNavigationPrevious.IsEnabled = enable;
-                cmdImageNavigationBegin.IsEnabled = enable;
-
-                cmdImageNavigationLastVert.IsEnabled = enable;
-                cmdImageNavigationNextVert.IsEnabled = enable;
-                cmdImageNavigationPreviousVert.IsEnabled = enable;
-                cmdImageNavigationBeginVert.IsEnabled = enable;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.PaneEnablePageControls()", (int)duration.TotalMilliseconds, ""); }
             }
         }
         #endregion
 
-        #region Pane Control Event Handelers
+        #region Pane \ Menu Event Handlers
         async private void radCategory_Checked(object sender, RoutedEventArgs e)
         {
             RefreshOverallPanesStructure(PaneMode.CategoryView);
@@ -1173,33 +1203,9 @@ namespace ManageWalla
             await RefreshAndDisplayTagList(false);
         }
 
-        private void cmdAccount_Click(object sender, RoutedEventArgs e)
-        {
-            previousPane = currentPane;
-            RefreshOverallPanesStructure(PaneMode.Account);
-            RefreshPanesAllControls(PaneMode.Account);
-        }
-
-        private void cmdAccountClose_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshOverallPanesStructure(previousPane);
-            RefreshPanesAllControls(previousPane);
-        }
-
         async private void cmdShowExpandedLayout_Click(object sender, RoutedEventArgs e)
         {
             isExpanded = true;
-
-            //panNavigationVert.Visibility = Visibility.Visible;
-            //lblImageViewNameVert.Visibility = Visibility.Collapsed;
-            //lblImageListNameVert.Visibility = Visibility.Visible;
-            //cmbGallerySectionVert.Visibility = Visibility.Visible;
-
-            //gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
-            //gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
-            //gridRight.RowDefinitions[0].Height = new GridLength(0);
-
-            
             RefreshOverallPanesStructure(currentPane);
             RefreshPanesAllControls(currentPane);
 
@@ -1210,430 +1216,21 @@ namespace ManageWalla
 
         async private void cmdShowMenuLayout_Click(object sender, RoutedEventArgs e)
         {
-            /*
-            if (currentPane == PaneMode.ImageEdit || currentPane == PaneMode.ImageView)
-            {
-                RefreshPanesAllControls(previousPane);
-                RefreshOverallPanesStructure(currentPane);
-            }
-            else
-            {
-                gridLeft.ColumnDefinitions[0].Width = new GridLength(0);
-                gridLeft.ColumnDefinitions[1].Width = new GridLength(300);
-                gridRight.RowDefinitions[0].Height = new GridLength(60);
-            }
-            */
-
             isExpanded = false;
 
-            //RefreshPanesAllControls(previousPane);
             RefreshOverallPanesStructure(currentPane);
 
             DateTime eventTime = DateTime.Now;
             await WaitAsynchronouslyAsync();
             TweakImageMarginSize(eventTime, currentPane);
         }
-
-        async private void ImageView_Click(object sender, RoutedEventArgs e)
-        {
-            //GeneralImage current = this.lstImageMainViewerList.Items.CurrentItem as GeneralImage;
-
-            //Deselect everything from this view.
-            while (lstImageMainViewerList.SelectedItems.Count > 0)
-            {
-                ListBoxItem listBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
-                listBoxItem.IsSelected = false;
-            }
-
-            var buttonClicked = sender as Button;
-            DependencyObject dependencyItem = buttonClicked;
-            while (dependencyItem is ListBoxItem == false)
-            {
-                dependencyItem = VisualTreeHelper.GetParent(dependencyItem);
-            }
-            var clickedListBoxItem = (ListBoxItem)dependencyItem;
-            clickedListBoxItem.IsSelected = true;
-
-            previousPane = currentPane;
-            cmdImageViewDetailToggle.IsChecked = false;
-
-            RefreshPanesAllControls(PaneMode.ImageView);
-            RefreshOverallPanesStructure(currentPane);
-
-            ImageViewUpdateNextPrevious();
-        }
-
-        private void ImageViewDetails_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshPanesAllControls(currentPane);
-            //if (currentPane == PaneMode.ImageView)
-                //ImageViewTagsUpdateFromMeta();
-        }
-
-        async private void ImageViewUpdateNextPrevious()
-        {
-            GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
-            if (current == null)
-                return;
-
-            cancelTokenSource = new CancellationTokenSource();
-            await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
-            await current.LoadMeta(false, cancelTokenSource.Token);
-            ImageViewTagsUpdateFromMeta();
-
-            if (lstImageMainViewerList.SelectedIndex == 0)
-            {
-                cmdImageViewPrevious.IsEnabled = false;
-            }
-            else
-            {
-                GeneralImage previous = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex - 1];
-                previous.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
-                previous.LoadMeta(false, cancelTokenSource.Token);
-
-                cmdImageViewPrevious.IsEnabled = true;
-            }
-
-            if (lstImageMainViewerList.SelectedIndex == lstImageMainViewerList.Items.Count -1)
-            {
-                cmdImageViewNext.IsEnabled = false;
-            }
-            else
-            {
-                GeneralImage next = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex + 1];
-                next.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
-                next.LoadMeta(false, cancelTokenSource.Token);
-                cmdImageViewNext.IsEnabled = true;
-            }
-        }
-
-        private void ImageViewPrevious_Click(object sender, RoutedEventArgs e)
-        {
-            int newIndex = lstImageMainViewerList.SelectedIndex - 1;
-
-            if (newIndex >= 0)
-            {
-                ListBoxItem oldListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
-                oldListBoxItem.IsSelected = false;
-
-                ListBoxItem newListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.Items[newIndex]) as ListBoxItem;
-                newListBoxItem.IsSelected = true;
-
-                ImageViewUpdateNextPrevious();
-            }
-        }
-
-        private void ImageViewNext_Click(object sender, RoutedEventArgs e)
-        {
-            int newIndex = lstImageMainViewerList.SelectedIndex + 1;
-
-            if (lstImageMainViewerList.Items.Count > newIndex)
-            {
-                ListBoxItem oldListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
-                oldListBoxItem.IsSelected = false;
-
-                ListBoxItem newListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.Items[newIndex]) as ListBoxItem;
-                newListBoxItem.IsSelected = true;
-
-                ImageViewUpdateNextPrevious();
-            }
-        }
-
-        private void ImageViewUpdateMetaTags(GeneralImage current)
-        {
-            List<ImageMetaTagRef> imageMetaTagRefTemp = new List<ImageMetaTagRef>();
-            
-            if (current.Meta.Tags == null)
-            {
-                foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
-                {
-                    TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
-                    ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
-                    newImageMetaTagRef.id = currentTagRef.id;
-                    newImageMetaTagRef.op = "C";
-                    imageMetaTagRefTemp.Add(newImageMetaTagRef);
-                }
-            }
-            else
-            {
-                foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
-                {
-                    TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
-
-                    if (!current.Meta.Tags.Any<ImageMetaTagRef>(r => r.id == currentTagRef.id))
-                    {
-                        ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
-                        newImageMetaTagRef.id = currentTagRef.id;
-                        newImageMetaTagRef.op = "C";
-                        imageMetaTagRefTemp.Add(newImageMetaTagRef);
-                    }
-                }
-
-
-                foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
-                {
-                    TagListTagRef stateTag = state.tagList.TagRef.First<TagListTagRef>(r => r.id == tagRef.id);
-                    if (!stateTag.systemOwned)
-                    {
-                        bool found = false;
-                        foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
-                        {
-                            TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
-                            if (currentTagRef.id == tagRef.id)
-                                found = true;
-                        }
-
-                        if (!found)
-                        {
-                            ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
-                            newImageMetaTagRef.id = tagRef.id;
-                            newImageMetaTagRef.op = "D";
-                            imageMetaTagRefTemp.Add(newImageMetaTagRef);
-                        }
-                    }
-                }
-            }
-            if (imageMetaTagRefTemp != null)
-                current.Meta.Tags = imageMetaTagRefTemp.ToArray<ImageMetaTagRef>();
-
-
-        }
-
-        async private void ImageViewEditSave_Click(object sender, RoutedEventArgs e)
-        {
-            GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
-            if (currentPane == PaneMode.ImageEdit)
-            {
-                if (txtImageViewName.Text.Length < 1)
-                {
-                    ShowMessage(MessageType.Warning, "You must enter a name to continue saving");
-                    return;
-                }
-
-                if (cancelTokenSource != null)
-                    cancelTokenSource.Cancel();
-
-                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                cancelTokenSource = newCancelTokenSource;
-
-                try
-                {
-                    ShowMessage(MessageType.Busy, "Saving image data updates");
-
-                    ImageViewUpdateMetaTags(current);
-                    await current.SaveMeta(cancelTokenSource.Token);
-
-                    if (newCancelTokenSource == cancelTokenSource)
-                        cancelTokenSource = null;
-                    
-                    ImageViewTagsUpdateFromMeta();
-
-                    ConcludeBusyProcess();
-                }
-                catch (OperationCanceledException)
-                {
-                    logger.Debug("ImageViewEditSave_Click has been cancelled.");
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex);
-                    ShowMessage(MessageType.Error, "Image data could not be saved, there was an error:" + ex.Message);
-                }
-                RefreshPanesAllControls(PaneMode.ImageView);
-            }
-            else
-            {
-                if (current.Meta == null)
-                {
-                    ShowMessage(MessageType.Info, "The image meta data has not been retrieved from the server, please wait...");
-                }
-                else
-                {
-                    //currentPane = PaneMode.ImageEdit;
-                    RefreshPanesAllControls(PaneMode.ImageEdit);
-                }
-            }
-        }
-
-        private void ImageViewEditCancel_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshPanesAllControls(PaneMode.ImageView);
-            GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
-            if (current != null)
-            {
-                current.LoadMeta(true, cancelTokenSource.Token);
-            }
-        }
-
-        /*
-        private void Image_MouseMove(object sender, MouseEventArgs e)
-        {
-            Image meImage = sender as Image;
-            if (meImage != null && e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragDrop.DoDragDrop(meImage, "dunno", DragDropEffects.Copy);
-            }
-        }
-        */
-
-        private void cmdShowActionsMenu_Click(object sender, RoutedEventArgs e)
-        {
-            //cmdShowActionsMenu.ContextMenu.IsOpen = (bool)cmdShowActionsMenu.IsChecked;
-        }
         #endregion
 
-        #region Image and menu handlers
-        async private void FetchCategoryImagesFirstAsync(object sender, RoutedEventArgs e)
-        {
-            if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
-                return;
-
-            cmbGallerySectionVert.Visibility = Visibility.Collapsed;
-            cmbGallerySection.Visibility = Visibility.Collapsed;
-
-            RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedTagButton != null)
-                checkedTagButton.IsChecked = false;
-
-            RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedGalleryButton != null)
-                checkedGalleryButton.IsChecked = false;
-
-            e.Handled = true;
-
-            TreeViewItem selectedTreeViewItem = (TreeViewItem)sender;
-
-            if (selectedTreeViewItem != null)
-            {
-                try
-                {
-                    if (cancelTokenSource != null)
-                        cancelTokenSource.Cancel();
-
-                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                    cancelTokenSource = newCancelTokenSource;
-
-                    CategoryListCategoryRef categoryRef = (CategoryListCategoryRef)selectedTreeViewItem.Tag;
-                    currentImageList = await controller.CategoryGetImagesAsync(categoryRef.id, 0, GetSearchQueryString(), cancelTokenSource.Token);
-                    if (currentImageList != null)
-                        await ImageListUpdateControls(cancelTokenSource.Token);
-
-                    if (newCancelTokenSource == cancelTokenSource)
-                        cancelTokenSource = null;
-                }
-                catch (OperationCanceledException)
-                {
-                    logger.Debug("FetchCategoryImagesFirstAsync has been cancelled by a subsequent request.");
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex);
-                    ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
-                }
-            }
-        }
-
-        async private void FetchTagImagesFirstAsync(object sender, RoutedEventArgs e)
-        {
-            cmbGallerySectionVert.Visibility = Visibility.Collapsed;
-            cmbGallerySection.Visibility = Visibility.Collapsed;
-
-            TreeViewItem selectedTreeViewItem = (TreeViewItem)treeCategoryView.SelectedItem;
-            if (selectedTreeViewItem != null)
-                selectedTreeViewItem.IsSelected = false;
-
-            RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedGalleryButton != null)
-                checkedGalleryButton.IsChecked = false;
-
-            RadioButton checkedButton = (RadioButton)sender;
-            //RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-
-            /* Refresh tag image state */
-            if (checkedButton != null)
-            {
-                try
-                {
-                    if (cancelTokenSource != null)
-                        cancelTokenSource.Cancel();
-
-                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                    cancelTokenSource = newCancelTokenSource;
-
-                    TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
-                    currentImageList = await controller.TagGetImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetSearchQueryString(), cancelTokenSource.Token);
-                    if (currentImageList != null)
-                        await ImageListUpdateControls(cancelTokenSource.Token);
-
-                    if (newCancelTokenSource == cancelTokenSource)
-                        cancelTokenSource = null;
-                }
-                catch (OperationCanceledException)
-                {
-                    logger.Debug("FetchTagImagesFirstAsync has been cancelled by a subsequent request. ");
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex);
-                    ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
-                }
-            }
-        }
-
-        async private void FetchGalleryImagesFirstAsync(object sender, RoutedEventArgs e)
-        {
-            //Uncheck any other selected imagelists.
-            TreeViewItem selectedTreeViewItem = (TreeViewItem)treeCategoryView.SelectedItem;
-            if (selectedTreeViewItem != null)
-                selectedTreeViewItem.IsSelected = false;
-
-            RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
-            if (checkedTagButton != null)
-                checkedTagButton.IsChecked = false;
-
-            RadioButton checkedButton = (RadioButton)sender;
-
-            /* Refresh tag image state */
-            if (checkedButton != null)
-            {
-                GalleryListGalleryRef galleryListRefTemp = (GalleryListGalleryRef)checkedButton.Tag;
-                if (!GalleryPopulateSectionDropdown(galleryListRefTemp))
-                {
-                    try
-                    {
-                        if (cancelTokenSource != null)
-                            cancelTokenSource.Cancel();
-
-                        CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                        cancelTokenSource = newCancelTokenSource;
-
-                        currentImageList = await controller.GalleryGetImagesAsync(galleryListRefTemp.id, galleryListRefTemp.name, 0, -1, GetSearchQueryString(), cancelTokenSource.Token);
-                        if (currentImageList != null)
-                        {
-                            newCancelTokenSource = new CancellationTokenSource();
-                            cancelTokenSource = newCancelTokenSource;
-
-                            await ImageListUpdateControls(cancelTokenSource.Token);
-                        }
-
-                        if (newCancelTokenSource == cancelTokenSource)
-                            cancelTokenSource = null;
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        logger.Debug("FetchGalleryImagesFirstAsync has been cancelled by a subsequent request. ");
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Error(ex);
-                        ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
-                    }
-                }
-            }
-        }
-
+        #region Image \ Navigation methods
         async private void FetchGalleryImagesSectionChangeAsync(long sectionId)
         {
+            DateTime startTime = DateTime.Now;
+
             RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
             if (checkedGalleryButton != null)
             {
@@ -1655,18 +1252,24 @@ namespace ManageWalla
                 }
                 catch (OperationCanceledException)
                 {
-                    logger.Debug("FetchTagImagesFirstAsync has been cancelled by a subsequent request. ");
+                    if (logger.IsDebugEnabled) { logger.Debug("FetchTagImagesFirstAsync has been cancelled by a subsequent request. "); }
                 }
                 catch (Exception ex)
                 {
                     logger.Error(ex);
                     ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
                 }
+                finally
+                {
+                    TimeSpan duration = DateTime.Now - startTime;
+                    if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.FetchGalleryImagesSectionChangeAsync()", (int)duration.TotalMilliseconds, ""); }
+                }
             }
         }
 
         async private Task FetchMoreImagesAsync(FetchDirection direction)
         {
+            DateTime startTime = DateTime.Now;
             if (currentImageList == null)
                 return;
 
@@ -1730,42 +1333,18 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("FetchMoreImagesAsync has been cancelled by a subsequent request. ");
+                if (logger.IsDebugEnabled) { logger.Debug("FetchMoreImagesAsync has been cancelled by a subsequent request. "); }
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
             }
-        }
-
-        async private void sldImageSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            DateTime eventTime = DateTime.Now;
-            await WaitAsynchronouslyAsync();
-            TweakImageMarginSize(eventTime, currentPane);
-        }
-
-        async private void mainTwo_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            DateTime eventTime = DateTime.Now;
-            await WaitAsynchronouslyAsync();
-            TweakImageMarginSize(eventTime, currentPane);
-        }
-
-        private void cmdShowInlineImageDetail_CheckedUnChecked(object sender, RoutedEventArgs e)
-        {
-            if (cmdShowInlineImageDetail.IsChecked)
+            finally
             {
-                previousImageSize = sldImageSize.Value;
-                sldImageSize.Visibility = Visibility.Hidden;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.FetchMoreImagesAsync()", (int)duration.TotalMilliseconds, ""); }
             }
-            else
-            {
-                sldImageSize.Visibility = Visibility.Visible;
-                sldImageSize.Value = previousImageSize;
-            }
-            TweakImageMarginSize(DateTime.Now, currentPane);
         }
 
         public async Task WaitAsynchronouslyAsync()
@@ -1773,60 +1352,8 @@ namespace ManageWalla
             await Task.Delay(750);
         }
 
-        private bool IsScrollBarVisible()
-        {
-            double imageSize = sldImageSize.Value + 4.0;
-            double areaForImages = (lstImageMainViewerList.Items.Count + 5) * (imageSize * imageSize);
-
-            double areaOfCanvas = gridRight.ColumnDefinitions[0].ActualWidth * gridRight.RowDefinitions[1].ActualHeight;
-
-            if (areaForImages > areaOfCanvas)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-            ScrollViewer sv = FindVisualChild<ScrollViewer>(lstImageMainViewerList);
-            Visibility scrollbarVisibility = sv.ComputedVerticalScrollBarVisibility;
-            if (scrollbarVisibility == Visibility.Visible)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
-        {
-            // Search immediate children first (breadth-first)
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-
-                if (child != null && child is childItem)
-                    return (childItem)child;
-
-                else
-                {
-                    childItem childOfChild = FindVisualChild<childItem>(child);
-
-                    if (childOfChild != null)
-                        return childOfChild;
-                }
-            }
-            return null;
-        }
-
         private void TweakUploadImageListMargin()
         {
-            //return;
-
-            /* Upload image list margin */
             double paneWidth = lstUploadImageFileList.ActualWidth - 22.0;
             double imageWidth = 131.0;
             double imageWidthWithMargin = imageWidth + 4.0;
@@ -1844,6 +1371,7 @@ namespace ManageWalla
 
             lastMarginTweakTime = DateTime.Now;
 
+            /*
             double total = (imageWidthCount * (newMargin * 2)) + (imageWidthCount * imageWidth);
             Console.Out.WriteLine("Upload");
             Console.Out.WriteLine("New total:" + total.ToString());
@@ -1851,6 +1379,7 @@ namespace ManageWalla
             Console.Out.WriteLine("Margin Changed:" + newMargin.ToString());
             Console.Out.WriteLine("Altered width:" + paneWidth.ToString());
             Console.Out.WriteLine("Actual width:" + lstUploadImageFileList.ActualWidth.ToString());
+            */
         }
 
         private void TweakMainImageListMargin()
@@ -1886,6 +1415,7 @@ namespace ManageWalla
 
             lastMarginTweakTime = DateTime.Now;
 
+            /*
             double total = (imageWidthCount * (newMargin * 2)) + (imageWidthCount * imageWidth);
             Console.Out.WriteLine("Main");
             Console.Out.WriteLine("New total:" + total.ToString());
@@ -1893,13 +1423,14 @@ namespace ManageWalla
             Console.Out.WriteLine("Margin Changed:" + newMargin.ToString());
             Console.Out.WriteLine("Altered width:" + paneWidth.ToString());
             Console.Out.WriteLine("Actual width:" + lstImageMainViewerList.ActualWidth.ToString());
+            */
         }
 
         private void TweakImageMarginSize(DateTime eventTime, PaneMode mode)
         {
             if (eventTime < lastMarginTweakTime)
             {
-                Console.Out.WriteLine("TweakImageMarginSize not run cause of later update.");
+                //Console.Out.WriteLine("TweakImageMarginSize not run cause of later update.");
                 return;
             }
 
@@ -1915,82 +1446,14 @@ namespace ManageWalla
             }
         }
 
-        /*  Could of worked better
-        private void TweakImageSize(DateTime eventTime)
-        {
-            if (lstImageMainViewerList.Items.Count < 1)
-                return;
-
-            if (eventTime < lastMarginTweakTime)
-            {
-                Console.Out.WriteLine("TweakImageSize not run cause of later update.");
-                return;
-            }
-
-            //Work out optimum image size.
-            double imageCountAlongWidth;
-            double remainder;
-            double newImageWidth = 0.0;
-            double currentPaneWidth = gridRight.ColumnDefinitions[0].ActualWidth;
-
-            bool isDetail = (bool)cmdShowInlineImageDetail.IsChecked;
-            if (isDetail)
-            {
-                newImageWidth = 140.0;
-            }
-            else
-            {
-                //if (IsScrollBarVisible())
-                //    currentPaneWidth = currentPaneWidth - 23.0;
-
-                double imageWidth = sldImageSize.Value;
-                double imageWidthWithMargin = imageWidth + 4.0;
-
-                imageCountAlongWidth = Math.Round(currentPaneWidth / imageWidthWithMargin,0.0);
-                remainder = (currentPaneWidth / imageWidthWithMargin) - Math.Floor(currentPaneWidth / imageWidthWithMargin);
-                if (remainder < 0.25 || remainder > 0.75)
-                {
-                    //Same number of images, just a little larger or a little smaller.
-                    newImageWidth = (currentPaneWidth / imageCountAlongWidth) - 4.0;
-                }
-                else if (remainder >= 0.25 && remainder < 0.50)
-                {
-                    //One more image please.
-                    newImageWidth = (currentPaneWidth / (imageCountAlongWidth + 1)) - 4.0;
-                }
-                else if (remainder >= 0.50 && remainder <= 0.75)
-                {
-                    //One less image please.
-                    newImageWidth = (currentPaneWidth / (imageCountAlongWidth - 1)) - 4.0;
-                }
-            }
-
-            if (newImageWidth > 0.0 && newImageWidth != sldImageSize.Value)
-            {
-                sldImageSize.Value = Math.Max(Math.Min(Math.Floor(newImageWidth), 300.0), 75.0);
-                Console.Out.WriteLine("Image Changed:" + sldImageSize.Value.ToString());
-            }
-            else
-            {
-                TweakImageMarginSize();
-                Console.Out.WriteLine("Image Not Changed:" + sldImageSize.Value.ToString());
-            }
-            Console.Out.WriteLine("Pane width:" + currentPaneWidth.ToString());
-            
-            lastMarginTweakTime = DateTime.Now;
-        }
- */
         async private Task ImageListUpdateControls(CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 imageMainViewerList.Clear();
 
-                if (tweakMainImageSize)
-                {
-                    
-                    tweakMainImageSize = false;
-                }
+                //tweakMainImageSize = false;
 
                 if (currentImageList == null)
                     return;
@@ -2089,8 +1552,13 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("ImageListUpdateControls has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("ImageListUpdateControls has been cancelled."); }
                 throw (cancelEx);
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.ImageListUpdateControls()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -2167,6 +1635,340 @@ namespace ManageWalla
             return null;
         }
 
+        private void ImageViewTagsUpdateFromMeta()
+        {
+
+            GeneralImage current = (GeneralImage)lstImageMainViewerList.SelectedItem;
+            if (current == null)
+                return;
+
+            //Deselect each tag.
+            foreach (ListBoxItem tagItem in lstImageViewTagList.Items)
+            {
+                tagItem.IsSelected = false;
+            }
+
+            if (current.Meta != null && current.Meta.Tags != null)
+            {
+                foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
+                {
+                    foreach (ListBoxItem tagItem in lstImageViewTagList.Items)
+                    {
+                        TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                        if (currentTagRef.id == tagRef.id)
+                        {
+                            tagItem.IsSelected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        async private void ImageViewUpdateNextPrevious()
+        {
+            DateTime startTime = DateTime.Now;
+
+            try
+            {
+                GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
+                if (current == null)
+                    return;
+
+                cancelTokenSource = new CancellationTokenSource();
+                await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
+                await current.LoadMeta(false, cancelTokenSource.Token);
+                ImageViewTagsUpdateFromMeta();
+
+                if (lstImageMainViewerList.SelectedIndex == 0)
+                {
+                    cmdImageViewPrevious.IsEnabled = false;
+                }
+                else
+                {
+                    GeneralImage previous = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex - 1];
+                    previous.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
+                    previous.LoadMeta(false, cancelTokenSource.Token);
+
+                    cmdImageViewPrevious.IsEnabled = true;
+                }
+
+                if (lstImageMainViewerList.SelectedIndex == lstImageMainViewerList.Items.Count - 1)
+                {
+                    cmdImageViewNext.IsEnabled = false;
+                }
+                else
+                {
+                    GeneralImage next = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex + 1];
+                    next.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
+                    next.LoadMeta(false, cancelTokenSource.Token);
+                    cmdImageViewNext.IsEnabled = true;
+                }
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.ImageViewUpdateNextPrevious()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
+        private void ImageViewUpdateMetaTags(GeneralImage current)
+        {
+            List<ImageMetaTagRef> imageMetaTagRefTemp = new List<ImageMetaTagRef>();
+
+            if (current.Meta.Tags == null)
+            {
+                foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
+                {
+                    TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                    ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
+                    newImageMetaTagRef.id = currentTagRef.id;
+                    newImageMetaTagRef.op = "C";
+                    imageMetaTagRefTemp.Add(newImageMetaTagRef);
+                }
+            }
+            else
+            {
+                foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
+                {
+                    TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+
+                    if (!current.Meta.Tags.Any<ImageMetaTagRef>(r => r.id == currentTagRef.id))
+                    {
+                        ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
+                        newImageMetaTagRef.id = currentTagRef.id;
+                        newImageMetaTagRef.op = "C";
+                        imageMetaTagRefTemp.Add(newImageMetaTagRef);
+                    }
+                }
+
+
+                foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
+                {
+                    TagListTagRef stateTag = state.tagList.TagRef.First<TagListTagRef>(r => r.id == tagRef.id);
+                    if (!stateTag.systemOwned)
+                    {
+                        bool found = false;
+                        foreach (ListBoxItem tagItem in lstImageViewTagList.SelectedItems)
+                        {
+                            TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
+                            if (currentTagRef.id == tagRef.id)
+                                found = true;
+                        }
+
+                        if (!found)
+                        {
+                            ImageMetaTagRef newImageMetaTagRef = new ImageMetaTagRef();
+                            newImageMetaTagRef.id = tagRef.id;
+                            newImageMetaTagRef.op = "D";
+                            imageMetaTagRefTemp.Add(newImageMetaTagRef);
+                        }
+                    }
+                }
+            }
+            if (imageMetaTagRefTemp != null)
+                current.Meta.Tags = imageMetaTagRefTemp.ToArray<ImageMetaTagRef>();
+        }
+        #endregion
+
+        #region Image \ navigation event handlers
+        async private void FetchCategoryImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
+                return;
+
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                cmbGallerySectionVert.Visibility = Visibility.Collapsed;
+                cmbGallerySection.Visibility = Visibility.Collapsed;
+
+                RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+                if (checkedTagButton != null)
+                    checkedTagButton.IsChecked = false;
+
+                RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+                if (checkedGalleryButton != null)
+                    checkedGalleryButton.IsChecked = false;
+
+                //e.Handled = true;
+
+                TreeViewItem selectedTreeViewItem = (TreeViewItem)sender;
+
+                if (selectedTreeViewItem != null)
+                {
+                    if (cancelTokenSource != null)
+                        cancelTokenSource.Cancel();
+
+                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource = newCancelTokenSource;
+
+                    CategoryListCategoryRef categoryRef = (CategoryListCategoryRef)selectedTreeViewItem.Tag;
+                    currentImageList = await controller.CategoryGetImagesAsync(categoryRef.id, 0, GetSearchQueryString(), cancelTokenSource.Token);
+                    if (currentImageList != null)
+                        await ImageListUpdateControls(cancelTokenSource.Token);
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("FetchCategoryImagesFirstAsync has been cancelled by a subsequent request."); }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.FetchCategoryImagesFirstAsync()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
+        async private void FetchTagImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                cmbGallerySectionVert.Visibility = Visibility.Collapsed;
+                cmbGallerySection.Visibility = Visibility.Collapsed;
+
+                TreeViewItem selectedTreeViewItem = (TreeViewItem)treeCategoryView.SelectedItem;
+                if (selectedTreeViewItem != null)
+                    selectedTreeViewItem.IsSelected = false;
+
+                RadioButton checkedGalleryButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+                if (checkedGalleryButton != null)
+                    checkedGalleryButton.IsChecked = false;
+
+                RadioButton checkedButton = (RadioButton)sender;
+                //RadioButton checkedButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+
+                /* Refresh tag image state */
+                if (checkedButton != null)
+                {
+
+                        if (cancelTokenSource != null)
+                            cancelTokenSource.Cancel();
+
+                        CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                        cancelTokenSource = newCancelTokenSource;
+
+                        TagListTagRef tagListTagRefTemp = (TagListTagRef)checkedButton.Tag;
+                        currentImageList = await controller.TagGetImagesAsync(tagListTagRefTemp.id, tagListTagRefTemp.name, 0, GetSearchQueryString(), cancelTokenSource.Token);
+                        if (currentImageList != null)
+                            await ImageListUpdateControls(cancelTokenSource.Token);
+
+                        if (newCancelTokenSource == cancelTokenSource)
+                            cancelTokenSource = null;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("FetchTagImagesFirstAsync has been cancelled by a subsequent request. "); }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.FetchTagImagesFirstAsync()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
+        async private void FetchGalleryImagesFirstAsync(object sender, RoutedEventArgs e)
+        {
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                //Uncheck any other selected imagelists.
+                TreeViewItem selectedTreeViewItem = (TreeViewItem)treeCategoryView.SelectedItem;
+                if (selectedTreeViewItem != null)
+                    selectedTreeViewItem.IsSelected = false;
+
+                RadioButton checkedTagButton = (RadioButton)wrapMyTags.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
+                if (checkedTagButton != null)
+                    checkedTagButton.IsChecked = false;
+
+                RadioButton checkedButton = (RadioButton)sender;
+
+                /* Refresh tag image state */
+                if (checkedButton != null)
+                {
+                    GalleryListGalleryRef galleryListRefTemp = (GalleryListGalleryRef)checkedButton.Tag;
+                    if (!GalleryPopulateSectionDropdown(galleryListRefTemp))
+                    {
+                        if (cancelTokenSource != null)
+                            cancelTokenSource.Cancel();
+
+                        CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                        cancelTokenSource = newCancelTokenSource;
+
+                        currentImageList = await controller.GalleryGetImagesAsync(galleryListRefTemp.id, galleryListRefTemp.name, 0, -1, GetSearchQueryString(), cancelTokenSource.Token);
+                        if (currentImageList != null)
+                        {
+                            newCancelTokenSource = new CancellationTokenSource();
+                            cancelTokenSource = newCancelTokenSource;
+
+                            await ImageListUpdateControls(cancelTokenSource.Token);
+                        }
+
+                        if (newCancelTokenSource == cancelTokenSource)
+                            cancelTokenSource = null;
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("FetchGalleryImagesFirstAsync has been cancelled by a subsequent request. "); }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Unexpected error loading images: " + ex.Message);
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.FetchGalleryImagesFirstAsync()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
+        async private void sldImageSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            DateTime eventTime = DateTime.Now;
+            await WaitAsynchronouslyAsync();
+            TweakImageMarginSize(eventTime, currentPane);
+        }
+
+        async private void mainTwo_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            DateTime eventTime = DateTime.Now;
+            await WaitAsynchronouslyAsync();
+            TweakImageMarginSize(eventTime, currentPane);
+        }
+
+        private void cmdShowInlineImageDetail_CheckedUnChecked(object sender, RoutedEventArgs e)
+        {
+            if (cmdShowInlineImageDetail.IsChecked)
+            {
+                previousImageSize = sldImageSize.Value;
+                sldImageSize.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                sldImageSize.Visibility = Visibility.Visible;
+                sldImageSize.Value = previousImageSize;
+            }
+            TweakImageMarginSize(DateTime.Now, currentPane);
+        }
+
         async private void cmdImageNavigationLast_Click(object sender, RoutedEventArgs e)
         {
             await FetchMoreImagesAsync(FetchDirection.Last);
@@ -2238,7 +2040,7 @@ namespace ManageWalla
                     }
                     catch (OperationCanceledException)
                     {
-                        logger.Debug("DeleteImages_Click has been cancelled");
+                        if (logger.IsDebugEnabled) { logger.Debug("DeleteImages_Click has been cancelled"); }
                     }
                     catch (Exception ex)
                     {
@@ -2273,9 +2075,189 @@ namespace ManageWalla
 
         private void Image_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (lstImageMainViewerList.SelectionMode == SelectionMode.Single)
+            try
             {
-                //isExpanded = true;
+                if (lstImageMainViewerList.SelectionMode == SelectionMode.Single)
+                {
+                    //isExpanded = true;
+                    previousPane = currentPane;
+                    cmdImageViewDetailToggle.IsChecked = false;
+
+                    RefreshPanesAllControls(PaneMode.ImageView);
+                    RefreshOverallPanesStructure(currentPane);
+
+                    ImageViewUpdateNextPrevious();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
+        }
+
+        async private void RevertFromImageView_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                RefreshPanesAllControls(previousPane);
+                RefreshOverallPanesStructure(currentPane);
+
+                DateTime eventTime = DateTime.Now;
+                await WaitAsynchronouslyAsync();
+                TweakImageMarginSize(eventTime, currentPane);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
+        }
+
+        private void ImageViewPrevious_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int newIndex = lstImageMainViewerList.SelectedIndex - 1;
+
+                if (newIndex >= 0)
+                {
+                    ListBoxItem oldListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
+                    oldListBoxItem.IsSelected = false;
+
+                    ListBoxItem newListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.Items[newIndex]) as ListBoxItem;
+                    newListBoxItem.IsSelected = true;
+
+                    ImageViewUpdateNextPrevious();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
+        }
+
+        private void ImageViewNext_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int newIndex = lstImageMainViewerList.SelectedIndex + 1;
+
+                if (lstImageMainViewerList.Items.Count > newIndex)
+                {
+                    ListBoxItem oldListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
+                    oldListBoxItem.IsSelected = false;
+
+                    ListBoxItem newListBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.Items[newIndex]) as ListBoxItem;
+                    newListBoxItem.IsSelected = true;
+
+                    ImageViewUpdateNextPrevious();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
+        }
+
+        async private void ImageViewEditSave_Click(object sender, RoutedEventArgs e)
+        {
+            GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
+            if (currentPane == PaneMode.ImageEdit)
+            {
+                if (txtImageViewName.Text.Length < 1)
+                {
+                    ShowMessage(MessageType.Warning, "You must enter a name to continue saving");
+                    return;
+                }
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                try
+                {
+                    ShowMessage(MessageType.Busy, "Saving image data updates");
+
+                    ImageViewUpdateMetaTags(current);
+                    await current.SaveMeta(cancelTokenSource.Token);
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+
+                    ImageViewTagsUpdateFromMeta();
+
+                    ConcludeBusyProcess();
+                }
+                catch (OperationCanceledException)
+                {
+                    if (logger.IsDebugEnabled) { logger.Debug("ImageViewEditSave_Click has been cancelled."); }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MessageType.Error, "Image data could not be saved, there was an error:" + ex.Message);
+                }
+                RefreshPanesAllControls(PaneMode.ImageView);
+            }
+            else
+            {
+                if (current.Meta == null)
+                {
+                    ShowMessage(MessageType.Info, "The image meta data has not been retrieved from the server, please wait...");
+                }
+                else
+                {
+                    //currentPane = PaneMode.ImageEdit;
+                    RefreshPanesAllControls(PaneMode.ImageEdit);
+                }
+            }
+        }
+
+        private void ImageViewEditCancel_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                RefreshPanesAllControls(PaneMode.ImageView);
+                GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
+                if (current != null)
+                {
+                    current.LoadMeta(true, cancelTokenSource.Token);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
+        }
+
+        async private void ImageView_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                //GeneralImage current = this.lstImageMainViewerList.Items.CurrentItem as GeneralImage;
+
+                //Deselect everything from this view.
+                while (lstImageMainViewerList.SelectedItems.Count > 0)
+                {
+                    ListBoxItem listBoxItem = this.lstImageMainViewerList.ItemContainerGenerator.ContainerFromItem(lstImageMainViewerList.SelectedItems[0]) as ListBoxItem;
+                    listBoxItem.IsSelected = false;
+                }
+
+                var buttonClicked = sender as Button;
+                DependencyObject dependencyItem = buttonClicked;
+                while (dependencyItem is ListBoxItem == false)
+                {
+                    dependencyItem = VisualTreeHelper.GetParent(dependencyItem);
+                }
+                var clickedListBoxItem = (ListBoxItem)dependencyItem;
+                clickedListBoxItem.IsSelected = true;
+
                 previousPane = currentPane;
                 cmdImageViewDetailToggle.IsChecked = false;
 
@@ -2284,8 +2266,25 @@ namespace ManageWalla
 
                 ImageViewUpdateNextPrevious();
             }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
         }
 
+        private void ImageViewDetails_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                RefreshPanesAllControls(currentPane);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
+        }
         #endregion
 
         #region Category Methods
@@ -2337,7 +2336,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("RefreshAndDisplayCategoryList has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("RefreshAndDisplayCategoryList has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -2503,7 +2502,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("CategoryPopulateMetaData has been cancelled");
+                if (logger.IsDebugEnabled) { logger.Debug("CategoryPopulateMetaData has been cancelled"); }
             }
             catch (Exception ex)
             {
@@ -2563,7 +2562,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("MoveImagesToCategory has been cancelled");
+                if (logger.IsDebugEnabled) { logger.Debug("MoveImagesToCategory has been cancelled"); }
             }
             catch (Exception ex)
             {
@@ -2711,7 +2710,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("cmdCategorySave_Click has been cancelled");
+                if (logger.IsDebugEnabled) { logger.Debug("cmdCategorySave_Click has been cancelled"); }
             }
             catch (Exception ex)
             {
@@ -2744,7 +2743,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("cmdCategoryDelete_Click has been cancelled");
+                if (logger.IsDebugEnabled) { logger.Debug("cmdCategoryDelete_Click has been cancelled"); }
             }
             catch (Exception ex)
             {
@@ -2757,6 +2756,71 @@ namespace ManageWalla
                 RefreshAndDisplayCategoryList(true);
             }
         }
+
+        private void menuCategoryMoveImage_Click(object sender, RoutedEventArgs e)
+        {
+            int count = lstImageMainViewerList.SelectedItems.Count;
+            if (count == 0)
+            {
+                ShowMessage(MessageType.Warning, "You must select at least one image to continue.");
+                return;
+            }
+
+            cmdCategorySelect.Content = "Add Images";
+            UpdateDialogsAndShow(MessageType.Other, "");
+            CategorySelectRefreshCategoryList();
+            gridCategorySelectDialog.Visibility = Visibility.Visible;
+        }
+
+        async private void cmdCategorySelect_Click(object sender, RoutedEventArgs e)
+        {
+            //CategoryListCategoryRef currentSelectedCategory = null;
+            TreeViewItem item = (TreeViewItem)treeCategorySelect.SelectedItem;
+            if (item != null)
+            {
+                CategoryListCategoryRef currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+
+                gridCategorySelectDialog.Visibility = Visibility.Collapsed;
+                if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
+                {
+                    currentCategory.parentId = currentSelectedCategory.id;
+                    lblCategoryParentName.Content = GetCategoryName(currentSelectedCategory.id);
+                    paneBusy.Visibility = Visibility.Collapsed;
+                }
+                else if (currentPane == PaneMode.Upload)
+                {
+                    uploadUIState.RootCategoryId = currentSelectedCategory.id;
+                    uploadUIState.RootCategoryName = GetCategoryName(currentSelectedCategory.id);
+                    paneBusy.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+                    await MoveImagesToCategory(currentSelectedCategory.id);
+                }
+            }
+            else
+            {
+                ShowMessage(MessageType.Warning, "You must select a category to continue.");
+                return;
+            }
+        }
+
+        private void cmdCategorySelectCancel_Click(object sender, RoutedEventArgs e)
+        {
+            gridCategorySelectDialog.Visibility = Visibility.Collapsed;
+            paneBusy.Visibility = Visibility.Collapsed;
+        }
+
+        private void cmdCategoryMoveParent_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateDialogsAndShow(MessageType.Other, "");
+            CategorySelectRefreshCategoryList();
+
+            cmdCategorySelect.Content = "Select";
+            gridCategorySelectDialog.Visibility = Visibility.Visible;
+        }
+
 
         /*
         async private void CategoryDroppedImages(object sender, DragEventArgs e)
@@ -2824,7 +2888,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("RefreshAndDisplayTagList has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("RefreshAndDisplayTagList has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -2955,7 +3019,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("PopulateTagMetaData has been cancelled");
+                if (logger.IsDebugEnabled) { logger.Debug("PopulateTagMetaData has been cancelled"); }
             }
             catch (Exception ex)
             {
@@ -3003,7 +3067,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("AddRemoveImagesFromTag has been cancelled");
+                if (logger.IsDebugEnabled) { logger.Debug("AddRemoveImagesFromTag has been cancelled"); }
             }
             catch (Exception ex)
             {
@@ -3061,7 +3125,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("cmdTagDelete_Click has been cancelled");
+                if (logger.IsDebugEnabled) { logger.Debug("cmdTagDelete_Click has been cancelled"); }
             }
             catch (Exception ex)
             {
@@ -3164,7 +3228,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("cmdTagSave_Click has been cancelled");
+                if (logger.IsDebugEnabled) { logger.Debug("cmdTagSave_Click has been cancelled"); }
             }
             catch (Exception ex)
             {
@@ -3211,10 +3275,54 @@ namespace ManageWalla
             }
         }
 
+        private void menuTagAddTo_Click(object sender, RoutedEventArgs e)
+        {
+            int count = lstImageMainViewerList.SelectedItems.Count;
+            if (count == 0)
+            {
+                ShowMessage(MessageType.Warning, "You must select at least one image to continue.");
+                return;
+            }
+
+            UpdateDialogsAndShow(MessageType.Other, "");
+
+            TagAddImagesRefreshTagsList();
+            gridTagSelectDialog.Visibility = Visibility.Visible;
+        }
+
+        async private void cmdTagAddImagesTo_Click(object sender, RoutedEventArgs e)
+        {
+            int count = lstTagAddImagesInclude.SelectedItems.Count;
+            if (count == 0)
+            {
+                ShowMessage(MessageType.Warning, "You must select at least one tag.");
+                return;
+            }
+
+            gridTagSelectDialog.Visibility = Visibility.Collapsed;
+
+            string[] tagName = new string[count];
+            int i = 0;
+            foreach (ListBoxItem current in lstTagAddImagesInclude.SelectedItems)
+            {
+                TagListTagRef tagRef = (TagListTagRef)current.Tag;
+                tagName[i] = tagRef.name;
+                i++;
+            }
+
+            await AddRemoveImagesFromTag(true, tagName);
+            //UpdateDialogsAndShow(MessageType.Other, "");
+        }
+
+        private void cmdTagAddImagesCancel_Click(object sender, RoutedEventArgs e)
+        {
+            gridTagSelectDialog.Visibility = Visibility.Collapsed;
+            paneBusy.Visibility = Visibility.Collapsed;
+        }
+
         #endregion
 
-        #region Upload Method and Event Handlers
-        
+        #region Upload Methods
         private void UploadRefreshTagsList()
         {
             lstUploadTagList.Items.Clear();
@@ -3373,18 +3481,162 @@ namespace ManageWalla
             tagListUploadRefreshing = false;
         }
 
+        private void UploadImageStateApplyServerState()
+        {
+
+        }
+
+        async private Task DoAutoUploadAsync(bool resume)
+        {
+            if (!resume)
+            {
+                UploadImageStateApplyServerState();
+
+                //TODO check account level flag, if false return
+
+                if (currentPane == PaneMode.Upload &&
+                    uploadUIState.Mode == UploadUIState.UploadMode.Auto &&
+                    uploadUIState.Uploading == true)
+                    return;
+
+                if (uploadFots.Count > 0)
+                    return;
+
+            }
+
+            if (cancelUploadTokenSource != null)
+                cancelUploadTokenSource.Cancel();
+
+            CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
+            cancelUploadTokenSource = newCancelUploadTokenSource;
+
+            DirectoryInfo folder = new DirectoryInfo(uploadUIState.AutoUploadFolder);
+
+            try
+            {
+                uploadUIState.Uploading = true;
+
+                if (!resume)
+                {
+
+                    uploadUIState.Mode = UploadUIState.UploadMode.Auto;
+
+                    List<string> responses = await controller.CheckImagesForAutoUploadAsync(folder, uploadFots, cancelUploadTokenSource.Token);
+
+                    if (responses.Count > 1)
+                    {
+                        StringBuilder messageBuilder = new StringBuilder();
+                        messageBuilder.AppendLine("Some files could not be prepared for upload:");
+                        foreach (string response in responses)
+                        {
+                            messageBuilder.AppendLine(response);
+                        }
+                        ShowMessage(MessageType.Error, messageBuilder.ToString());
+                    }
+                }
+
+                int uploadCount = uploadFots.Count;
+
+                if (uploadCount > 0)
+                {
+                    ShowMessage(MessageType.Info, uploadCount.ToString() + " images were found and are being uploaded automatically");
+                    await controller.UploadAutoAsync(uploadFots, uploadUIState, cancelUploadTokenSource.Token);
+                    ShowMessage(MessageType.Info, uploadCount.ToString() + " images were uploaded successfully");
+                }
+
+                if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                    cancelUploadTokenSource = null;
+
+                ResetUploadState();
+            }
+            catch (OperationCanceledException)
+            {
+                //uploadFots.Clear();
+                if (logger.IsDebugEnabled) { logger.Debug("DoAutoUploadAsync has been cancelled."); }
+            }
+            catch (Exception ex)
+            {
+                uploadFots.Clear();
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "There was an unexpected error whilst preparing files for uploading.  Error: " + ex.Message);
+                ResetUploadState();
+            }
+            finally
+            {
+                uploadUIState.Uploading = false;
+            }
+        }
+
+        async private Task RefreshUploadStatusStateAsync(bool force, bool silent)
+        {
+            try
+            {
+                bool isBusy = bool.Parse(cmdAccountRefresh.Tag.ToString());
+                if (isBusy) { return; }
+
+                if (!force && cancelUploadTokenSource != null)
+                    return;
+
+                long[] orderIds = CacheHelper.GetUploadImageListQueryIds(uploadImageStateList);
+
+                if (!force && orderIds.Length == 0)
+                    return;
+
+                if (!silent)
+                    ShowMessage(MessageType.Busy, "Refreshing upload history list");
+
+                cmdAccountRefresh.Tag = true;
+
+                CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
+                cancelUploadTokenSource = newCancelUploadTokenSource;
+
+                await controller.RefreshUploadStatusListAsync(orderIds, cancelUploadTokenSource.Token, uploadImageStateList);
+
+                CacheHelper.DeleteUploadedFiles(uploadImageStateList, uploadUIState.AutoUploadFolder);
+
+                if (newCancelUploadTokenSource == cancelUploadTokenSource)
+                    cancelUploadTokenSource = null;
+
+                switch (state.uploadStatusListState)
+                {
+                    case GlobalState.DataLoadState.Loaded:
+                    case GlobalState.DataLoadState.LocalCache:
+                        RefreshUploadStatusListBinding();
+                        panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Collapsed;
+                        break;
+                    case GlobalState.DataLoadState.Unavailable:
+                        panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Visible;
+                        break;
+                }
+
+                if (!silent)
+                    ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("RefreshUploadStatusStateAsync has been cancelled."); }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Retrieving the upload history has failed with an unexpected problem: " + ex.Message);
+            }
+            finally
+            {
+                cmdAccountRefresh.Tag = false;
+            }
+        }
+
+        #endregion
+
+        #region Upload Event Handlers
+
         async private void cmdUploadImportFolder_Click(object sender, RoutedEventArgs e)
         {
             var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
             System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
             if (folderDialog.SelectedPath.Length > 0)
             {
-                //if (tweakUploadImageSize)
-                //{
-                //    TweakImageMarginSize(DateTime.Now, currentPane);
-                //    tweakUploadImageSize = false;
-                //}
-
                 if (cancelUploadTokenSource != null)
                     cancelUploadTokenSource.Cancel();
 
@@ -3440,7 +3692,7 @@ namespace ManageWalla
                 }
                 catch (OperationCanceledException)
                 {
-                    logger.Debug("cmdUploadImportFolder_Click has been cancelled.");
+                    if (logger.IsDebugEnabled) { logger.Debug("cmdUploadImportFolder_Click has been cancelled."); }
                 }
                 catch (Exception ex)
                 {
@@ -3511,7 +3763,7 @@ namespace ManageWalla
                 }
                 catch (OperationCanceledException)
                 {
-                    logger.Debug("cmdUploadImportFiles_Click has been cancelled.");
+                    if (logger.IsDebugEnabled) { logger.Debug("cmdUploadImportFiles_Click has been cancelled."); }
                 }
                 catch (Exception ex)
                 {
@@ -3590,7 +3842,6 @@ namespace ManageWalla
         {
             try
             {
-
                 //TreeViewItem item = (TreeViewItem)treeUploadCategoryView.SelectedItem;
                 if (uploadUIState.RootCategoryId < 0)
                 {
@@ -3646,7 +3897,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("cmdUploadAll_Click has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("cmdUploadAll_Click has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -3657,6 +3908,100 @@ namespace ManageWalla
             {
                 uploadUIState.Uploading = false;
                 RefreshPanesAllControls(PaneMode.Upload);
+            }
+        }
+
+        private void chkUploadOverrideDateAll_Checked(object sender, RoutedEventArgs e)
+        {
+            if (uploadUIState.MetaTakenDateSetAll)
+            {
+                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
+                uploadUIState.MetaTakenDate = current.Meta.TakenDate;
+
+                BindingOperations.ClearBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty);
+                Binding binding = new Binding("MetaTakenDate");
+                binding.Mode = BindingMode.TwoWay;
+                binding.Source = uploadUIState;
+                BindingOperations.SetBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty, binding);
+
+                grdUploadImageDetails.RowDefinitions[6].Height = new GridLength(0);
+                lblUploadOverrideDateAll.Content = "Override date (All fotos)";
+            }
+            else
+            {
+                BindingOperations.ClearBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty);
+                Binding binding = new Binding("/Meta.TakenDate");
+                binding.Mode = BindingMode.TwoWay;
+                BindingOperations.SetBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty, binding);
+
+                grdUploadImageDetails.RowDefinitions[6].Height = new GridLength(30);
+                lblUploadOverrideDateAll.Content = "Apply to all";
+            }
+        }
+
+        private void chkUploadOverrideDate_Checked(object sender, RoutedEventArgs e)
+        {
+            grdUploadImageDetails.RowDefinitions[7].Height = new GridLength(30);
+            datUploadOverrideDate.IsEnabled = true;
+        }
+
+        private void chkUploadOverrideDate_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!uploadUIState.MetaTakenDateSetAll)
+            {
+                grdUploadImageDetails.RowDefinitions[7].Height = new GridLength(0);
+                datUploadOverrideDate.IsEnabled = false;
+            }
+        }
+
+        public void UploadImageStateInProgress_Filter(object sender, FilterEventArgs e)
+        {
+            UploadImageState item = e.Item as UploadImageState;
+            if (item.status != UploadImage.ImageStatus.Complete && item.status != UploadImage.ImageStatus.Inactive)
+            {
+                e.Accepted = true;
+            }
+            else
+            {
+                e.Accepted = false;
+            }
+        }
+
+        public void UploadImageStateComplete_Filter(object sender, FilterEventArgs e)
+        {
+            UploadImageState item = e.Item as UploadImageState;
+            if (item.status == UploadImage.ImageStatus.Complete)
+            {
+                e.Accepted = true;
+            }
+            else
+            {
+                e.Accepted = false;
+            }
+        }
+
+        private void cmdUploadChangeCategory_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateDialogsAndShow(MessageType.Other, "");
+            CategorySelectRefreshCategoryList();
+
+            cmdCategorySelect.Content = "Select";
+            gridCategorySelectDialog.Visibility = Visibility.Visible;
+        }
+
+        private void cmdUploadTurnAutoOff_Click(object sender, RoutedEventArgs e)
+        {
+            //TODO set account level flag and update on server
+            uploadFots.Clear();
+            ResetUploadState();
+        }
+
+        private void cmdUploadRemoveImage_Click(object sender, RoutedEventArgs e)
+        {
+            UploadImage uploadImage = (UploadImage)lstUploadImageFileList.SelectedItem;
+            if (uploadImage != null)
+            {
+                uploadFots.Remove(uploadImage);
             }
         }
         #endregion
@@ -3870,21 +4215,10 @@ namespace ManageWalla
         }
         #endregion
 
-        #region Account Methods and Handlers
-
-
+        #region Account Methods
         public void RefreshUploadStatusListBinding()
         {
-            //bool simon1 = (bool)datUploadsInProgress.Items.IsLiveFiltering;
-            //bool simon = (bool)datUploadCompletedList.Items.IsLiveFiltering;
-
             Dispatcher.Invoke(RefreshUploadStatusListBindingDispatcher);
-            
-
-            //Dispatcher.Invoke(datUploadsInProgress.Items.Refresh);
-            //Dispatcher.Invoke(datUploadCompletedList.Items.Refresh);
-
-            
         }
 
         private void RefreshUploadStatusListBindingDispatcher()
@@ -3894,62 +4228,6 @@ namespace ManageWalla
 
             CollectionViewSource completedFilter = (CollectionViewSource)FindResource("uploadImageStateListCompleteKey");
             completedFilter.View.Refresh();
-        }
-
-
-        async private void tabAccount_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //if (tabAccount.SelectedIndex == 1)
-            //{
-            //    await RefreshUploadStatusStateAsync(false);
-            //}
-        }
-
-        private void cmdUserAppCancel_Click(object sender, RoutedEventArgs e)
-        {
-            AccountRefreshFromState();
-            RefreshPanesAllControls(PaneMode.Account);
-        }
-
-        async private void cmdUserAppSave_Click(object sender, RoutedEventArgs e)
-        {
-            await UserAppSave();
-            //AccountRefreshFromState();
-            //RefreshPanesAllControls(PaneMode.Account);
-        }
-
-        private void cmdUserAppEdit_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshPanesAllControls(PaneMode.AccountEdit);
-        }
-
-        async private void cmdAccountLogin_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string profileName = txtAccountProfileName.Text;
-                string password = txtAccountPassword.Password;
-
-                if (profileName.Length < 1 || password.Length < 1)
-                {
-                    ShowMessage(MessageType.Warning, "You must enter your profile name and password to continue");
-                    return;
-                }
-
-                await Login(profileName, password);
-
-                //if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
-                //{
-                //    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                //    radGallery.IsChecked = true;
-                //}
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                ShowMessage(MessageType.Error, "The logon process failed with an unexpected problem: " + ex.Message);
-                RefreshPanesAllControls(PaneMode.Account);
-            }
         }
 
         private void AccountRefreshFromState()
@@ -4038,7 +4316,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("AccountSave has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("AccountSave has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -4100,6 +4378,145 @@ namespace ManageWalla
                 ConcludeBusyProcess();
             }
         }
+
+        async private Task AccountStatusRefresh(string password)
+        {
+            try
+            {
+                ShowMessage(MessageType.Busy, "Refreshing Account information");
+                cmdAccountRefresh.Tag = true;
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                if (password == null)
+                    password = state.account.Password;
+
+                await controller.AccountDetailsGet(cancelTokenSource.Token);
+                state.account.Password = password;
+
+                //lblTagProfileNameLabel.Content = state.account.ProfileName + " Tags";
+
+                await controller.SetUserApp(cancelTokenSource.Token);
+
+                ResetUploadState();
+
+                ConcludeBusyProcess();
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("AccountStatusRefresh has been cancelled."); }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Account information could not be loaded, there was an error: " + ex.Message);
+            }
+            finally
+            {
+                cmdAccountRefresh.Tag = false;
+                AccountRefreshFromState();
+            }
+        }
+        #endregion
+
+        #region Account Event Handlers
+        private void cmdAccount_Click(object sender, RoutedEventArgs e)
+        {
+            previousPane = currentPane;
+            RefreshOverallPanesStructure(PaneMode.Account);
+            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+        private void cmdAccountClose_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshOverallPanesStructure(previousPane);
+            RefreshPanesAllControls(previousPane);
+        }
+        
+        private void cmdUserAppCancel_Click(object sender, RoutedEventArgs e)
+        {
+            AccountRefreshFromState();
+            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+        async private void cmdUserAppSave_Click(object sender, RoutedEventArgs e)
+        {
+            await UserAppSave();
+        }
+
+        private void cmdUserAppEdit_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshPanesAllControls(PaneMode.AccountEdit);
+        }
+
+        async private void cmdAccountLogin_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string profileName = txtAccountProfileName.Text;
+                string password = txtAccountPassword.Password;
+
+                if (profileName.Length < 1 || password.Length < 1)
+                {
+                    ShowMessage(MessageType.Warning, "You must enter your profile name and password to continue");
+                    return;
+                }
+
+                await Login(profileName, password);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "The logon process failed with an unexpected problem: " + ex.Message);
+                RefreshPanesAllControls(PaneMode.Account);
+            }
+        }
+
+        private void cmdAccountChangeImageCopyFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
+            if (folderDialog.SelectedPath.Length > 0)
+            {
+                lblAccountImageCopyFolder.Content = folderDialog.SelectedPath;
+                lblAccountImageCopyFolderAbbrev.Content = StringTrim(folderDialog.SelectedPath, 80);
+            }
+        }
+
+        private void cmdAccountChangeAutoUploadFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
+            if (folderDialog.SelectedPath.Length > 0)
+            {
+                chkAccountAutoUpload.IsChecked = true;
+                lblAccountAutoUploadFolder.Content = folderDialog.SelectedPath;
+                lblAccountAutoUploadFolderAbbrev.Content = StringTrim(folderDialog.SelectedPath, 80);
+            }
+        }
+
+        async private void cmdAccountRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            if (tabAccount.SelectedIndex == 0)
+            {
+                await AccountStatusRefresh(null);
+            }
+            else if (tabAccount.SelectedIndex == 1)
+            {
+                await RefreshUploadStatusStateAsync(true, false);
+            }
+            else
+            {
+                //TODO
+            }
+        }
         #endregion
 
         #region Gallery Methods
@@ -4149,7 +4566,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("RefreshAndDisplayGalleryList has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("RefreshAndDisplayGalleryList has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -4371,7 +4788,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("PopulateGalleryMetaData has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("PopulateGalleryMetaData has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -4851,7 +5268,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("InitNewGallery has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("InitNewGallery has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -4898,7 +5315,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("GallerySave has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("GallerySave has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -4939,7 +5356,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("GalleryReloadSection has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("GalleryReloadSection has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -5276,7 +5693,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("cmdGalleryDelete_Click has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("cmdGalleryDelete_Click has been cancelled."); }
             }
             catch (Exception ex)
             {
@@ -5313,525 +5730,12 @@ namespace ManageWalla
                 cmbGallerySection.SelectedIndex = cmbGallerySectionVert.SelectedIndex;
         }
 
-        //private void cmbGalleryPresentationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        //{
-        //    RefreshPanesAllControls(currentPane);
-        //}
-
         private void GalleryCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             foreach (TreeViewItem child in treeGalleryCategoryView.Items)
                 GalleryCategoryRecursiveRelatedUpdates(child, false);
 
             gallerySectionNeedRefresh = true;
-        }
-
-
-        #endregion
-
-        private void cmdUploadRemoveImage_Click(object sender, RoutedEventArgs e)
-        {
-            UploadImage uploadImage = (UploadImage)lstUploadImageFileList.SelectedItem;
-            if (uploadImage != null)
-            {
-                uploadFots.Remove(uploadImage);
-            }
-        }
-
-        private void menuTagAddTo_Click(object sender, RoutedEventArgs e)
-        {
-            int count = lstImageMainViewerList.SelectedItems.Count;
-            if (count == 0)
-            {
-                ShowMessage(MessageType.Warning, "You must select at least one image to continue.");
-                return;
-            }
-
-            UpdateDialogsAndShow(MessageType.Other, "");
-
-            TagAddImagesRefreshTagsList();
-            gridTagSelectDialog.Visibility = Visibility.Visible;
-        }
-
-        async private void cmdTagAddImagesTo_Click(object sender, RoutedEventArgs e)
-        {
-            int count = lstTagAddImagesInclude.SelectedItems.Count;
-            if (count == 0)
-            {
-                ShowMessage(MessageType.Warning, "You must select at least one tag.");
-                return;
-            }
-
-            gridTagSelectDialog.Visibility = Visibility.Collapsed;
-
-            string[] tagName = new string[count];
-            int i = 0;
-            foreach (ListBoxItem current in lstTagAddImagesInclude.SelectedItems)
-            {
-                TagListTagRef tagRef = (TagListTagRef)current.Tag;
-                tagName[i] = tagRef.name;
-                i++;
-            }
-
-            await AddRemoveImagesFromTag(true, tagName);
-            //UpdateDialogsAndShow(MessageType.Other, "");
-        }
-
-        private void cmdTagAddImagesCancel_Click(object sender, RoutedEventArgs e)
-        {
-            gridTagSelectDialog.Visibility = Visibility.Collapsed;
-            paneBusy.Visibility = Visibility.Collapsed;
-        }
-
-
-
-        private void menuCategoryMoveImage_Click(object sender, RoutedEventArgs e)
-        {
-            int count = lstImageMainViewerList.SelectedItems.Count;
-            if (count == 0)
-            {
-                ShowMessage(MessageType.Warning, "You must select at least one image to continue.");
-                return;
-            }
-
-            cmdCategorySelect.Content = "Add Images";
-            UpdateDialogsAndShow(MessageType.Other, "");
-            CategorySelectRefreshCategoryList();
-            gridCategorySelectDialog.Visibility = Visibility.Visible;
-        }
-
-        async private void cmdCategorySelect_Click(object sender, RoutedEventArgs e)
-        {
-            //CategoryListCategoryRef currentSelectedCategory = null;
-            TreeViewItem item = (TreeViewItem)treeCategorySelect.SelectedItem;
-            if (item != null)
-            {
-                CategoryListCategoryRef currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
-
-                gridCategorySelectDialog.Visibility = Visibility.Collapsed;
-                if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
-                {
-                    currentCategory.parentId = currentSelectedCategory.id;
-                    lblCategoryParentName.Content = GetCategoryName(currentSelectedCategory.id);
-                    paneBusy.Visibility = Visibility.Collapsed;
-                }
-                else if (currentPane == PaneMode.Upload)
-                {
-                    uploadUIState.RootCategoryId = currentSelectedCategory.id;
-                    uploadUIState.RootCategoryName = GetCategoryName(currentSelectedCategory.id);
-                    paneBusy.Visibility = Visibility.Collapsed;
-                }
-                else
-                {
-                    currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
-                    await MoveImagesToCategory(currentSelectedCategory.id);
-                }
-            }
-            else
-            {
-                ShowMessage(MessageType.Warning, "You must select a category to continue.");
-                return;
-            }
-        }
-
-        private void cmdCategorySelectCancel_Click(object sender, RoutedEventArgs e)
-        {
-            gridCategorySelectDialog.Visibility = Visibility.Collapsed;
-            paneBusy.Visibility = Visibility.Collapsed;
-        }
-
-        private void cmdCategoryMoveParent_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateDialogsAndShow(MessageType.Other, "");
-            CategorySelectRefreshCategoryList();
-
-            cmdCategorySelect.Content = "Select";
-            gridCategorySelectDialog.Visibility = Visibility.Visible;
-        }
-
-
-
-        private void ImageViewTagsUpdateFromMeta()
-        {
-
-            GeneralImage current = (GeneralImage)lstImageMainViewerList.SelectedItem;
-            if (current == null)
-                return;
-
-            //Deselect each tag.
-            foreach (ListBoxItem tagItem in lstImageViewTagList.Items)
-            {
-                tagItem.IsSelected = false;
-            }
-
-            if (current.Meta != null && current.Meta.Tags != null)
-            {
-                foreach (ImageMetaTagRef tagRef in current.Meta.Tags)
-                {
-                    foreach (ListBoxItem tagItem in lstImageViewTagList.Items)
-                    {
-                        TagListTagRef currentTagRef = (TagListTagRef)tagItem.Tag;
-                        if (currentTagRef.id == tagRef.id)
-                        {
-                            tagItem.IsSelected = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        async private void RevertFromImageView_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            //isExpanded = false;
-
-            RefreshPanesAllControls(previousPane);
-            RefreshOverallPanesStructure(currentPane);
-
-            DateTime eventTime = DateTime.Now;
-            await WaitAsynchronouslyAsync();
-            TweakImageMarginSize(eventTime, currentPane); 
-        }
-
-
-
-        public void UploadImageStateInProgress_Filter(object sender, FilterEventArgs e)
-        {
-            UploadImageState item = e.Item as UploadImageState;
-            if (item.status != UploadImage.ImageStatus.Complete && item.status != UploadImage.ImageStatus.Inactive)
-            {
-                e.Accepted = true;
-            }
-            else
-            {
-                e.Accepted = false;
-            }
-        }
-
-        public void UploadImageStateComplete_Filter(object sender, FilterEventArgs e)
-        {
-            UploadImageState item = e.Item as UploadImageState;
-            if (item.status == UploadImage.ImageStatus.Complete)
-            {
-                e.Accepted = true;
-            }
-            else
-            {
-                e.Accepted = false;
-            }
-        }
-
-        private void cmdUploadChangeCategory_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateDialogsAndShow(MessageType.Other, "");
-            CategorySelectRefreshCategoryList();
-
-            cmdCategorySelect.Content = "Select";
-            gridCategorySelectDialog.Visibility = Visibility.Visible;
-        }
-
-        private void cmdUploadTurnAutoOff_Click(object sender, RoutedEventArgs e)
-        {
-            //TODO set account level flag and update on server
-            uploadFots.Clear();
-            ResetUploadState();
-        }
-
-        private void UploadImageStateApplyServerState()
-        {
-
-        }
-
-        async private Task DoAutoUploadAsync(bool resume)
-        {
-            if (!resume)
-            {
-                UploadImageStateApplyServerState();
-
-                //TODO check account level flag, if false return
-
-                if (currentPane == PaneMode.Upload &&
-                    uploadUIState.Mode == UploadUIState.UploadMode.Auto &&
-                    uploadUIState.Uploading == true)
-                    return;
-
-                if (uploadFots.Count > 0)
-                    return;
-
-            }
-
-            if (cancelUploadTokenSource != null)
-                cancelUploadTokenSource.Cancel();
-
-            CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
-            cancelUploadTokenSource = newCancelUploadTokenSource;
-
-            DirectoryInfo folder = new DirectoryInfo(uploadUIState.AutoUploadFolder);
-
-            try
-            {
-                uploadUIState.Uploading = true;
-
-                if (!resume)
-                {
-
-                    uploadUIState.Mode = UploadUIState.UploadMode.Auto;
-
-                    List<string> responses = await controller.CheckImagesForAutoUploadAsync(folder, uploadFots, cancelUploadTokenSource.Token);
-
-                    if (responses.Count > 1)
-                    {
-                        StringBuilder messageBuilder = new StringBuilder();
-                        messageBuilder.AppendLine("Some files could not be prepared for upload:");
-                        foreach (string response in responses)
-                        {
-                            messageBuilder.AppendLine(response);
-                        }
-                        ShowMessage(MessageType.Error, messageBuilder.ToString());
-                    }
-                }
-
-                int uploadCount = uploadFots.Count;
-
-                if (uploadCount > 0)
-                {
-                    ShowMessage(MessageType.Info, uploadCount.ToString() + " images were found and are being uploaded automatically");
-                    await controller.UploadAutoAsync(uploadFots, uploadUIState, cancelUploadTokenSource.Token);
-                    ShowMessage(MessageType.Info, uploadCount.ToString() + " images were uploaded successfully");
-                }
-
-                if (newCancelUploadTokenSource == cancelUploadTokenSource)
-                    cancelUploadTokenSource = null;
-
-                ResetUploadState();
-            }
-            catch (OperationCanceledException)
-            {
-                //uploadFots.Clear();
-                logger.Debug("DoAutoUploadAsync has been cancelled.");
-            }
-            catch (Exception ex)
-            {
-                uploadFots.Clear();
-                logger.Error(ex);
-                ShowMessage(MessageType.Error, "There was an unexpected error whilst preparing files for uploading.  Error: " + ex.Message);
-                //uploadUIState.Mode = UploadUIState.UploadMode.None;
-                ResetUploadState();
-            }
-            finally
-            {
-                uploadUIState.Uploading = false;
-                //RefreshPanesAllControls(currentPane);
-
-                //if (!isExpanded)
-                //    RefreshOverallPanesStructure(currentPane);
-            }
-        }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            DoAutoUploadAsync(false);
-        }
-
-        async private void lstImageMainViewerList_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            //DateTime eventTime = DateTime.Now;
-            //await WaitAsynchronouslyAsync();
-            //TweakImageMarginSize(eventTime, currentPane);
-        }
-
-        private void cmdAccountChangeImageCopyFolder_Click(object sender, RoutedEventArgs e)
-        {
-            var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
-            System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
-            if (folderDialog.SelectedPath.Length > 0)
-            {
-                lblAccountImageCopyFolder.Content = folderDialog.SelectedPath;
-                lblAccountImageCopyFolderAbbrev.Content = StringTrim(folderDialog.SelectedPath, 80);
-            }
-        }
-
-        private void cmdAccountChangeAutoUploadFolder_Click(object sender, RoutedEventArgs e)
-        {
-            var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
-            System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
-            if (folderDialog.SelectedPath.Length > 0)
-            {
-                chkAccountAutoUpload.IsChecked = true;
-                lblAccountAutoUploadFolder.Content = folderDialog.SelectedPath;
-                lblAccountAutoUploadFolderAbbrev.Content = StringTrim(folderDialog.SelectedPath, 80);
-            }
-        }
-
-        async private Task AccountStatusRefresh(string password)
-        {
-            try
-            {
-                ShowMessage(MessageType.Busy, "Refreshing Account information");
-                cmdAccountRefresh.Tag = true;
-
-                if (cancelTokenSource != null)
-                    cancelTokenSource.Cancel();
-
-                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                cancelTokenSource = newCancelTokenSource;
-
-                if (password == null)
-                    password = state.account.Password;
-
-                await controller.AccountDetailsGet(cancelTokenSource.Token);
-                state.account.Password = password;
-
-                //lblTagProfileNameLabel.Content = state.account.ProfileName + " Tags";
-
-                await controller.SetUserApp(cancelTokenSource.Token);
-
-                ResetUploadState();
-
-                ConcludeBusyProcess();
-
-                if (newCancelTokenSource == cancelTokenSource)
-                    cancelTokenSource = null;
-            }
-            catch (OperationCanceledException)
-            {
-                logger.Debug("AccountStatusRefresh has been cancelled.");
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                ShowMessage(MessageType.Error, "Account information could not be loaded, there was an error: " + ex.Message);
-            }
-            finally
-            {
-                cmdAccountRefresh.Tag = false;
-                AccountRefreshFromState();
-            }
-        }
-
-        private bool UploadStatusListNeedRefresh()
-        {
-            return true;
-
-        }
-
-        async private Task RefreshUploadStatusStateAsync(bool force, bool silent)
-        {
-            try
-            {
-                bool isBusy = bool.Parse(cmdAccountRefresh.Tag.ToString());
-                if (isBusy) { return; }
-
-                if (!force && cancelUploadTokenSource != null)
-                    return;
-
-                long[] orderIds = CacheHelper.GetUploadImageListQueryIds(uploadImageStateList);
-
-                if (!force && orderIds.Length == 0)
-                    return;
-
-                if (!silent)
-                    ShowMessage(MessageType.Busy, "Refreshing upload history list");
-
-                cmdAccountRefresh.Tag = true;
-
-                CancellationTokenSource newCancelUploadTokenSource = new CancellationTokenSource();
-                cancelUploadTokenSource = newCancelUploadTokenSource;
-
-                await controller.RefreshUploadStatusListAsync(orderIds, cancelUploadTokenSource.Token, uploadImageStateList);
-
-                CacheHelper.DeleteUploadedFiles(uploadImageStateList, uploadUIState.AutoUploadFolder);
-
-                if (newCancelUploadTokenSource == cancelUploadTokenSource)
-                    cancelUploadTokenSource = null;
-
-                switch (state.uploadStatusListState)
-                {
-                    case GlobalState.DataLoadState.Loaded:
-                    case GlobalState.DataLoadState.LocalCache:
-                        RefreshUploadStatusListBinding();
-                        panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Collapsed;
-                        break;
-                    case GlobalState.DataLoadState.Unavailable:
-                        panUploadStatusListUnavailable.Visibility = System.Windows.Visibility.Visible;
-                        break;
-                }
-
-                if (!silent)
-                    ConcludeBusyProcess();
-            }
-            catch (OperationCanceledException)
-            {
-                logger.Debug("RefreshUploadStatusStateAsync has been cancelled.");
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                ShowMessage(MessageType.Error, "Retrieving the upload history has failed with an unexpected problem: " + ex.Message);
-            }
-            finally
-            {
-                cmdAccountRefresh.Tag = false;
-            }
-        }
-
-        async private void cmdAccountRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            if (tabAccount.SelectedIndex == 0)
-            {
-                await AccountStatusRefresh(null);
-            }
-            else if (tabAccount.SelectedIndex == 1)
-            {
-                await RefreshUploadStatusStateAsync(true, false);
-            }
-            else
-            {
-                //TODO
-            }
-        }
-
-        private void chkUploadOverrideDateAll_Checked(object sender, RoutedEventArgs e)
-        {
-            if (uploadUIState.MetaTakenDateSetAll)
-            {
-                UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-                uploadUIState.MetaTakenDate = current.Meta.TakenDate;
-
-                BindingOperations.ClearBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty);
-                Binding binding = new Binding("MetaTakenDate");
-                binding.Mode = BindingMode.TwoWay;
-                binding.Source = uploadUIState;
-                BindingOperations.SetBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty, binding);
-
-                grdUploadImageDetails.RowDefinitions[6].Height = new GridLength(0);
-                lblUploadOverrideDateAll.Content = "Override date (All fotos)";
-            }
-            else
-            {
-                BindingOperations.ClearBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty);
-                Binding binding = new Binding("/Meta.TakenDate");
-                binding.Mode = BindingMode.TwoWay;
-                BindingOperations.SetBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty, binding);
-
-                grdUploadImageDetails.RowDefinitions[6].Height = new GridLength(30);
-                lblUploadOverrideDateAll.Content = "Apply to all";
-            }
-        }
-
-        private void chkUploadOverrideDate_Checked(object sender, RoutedEventArgs e)
-        {
-            grdUploadImageDetails.RowDefinitions[7].Height = new GridLength(30);
-            datUploadOverrideDate.IsEnabled = true;
-        }
-
-        private void chkUploadOverrideDate_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (!uploadUIState.MetaTakenDateSetAll)
-            {
-                grdUploadImageDetails.RowDefinitions[7].Height = new GridLength(0);
-                datUploadOverrideDate.IsEnabled = false;
-            }
         }
 
         private void lstGallerySelectionOptions_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -5860,16 +5764,6 @@ namespace ManageWalla
         private void lstGalleryStylesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RefreshPanesAllControls(currentPane);
-        }
-
-        private void Label_MouseUp_1(object sender, MouseButtonEventArgs e)
-        {
-            gallerySectionList[0].nameOveride = gallerySectionList[0].name + "1";
-            gallerySectionList[1].descOveride = gallerySectionList[1].desc + "1";
-            gallerySectionList[2].sequence = 1;
-            gallerySectionList[3].sequence = 2;
-
-            datGallerySections.Items.Refresh();
         }
 
         private void cmdGalleryPreview_Checked(object sender, RoutedEventArgs e)
@@ -5903,7 +5797,7 @@ namespace ManageWalla
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("GallerySetupPreview has been cancelled.");
+                if (logger.IsDebugEnabled) { logger.Debug("GallerySetupPreview has been cancelled."); }
                 return "";
             }
             catch (Exception ex)
@@ -5926,8 +5820,6 @@ namespace ManageWalla
                 System.Diagnostics.Process.Start(url);
                 ShowMessage(MessageType.Info, "Browser will load web site");
             }
-
-            
         }
 
         async private void tabGallery_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -5950,6 +5842,8 @@ namespace ManageWalla
         {
             await GalleryReloadSection(true);
         }
+        #endregion
+
 
     }
 }

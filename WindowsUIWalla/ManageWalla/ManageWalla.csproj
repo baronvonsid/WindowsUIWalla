@@ -198,10 +198,10 @@
     <Compile Include="ProjectDataType\UploadImageFileList.cs" />
     <Compile Include="WallaDataType\UploadStatusList.cs" />
     <Compile Include="ValueConverters\WallaUploadStatusConverter.cs" />
-    <ApplicationDefinition Include="App.xaml">
+    <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </ApplicationDefinition>
+    </Page>
     <Compile Include="WallaDataType\UserApp.cs" />
     <Page Include="MainTwo.xaml">
       <SubType>Designer</SubType>
@@ -399,6 +399,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Walla.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\SplashScreen.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -793,7 +793,7 @@
                                     <MenuItem Header="Download Images - Copy (1920px)" ToolTip="Downloads a high quality copy of your original image.  Maximum resultion is 1920px.  Available in the downloads section when complete.">
 
                                     </MenuItem>
-                                    <MenuItem Header="Download Images - Original"  ToolTip="Requests a download of the originals, available in the downloads section when complete." Click="MenuItem_Click">
+                                    <MenuItem Header="Download Images - Original"  ToolTip="Requests a download of the originals, available in the downloads section when complete.">
 
                                     </MenuItem>
                                 </ContextMenu>
@@ -1167,7 +1167,7 @@
                                     <ListBoxItem x:Name="itemGalleryGroupTag" Content="Use Tag" ToolTip="Fotos will be displayed by their tags" Tag="2" />
                                 </ListBox>
 
-                                <Label Content="Groups to be displayed" Grid.Column="4" Grid.Row="3" FontWeight="Bold" MouseUp="Label_MouseUp_1" />
+                                <Label Content="Groups to be displayed" Grid.Column="4" Grid.Row="3" FontWeight="Bold" />
 
                                 <!--
                                 <WrapPanel x:Name="wrapGalleryGroupOptions" Orientation="Horizontal" Grid.Column="3" Grid.Row="1">
@@ -1888,7 +1888,7 @@
                 </StackPanel>
 
                 <DockPanel x:Name="panAccount" Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" Margin="2">
-                    <TabControl x:Name="tabAccount" Margin="4" SelectionChanged="tabAccount_SelectionChanged">
+                    <TabControl x:Name="tabAccount" Margin="4">
                         <TabItem x:Name="tabAccountSettings" Header="Account Details" >
 
                             <Grid x:Name="gridAccountSettings" Background="{StaticResource PaneBodyBackgroundBrush}">
