@@ -24,10 +24,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 /*
 
 TODO - Error handlers
- * Category onwards
+ * Tag onwards
 
 DONE
- * Window init, controls, pane, image - Double check for event handlers that might need an exception message.
+ * Window init, controls, pane, image, tag - Double check for event handlers that might need an exception message.
  * 
 
 TODO - Code Updates
@@ -1162,7 +1162,15 @@ namespace ManageWalla
         {
             RefreshOverallPanesStructure(PaneMode.CategoryView);
             RefreshPanesAllControls(PaneMode.CategoryView);
-            await RefreshAndDisplayCategoryList(false);
+            try
+            {
+                await RefreshAndDisplayCategoryList(false);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the category list.  Error: " + ex.Message);
+            }
         }
 
         private void radUpload_Checked(object sender, RoutedEventArgs e)
@@ -1175,24 +1183,33 @@ namespace ManageWalla
         {
             RefreshOverallPanesStructure(PaneMode.GalleryView);
             RefreshPanesAllControls(PaneMode.GalleryView);
-            await RefreshAndDisplayGalleryList(false);
 
-            if (startingApplication)
+            try
             {
-                await RefreshAndDisplayTagList(false);
-                await RefreshAndDisplayCategoryList(false);
+                await RefreshAndDisplayGalleryList(false);
 
-                foreach (RadioButton button in wrapMyGalleries.Children.OfType<RadioButton>())
+                if (startingApplication)
                 {
-                    GalleryListGalleryRef galleryRef = (GalleryListGalleryRef)button.Tag;
-                    if (galleryRef.id == state.userApp.GalleryId)
-                    {
-                        button.IsChecked = true;
-                    }
-                    continue;
-                }
+                    await RefreshAndDisplayTagList(false);
+                    await RefreshAndDisplayCategoryList(false);
 
-                startingApplication = false;
+                    foreach (RadioButton button in wrapMyGalleries.Children.OfType<RadioButton>())
+                    {
+                        GalleryListGalleryRef galleryRef = (GalleryListGalleryRef)button.Tag;
+                        if (galleryRef.id == state.userApp.GalleryId)
+                        {
+                            button.IsChecked = true;
+                        }
+                        continue;
+                    }
+
+                    startingApplication = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the lists.  Error: " + ex.Message);
             }
         }
 
@@ -2290,6 +2307,7 @@ namespace ManageWalla
         #region Category Methods
         async public Task RefreshAndDisplayCategoryList(bool forceRefresh)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 bool isBusy = bool.Parse(radCategory.Tag.ToString());
@@ -2301,9 +2319,6 @@ namespace ManageWalla
                 if (state.connectionState != GlobalState.ConnectionState.NoAccount &&
                     (state.categoryLoadState == GlobalState.DataLoadState.No || forceRefresh || state.categoryLoadState == GlobalState.DataLoadState.LocalCache))
                 {
-                    //panCategoryUnavailable.Visibility = System.Windows.Visibility.Visible;
-                    //gridCategory.Visibility = Visibility.Collapsed;
-
                     if (cancelTokenSource != null)
                         cancelTokenSource.Cancel();
 
@@ -2340,15 +2355,15 @@ namespace ManageWalla
             }
             catch (Exception ex)
             {
-                radCategory.Tag = false;
                 state.categoryList = null;
                 state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
-                logger.Error(ex);
-                ShowMessage(MessageType.Error, "Category list could not be loaded, there was an error: " + ex.Message);
+                throw ex;
             }
             finally
             {
                 radCategory.Tag = false;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.RefreshAndDisplayCategoryList()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -2376,21 +2391,6 @@ namespace ManageWalla
             {
                   CategorySelect(categoryId, null, treeCategoryView);
             }
-
-            //TreeViewItem baseItem = (TreeViewItem)treeCategoryView.Items[0];
-            //CategoryListCategoryRef baseCategoryObj = (CategoryListCategoryRef)baseItem.Tag;
-            //if (baseCategoryObj.id == categoryId || categoryId == 0)
-            //{
-            //    baseItem.IsSelected = true;
-            //    treeCategoryView.Items.MoveCurrentTo(baseItem);
-
-            //}
-            //else
-            //{
-            //    CategorySelect(categoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
-            //}
-
-            //UploadRefreshCategoryList();
         }
 
         private void CategoryAddTreeViewLevel(long parentId, TreeViewItem currentHeader)
@@ -2477,6 +2477,7 @@ namespace ManageWalla
 
         async private Task CategoryPopulateMetaData(CategoryListCategoryRef current)
         {
+            DateTime startTime = DateTime.Now; 
             try
             {
                 if (cancelTokenSource != null)
@@ -2504,10 +2505,80 @@ namespace ManageWalla
             {
                 if (logger.IsDebugEnabled) { logger.Debug("CategoryPopulateMetaData has been cancelled"); }
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the category.  Error: " + ex.Message);
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.CategoryPopulateMetaData()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
+        async private Task CategorySave()
+        {
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                ShowMessage(MessageType.Busy, "Updating server with category info");
+
+                currentCategory.Name = txtCategoryName.Text;
+                currentCategory.Desc = txtCategoryDescription.Text;
+
+                if (currentPane == PaneMode.CategoryAdd)
+                {
+                    await controller.CategoryCreateAsync(currentCategory, cancelTokenSource.Token);
+                }
+                else
+                {
+                    await controller.CategoryUpdateAsync(currentCategory, cancelTokenSource.Token);
+                }
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("CategoryPopulateMetaData has been cancelled"); }
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.CategorySave()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
+        async private Task CategoryDelete()
+        {
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                ShowMessage(MessageType.Busy, "Deleting category");
+
+                await controller.CategoryDeleteAsync(currentCategory, cancelTokenSource.Token);
+
+                imageMainViewerList.Clear();
+                ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("cmdCategoryDelete_Click has been cancelled"); }
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.CategoryDelete()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -2525,6 +2596,7 @@ namespace ManageWalla
 
         async private Task MoveImagesToCategory(long categoryId)
         {
+            DateTime startTime = DateTime.Now;
             ImageIdList moveList = new ImageIdList();
             moveList.ImageRef = new long[lstImageMainViewerList.SelectedItems.Count];
 
@@ -2564,10 +2636,10 @@ namespace ManageWalla
             {
                 if (logger.IsDebugEnabled) { logger.Debug("MoveImagesToCategory has been cancelled"); }
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                ShowMessage(MainTwo.MessageType.Error, "Images could not be moved to the category, there was an error on the server: " + ex.Message);
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.MoveImagesToCategory()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -2611,9 +2683,17 @@ namespace ManageWalla
         #endregion
 
         #region Category Event Handlers
-        private void cmdCategoryRefresh_Click(object sender, RoutedEventArgs e)
+        async private void cmdCategoryRefresh_Click(object sender, RoutedEventArgs e)
         {
-            RefreshAndDisplayCategoryList(true);
+            try
+            {
+                await RefreshAndDisplayCategoryList(true);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem loading the category list.  Error: " + ex.Message);
+            }
         }
 
         private void cmdCategoryCancel_Click(object sender, RoutedEventArgs e)
@@ -2623,30 +2703,38 @@ namespace ManageWalla
 
         private void cmdCategoryAdd_Click(object sender, RoutedEventArgs e)
         {
-            currentCategory = new Category();
-            TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
-            if (item != null)
+            try
             {
-                CategoryListCategoryRef currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
-
-                if (currentSelectedCategory.SystemOwned == true && currentSelectedCategory.id != state.userApp.UserDefaultCategoryId)
+                currentCategory = new Category();
+                TreeViewItem item = (TreeViewItem)treeCategoryView.SelectedItem;
+                if (item != null)
                 {
-                    ShowMessage(MessageType.Warning, "You cannot add new categories here, these are reserved for uploads.  Please select a user category");
-                    return;
-                }
-                
-                currentCategory.parentId = currentSelectedCategory.id;
-            }
-            else
-            {
-                CategorySelect(state.userApp.UserDefaultCategoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
-                currentCategory.parentId = state.userApp.UserDefaultCategoryId;
-            }
+                    CategoryListCategoryRef currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
 
-            lblCategoryParentName.Content = GetCategoryName(currentCategory.parentId);
-            txtCategoryName.Text = "";
-            txtCategoryDescription.Text = "";
-            RefreshPanesAllControls(PaneMode.CategoryAdd);
+                    if (currentSelectedCategory.SystemOwned == true && currentSelectedCategory.id != state.userApp.UserDefaultCategoryId)
+                    {
+                        ShowMessage(MessageType.Warning, "You cannot add new categories here, these are reserved for uploads.  Please select a user category");
+                        return;
+                    }
+
+                    currentCategory.parentId = currentSelectedCategory.id;
+                }
+                else
+                {
+                    CategorySelect(state.userApp.UserDefaultCategoryId, (TreeViewItem)treeCategoryView.Items[0], treeCategoryView);
+                    currentCategory.parentId = state.userApp.UserDefaultCategoryId;
+                }
+
+                lblCategoryParentName.Content = GetCategoryName(currentCategory.parentId);
+                txtCategoryName.Text = "";
+                txtCategoryDescription.Text = "";
+                RefreshPanesAllControls(PaneMode.CategoryAdd);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem preparing to add a new category.  Error: " + ex.Message);
+            }
         }
 
         async private void cmdCategoryEdit_Click(object sender, RoutedEventArgs e)
@@ -2661,7 +2749,16 @@ namespace ManageWalla
                     ShowMessage(MessageType.Warning, "You cannot edit this category, it is reserved for system usage");
                     return;
                 }
-                await CategoryPopulateMetaData(currentSelectedCategory);
+
+                try
+                {
+                    await CategoryPopulateMetaData(currentSelectedCategory);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex);
+                    ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the category.  Error: " + ex.Message);
+                }
             }
             else
             {
@@ -2679,48 +2776,23 @@ namespace ManageWalla
 
             try
             {
-
-                if (cancelTokenSource != null)
-                    cancelTokenSource.Cancel();
-
-                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                cancelTokenSource = newCancelTokenSource;
-
-                ShowMessage(MessageType.Busy, "Updating server with category info");
-
-                if (currentPane == PaneMode.CategoryAdd)
-                {
-                    currentCategory.Name = txtCategoryName.Text;
-                    currentCategory.Desc = txtCategoryDescription.Text;
-
-                    await controller.CategoryCreateAsync(currentCategory, cancelTokenSource.Token);
-                }
-                else
-                {
-                    currentCategory.Name = txtCategoryName.Text;
-                    currentCategory.Desc = txtCategoryDescription.Text;
-
-                    await controller.CategoryUpdateAsync(currentCategory, cancelTokenSource.Token);
-                }
-
-                if (newCancelTokenSource == cancelTokenSource)
-                    cancelTokenSource = null;
-
-                ConcludeBusyProcess();
-            }
-            catch (OperationCanceledException)
-            {
-                if (logger.IsDebugEnabled) { logger.Debug("cmdCategorySave_Click has been cancelled"); }
+                await CategorySave();
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 ShowMessage(MainTwo.MessageType.Error, "There was a problem updating category data on the server.  Error: " + ex.Message);
             }
-            finally
+
+            try
             {
                 RefreshPanesAllControls(PaneMode.CategoryView);
-                RefreshAndDisplayCategoryList(true);
+                await RefreshAndDisplayCategoryList(true);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem refreshing the category view.  Error: " + ex.Message);
             }
         }
 
@@ -2728,32 +2800,23 @@ namespace ManageWalla
         {
             try
             {
-                if (cancelTokenSource != null)
-                    cancelTokenSource.Cancel();
-
-                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
-                cancelTokenSource = newCancelTokenSource;
-
-                ShowMessage(MessageType.Busy, "Deleting category");
-
-                await controller.CategoryDeleteAsync(currentCategory, cancelTokenSource.Token);
-
-                imageMainViewerList.Clear();
-                ConcludeBusyProcess();
-            }
-            catch (OperationCanceledException)
-            {
-                if (logger.IsDebugEnabled) { logger.Debug("cmdCategoryDelete_Click has been cancelled"); }
+                await CategoryDelete();
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 ShowMessage(MainTwo.MessageType.Error, "There was a problem deleting the category.  Error: " + ex.Message);
             }
-            finally
+
+            try
             {
                 RefreshPanesAllControls(PaneMode.CategoryView);
-                RefreshAndDisplayCategoryList(true);
+                await RefreshAndDisplayCategoryList(true);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem refreshing the category view.  Error: " + ex.Message);
             }
         }
 
@@ -2766,43 +2829,58 @@ namespace ManageWalla
                 return;
             }
 
-            cmdCategorySelect.Content = "Add Images";
-            UpdateDialogsAndShow(MessageType.Other, "");
-            CategorySelectRefreshCategoryList();
-            gridCategorySelectDialog.Visibility = Visibility.Visible;
+            try
+            {
+                cmdCategorySelect.Content = "Add Images";
+                UpdateDialogsAndShow(MessageType.Other, "");
+                CategorySelectRefreshCategoryList();
+                gridCategorySelectDialog.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected problem.  Error: " + ex.Message);
+            }
         }
 
         async private void cmdCategorySelect_Click(object sender, RoutedEventArgs e)
         {
-            //CategoryListCategoryRef currentSelectedCategory = null;
-            TreeViewItem item = (TreeViewItem)treeCategorySelect.SelectedItem;
-            if (item != null)
+            try
             {
-                CategoryListCategoryRef currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+                TreeViewItem item = (TreeViewItem)treeCategorySelect.SelectedItem;
+                if (item != null)
+                {
+                    CategoryListCategoryRef currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
 
-                gridCategorySelectDialog.Visibility = Visibility.Collapsed;
-                if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
-                {
-                    currentCategory.parentId = currentSelectedCategory.id;
-                    lblCategoryParentName.Content = GetCategoryName(currentSelectedCategory.id);
-                    paneBusy.Visibility = Visibility.Collapsed;
-                }
-                else if (currentPane == PaneMode.Upload)
-                {
-                    uploadUIState.RootCategoryId = currentSelectedCategory.id;
-                    uploadUIState.RootCategoryName = GetCategoryName(currentSelectedCategory.id);
-                    paneBusy.Visibility = Visibility.Collapsed;
+                    gridCategorySelectDialog.Visibility = Visibility.Collapsed;
+                    if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
+                    {
+                        currentCategory.parentId = currentSelectedCategory.id;
+                        lblCategoryParentName.Content = GetCategoryName(currentSelectedCategory.id);
+                        paneBusy.Visibility = Visibility.Collapsed;
+                    }
+                    else if (currentPane == PaneMode.Upload)
+                    {
+                        uploadUIState.RootCategoryId = currentSelectedCategory.id;
+                        uploadUIState.RootCategoryName = GetCategoryName(currentSelectedCategory.id);
+                        paneBusy.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+                        await MoveImagesToCategory(currentSelectedCategory.id);
+                    }
                 }
                 else
                 {
-                    currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
-                    await MoveImagesToCategory(currentSelectedCategory.id);
+                    ShowMessage(MessageType.Warning, "You must select a category to continue.");
+                    return;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                ShowMessage(MessageType.Warning, "You must select a category to continue.");
-                return;
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected problem.  Error: " + ex.Message);
             }
         }
 
@@ -2814,13 +2892,20 @@ namespace ManageWalla
 
         private void cmdCategoryMoveParent_Click(object sender, RoutedEventArgs e)
         {
-            UpdateDialogsAndShow(MessageType.Other, "");
-            CategorySelectRefreshCategoryList();
+            try
+            {
+                UpdateDialogsAndShow(MessageType.Other, "");
+                CategorySelectRefreshCategoryList();
 
-            cmdCategorySelect.Content = "Select";
-            gridCategorySelectDialog.Visibility = Visibility.Visible;
+                cmdCategorySelect.Content = "Select";
+                gridCategorySelectDialog.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected problem.  Error: " + ex.Message);
+            }
         }
-
 
         /*
         async private void CategoryDroppedImages(object sender, DragEventArgs e)
