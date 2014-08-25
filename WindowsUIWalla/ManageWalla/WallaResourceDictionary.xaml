@@ -16,7 +16,7 @@
     <walla:GallerySectionList x:Key="gallerySectionListKey" />
     
     <walla:ImageMainViewerList x:Key="imageMainViewerListKey" />
-    <walla:GalleryCategoryModel x:Key="galleryCategoryModelKey" />
+    <!--<walla:GalleryCategoryModel x:Key="galleryCategoryModelKey" />-->
 
     <walla:WallaUploadStatusConverter x:Key="wallaUploadStatusConverterKey"  />
     <walla:WallaByteToMBConverter x:Key="WallaByteToMBConverterKey" />

@@ -23,6 +23,11 @@ using log4net.Config;
 using System.Configuration;
 using System.Threading;
 
+/*
+    - Code refactor - Done Upload.
+ 
+ */
+
 namespace ManageWalla
 {
     public class MainController : IDisposable
@@ -154,13 +159,12 @@ namespace ManageWalla
                 Account account = await serverHelper.AccountGet(cancelToken);
                 state.account = account;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException cancelEx)
             {
-                //Suppress exception
                 logger.Debug("AccountDetailsGet has been cancelled");
+                throw cancelEx;
             }
         }
-
 
         async public Task SetUserApp(CancellationToken cancelToken)
         {
@@ -217,17 +221,13 @@ namespace ManageWalla
                 logger.Debug("UserAppUpdateAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
         #endregion
 
         #region Upload Methods
         async public Task<List<string>> LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             List<string> errorResponses = new List<string>();
             try
             {
@@ -253,10 +253,10 @@ namespace ManageWalla
                 logger.Debug("LoadImagesFromArray has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                throw ex;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.LoadImagesFromArray()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -299,6 +299,7 @@ namespace ManageWalla
 
         async public Task<List<string>> UploadManualAsync(UploadImageFileList meFots, UploadUIState uploadState, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 createdCategory = false;
@@ -360,8 +361,6 @@ namespace ManageWalla
                         currentImage.Meta.Tags = uploadState.MetaTagRef;
                     }
 
-                    //currentImage.Meta.TakenDate = currentImage.Meta.TakenDateFile;
-
                     AddMachineTag(currentImage);
                     currentImage.Meta.UserAppId = state.userApp.id;
                 }
@@ -374,15 +373,16 @@ namespace ManageWalla
                 logger.Debug("UploadManualAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                throw ex;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.UploadManualAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
         async public Task<List<string>> UploadProcessAsync(UploadImageFileList meFots, bool isAuto, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 List<string> responseErrors = new List<string>();
@@ -423,15 +423,16 @@ namespace ManageWalla
                 logger.Debug("UploadProcessAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                throw ex;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.UploadProcessAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
         async public Task UploadAutoAsync(UploadImageFileList meFots, UploadUIState uploadState, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 foreach (UploadImage currentImage in meFots)
@@ -448,18 +449,17 @@ namespace ManageWalla
                 logger.Debug("UploadAutoAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                throw ex;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.UploadAutoAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
         private void AddMachineTag(UploadImage current)
         {
             ImageMetaTagRef newTagRef = new ImageMetaTagRef();
-            //TODO Change to use tagid from userapp object.
-            newTagRef.id = state.userApp.TagId;   //account.Machines.Single(r => r.id == state.userAppId).tagId;
+            newTagRef.id = state.userApp.TagId;
 
             if (current.Meta.Tags == null)
             {
@@ -478,16 +478,9 @@ namespace ManageWalla
             }
         }
 
-        async public Task ResetMeFotsMeta(UploadImageFileList metFots)
-        {
-            foreach (UploadImage currentImage in metFots)
-            {
-                await currentImage.ResetMeta();
-            }
-        }
-
         async public Task<List<string>> LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             List<string> errorResponses = new List<string>();
             try
             {
@@ -525,10 +518,10 @@ namespace ManageWalla
                 logger.Debug("LoadImagesFromFolder has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                throw ex;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.LoadImagesFromFolder()", (int)duration.TotalMilliseconds, imageDirectory); }
             }
         }
 
@@ -541,6 +534,8 @@ namespace ManageWalla
         async public Task<List<string>> CheckImagesForAutoUploadAsync(DirectoryInfo imageDirectory, UploadImageFileList meFots, 
             CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;            
+
             List<string> errorResponses = new List<string>();
             try
             {
@@ -580,16 +575,17 @@ namespace ManageWalla
                 logger.Debug("CheckImagesForAutoUpload has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                throw ex;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.CheckImagesForAutoUploadAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
         //TODO Sort out with date modified and to use local version.
         async public Task RefreshUploadStatusListAsync(long[] orderIds, CancellationToken cancelToken, UploadImageStateList currentUploadStatusList)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
@@ -597,41 +593,41 @@ namespace ManageWalla
                     ImageIdList orderIdList = new ImageIdList();
                     orderIdList.ImageRef = orderIds;
 
-                    //for (int i = 0; i < orderIds.Length; i++)
-                    //{  
-                    //}
-
                     UploadStatusList serverUploadStatusList = await serverHelper.UploadGetStatusListAsync(orderIdList, cancelToken);
-                    foreach (UploadStatusListImageUploadRef serverImageState in serverUploadStatusList.ImageUploadRef)
+                    if (serverUploadStatusList.ImageUploadRef != null)
                     {
-                        UploadImageState current = currentUploadStatusList.FirstOrDefault<UploadImageState>(r => r.imageId == serverImageState.imageId);
-                        if (current == null)
+                        foreach (UploadStatusListImageUploadRef serverImageState in serverUploadStatusList.ImageUploadRef)
                         {
-                            //Add to collection.
-                            UploadImageState newImage = new UploadImageState();
-                            newImage.error = serverImageState.error;
-                            newImage.errorMessage = serverImageState.errorMessage;
-                            newImage.lastUpdated = serverImageState.lastUpdated;
-                            newImage.status = (UploadImage.ImageStatus)serverImageState.status;
-                            newImage.name = serverImageState.name;
-
-                            currentUploadStatusList.Add(newImage);  //Check this is OK.
-                        }
-                        else
-                        {
-                            //Update current entry.
-                            if (serverImageState.error)
+                            UploadImageState current = currentUploadStatusList.FirstOrDefault<UploadImageState>(r => r.imageId == serverImageState.imageId);
+                            if (current == null)
                             {
-                                current.error = true;
-                                current.errorMessage = serverImageState.errorMessage;
+                                //Add to collection.
+                                UploadImageState newImage = new UploadImageState();
+                                newImage.error = serverImageState.error;
+                                newImage.errorMessage = serverImageState.errorMessage;
+                                newImage.lastUpdated = serverImageState.lastUpdated;
+                                newImage.status = (UploadImage.ImageStatus)serverImageState.status;
+                                newImage.name = serverImageState.name;
+                                newImage.imageId = serverImageState.imageId;
+
+                                currentUploadStatusList.Add(newImage);  //Check this is OK.
                             }
                             else
                             {
-                                current.error = false;
-                                current.errorMessage = "";
+                                //Update current entry.
+                                if (serverImageState.error)
+                                {
+                                    current.error = true;
+                                    current.errorMessage = serverImageState.errorMessage;
+                                }
+                                else
+                                {
+                                    current.error = false;
+                                    current.errorMessage = "";
+                                }
+                                current.lastUpdated = serverImageState.lastUpdated;
+                                current.status = (UploadImage.ImageStatus)serverImageState.status;
                             }
-                            current.lastUpdated = serverImageState.lastUpdated;
-                            current.status = (UploadImage.ImageStatus)serverImageState.status;
                         }
                     }
 
@@ -661,7 +657,11 @@ namespace ManageWalla
                 logger.Error(ex);
                 throw ex;
             }
-
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.RefreshUploadStatusListAsync()", (int)duration.TotalMilliseconds, ""); }
+            }
         }
         #endregion
 
@@ -673,6 +673,7 @@ namespace ManageWalla
         /// <returns>OK or error</returns>
         async public Task TagRefreshListAsync(CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
@@ -723,6 +724,11 @@ namespace ManageWalla
                 state.tagLoadState = GlobalState.DataLoadState.Unavailable;
                 throw (ex);
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.TagRefreshListAsync()", (int)duration.TotalMilliseconds, ""); }
+            }
         }
 
         /// <summary>
@@ -737,6 +743,7 @@ namespace ManageWalla
         /// <returns></returns>
         async public Task<ImageList> TagGetImagesAsync(long id, string tagName, int cursor, string searchQueryString, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 //Find a locally cached version,  ignore query string. 
@@ -781,15 +788,13 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                //Suppress exception and just return null.
                 logger.Debug("TagGetImagesAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                currentMain.ShowMessage(MainTwo.MessageType.Error,"There was a problem retrieving the images associated with the Tag: " + tagName + ".  Error: " + ex.Message);
-                return null;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.TagGetImagesAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -801,14 +806,8 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                //Suppress exception and just return null.
                 logger.Debug("TagGetMetaAsync has been cancelled");
                 throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
             }
         }
 
@@ -823,11 +822,6 @@ namespace ManageWalla
                 logger.Debug("TagUpdateAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
 
         async public Task TagCreateAsync(Tag tag, CancellationToken cancelToken)
@@ -840,11 +834,6 @@ namespace ManageWalla
             {
                 logger.Debug("TagCreateAsync has been cancelled");
                 throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
             }
         }
 
@@ -859,11 +848,6 @@ namespace ManageWalla
                 logger.Debug("TagDeleteAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
 
         async public Task TagAddRemoveImagesAsync(string tagName, ImageIdList moveList, bool add, CancellationToken cancelToken)
@@ -876,11 +860,6 @@ namespace ManageWalla
             {
                 logger.Debug("TagAddRemoveImagesAsync has been cancelled");
                 throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
             }
         }
         #endregion
@@ -897,11 +876,6 @@ namespace ManageWalla
                 logger.Debug("CategoryGetMetaAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
 
         async public Task CategoryUpdateAsync(Category existingCategory, CancellationToken cancelToken)
@@ -914,11 +888,6 @@ namespace ManageWalla
             {
                 logger.Debug("CategoryUpdateAsync has been cancelled");
                 throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
             }
         }
 
@@ -933,11 +902,6 @@ namespace ManageWalla
                 logger.Debug("CategoryCreateAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
 
         async public Task CategoryDeleteAsync(Category category, CancellationToken cancelToken)
@@ -951,15 +915,11 @@ namespace ManageWalla
                 logger.Debug("TagDeleteAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
 
         async public Task<ImageList> CategoryGetImagesAsync(long categoryId, int cursor, string searchQueryString, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 //Find a locally cached version,  ignore query string. 
@@ -1006,16 +966,16 @@ namespace ManageWalla
                 logger.Debug("CategoryGetImagesAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the images associated with the Category: " + categoryId.ToString() + ".  Error: " + ex.Message);
-                return null;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.CategoryGetImagesAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
         async public Task CategoryRefreshListAsync(CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
@@ -1056,14 +1016,20 @@ namespace ManageWalla
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException cancelEx)
             {
                 logger.Debug("CategoryRefreshListAsync has been cancelled.");
+                throw cancelEx;
             }
             catch (Exception ex)
             {
                 state.categoryLoadState = GlobalState.DataLoadState.Unavailable;
                 throw (ex);
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.CategoryRefreshListAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -1078,17 +1044,13 @@ namespace ManageWalla
                 logger.Debug("CategoryMoveImagesAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
         #endregion
 
         #region Gallery
         async public Task GalleryRefreshListAsync(CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
@@ -1139,6 +1101,11 @@ namespace ManageWalla
                 state.galleryLoadState = GlobalState.DataLoadState.Unavailable;
                 throw (ex);
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.GalleryRefreshListAsync()", (int)duration.TotalMilliseconds, ""); }
+            }
         }
 
         async public Task<Gallery> GalleryGetMetaAsync(GalleryListGalleryRef galleryRef, CancellationToken cancelToken)
@@ -1149,14 +1116,8 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                //Suppress exception and just return null.
                 logger.Debug("GalleryGetMetaAsync has been cancelled");
                 throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
             }
         }
 
@@ -1171,11 +1132,6 @@ namespace ManageWalla
                 logger.Debug("GalleryUpdateAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
 
         async public Task GalleryCreateAsync(Gallery gallery, CancellationToken cancelToken)
@@ -1188,11 +1144,6 @@ namespace ManageWalla
             {
                 logger.Debug("GalleryCreateAsync has been cancelled");
                 throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
             }
         }
 
@@ -1207,15 +1158,11 @@ namespace ManageWalla
                 logger.Debug("GalleryDeleteAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
 
         async public Task<ImageList> GalleryGetImagesAsync(long id, string galleryName, int cursor, long sectionId, string searchQueryString, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 //Find a locally cached version,  ignore query string. 
@@ -1260,15 +1207,13 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                //Suppress exception and just return null.
                 logger.Debug("GalleryGetImagesAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                currentMain.ShowMessage(MainTwo.MessageType.Error, "There was a problem retrieving the images associated with the Gallery: " + galleryName + ".  Error: " + ex.Message);
-                return null;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.GalleryGetImagesAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -1295,11 +1240,6 @@ namespace ManageWalla
                 logger.Debug("GalleryCreatePreviewAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
-            }
         }
 
         public string GetGalleryPreviewUrl(string galleryPreviewKey)
@@ -1309,6 +1249,7 @@ namespace ManageWalla
 
         async public Task GalleryOptionsRefreshAsync(GalleryPresentationList presentationList, GalleryStyleList styleList, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
@@ -1381,14 +1322,16 @@ namespace ManageWalla
                 logger.Debug("GalleryOptionsRefreshAsync has been cancelled.");
                 throw (cancelEx);
             }
-            catch (Exception ex)
+            finally
             {
-                throw (ex);
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.GalleryOptionsRefreshAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
         async public Task GalleryGetSectionListAndMerge(Gallery gallery, GallerySectionList gallerySectionList, bool isReset, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 //Retrieve server sections list.
@@ -1427,21 +1370,18 @@ namespace ManageWalla
                         gallerySectionList.Add(newSection);
                     }
                 }
-
             }
             catch (OperationCanceledException cancelEx)
             {
                 logger.Debug("GalleryGetSectionListAndMerge has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                throw ex;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.GalleryGetSectionListAndMerge()", (int)duration.TotalMilliseconds, ""); }
             }
-
         }
-
         #endregion
 
         #region  Images Processing
@@ -1455,11 +1395,6 @@ namespace ManageWalla
             {
                 logger.Debug("DeleteImagesAsync has been cancelled");
                 throw cancelEx;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                throw ex;
             }
         }
         #endregion

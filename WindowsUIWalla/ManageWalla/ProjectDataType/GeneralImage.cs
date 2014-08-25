@@ -15,8 +15,8 @@ namespace ManageWalla
 {
     public class GeneralImage : INotifyPropertyChanged
     {
+        #region Variables and Init
         private ServerHelper serverHelper;
-        //private Image thumbnailImage;
 
         public long imageId { get; set; }
         public long categoryId { get; set; }
@@ -29,7 +29,7 @@ namespace ManageWalla
         public string fileSummary { get; set; }
         public DateTime uploadDate { get; set; }
         public int metaVersion { get; set; }
-        //private LoadState mainImageLoadState;
+        
         public LoadState metaLoadState { get; set; }
         public LoadState mainImageLoadState { get; set; }
         public LoadState thumbImageLoadState { get; set; }
@@ -52,17 +52,17 @@ namespace ManageWalla
             mainImageLoadState = LoadState.NotLoaded;
             thumbImageLoadState = LoadState.NotLoaded;
 
-            //thumbnailImage = GetTempBitmap("Working", true);
-            //mainCopyImage = GetTempBitmap("Working", false);
             metaLoadState = LoadState.NotLoaded;
         }
+        #endregion
 
-        #region Thumb
+        #region Load Images
         async public Task LoadThumb(CancellationToken cancelToken, List<ThumbCache> thumbCacheList, int thumbCacheSizeMB)
         {
             if (imageId == 0)
                 return;
 
+            DateTime startTime = DateTime.Now;
             try
             {
                 thumbImageLoadState = LoadState.Requested;
@@ -94,20 +94,22 @@ namespace ManageWalla
             }
             finally
             {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "GeneralImage.LoadThumb()", (int)duration.TotalMilliseconds, ""); }
+
                 OnPropertyChanged("thumbImageLoadState");
 
                 if (thumbnailImage != null)
                     OnPropertyChanged("thumbnailImage");
             }
         }
-        #endregion
 
-        #region MainCopy
         async public Task LoadMainCopyImage(CancellationToken cancelToken, List<MainCopyCache> mainCopyCacheList, string folder, int mainCopyCacheSizeMB)
         {
             if (imageId == 0)
                 return;
 
+            DateTime startTime = DateTime.Now;
             try
             {
                 mainImageLoadState = LoadState.Requested;
@@ -143,14 +145,15 @@ namespace ManageWalla
             }
             finally
             {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "GeneralImage.LoadMainCopyImage()", (int)duration.TotalMilliseconds, ""); }
+                
                 OnPropertyChanged("mainImageLoadState");
 
                 if (mainCopyImage != null)
                     OnPropertyChanged("mainCopyImage");
             }
         }
-
-
         #endregion
 
         #region Meta
@@ -178,6 +181,7 @@ namespace ManageWalla
 
         async private Task<ImageMeta> LoadImageMetaAsync(CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 metaLoadState = LoadState.Requested;
@@ -200,10 +204,16 @@ namespace ManageWalla
                 logger.Error(ex);
                 return null;
             }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "GeneralImage.LoadImageMetaAsync()", (int)duration.TotalMilliseconds, ""); }
+            }
         }
 
         async private Task SaveImageMetaAsync(ImageMeta imageMeta, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 await serverHelper.ImageUpdateMetaAsync(imageMeta, cancelToken);
@@ -218,6 +228,11 @@ namespace ManageWalla
                 logger.Error(ex);
                 metaLoadState = LoadState.Error;
                 throw ex;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "GeneralImage.SaveImageMetaAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
         #endregion
@@ -266,6 +281,7 @@ namespace ManageWalla
 
         async private Task<byte[]> LoadImageArrayAsync(string requestUrl, CancellationToken cancelToken)
         {
+            DateTime startTime = DateTime.Now;
             try
             {
                 return await serverHelper.GetByteArray(requestUrl, cancelToken);
@@ -275,22 +291,31 @@ namespace ManageWalla
                 logger.Debug("LoadImageArrayAsync has been cancelled");
                 throw cancelEx;
             }
-            catch (Exception ex)
+            finally
             {
-                logger.Error(ex);
-                throw ex;
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "GeneralImage.LoadImageArrayAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
         private Image ConvertByteArrayToImage(byte[] imageArray)
         {
-            Image newImage = new Image();
-            using (MemoryStream ms = new MemoryStream(imageArray))
+            DateTime startTime = DateTime.Now;
+            try
             {
-                var decoder = JpegBitmapDecoder.Create(ms, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-                newImage.Source = decoder.Frames[0];
+                Image newImage = new Image();
+                using (MemoryStream ms = new MemoryStream(imageArray))
+                {
+                    var decoder = JpegBitmapDecoder.Create(ms, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                    newImage.Source = decoder.Frames[0];
+                }
+                return newImage;
             }
-            return newImage;
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "GeneralImage.ConvertByteArrayToImage()", (int)duration.TotalMilliseconds, ""); }
+            }
         }
 
         protected void OnPropertyChanged(string name)

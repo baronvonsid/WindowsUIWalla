@@ -170,7 +170,6 @@
     <Compile Include="ProjectDataType\UploadImageState.cs" />
     <Compile Include="ProjectDataType\MainCopyCache.cs" />
     <Compile Include="CacheHelper.cs" />
-    <Compile Include="ProjectDataType\GalleryCategoryModel.cs" />
     <Compile Include="ProjectDataType\GlobalState.cs" />
     <Compile Include="MainTwo.xaml.cs">
       <DependentUpon>MainTwo.xaml</DependentUpon>

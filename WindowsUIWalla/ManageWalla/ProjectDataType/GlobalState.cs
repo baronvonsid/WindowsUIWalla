@@ -4,9 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-//using System.IO;
-//using System.Runtime.Serialization.Formatters.Binary;
-//using System.Security.Cryptography;
 using System.Runtime.Serialization;
 using System.Windows.Media.Imaging;
 using System.Xml;
@@ -14,7 +11,6 @@ using System.Xml;
 namespace ManageWalla
 {
     [System.SerializableAttribute()]
-    //[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/GlobalState", IsNullable = false)]
     public class GlobalState
     {
         public DateTime lastLoggedIn { get; set; }

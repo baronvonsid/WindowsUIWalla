@@ -16,7 +16,6 @@ using System.Runtime.Serialization;
 namespace ManageWalla
 {
     [System.SerializableAttribute()]
-    //[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.example.org/MainCopyCache", IsNullable = false)]
     public class MainCopyCache
     {
         public DateTime lastAccessed { get; set; }
