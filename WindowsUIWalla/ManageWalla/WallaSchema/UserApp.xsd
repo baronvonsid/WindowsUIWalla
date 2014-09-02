@@ -7,7 +7,7 @@ targetNamespace="http://ws.fotowalla.com/UserApp"
   <element name="UserApp">
     <complexType>
       <sequence maxOccurs="1" minOccurs="0">
-      	  <element type="int" name="AppId" />
+      	<element type="int" name="AppId" />
 	      <element type="int" name="PlatformId" />
 	      <element type="string" name="MachineName" />
 	      <element type="dateTime" name="LastUsed" />

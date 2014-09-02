@@ -189,10 +189,9 @@ namespace ManageWalla
             DateTime startTime = DateTime.Now;
             try
             {
-                if (currentPane != PaneMode.Upload && currentPane != PaneMode.AccountEdit && uploadUIState.Mode == UploadUIState.UploadMode.None && state.userApp.AutoUpload)
-                    Dispatcher.Invoke(new Action(() => { DoAutoUploadDispatcherAsync(); }));
+                Dispatcher.Invoke(new Action(() => { UploadTimerDispatcherAsync(); }));
 
-                Dispatcher.Invoke(new Action(() => { RefreshUploadStatusStateDispatcherAsync(false, true); }));
+                //Dispatcher.Invoke(new Action(() => { RefreshUploadStatusStateDispatcherAsync(false, true); }));
             }
             catch (Exception ex)
             {
@@ -3666,16 +3665,19 @@ namespace ManageWalla
             tagListUploadRefreshing = false;
         }
 
-        async private void DoAutoUploadDispatcherAsync()
+        async private void UploadTimerDispatcherAsync()
         {
             try
             {
-                await DoAutoUploadAsync(false);
+                if (currentPane != PaneMode.Upload && currentPane != PaneMode.AccountEdit && uploadUIState.Mode == UploadUIState.UploadMode.None && state.userApp.AutoUpload)
+                    await DoAutoUploadAsync(false);
+
+                await RefreshUploadStatusStateAsync(true, true);
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                ShowMessage(MessageType.Error, "There was an unexpected error whilst preparing files for uploading.  Error: " + ex.Message);
+                ShowMessage(MessageType.Error, "There was an unexpected error whilst checking upload status.  Error: " + ex.Message);
             }
         }
 
@@ -3686,7 +3688,7 @@ namespace ManageWalla
 
             if (!resume)
             {
-                UploadImageStateApplyServerState();
+                //UploadImageStateApplyServerState();
 
                 //TODO check account level flag, if false return
 
@@ -3747,6 +3749,7 @@ namespace ManageWalla
             catch (OperationCanceledException)
             {
                 if (logger.IsDebugEnabled) { logger.Debug("DoAutoUploadAsync has been cancelled."); }
+                ResetUploadState();
             }
             catch (Exception ex)
             {
@@ -3793,6 +3796,7 @@ namespace ManageWalla
             }
         }
 
+        /*
         async private void RefreshUploadStatusStateDispatcherAsync(bool force, bool silent)
         {
             try
@@ -3805,6 +3809,7 @@ namespace ManageWalla
                 ShowMessage(MainTwo.MessageType.Error, "There was a problem refreshing the account information.  Error: " + ex.Message);
             }
         }
+        */
 
         async private Task RefreshUploadStatusStateAsync(bool force, bool silent)
         {
@@ -3833,7 +3838,7 @@ namespace ManageWalla
 
                 await controller.RefreshUploadStatusListAsync(orderIds, cancelUploadListTokenSource.Token, uploadImageStateList);
 
-                CacheHelper.DeleteUploadedFiles(uploadImageStateList, uploadUIState.AutoUploadFolder);
+                CacheHelper.DeleteUploadedFiles(uploadImageStateList, uploadUIState.AutoUploadFolder, state.userApp.MachineName);
 
                 if (newCancelUploadListTokenSource == cancelUploadListTokenSource)
                     cancelUploadListTokenSource = null;
@@ -5106,8 +5111,6 @@ namespace ManageWalla
                     cancelTokenSource = null;
 
                 ConcludeBusyProcess();
-                RefreshOverallPanesStructure(PaneMode.GalleryEdit);
-                RefreshPanesAllControls(PaneMode.GalleryEdit);
             }
             catch (OperationCanceledException)
             {
@@ -6040,9 +6043,13 @@ namespace ManageWalla
                 try
                 {
                     await GalleryPopulateMetaData(galleryListGalleryRef);
+                    RefreshOverallPanesStructure(PaneMode.GalleryEdit);
+                    RefreshPanesAllControls(PaneMode.GalleryEdit);
                 }
                 catch (Exception ex)
                 {
+                    RefreshOverallPanesStructure(PaneMode.GalleryView);
+                    RefreshPanesAllControls(PaneMode.GalleryView);
                     logger.Error(ex);
                     ShowMessage(MainTwo.MessageType.Error, "There was a problem loading the gallery.  Error: " + ex.Message);
                 }

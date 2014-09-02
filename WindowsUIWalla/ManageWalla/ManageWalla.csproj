@@ -184,6 +184,7 @@
     <Compile Include="WallaDataType\Account.cs" />
     <Compile Include="WallaDataType\Category.cs" />
     <Compile Include="WallaDataType\CategoryList.cs" />
+    <Compile Include="WallaDataType\ClientApp.cs" />
     <Compile Include="WallaDataType\Gallery.cs" />
     <Compile Include="WallaDataType\GalleryList.cs" />
     <Compile Include="WallaDataType\GalleryOptions.cs" />
@@ -253,13 +254,13 @@
     <None Include="WallaSchema\Account.xsd" />
     <None Include="WallaSchema\Category.xsd" />
     <None Include="WallaSchema\CategoryList.xsd" />
+    <None Include="WallaSchema\ClientApp.xsd" />
     <None Include="WallaSchema\Gallery.xsd" />
     <None Include="WallaSchema\GalleryList.xsd" />
     <None Include="WallaSchema\GalleryOptions.xsd" />
     <None Include="WallaSchema\ImageIdList.xsd" />
     <None Include="WallaSchema\ImageList.xsd" />
     <None Include="WallaSchema\ImageMeta.xsd" />
-    <None Include="WallaSchema\Machine.xsd" />
     <None Include="WallaSchema\TagList.xsd" />
     <None Include="WallaSchema\Tag.xsd" />
     <None Include="WallaSchema\UploadStatusList.xsd" />

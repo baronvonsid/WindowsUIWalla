@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://ws.fotowalla.com/ClientApp"
+	xmlns:tns="http://ws.fotowalla.com/ClientApp" 
+	elementFormDefault="qualified">
+
+  <element name="ClientApp">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="0">
+	      	<element type="string" name="WSKey" />
+			<element type="string" name="OS" />
+			<element type="string" name="machineType" />
+			<element type="int" name="major" />
+			<element type="int" name="minor" />
+       </sequence>
+    </complexType>
+  </element>
+</schema>

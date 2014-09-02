@@ -70,7 +70,11 @@ namespace ManageWalla
 
                 FileInfo fileInfo = new FileInfo(FilePath);
                 meta.OriginalFileName = Path.GetFileName(FilePath);
-                meta.Name = Path.GetFileNameWithoutExtension(FilePath);
+
+                meta.Name = Path.GetFileNameWithoutExtension(FilePath).Trim();
+                if (meta.Name.Length > 30)
+                    meta.Name = meta.Name.Substring(0, 30);
+                
                 meta.Format = format;
 
                 meta.UploadDate = DateTime.Now;

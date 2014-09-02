@@ -7,7 +7,7 @@
     xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary"
     x:Name="mainTwo" x:Class="ManageWalla.MainTwo"
     Title="fotowalla" FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" 
-    SizeChanged="mainTwo_SizeChanged" FontSize="18" TextOptions.TextFormattingMode="Display" Height="650" Width="1000">
+    SizeChanged="mainTwo_SizeChanged" FontSize="16" TextOptions.TextFormattingMode="Display" Height="650" Width="1000">
 
     <!-- gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" 
     Source="{StaticResource busyImageSrc}"
@@ -1355,9 +1355,9 @@
                                 </Grid>
                                 <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane"  Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140" MouseUp="Image_MouseUp" >
                                     <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2" Foreground="{StaticResource FontBorderBrush}"/>
-                                    <TextBlock Text="{Binding description}" MaxHeight="60" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
-                                    <TextBlock Text="{Binding shotSummary}" TextWrapping="Wrap" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
-                                    <TextBlock Text="{Binding fileSummary}" TextWrapping="Wrap" Margin="6,2,2,2" FontSize="12" FontWeight="Light" Foreground="{StaticResource FontBorderBrush}" />
+                                    <TextBlock Text="{Binding description}" MaxHeight="60" FontWeight="Light" FontSize="14" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                    <TextBlock Text="{Binding shotSummary}" TextWrapping="Wrap" FontWeight="Light" FontSize="14" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                    <TextBlock Text="{Binding fileSummary}" TextWrapping="Wrap" Margin="6,2,2,2" FontSize="14" FontWeight="Light" Foreground="{StaticResource FontBorderBrush}" />
 
                                     <!--
                                     <Button Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"  
@@ -1648,7 +1648,7 @@
                         </Image>
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center">
 
                         <Button x:Name="cmdImageViewPrevious" Opacity="0.8" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="ImageViewPrevious_Click" Padding="0" Margin="2" BorderThickness="0">
                             <Button.Content>
@@ -1779,9 +1779,9 @@
                         <Label x:Name="lblImageViewSize" Grid.Column="2" Grid.Row="8" Content="{Binding Mode=OneWay, Path=/Meta.Size, Converter={StaticResource WallaByteToMBConverterKey}}" />
 
                         <Label Content="Pixels" Grid.Column="1" Grid.Row="9" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="2" Grid.Row="9" VerticalAlignment="Center" Foreground="{StaticResource FontBorderBrush}">
+                        <TextBlock Grid.Column="2" Grid.Row="9"  Foreground="{StaticResource FontBorderBrush}">
                             <TextBlock.Text>
-                                <MultiBinding StringFormat="Width: {0} Height: {1}">
+                                <MultiBinding StringFormat=" Width:{0} Height:{1}">
                                     <Binding Path="/Meta.Width" />
                                     <Binding Path="/Meta.Height" />
                                 </MultiBinding>

@@ -352,11 +352,11 @@ namespace ManageWalla
             //Loop through uploadStatusList and reflect new reality in uploadHistoryCacheList 
         }
 
-        public static void DeleteUploadedFiles(UploadImageStateList uploadImageStateList, string autoUploadFolder)
+        public static void DeleteUploadedFiles(UploadImageStateList uploadImageStateList, string autoUploadFolder, string machineName)
         {
             var needDeletingItems = uploadImageStateList.Where(
                                             r => r.status == UploadImage.ImageStatus.Complete
-                                            && r.isDeleted == false);
+                                            && r.isDeleted == false && r.isAutoUpload == true && r.machineName == machineName);
 
             foreach (UploadImageState uploadedItem in needDeletingItems)
             {

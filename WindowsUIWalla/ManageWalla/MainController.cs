@@ -336,29 +336,15 @@ namespace ManageWalla
                 if (createdCategory)
                     await currentMain.RefreshAndDisplayCategoryList(true);
 
-                //Check for each chkAll box set to true, then replace respective values.
-                if (uploadState.MetaTagRefAll)
-                {
-                    foreach (UploadImage currentImage in meFots)
-                    {
-                        currentImage.Meta.Tags = uploadState.MetaTagRef;
-                    }
-                }
-
-                if (uploadState.MetaTakenDateSetAll)
-                {
-                    foreach (UploadImage currentImage in meFots)
-                    {
-                        currentImage.Meta.TakenDate = uploadState.MetaTakenDate;
-                        currentImage.Meta.TakenDateSet = true;
-                    }
-                }
-
                 foreach (UploadImage currentImage in meFots)
                 {
                     if (uploadState.MetaTagRefAll)
-                    {
                         currentImage.Meta.Tags = uploadState.MetaTagRef;
+
+                    if (uploadState.MetaTakenDateSetAll)
+                    {
+                        currentImage.Meta.TakenDate = uploadState.MetaTakenDate;
+                        currentImage.Meta.TakenDateSet = true;
                     }
 
                     AddMachineTag(currentImage);
@@ -582,7 +568,7 @@ namespace ManageWalla
             }
         }
 
-        //TODO Sort out with date modified and to use local version.
+        //TODO Sort out with date modified or a way or limiting the number of requests needed.
         async public Task RefreshUploadStatusListAsync(long[] orderIds, CancellationToken cancelToken, UploadImageStateList currentUploadStatusList)
         {
             DateTime startTime = DateTime.Now;
@@ -609,6 +595,9 @@ namespace ManageWalla
                                 newImage.status = (UploadImage.ImageStatus)serverImageState.status;
                                 newImage.name = serverImageState.name;
                                 newImage.imageId = serverImageState.imageId;
+                                newImage.sizeBytes = 0;
+                                newImage.fileName = "";
+                                newImage.fullPath = "";
 
                                 currentUploadStatusList.Add(newImage);  //Check this is OK.
                             }
