@@ -14,7 +14,6 @@ targetNamespace="http://ws.fotowalla.com/Account"
         <element type="int" name="Status" /> <!-- 1 - Initial details received, 2 - Email confirmed, 
         											3 - billing confirmed, 4 - billing issue
         											5 - live, 6 - shutdown pending, 7 closed. -->
-        
         <element type="int" name="AccountType" />
         <element type="string" name="AccountTypeName" />
         <element type="date" name="OpenDate" />
@@ -24,6 +23,7 @@ targetNamespace="http://ws.fotowalla.com/Account"
         <element type="int" name="TotalImages" />
         <element type="int" name="MonthlyUploadCap" />
         <element type="int" name="UploadCount30Days" />
+        <element type="string" name="Key" />
        </sequence>
       <attribute type="long" name="id" default="0"/>
       <attribute type="int" name="version" default="0"/>

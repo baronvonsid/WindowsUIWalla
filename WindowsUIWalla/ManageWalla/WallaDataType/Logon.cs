@@ -20,67 +20,67 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/ClientApp")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/ClientApp", IsNullable=false)]
-    public partial class ClientApp {
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/Logon")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/Logon", IsNullable=false)]
+    public partial class Logon {
         
-        private string wSKeyField;
+        private string profileNameField;
         
-        private string osField;
+        private string emailField;
         
-        private string machineTypeField;
+        private string passwordField;
         
-        private int majorField;
+        private string oldPasswordField;
         
-        private int minorField;
+        private string keyField;
         
         /// <remarks/>
-        public string WSKey {
+        public string ProfileName {
             get {
-                return this.wSKeyField;
+                return this.profileNameField;
             }
             set {
-                this.wSKeyField = value;
+                this.profileNameField = value;
             }
         }
         
         /// <remarks/>
-        public string OS {
+        public string Email {
             get {
-                return this.osField;
+                return this.emailField;
             }
             set {
-                this.osField = value;
+                this.emailField = value;
             }
         }
         
         /// <remarks/>
-        public string MachineType {
+        public string Password {
             get {
-                return this.machineTypeField;
+                return this.passwordField;
             }
             set {
-                this.machineTypeField = value;
+                this.passwordField = value;
             }
         }
         
         /// <remarks/>
-        public int Major {
+        public string OldPassword {
             get {
-                return this.majorField;
+                return this.oldPasswordField;
             }
             set {
-                this.majorField = value;
+                this.oldPasswordField = value;
             }
         }
         
         /// <remarks/>
-        public int Minor {
+        public string Key {
             get {
-                return this.minorField;
+                return this.keyField;
             }
             set {
-                this.minorField = value;
+                this.keyField = value;
             }
         }
     }

@@ -52,6 +52,8 @@ namespace ManageWalla {
         
         private int uploadCount30DaysField;
         
+        private string keyField;
+        
         private long idField;
         
         private int versionField;
@@ -200,6 +202,16 @@ namespace ManageWalla {
             }
             set {
                 this.uploadCount30DaysField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public string Key {
+            get {
+                return this.keyField;
+            }
+            set {
+                this.keyField = value;
             }
         }
         

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://ws.fotowalla.com/Logon"
+	xmlns:tns="http://ws.fotowalla.com/Logon" 
+	elementFormDefault="qualified">
+
+  <element name="Logon">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="1">
+	      	<element type="string" name="ProfileName" />
+	      	<element type="string" name="Email" />
+			<element type="string" name="Password" />
+			<element type="string" name="OldPassword" />
+			<element type="string" name="Key" />
+       </sequence>
+    </complexType>
+  </element>
+</schema>

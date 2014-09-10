@@ -6,12 +6,12 @@ targetNamespace="http://ws.fotowalla.com/ClientApp"
 
   <element name="ClientApp">
     <complexType>
-      <sequence maxOccurs="1" minOccurs="0">
+      <sequence maxOccurs="1" minOccurs="1">
 	      	<element type="string" name="WSKey" />
 			<element type="string" name="OS" />
-			<element type="string" name="machineType" />
-			<element type="int" name="major" />
-			<element type="int" name="minor" />
+			<element type="string" name="MachineType" />
+			<element type="int" name="Major" />
+			<element type="int" name="Minor" />
        </sequence>
     </complexType>
   </element>
