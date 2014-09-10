@@ -229,15 +229,15 @@ namespace ManageWalla
                 }
             }
 
-            if (!await controller.VerifyApp())
+            if (!await controller.VerifyAppAndPlatform())
             {
-                throw new Exception("The application failed validation with the server.  Please check for the latest app version.");
+                throw new Exception("The application/platform failed validation with the server.  Please check www.fotowalla.com/support for the latest versions supported.");
             }
 
-            if (!await controller.SetPlatform())
-            {
-                throw new Exception("The platform is not supported by fotowalla.  Please check the web site for our latest application details.");
-            }
+            //if (!await controller.SetPlatform())
+            //{
+            ///   throw new Exception("The platform is not supported by fotowalla.  Please check the web site for our latest application details.");
+            //}
 
             if (profileName.Length > 0 && controller.CacheFilesPresent(profileName))
             {

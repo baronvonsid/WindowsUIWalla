@@ -7,7 +7,7 @@
     xmlns:ShaderEffectLibrary="clr-namespace:ShaderEffectLibrary;assembly=ShaderEffectLibrary"
     x:Name="mainTwo" x:Class="ManageWalla.MainTwo"
     Title="fotowalla" FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" 
-    SizeChanged="mainTwo_SizeChanged" FontSize="16" TextOptions.TextFormattingMode="Display" Height="650" Width="1000">
+    SizeChanged="mainTwo_SizeChanged" FontSize="18" TextOptions.TextFormattingMode="Display" Height="650" Width="1000">
 
     <!-- gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" 
     Source="{StaticResource busyImageSrc}"

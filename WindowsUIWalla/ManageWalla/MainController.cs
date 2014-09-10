@@ -135,9 +135,9 @@ namespace ManageWalla
             return await serverHelper.isOnline(Properties.Settings.Default.WebServerTest);
         }
 
-        async public Task<bool> VerifyApp()
+        async public Task<bool> VerifyAppAndPlatform()
         {
-            return await serverHelper.VerifyApp(Properties.Settings.Default.WallaAppKey);
+            return await serverHelper.VerifyAppAndPlatform(Properties.Settings.Default.WallaAppKey);
         }
 
         async public Task<string> Logon(string userName, string password)
