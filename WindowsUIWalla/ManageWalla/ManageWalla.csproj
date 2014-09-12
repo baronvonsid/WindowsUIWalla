@@ -189,6 +189,7 @@
     <Compile Include="WallaDataType\GalleryOptions.cs" />
     <Compile Include="WallaDataType\ImageIdList.cs" />
     <Compile Include="WallaDataType\ImageList.cs" />
+    <Compile Include="WallaDataType\Logon.cs" />
     <Compile Include="WallaDataType\Tag.cs" />
     <Compile Include="MainController.cs" />
     <Compile Include="ProjectDataType\UploadUIState.cs" />

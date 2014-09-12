@@ -123,33 +123,41 @@ namespace ManageWalla
             galleryStyleList = styleListParam;
         }
 
-        async public Task<bool> SetPlatform()
-        {
-            System.OperatingSystem osInfo = System.Environment.OSVersion;
-
-            return await serverHelper.VerifyPlatform(Properties.Settings.Default.OS, "PC", osInfo.Version.Major, osInfo.Version.Minor);
-        }
-
         async public Task<bool> CheckOnline()
         {
             return await serverHelper.isOnline(Properties.Settings.Default.WebServerTest);
         }
 
-        async public Task<bool> VerifyAppAndPlatform()
+        async public Task<bool> VerifyAppAndPlatform(bool verifyOnly)
         {
-            return await serverHelper.VerifyAppAndPlatform(Properties.Settings.Default.WallaAppKey);
+            System.OperatingSystem osInfo = System.Environment.OSVersion;
+
+            ClientApp clientApp = new ClientApp();
+            clientApp.WSKey = Properties.Settings.Default.WallaAppKey;
+            clientApp.OS = Properties.Settings.Default.OS;
+            clientApp.MachineType = "PC";
+            clientApp.Major = osInfo.Version.Major;
+            clientApp.Minor = osInfo.Version.Minor;
+
+            return await serverHelper.VerifyAppAndPlatform(clientApp, verifyOnly);
         }
 
-        async public Task<string> Logon(string userName, string password)
+        async public Task<string> Logon(string profileName, string password)
         {
-            if (await serverHelper.Logon(userName, password))
-            {
-                return "OK";
-            }
-            else
-            {
+            Logon logon = new Logon();
+            logon.ProfileName = profileName;
+
+            logon = await serverHelper.GetLogonToken(logon);
+            if (logon == null || logon.Key.Length != 32)
                 return "Logon failed";
-            }
+
+            logon.ProfileName = profileName;
+            logon.Password = password;
+
+            if (await serverHelper.Logon(logon))
+                return "OK";
+            else
+                return "Logon failed";
         }
 
         async public Task AccountDetailsGet(CancellationToken cancelToken)

@@ -159,13 +159,13 @@ namespace ManageWalla
                     {
                         cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                         radGallery.IsChecked = true;
+
+                        timer = new System.Timers.Timer();
+                        timer.Elapsed += timer_Elapsed;
+                        timer.Interval = 10000.0;
+                        timer.Start();
                     }
                 }
-
-                timer = new System.Timers.Timer();
-                timer.Elapsed += timer_Elapsed;
-                timer.Interval = 10000.0;
-                timer.Start();
 
                 ConcludeBusyProcess();
             }
@@ -229,7 +229,7 @@ namespace ManageWalla
                 }
             }
 
-            if (!await controller.VerifyAppAndPlatform())
+            if (!await controller.VerifyAppAndPlatform(true))
             {
                 throw new Exception("The application/platform failed validation with the server.  Please check www.fotowalla.com/support for the latest versions supported.");
             }
@@ -4649,6 +4649,8 @@ namespace ManageWalla
                 await controller.AccountDetailsGet(cancelTokenSource.Token);
                 state.account.Password = password;
 
+                await controller.VerifyAppAndPlatform(false);
+
                 await controller.SetUserApp(cancelTokenSource.Token);
 
                 if (newCancelTokenSource == cancelTokenSource)
@@ -4727,6 +4729,11 @@ namespace ManageWalla
                 {
                     cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     radGallery.IsChecked = true;
+
+                    timer = new System.Timers.Timer();
+                    timer.Elapsed += timer_Elapsed;
+                    timer.Interval = 10000.0;
+                    timer.Start();
                 }
 
             }

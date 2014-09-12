@@ -33,7 +33,8 @@ namespace ManageWalla
         //private long userId;
         private string userName;
         private string webPath;
-        //private string sessionKey;
+        private CookieContainer cookie;
+        private HttpClientHandler handler;
 
         public ServerHelper(string hostNameParam, int portParam, string wsPathParam, string appKeyParam, string webPathParam)
         {
@@ -42,6 +43,9 @@ namespace ManageWalla
             wsPath = wsPathParam;
             appKey = appKeyParam;
             webPath = webPathParam;
+            cookie = new CookieContainer();
+            handler = new HttpClientHandler();
+            handler.CookieContainer = cookie;
         }
 
         async public Task<bool> isOnline(string webServerTest)
@@ -64,28 +68,73 @@ namespace ManageWalla
             }
         }
 
-        async public Task<bool> Logon(string userName, string passwordParam)
+        async public Task<Logon> GetLogonToken(Logon logon)
         {
             DateTime startTime = DateTime.Now;
             string url = "";
             try
             {
-                HttpClient initialHttp = new HttpClient();
-                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
+                http = new HttpClient(handler);
+                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
 
-                url = "logon?userName=" + userName;
+                url = "logontoken";
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Logon>(logon, xmlFormatter);
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
+                request.Content = content;
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                XmlSerializer serialKiller = new XmlSerializer(typeof(Logon));
+                logon = (Logon)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+
+                return logon;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return null;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.Logon()", (int)duration.TotalMilliseconds, url); }
+            }
+        }
+
+        async public Task<bool> Logon(Logon logon)
+        {
+            DateTime startTime = DateTime.Now;
+            string url = "";
+            try
+            {
+                url = "logon";
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await initialHttp.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<Logon>(logon, xmlFormatter);
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
+                request.Content = content;
                 
-                http = new HttpClient();
-                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + userName + "/");
-                this.userName = userName;
-                //TODO get session returned to Walla for use in all subsequent requests.
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
 
+                handler = new HttpClientHandler();
+                handler.CookieContainer = cookie;
+                http = new HttpClient(handler);
+                
+                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + logon.ProfileName + "/");
+                this.userName = logon.ProfileName;
                 return true;
             }
             catch (Exception ex)
@@ -138,16 +187,30 @@ namespace ManageWalla
             return "http://" + hostName + ":" + port.ToString() + webPath + userName + "/";
         }
 
-        async public Task<bool> VerifyApp(string validation)
+        async public Task<bool> VerifyAppAndPlatform(ClientApp clientApp, bool verify)
         {
             DateTime startTime = DateTime.Now;
             try
             {
-                HttpClient initialHttp = new HttpClient();
-                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
+                HttpClient initialHttp = null; ;
+                if (verify)
+                {
+                    initialHttp = new HttpClient();
+                    initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
+                }
+                else
+                {
+                    initialHttp = http;
+                }
 
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "appcheck?wsKey=" + validation);
+                HttpRequestMessage request = new HttpRequestMessage((verify) ? HttpMethod.Post: HttpMethod.Put, "clientapp");
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<ClientApp>(clientApp, xmlFormatter);
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
+                request.Content = content;
 
                 HttpResponseMessage response = await initialHttp.SendAsync(request);
                 response.EnsureSuccessStatusCode();
@@ -166,37 +229,6 @@ namespace ManageWalla
             }
         }
 
-        async public Task<bool> VerifyPlatform(string os, string machineType, int majorVersion, int minorVersion)
-        {
-            DateTime startTime = DateTime.Now;
-            string url = "";
-            try
-            {
-
-                HttpClient initialHttp = new HttpClient();
-                initialHttp.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
-
-                url = "platform?OS=" + os + "&machineType=" + machineType + "&major=" + majorVersion.ToString() + "&minor=" + minorVersion.ToString();
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post,url);
-                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-
-                HttpResponseMessage response = await initialHttp.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                return false;
-            }
-            finally
-            {
-                TimeSpan duration = DateTime.Now - startTime;
-                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.VerifyPlatform()", (int)duration.TotalMilliseconds, url); }
-            }
-        }
-
         async public Task<UserApp> UserAppGet(long userAppId)
         {
             DateTime startTime = DateTime.Now;
@@ -212,7 +244,7 @@ namespace ManageWalla
 
                 XmlSerializer serialKiller = new XmlSerializer(typeof(UserApp));
                 UserApp userApp = (UserApp)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
+                
                 return userApp;
             }
             catch (Exception ex)
@@ -263,6 +295,13 @@ namespace ManageWalla
                 TimeSpan duration = DateTime.Now - startTime;
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.UserAppCreateUpdateAsync()", (int)duration.TotalMilliseconds, url); }
             }
+        }
+
+        private HttpClient GetHttpProxyWithoutUser(HttpClientHandler handler)
+        {
+            HttpClient proxy = new HttpClient(handler);
+            proxy.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
+            return proxy;
         }
         #endregion
 
@@ -835,7 +874,7 @@ namespace ManageWalla
                 StreamContent streamContent = new StreamContent(fileStream);
                 requestImage.Content = streamContent;
                 streamContent.Headers.ContentLength = fileStream.Length;
-                streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
                 //Upload file asynchronously and check response.
                 HttpResponseMessage response = await http.SendAsync(requestImage, cancelToken);
