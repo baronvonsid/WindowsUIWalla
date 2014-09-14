@@ -79,10 +79,18 @@ namespace ManageWalla
             if (state == null)
                 return;
 
-            CacheHelper.SaveGlobalState(state, state.account.ProfileName);
-            CacheHelper.SaveThumbCacheList(thumbCacheList, state.account.ProfileName);
-            CacheHelper.SaveMainCopyCacheList(mainCopyCacheList, state.account.ProfileName);
-            CacheHelper.SaveUploadImageStateList(uploadImageStateList, state.account.ProfileName);
+            SaveCacheToDisk();
+        }
+
+        private void SaveCacheToDisk()
+        {
+            if (state != null && state.account != null && state.account.ProfileName.Length > 0)
+            {
+                CacheHelper.SaveGlobalState(state, state.account.ProfileName);
+                CacheHelper.SaveThumbCacheList(thumbCacheList, state.account.ProfileName);
+                CacheHelper.SaveMainCopyCacheList(mainCopyCacheList, state.account.ProfileName);
+                CacheHelper.SaveUploadImageStateList(uploadImageStateList, state.account.ProfileName);
+            }
         }
         #endregion
 
@@ -142,22 +150,34 @@ namespace ManageWalla
             return await serverHelper.VerifyAppAndPlatform(clientApp, verifyOnly);
         }
 
-        async public Task<string> Logon(string profileName, string password)
+        async public Task<string> Logon(string profileName, string email, string password)
         {
             Logon logon = new Logon();
-            logon.ProfileName = profileName;
+            if (profileName.Length > 0)
+                logon.ProfileName = profileName;
+            else
+                logon.Email = email;
 
             logon = await serverHelper.GetLogonToken(logon);
             if (logon == null || logon.Key.Length != 32)
                 return "Logon failed";
 
-            logon.ProfileName = profileName;
+            //logon.ProfileName = profileName;
             logon.Password = password;
 
             if (await serverHelper.Logon(logon))
                 return "OK";
             else
                 return "Logon failed";
+        }
+
+        async public Task Logout()
+        {
+            await serverHelper.Logout();
+            //Ignore response, we need to close it out regardless.
+
+            SaveCacheToDisk();
+            CacheHelper.ResetGlobalState(state);
         }
 
         async public Task AccountDetailsGet(CancellationToken cancelToken)

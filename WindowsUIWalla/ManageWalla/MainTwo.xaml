@@ -41,9 +41,9 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40" />
-                <ColumnDefinition Width="300" />
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0" />
                 <ColumnDefinition Width="0"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0" Grid.Row="0" Grid.RowSpan="9" Margin="2,2,2,2" Background="{StaticResource WallaBannerBackgroundBrush}" LastChildFill="True">
@@ -247,6 +247,7 @@
                     </Button>
 
                     <!-- <Image Source="{StaticResource contractImageSrc}" Height="28" /> -->
+                    <!--
                     <Button x:Name="cmdAccount" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Click="cmdAccount_Click" Padding="0" BorderThickness="0">
                         <Button.Template>
                             <ControlTemplate TargetType="{x:Type Button}">
@@ -267,6 +268,9 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
+                    -->
+                    <Image Source="{StaticResource accountImageSelectedSrc}" DockPanel.Dock="Left" Width="146" />
+                    
                     <Label x:Name="lblFotoWalla" Content="" FontSize="24" VerticalContentAlignment="Center" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Background="Transparent" Foreground="{StaticResource FontBorderBrush}">
                     </Label>
                 </DockPanel>
@@ -790,12 +794,11 @@
                                     <MenuItem Header="Delete Images" Click="DeleteImages_Click" ToolTip="Permanently deletes the selected image from fotowalla">
 
                                     </MenuItem>
-                                    <MenuItem Header="Download Images - Copy (1920px)" ToolTip="Downloads a high quality copy of your original image.  Maximum resultion is 1920px.  Available in the downloads section when complete.">
+                                    <MenuItem Header="Download Images - Copy (1920px)" ToolTip="Downloads a high quality copy of your original image.  Maximum resultion is 1920px.  Available in the downloads section when complete." />
+                                    <MenuItem Header="Download Images - Original"  ToolTip="Requests a download of the originals, available in the downloads section when complete." />
+                                    <Separator />
+                                    <MenuItem x:Name="menuSettings" Header="Settings, Upload\Download progress"  ToolTip="View\update application preferences. Check the status of Uploads\Downloads" Click="menuSettings_Click" />
 
-                                    </MenuItem>
-                                    <MenuItem Header="Download Images - Original"  ToolTip="Requests a download of the originals, available in the downloads section when complete.">
-
-                                    </MenuItem>
                                 </ContextMenu>
                             </ToggleButton.ContextMenu>
                         </ToggleButton>
@@ -1053,7 +1056,7 @@
 
                                 <ScrollViewer x:Name="scrollGalleryCategoryInclude" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="4" Margin="2,0,0,2" Background="{StaticResource GroupControlBackgroundBrush}" Grid.ColumnSpan="2">
                                     <TreeView x:Name="treeGalleryCategoryView" >
-                                        <!-- ItemContainerStyle="{StaticResource styleTreeViewItemWithCombo}" --> 
+                                        <!-- ItemContainerStyle="{StaticResource styleTreeViewItemWithCombo}" -->
                                     </TreeView>
                                 </ScrollViewer>
 
@@ -1822,10 +1825,11 @@
 
             </Grid>
 
-            <Grid x:Name="gridAccount" Margin="12,0,10,0" Grid.Column="3" Grid.Row="0" Grid.RowSpan="9" >
+            <Grid x:Name="gridAccount" Margin="12,0,10,0" Grid.Column="3" Grid.Row="0" Grid.RowSpan="9">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="60"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="0"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -1834,6 +1838,8 @@
                 <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical">
 
                     <DockPanel LastChildFill="True">
+                        <Image Source="{StaticResource accountImageSelectedSrc}" DockPanel.Dock="Left" Width="146"  />
+                        <!--
                         <Button x:Name="cmdAccountFotoWallaClose" DockPanel.Dock="Left" Style="{StaticResource styleButton}" Padding="0" BorderThickness="0" Click="cmdAccountClose_Click" >
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
@@ -1854,16 +1860,17 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-
-                        <Button x:Name="cmdAccountClose" VerticalAlignment="Center" DockPanel.Dock="Right" Padding="0" Margin="2" BorderThickness="0" Click="cmdAccountClose_Click">
+                        -->
+                        
+                        <Button x:Name="cmdAccountClose" VerticalAlignment="Center" DockPanel.Dock="Right" Padding="0" Margin="2" BorderThickness="0"  Click="cmdAccountClose_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
                                     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <Image x:Name="accountCloseImage" Source="{StaticResource accountCloseImageSrc}" Height="32" />
+                                        <Image x:Name="imageNav" Source="{StaticResource expandImageSrc}" Height="32" />
                                     </Grid>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsEnabled" Value="false">
-                                            <Setter TargetName="accountCloseImage" Property="Opacity" Value="0.7" />
+                                            <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
                                         </Trigger>
                                         <MultiTrigger>
                                             <MultiTrigger.Conditions>
@@ -1871,140 +1878,111 @@
                                                 <Condition Property="IsMouseOver" Value="true" />
                                             </MultiTrigger.Conditions>
                                             <MultiTrigger.Setters>
-                                                <Setter TargetName="accountCloseImage" Property="Source" Value="{StaticResource accountCloseSelectedImageSrc}" />
+                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource expandImageSelectedSrc}" />
                                             </MultiTrigger.Setters>
                                         </MultiTrigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                        <Button x:Name="cmdAccountRefresh" DockPanel.Dock="Right" Tag="false" VerticalAlignment="Center" Height="32" Padding="0" Margin="2" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" BorderThickness="0" Click="cmdAccountRefresh_Click" />
-                        <Line Visibility="Visible" DockPanel.Dock="Right" Stroke="{StaticResource FontBorderBrushSelected}" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="6,0,6,0" />
 
-                        <Label Content="Account info"  Background="Transparent" FontSize="24" HorizontalAlignment="Center" />
+                        <Label x:Name="lblAccountPaneTitle" Content="Account"  Background="Transparent" FontSize="24" HorizontalAlignment="Center" Margin="0,0,120,0" />
                     </DockPanel>
 
                     <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="2000" Y2="5" StrokeThickness="0.5" Margin="0,8,0,0" />
                 </StackPanel>
 
+
                 <DockPanel x:Name="panAccount" Grid.Column="0" Grid.Row="1" VerticalAlignment="Stretch" Margin="2">
-                    <TabControl x:Name="tabAccount" Margin="4">
-                        <TabItem x:Name="tabAccountSettings" Header="Account Details" >
+                    <TabControl x:Name="tabAccount">
+                        <TabItem x:Name="tabAccountSettings" Header="Account" Margin="-4,0,0,0" Width="100">
+
 
                             <Grid x:Name="gridAccountSettings" Background="{StaticResource PaneBodyBackgroundBrush}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="40" />
-                                    <RowDefinition Height="120" />
-                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="34" />
+                                    <RowDefinition Height="34" />
+                                    <RowDefinition Height="34" />
+                                    <RowDefinition Height="34" />
+                                    <RowDefinition Height="34" />
+                                    <RowDefinition Height="34" />
+                                    <RowDefinition Height="34" />
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="34" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="300" />
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="190" />
                                     <ColumnDefinition Width="10" />
-                                    <ColumnDefinition Width="330" />
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="200" />
                                 </Grid.ColumnDefinitions>
 
-                                <Label Content="Account" FontWeight="SemiBold" FontSize="24" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="0" />
+                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" >
+                                    <Button x:Name="cmdAccountRefresh" DockPanel.Dock="Right" Tag="false" VerticalAlignment="Center" Height="32" Padding="0" Margin="2" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" BorderThickness="0" Click="cmdAccountRefresh_Click" />
+                                    <Label Content="Account" FontWeight="SemiBold" FontSize="24" VerticalContentAlignment="Center" />
+                                </StackPanel>
 
-                                <Label Content="Account Status" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="0" />
+                                <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="5" Y1="0" X2="5" Y2="2000" StrokeThickness="0.5" Margin="0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="11" />
 
-                                <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="5" Y1="10" X2="5" Y2="2000" StrokeThickness="0.5" Margin="0" Grid.Column="1" Grid.Row="0" Grid.RowSpan="5" />
+                                <Label Grid.Column="0" Grid.Row="2" Content="Profile Name" FontWeight="SemiBold"/>
+                                <Label x:Name="lblAccountProfileName" Grid.Column="1" Grid.Row="2"  />
 
-                                <Grid Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="0" Grid.Row="1">
+                                <Label Grid.Column="0" Grid.Row="3" Content="Email Address" FontWeight="SemiBold"/>
+                                <Label x:Name="lblAccountEmail" Grid.Column="1" Grid.Row="3" />
+
+                                <Label Grid.Column="0" Grid.Row="4" Content="Account Type" FontWeight="SemiBold"/>
+                                <Label x:Name="lblAccountType" Grid.Column="1" Grid.Row="4" />
+
+                                <Label Grid.Column="0" Grid.Row="5" Content="Account Open" FontWeight="SemiBold"/>
+                                <Label x:Name="lblAccountOpen" Grid.Column="1" Grid.Row="5" />
+
+                                <Label Grid.Column="0" Grid.Row="6" Content="Storage Limit" FontWeight="SemiBold"/>
+                                <Label x:Name="lblAccountStorageLimitGB" Grid.Column="1" Grid.Row="6" />
+
+                                <Label Grid.Column="0" Grid.Row="7" Content="Current Storage" FontWeight="SemiBold"/>
+                                <Label x:Name="lblAccountCurrentUtil" Grid.Column="1" Grid.Row="7" />
+
+                                <StackPanel Orientation="Horizontal" Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" >
+                                    <Button x:Name="cmdAccountLogout" Content="Logout" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountLogout_Click" />
+                                    <Button x:Name="cmdUseOffline" Content="Use Offline" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
+                                    <Button x:Name="cmdUpdateProfileLoggedOn" Content="Update Profile" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                                </StackPanel>
+
+
+                                <Label Content="Application Settings" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="2" />
+
+                                <Label Grid.Column="3" Grid.Row="2" Content="Auto Upload" FontWeight="SemiBold"/>
+                                <CheckBox x:Name="chkAccountAutoUpload" Grid.Row="2" Grid.Column="4" HorizontalAlignment="Right" Margin="0,0,20,0" VerticalAlignment="Center" />
+
+                                <Label Grid.Column="3" Grid.Row="3" Grid.ColumnSpan="2" Content="Auto Upload Folder" FontWeight="SemiBold"/>
+                                <Button x:Name="cmdAccountChangeAutoUploadFolder" HorizontalAlignment="Right" Content="Change" Grid.Column="4" Grid.Row="3" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountChangeAutoUploadFolder_Click" />
+
+                                <Label x:Name="lblAccountAutoUploadFolder" Visibility="Collapsed" Content="..." Grid.Column="3" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+                                <Label x:Name="lblAccountAutoUploadFolderAbbrev" Content="..." Grid.Column="3" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+
+                                <Label Grid.Column="3" Grid.Row="5" Grid.ColumnSpan="2" Content="Image Copy Folder" FontWeight="SemiBold"/>
+                                <Button x:Name="cmdAccountChangeImageCopyFolder" Content="Change"  HorizontalAlignment="Right" Grid.Column="4" Grid.Row="5" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountChangeImageCopyFolder_Click" />
+
+                                <Label x:Name="lblAccountImageCopyFolder" Visibility="Collapsed" Content="..." Grid.Column="3" Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+                                <Label x:Name="lblAccountImageCopyFolderAbbrev" Content="..." Grid.Column="3" Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
+
+                                <Label Grid.Column="3" Grid.Row="7" Grid.ColumnSpan="2" Content="Copies Saved (local)" FontWeight="SemiBold" />
+                                <Label x:Name="lblAccountImageCopyStatus" Grid.Column="4" Grid.Row="7" Content="..." HorizontalAlignment="Right"/>
+
+                                <Label Grid.Column="3" Grid.Row="8" Grid.ColumnSpan="2" Content="Max Size" FontWeight="SemiBold" />
+                                <Grid Grid.Column="4" Grid.Row="8" HorizontalAlignment="Right">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="200" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="50" />
                                     </Grid.ColumnDefinitions>
 
-                                    <Label Grid.Column="0" Grid.Row="0" Content="Profile Name" FontWeight="SemiBold"/>
-                                    <TextBox x:Name="txtAccountProfileName" Grid.Column="1" Grid.Row="0" MaxLength="100" Margin="2" />
-
-                                    <Label Grid.Column="0" Grid.Row="1" Content="Password" FontWeight="SemiBold"/>
-                                    <PasswordBox x:Name="txtAccountPassword" Grid.Column="1" FontSize="16" Grid.Row="1" MaxLength="20" Margin="2" />
-
-                                    <Label Grid.Column="0" Grid.Row="2" Content="Email Address" FontWeight="SemiBold"/>
-                                    <Label x:Name="lblAccountEmail" Grid.Column="1" Grid.Row="2" />
-
-                                </Grid>
-
-                                <Grid Background="{StaticResource PaneBodyBackgroundBrush}" Grid.Column="2" Grid.Row="1">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                        <RowDefinition Height="30" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="200" />
-                                    </Grid.ColumnDefinitions>
-                                    <Label Grid.Column="0" Grid.Row="0" Content="Account Type" FontWeight="SemiBold"/>
-                                    <Label x:Name="lblAccountType" Grid.Column="1" Grid.Row="0" />
-
-                                    <Label Grid.Column="0" Grid.Row="1" Content="Account Open" FontWeight="SemiBold"/>
-                                    <Label x:Name="lblAccountOpen" Grid.Column="1" Grid.Row="1" />
-
-                                    <Label Grid.Column="0" Grid.Row="2" Content="Storage Limit" FontWeight="SemiBold"/>
-                                    <Label x:Name="lblAccountStorageLimitGB" Grid.Column="1" Grid.Row="2" />
-
-                                    <Label Grid.Column="0" Grid.Row="3" Content="Current Storage" FontWeight="SemiBold"/>
-                                    <Label x:Name="lblAccountCurrentUtil" Grid.Column="1" Grid.Row="3" />
-                                </Grid>
-
-                                <Label Content="Application Settings" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" Grid.Column="2" Grid.Row="2" />
-
-                                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="3">
-                                    <Grid Background="{StaticResource PaneBodyBackgroundBrush}">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="30" />
-                                            <RowDefinition Height="34" />
-                                            <RowDefinition Height="30" />
-                                            <RowDefinition Height="34" />
-                                            <RowDefinition Height="30" />
-                                            <RowDefinition Height="30" />
-                                            <RowDefinition Height="30" />
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100" />
-                                            <ColumnDefinition Width="200" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <Label Grid.Column="0" Grid.Row="0" Content="Auto Upload" FontWeight="SemiBold"/>
-                                        <CheckBox x:Name="chkAccountAutoUpload" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,20,0" VerticalAlignment="Center" />
-
-                                        <Label Grid.Column="0" Grid.Row="1" Content="Auto Upload Folder" Grid.ColumnSpan="2" FontWeight="SemiBold"/>
-                                        <Button x:Name="cmdAccountChangeAutoUploadFolder" HorizontalAlignment="Right" Content="Change" Grid.Column="1" Grid.Row="1" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountChangeAutoUploadFolder_Click" />
-
-                                        <Label x:Name="lblAccountAutoUploadFolder" Visibility="Collapsed" Content="..." Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
-                                        <Label x:Name="lblAccountAutoUploadFolderAbbrev" Content="..." Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
-
-                                        <Label Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Content="Image Copy Folder" FontWeight="SemiBold"/>
-                                        <Button x:Name="cmdAccountChangeImageCopyFolder" Content="Change"  HorizontalAlignment="Right" Grid.Column="1" Grid.Row="3" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountChangeImageCopyFolder_Click" />
-
-                                        <Label x:Name="lblAccountImageCopyFolder" Visibility="Collapsed" Content="..." Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
-                                        <Label x:Name="lblAccountImageCopyFolderAbbrev" Content="..." Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" />
-
-                                        <Label Grid.Column="0" Grid.Row="5" Content="Copies Saved" FontWeight="SemiBold" />
-                                        <Label x:Name="lblAccountImageCopyStatus" Grid.Column="1" Grid.Row="5" Content="..." HorizontalAlignment="Right"/>
-
-                                        <Label Grid.Column="0" Grid.Row="6" Content="Max Size" FontWeight="SemiBold" />
-                                        <Grid Grid.Column="1" Grid.Row="6" HorizontalAlignment="Right">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="*" />
-                                            </Grid.RowDefinitions>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="50" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <Slider x:Name="sldAccountImageCopySize" Grid.Column="0" Grid.Row="0" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    <Slider x:Name="sldAccountImageCopySize" Grid.Column="0" Grid.Row="0" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                     Value="250"
                                                     Delay="500"
                                                     Interval="10"
@@ -2012,57 +1990,56 @@
                                                     Minimum="0"
                                                     Maximum="500"
                                                     Width="100"></Slider>
-                                            <Label Content="{Binding ElementName=sldAccountImageCopySize, Path=Value, Converter={StaticResource WallaCacheSizeConverterKey}}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Grid>
-                                    </Grid>
-                                </ScrollViewer>
+                                    <Label Content="{Binding ElementName=sldAccountImageCopySize, Path=Value, Converter={StaticResource WallaCacheSizeConverterKey}}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Grid>
 
-                                <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" >
-                                    <Button x:Name="cmdAccountLogin" Content="Login" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountLogin_Click" />
-                                    <Button x:Name="cmdUseOffline" Content="Use Offline" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
-                                    <Button x:Name="cmdAccountUpdateOnWeb" Content="Update Profile" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
-                                </StackPanel>
 
-                                <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="2">
+                                <StackPanel Orientation="Horizontal" Grid.Row="10" Grid.Column="3" Grid.ColumnSpan="2">
                                     <Button x:Name="cmdUserAppEdit" Content="Edit" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUserAppEdit_Click" />
                                     <Button x:Name="cmdUserAppSave" Content="Save" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUserAppSave_Click" />
                                     <Button x:Name="cmdUserAppCancel" Content="Cancel" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUserAppCancel_Click" />
                                 </StackPanel>
 
-                                <!-- <Button x:Name="cmdAccountClose" Content="Close" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountClose_Click" /> -->
                             </Grid>
+
                         </TabItem>
 
-                        <TabItem x:Name="tabUploadStatusList" Header="Upload Status" >
+                        <TabItem x:Name="tabUploadStatusList" Header="Uploads" Width="100" Margin="-2,0,0,0">
                             <Grid>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="40" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="30" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="2*"/>
-                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="38*"/>
+                                    <ColumnDefinition Width="38*"/>
+                                    <ColumnDefinition Width="379*"/>
+                                    <ColumnDefinition Width="454*"/>
                                 </Grid.ColumnDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Grid.ColumnSpan="3">
+                                    <Button x:Name="cmdUploadRefresh" DockPanel.Dock="Right" Tag="false" VerticalAlignment="Center" Height="32" Padding="0" Margin="2" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" BorderThickness="0" Click="cmdUploadRefresh_Click" />
+                                    <Label Content="Upload status" FontWeight="SemiBold" FontSize="24" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="0" />
+                                </StackPanel>
+
+                                <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="2000" Y2="5" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4" />
+
+                                <Label Content="Uploads in progresss" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Center" Grid.Column="2" Grid.Row="2" Margin="82.5,0,158,0" />
+
+                                <Label Content="Uploads completed" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Center" Grid.Column="3" Grid.Row="2" Margin="164,0" />
 
                                 <DataGrid x:Name="datUploadsInProgress" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible" 
                                         SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="True" 
-                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="0" Grid.Row="0" 
-                                          ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadImageStateListInProgressKey}}" RowHeaderWidth="0" BorderThickness="0.5">
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="0" Grid.Row="3" Margin="5"
+                                          ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadImageStateListInProgressKey}}" RowHeaderWidth="0" BorderThickness="0.5" Background="{x:Null}" Grid.ColumnSpan="3">
                                     <DataGrid.Columns>
 
                                         <DataGridTemplateColumn Header="Name" Width="*" IsReadOnly="True">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding name}" ToolTip="{Binding fullPath}" />
-                                                    <!--
-                                                            <TextBlock.ToolTip>
-                                                                <MultiBinding StringFormat="{}File name: {0}{3}Full path: {1}{3}Automatic Upload: {3}">
-                                                                    <Binding Path="fileName" />
-                                                                    <Binding Path="fullPath" />
-                                                                    <Binding Path="isAutoUpload"  />
-                                                                    <Binding Source="{x:Static sys:Environment.NewLine}"/>
-                                                                </MultiBinding>
-                                                        </TextBlock.ToolTip>
-                                            -->
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -2096,7 +2073,7 @@
 
                                 <DataGrid x:Name="datUploadCompletedList" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible"
                                         SelectionMode="Single" CanUserResizeColumns="True" MinColumnWidth="40" CanUserSortColumns="True" 
-                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="1" Grid.Row="0" RowHeaderWidth="0">
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="3" Grid.Row="3" RowHeaderWidth="0" BorderThickness="0" GridLinesVisibility="None" CanUserResizeRows="False" RowDetailsVisibilityMode="Collapsed" FontSize="16">
                                     <DataGrid.ItemsSource>
                                         <Binding Source="{StaticResource uploadImageStateListCompleteKey}" />
                                     </DataGrid.ItemsSource>
@@ -2136,18 +2113,72 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
 
-                                <DockPanel x:Name="panUploadStatusListUnavailable" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2" Visibility="Collapsed">
+                                <DockPanel x:Name="panUploadStatusListUnavailable" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2" Visibility="Collapsed" Grid.ColumnSpan="3">
                                     <TextBlock Text="Upload Status List" TextAlignment="Center" />
                                 </DockPanel>
 
                             </Grid>
                         </TabItem>
 
-                        <TabItem x:Name="tabDownloadList" Header="Downloads" >
+                        <TabItem x:Name="tabDownloadList" Header="Downloads" Width="100" Margin="0,0,0,0">
 
                         </TabItem>
                     </TabControl>
                 </DockPanel>
+
+
+                <Grid x:Name="gridAccountLogin" Grid.Column="0" Grid.Row="2" Background="{StaticResource PaneBodyBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="60" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="190" />
+
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="New User" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="0" />
+                    <Label Content="Existing User" FontSize="24" FontWeight="SemiBold" VerticalContentAlignment="Center" HorizontalAlignment="Left" Grid.ColumnSpan="2" Grid.Column="2" Grid.Row="0" />
+
+                    <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="500" Y2="5" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4" />
+
+                    <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="5" Y1="0" X2="5" Y2="500" StrokeThickness="0.5" Margin="0" Grid.Column="1" Grid.Row="0" Grid.RowSpan="8" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Grid.RowSpan="5" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Background="GhostWhite">
+                                        Aenean consectetur ornare nisl, et vulputate urna viverra eget. Nulla a efficitur lorem. Sed maximus, nunc nec efficitur fermentum, neque velit ullamcorper felis, non convallis turpis ligula at elit. Vestibulum sit amet ullamcorper nunc. Ut non pretium libero. que velit ullamcorper felis, non convallis turpis ligula
+                    </TextBlock>
+
+                    <Button x:Name="cmdSignupNewUser" Content="Sign up now" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  Grid.Row="7" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+
+                    <Label Grid.Column="2" Grid.Row="2" Content="Profile name" FontWeight="SemiBold"/>
+                    <TextBox x:Name="txtAccountProfileName" Grid.Column="3" Grid.Row="2" MaxLength="30" Margin="2" />
+
+                    <Label Grid.Column="2" Grid.Row="3" Content="Or" FontWeight="SemiBold" HorizontalAlignment="Center" FontSize="14"/>
+
+                    <Label Grid.Column="2" Grid.Row="4" Content="Email address" FontWeight="SemiBold"/>
+                    <TextBox x:Name="txtAccountEmail" Grid.Column="3" Grid.Row="4"  MaxLength="100" Margin="2" />
+
+                    <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="300" Y2="5" StrokeThickness="0.5" StrokeDashArray="5,10"  Margin="0" Grid.Column="2" Grid.Row="5" Grid.ColumnSpan="2" />
+
+                    <Label Grid.Column="2" Grid.Row="6" Content="Password" FontWeight="SemiBold"/>
+                    <PasswordBox x:Name="txtAccountPassword" Grid.Column="3" Grid.Row="6" MaxLength="30" Margin="2" PasswordChar="*" />
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <Button x:Name="cmdAccountLogin" Content="Login" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountLogin_Click" />
+                        <Button x:Name="cmdForgotPassword" Content="Forgot Password" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
+                    </StackPanel>
+
+                </Grid>
+
 
             </Grid>
         </Grid>

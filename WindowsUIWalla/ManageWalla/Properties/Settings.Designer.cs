@@ -127,7 +127,7 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.229")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.129")]
         public string WallaWSHostname {
             get {
                 return ((string)(this["WallaWSHostname"]));

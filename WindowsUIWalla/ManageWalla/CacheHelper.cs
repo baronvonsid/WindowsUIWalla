@@ -43,6 +43,24 @@ namespace ManageWalla
             return state;
         }
 
+        public static void ResetGlobalState(GlobalState state)
+        {
+            state.tagImageList = new List<ImageList>();
+            state.categoryImageList = new List<ImageList>();
+            state.galleryImageList = new List<ImageList>();
+            state.imageMetaList = new List<ImageMeta>();
+            state.connectionState = GlobalState.ConnectionState.NoAccount;
+            state.account = new Account();
+            state.account.ProfileName = "";
+            state.account.Password = "";
+
+            state.categoryLoadState = GlobalState.DataLoadState.No;
+            state.tagLoadState = GlobalState.DataLoadState.No;
+            state.galleryLoadState = GlobalState.DataLoadState.No;
+            state.uploadStatusListState = GlobalState.DataLoadState.No;
+
+        }
+
         public static void SaveGlobalState(GlobalState state, string profileName)
         {
             string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);

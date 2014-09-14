@@ -153,11 +153,13 @@ namespace ManageWalla
                 if (await ApplicationInit(profileName))
                 {
                     AccountRefreshFromState();
-                    await Login(state.account.ProfileName, state.account.Password);
+                    await Login(state.account.ProfileName, "", state.account.Password);
 
                     if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                     {
-                        cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        RefreshOverallPanesStructure(PaneMode.GalleryView);
+                        RefreshPanesAllControls(PaneMode.GalleryView);
+                        //cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                         radGallery.IsChecked = true;
 
                         timer = new System.Timers.Timer();
@@ -454,16 +456,6 @@ namespace ManageWalla
             }
         }
 
-        /*
-        private void DisplayConnectionStatus()
-        {
-            if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
-                this.Title = "FotoWalla - Connected";
-            else
-                this.Title = "FotoWalla - Offline";
-        }
-        */
-
         private void cmdAlertDialogResponse_Click(object sender, RoutedEventArgs e)
         {
             UserConcludeProcess();
@@ -588,6 +580,16 @@ namespace ManageWalla
                         gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
                         gridLeft.ColumnDefinitions[2].Width = new GridLength(0); //Image display grid
                         gridLeft.ColumnDefinitions[3].Width = new GridLength(1, GridUnitType.Star); //Account grid
+                        if (state != null && state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                        {
+                            gridAccount.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
+                            gridAccount.RowDefinitions[2].Height = new GridLength(0);
+                        }
+                        else
+                        {
+                            gridAccount.RowDefinitions[1].Height = new GridLength(0);
+                            gridAccount.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Star);
+                        }
                         break;
                     case PaneMode.ImageView:
                     case PaneMode.ImageEdit:
@@ -995,37 +997,44 @@ namespace ManageWalla
                         {
                             //tabAccount.IsEnabled = true;
                             //cmdAccountClose.IsEnabled = true;
+                            lblAccountPaneTitle.Content = "Account " + state.account.ProfileName;
                             cmdUserAppEdit.Visibility = Visibility.Visible;
                             cmdUserAppSave.Visibility = Visibility.Collapsed;
                             cmdUserAppCancel.Visibility = Visibility.Collapsed;
-                            cmdAccountLogin.Visibility = Visibility.Collapsed;
-                            cmdAccount.IsEnabled = true;
+                            
+                            //cmdAccount.IsEnabled = true;
                             cmdAccountRefresh.IsEnabled = true;
-                            tabDownloadList.IsEnabled = true;
-                            tabUploadStatusList.IsEnabled = true;
-                            cmdAccountFotoWallaClose.IsEnabled = true;
+                            //tabDownloadList.IsEnabled = true;
+                            //tabUploadStatusList.IsEnabled = true;
+                            //cmdAccountFotoWallaClose.IsEnabled = true;
+                            cmdAccountClose.Visibility = Visibility.Visible;
+                            cmdAccountClose.IsEnabled = true;
 
+                            cmdUseOffline.IsEnabled = true;
+                            cmdAccountLogout.IsEnabled = true;
+                            cmdUpdateProfileLoggedOn.IsEnabled = true;
+
+                            chkAccountAutoUpload.IsEnabled = false;
+                            sldAccountImageCopySize.IsEnabled = false;
+                            cmdAccountChangeAutoUploadFolder.IsEnabled = false;
+                            cmdAccountChangeImageCopyFolder.IsEnabled = false;
                         }
                         else
                         {
                             //tabAccount.IsEnabled = false;
-                            cmdAccountRefresh.IsEnabled = false;
-                            cmdUserAppEdit.Visibility = Visibility.Collapsed;
-                            cmdUserAppCancel.Visibility = Visibility.Collapsed;
-                            cmdUserAppSave.Visibility = Visibility.Collapsed;
-                            cmdAccountLogin.Visibility = Visibility.Visible;
-                            cmdAccount.IsEnabled = false;
-                            tabDownloadList.IsEnabled = false;
-                            tabUploadStatusList.IsEnabled = false;
-                            cmdAccountFotoWallaClose.IsEnabled = false;
+                            //cmdAccountRefresh.IsEnabled = false;
+                            //cmdUserAppEdit.Visibility = Visibility.Collapsed;
+                            //cmdUserAppCancel.Visibility = Visibility.Collapsed;
+                            //cmdUserAppSave.Visibility = Visibility.Collapsed;
+                            //cmdAccountLogin.Visibility = Visibility.Visible;
+                            //cmdAccount.IsEnabled = false;
+                            //tabDownloadList.IsEnabled = false;
+                            //tabUploadStatusList.IsEnabled = false;
+                            //cmdAccount.IsEnabled = false;
+                            //cmdAccountFotoWallaClose.IsEnabled = false
+                            lblAccountPaneTitle.Content = "";
+                            cmdAccountClose.Visibility = Visibility.Collapsed;
                         }
-
-                        cmdUseOffline.IsEnabled = true;
-                        cmdAccountUpdateOnWeb.IsEnabled = true;
-                        chkAccountAutoUpload.IsEnabled = false;
-                        sldAccountImageCopySize.IsEnabled = false;
-                        cmdAccountChangeAutoUploadFolder.IsEnabled = false;
-                        cmdAccountChangeImageCopyFolder.IsEnabled = false;
 
                         break;
                     case PaneMode.AccountEdit:
@@ -1034,16 +1043,16 @@ namespace ManageWalla
                         cmdUserAppEdit.Visibility = Visibility.Collapsed;
                         cmdUserAppCancel.Visibility = Visibility.Visible;
                         cmdUserAppSave.Visibility = Visibility.Visible;
-                        cmdAccountLogin.Visibility = Visibility.Collapsed;
+                        //cmdAccountLogin.Visibility = Visibility.Collapsed;
 
                         cmdAccountRefresh.IsEnabled = false;
                         cmdAccountClose.IsEnabled = false;
                         tabDownloadList.IsEnabled = false;
                         tabUploadStatusList.IsEnabled = false;
-
-                        cmdAccountFotoWallaClose.IsEnabled = false;
                         cmdUseOffline.IsEnabled = false;
-                        cmdAccountUpdateOnWeb.IsEnabled = false;
+                        cmdUpdateProfileLoggedOn.IsEnabled = false;
+
+
                         chkAccountAutoUpload.IsEnabled = true;
                         sldAccountImageCopySize.IsEnabled = true;
                         cmdAccountChangeAutoUploadFolder.IsEnabled = true;
@@ -1118,7 +1127,7 @@ namespace ManageWalla
             {
                 cmdShowMenuLayout.IsEnabled = enable;
                 cmdShowExpandedLayout.IsEnabled = enable;
-                cmdAccount.IsEnabled = enable;
+                //cmdAccount.IsEnabled = enable;
                 sldImageSize.IsEnabled = enable;
                 cmdShowActionsMenu.IsEnabled = enable;
                 cmbGallerySection.IsEnabled = enable;
@@ -3816,7 +3825,7 @@ namespace ManageWalla
             DateTime startTime = DateTime.Now;
             try
             {
-                bool isBusy = bool.Parse(cmdAccountRefresh.Tag.ToString());
+                bool isBusy = bool.Parse(cmdUploadRefresh.Tag.ToString());
                 if (isBusy) { return; }
 
                 if (!force && cancelUploadTokenSource != null)
@@ -3831,7 +3840,7 @@ namespace ManageWalla
                 if (!silent)
                     ShowMessage(MessageType.Busy, "Refreshing upload history list");
 
-                cmdAccountRefresh.Tag = true;
+                cmdUploadRefresh.Tag = true;
 
                 CancellationTokenSource newCancelUploadListTokenSource = new CancellationTokenSource();
                 cancelUploadListTokenSource = newCancelUploadListTokenSource;
@@ -3864,7 +3873,7 @@ namespace ManageWalla
             }
             finally
             {
-                cmdAccountRefresh.Tag = false;
+                cmdUploadRefresh.Tag = false;
                 TimeSpan duration = DateTime.Now - startTime;
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.RefreshUploadStatusStateAsync()", (int)duration.TotalMilliseconds, ""); }
             }
@@ -4488,17 +4497,17 @@ namespace ManageWalla
 
         private void AccountRefreshFromState()
         {
-            if (state.account != null)
+            if (state!= null && state.account != null)
             {
                 lblAccountType.Content = state.account.AccountTypeName;
                 lblAccountOpen.Content = state.account.OpenDate.ToShortDateString();
                 lblAccountStorageLimitGB.Content = state.account.StorageGBLimit + " GB";
                 lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + " GB - " + state.account.TotalImages.ToString() + " Images";
                 lblAccountEmail.Content = state.account.Email;
-                txtAccountProfileName.Text = state.account.ProfileName;
+                lblAccountProfileName.Content = state.account.ProfileName;
             }
 
-            if (state.userApp != null)
+            if (state != null && state.userApp != null)
             {
                 chkAccountAutoUpload.IsChecked = state.userApp.AutoUpload;
                 lblAccountAutoUploadFolder.Content = state.userApp.AutoUploadFolder;
@@ -4515,9 +4524,9 @@ namespace ManageWalla
             }
 
             if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
-                this.Title = "FotoWalla - Connected";
+                this.Title = "fotowalla - Connected";
             else
-                this.Title = "FotoWalla - Offline";
+                this.Title = "fotowalla - Offline";
         }
 
         private string StringTrim(string input, int length)
@@ -4585,14 +4594,14 @@ namespace ManageWalla
             }
         }
 
-        async private Task Login(string profileName, string password)
+        async private Task Login(string profileName, string email, string password)
         {
             DateTime startTime = DateTime.Now;
             try
             {
                 ShowMessage(MessageType.Busy, "Logging onto FotoWalla");
 
-                string logonResponse = await controller.Logon(profileName, password);
+                string logonResponse = await controller.Logon(profileName, email, password);
 
                 if (logonResponse == "OK")
                 {
@@ -4616,7 +4625,7 @@ namespace ManageWalla
                     if (cacheFilesSetup)
                         state.connectionState = GlobalState.ConnectionState.FailedLogin;
 
-                    ShowMessage(MessageType.Warning, "The logon for: " + profileName + ", failed with the message: " + logonResponse);
+                    ShowMessage(MessageType.Warning, "The logon for: " + profileName + email + ", failed with the message: " + logonResponse);
                 }
                 ConcludeBusyProcess();
             }
@@ -4669,15 +4678,30 @@ namespace ManageWalla
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.AccountStatusRefresh()", (int)duration.TotalMilliseconds, ""); }
             }
         }
+
+        async private Task Logout()
+        {
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                ShowMessage(MessageType.Busy, "Logging out of FotoWalla");
+
+                await controller.Logout();
+
+                ShowMessage(MessageType.Info, "Account has been logged out.");
+
+                ConcludeBusyProcess();
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.Logout()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
         #endregion
 
         #region Account Event Handlers
-        private void cmdAccount_Click(object sender, RoutedEventArgs e)
-        {
-            previousPane = currentPane;
-            RefreshOverallPanesStructure(PaneMode.Account);
-            RefreshPanesAllControls(PaneMode.Account);
-        }
 
         private void cmdAccountClose_Click(object sender, RoutedEventArgs e)
         {
@@ -4716,18 +4740,27 @@ namespace ManageWalla
             try
             {
                 string profileName = txtAccountProfileName.Text;
+                string email = txtAccountEmail.Text;
                 string password = txtAccountPassword.Password;
 
-                if (profileName.Length < 1 || password.Length < 1)
+                if (profileName.Length < 1 && email.Length < 1)
                 {
-                    ShowMessage(MessageType.Warning, "You must enter your profile name and password to continue");
+                    ShowMessage(MessageType.Warning, "You must enter your profile name or email to continue");
                     return;
                 }
 
-                await Login(profileName, password);
+                if (password.Length < 1)
+                {
+                    ShowMessage(MessageType.Warning, "You must enter a password to continue");
+                    return;
+                }
+
+                await Login(profileName, email, password);
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
-                    cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    RefreshOverallPanesStructure(PaneMode.GalleryView);
+                    RefreshPanesAllControls(PaneMode.GalleryView);
+                    //cmdAccountClose.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     radGallery.IsChecked = true;
 
                     timer = new System.Timers.Timer();
@@ -4736,13 +4769,40 @@ namespace ManageWalla
                     timer.Start();
                 }
 
+                txtAccountProfileName.Text = "";
+                txtAccountEmail.Text = "";
+                txtAccountPassword.Password = "";
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "The logon process failed with an unexpected problem: " + ex.Message);
             }
-            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+        async private void cmdAccountLogout_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                timer.Stop();
+                await Logout();
+
+                cacheFilesSetup = false;
+                this.Title = "fotowalla";
+
+                Properties.Settings.Default.LastUser = "";
+                Properties.Settings.Default.Save();
+
+
+                RefreshOverallPanesStructure(PaneMode.Account);
+                RefreshPanesAllControls(PaneMode.Account);
+
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "The logout process failed with an unexpected problem: " + ex.Message);
+            }
         }
 
         private void cmdAccountChangeImageCopyFolder_Click(object sender, RoutedEventArgs e)
@@ -4774,20 +4834,9 @@ namespace ManageWalla
 
             try
             {
-                if (tabAccount.SelectedIndex == 0)
-                {
-                    await AccountStatusRefresh(null);
-                    AccountRefreshFromState();
-                    ResetUploadState();
-                }
-                else if (tabAccount.SelectedIndex == 1)
-                {
-                    await RefreshUploadStatusStateAsync(true, false);
-                }
-                else
-                {
-                    //TODO
-                }
+                await AccountStatusRefresh(null);
+                AccountRefreshFromState();
+                ResetUploadState();
             }
             catch (Exception ex)
             {
@@ -4798,6 +4847,26 @@ namespace ManageWalla
             {
                 TimeSpan duration = DateTime.Now - startTime;
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.cmdAccountRefresh_Click()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
+        async private void cmdUploadRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            DateTime startTime = DateTime.Now;
+
+            try
+            {
+                await RefreshUploadStatusStateAsync(true, false);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was a problem refreshing the upload information.  Error: " + ex.Message);
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.cmdUploadRefresh_Click()", (int)duration.TotalMilliseconds, ""); }
             }
         }
         #endregion
@@ -6198,6 +6267,16 @@ namespace ManageWalla
             }
         }
         #endregion
+
+        private void menuSettings_Click(object sender, RoutedEventArgs e)
+        {
+            previousPane = currentPane;
+            RefreshOverallPanesStructure(PaneMode.Account);
+            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+
+
 
     }
 }

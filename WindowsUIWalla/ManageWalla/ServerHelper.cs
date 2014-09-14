@@ -149,6 +149,39 @@ namespace ManageWalla
             }
         }
 
+
+        async public Task<bool> Logout()
+        {
+            DateTime startTime = DateTime.Now;
+            string url = "";
+            try
+            {
+                http = new HttpClient(handler);
+                http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
+
+                url = "logout";
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                return false;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.Logon()", (int)duration.TotalMilliseconds, url); }
+            }
+        }
+
+
         async public Task<Account> AccountGet(CancellationToken cancelToken)
         {
             DateTime startTime = DateTime.Now;
