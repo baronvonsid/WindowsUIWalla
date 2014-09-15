@@ -180,6 +180,11 @@ namespace ManageWalla
             CacheHelper.ResetGlobalState(state);
         }
 
+        public void LogoutFromOffline()
+        {
+            CacheHelper.ResetGlobalState(state);
+        }
+
         async public Task AccountDetailsGet(CancellationToken cancelToken)
         {
             try

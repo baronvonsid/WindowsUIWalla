@@ -42,7 +42,8 @@ namespace ManageWalla
             NoAccount = 0,
             Offline = 1,
             FailedLogin = 2,
-            LoggedOn = 3
+            LoggedOn = 3,
+            OfflineMode = 4
         }
 
         public enum DataLoadState

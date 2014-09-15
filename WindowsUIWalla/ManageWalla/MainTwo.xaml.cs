@@ -154,14 +154,16 @@ namespace ManageWalla
                 {
                     AccountRefreshFromState();
                     await Login(state.account.ProfileName, "", state.account.Password);
+                }
+
+                if (state != null && (state.connectionState == GlobalState.ConnectionState.OfflineMode || state.connectionState == GlobalState.ConnectionState.LoggedOn))
+                {
+                    RefreshOverallPanesStructure(PaneMode.GalleryView);
+                    RefreshPanesAllControls(PaneMode.GalleryView);
+                    radGallery.IsChecked = true;
 
                     if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                     {
-                        RefreshOverallPanesStructure(PaneMode.GalleryView);
-                        RefreshPanesAllControls(PaneMode.GalleryView);
-                        //cmdAccount.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                        radGallery.IsChecked = true;
-
                         timer = new System.Timers.Timer();
                         timer.Elapsed += timer_Elapsed;
                         timer.Interval = 10000.0;
@@ -221,8 +223,11 @@ namespace ManageWalla
                     else
                     {
                         UseCreateLocalCacheFiles(profileName);
-                        state.connectionState = GlobalState.ConnectionState.Offline;
-                        return true;
+                        state.connectionState = GlobalState.ConnectionState.OfflineMode;
+                        this.Title = "fotowalla - offline mode";
+                        cmdUseOffline.Content = "Online mode";
+
+                        return false;
                     }
                 }
                 else
@@ -580,7 +585,7 @@ namespace ManageWalla
                         gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
                         gridLeft.ColumnDefinitions[2].Width = new GridLength(0); //Image display grid
                         gridLeft.ColumnDefinitions[3].Width = new GridLength(1, GridUnitType.Star); //Account grid
-                        if (state != null && state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                        if (state != null && (state.connectionState == GlobalState.ConnectionState.LoggedOn || state.connectionState == GlobalState.ConnectionState.OfflineMode))
                         {
                             gridAccount.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
                             gridAccount.RowDefinitions[2].Height = new GridLength(0);
@@ -631,6 +636,17 @@ namespace ManageWalla
                         radTag.IsEnabled = true;
                         radGallery.IsEnabled = true;
 
+                        if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
+                        {
+                            cmdCategoryAdd.IsEnabled = false;
+                            cmdCategoryEdit.IsEnabled = false;
+                        }
+                        else
+                        {
+                            cmdCategoryAdd.IsEnabled = true;
+                            cmdCategoryEdit.IsEnabled = true;
+                        }
+
                         PaneEnablePageControls(true);
 
                         break;
@@ -680,6 +696,16 @@ namespace ManageWalla
                         radGallery.IsEnabled = true;
                         radUpload.IsEnabled = true;
 
+                        if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
+                        {
+                            cmdTagAdd.IsEnabled = false;
+                            cmdTagEdit.IsEnabled = false;
+                        }
+                        else
+                        {
+                            cmdTagAdd.IsEnabled = true;
+                            cmdTagEdit.IsEnabled = true;
+                        }
                         PaneEnablePageControls(true);
                         break;
                     case PaneMode.TagAdd:
@@ -735,6 +761,21 @@ namespace ManageWalla
                         radUpload.IsEnabled = true;
                         PaneEnablePageControls(true);
                         wrapMyGalleries.IsEnabled = true;
+
+                        if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
+                        {
+                            cmdGalleryAdd.IsEnabled = false;
+                            cmdGalleryEdit.IsEnabled = false;
+                            cmdGalleryCopyUrl.IsEnabled = false;
+                            cmdGalleryView.IsEnabled = false;
+                        }
+                        else
+                        {
+                            cmdGalleryAdd.IsEnabled = true;
+                            cmdGalleryEdit.IsEnabled = true;
+                            cmdGalleryCopyUrl.IsEnabled = true;
+                            cmdGalleryView.IsEnabled = true;
+                        }
 
                         break;
                     case PaneMode.GalleryEdit:
@@ -995,18 +1036,12 @@ namespace ManageWalla
                     case PaneMode.Account:
                         if (state != null && state.connectionState == GlobalState.ConnectionState.LoggedOn)
                         {
-                            //tabAccount.IsEnabled = true;
-                            //cmdAccountClose.IsEnabled = true;
                             lblAccountPaneTitle.Content = "Account " + state.account.ProfileName;
-                            cmdUserAppEdit.Visibility = Visibility.Visible;
+                            cmdUserAppEdit.IsEnabled = true;
                             cmdUserAppSave.Visibility = Visibility.Collapsed;
                             cmdUserAppCancel.Visibility = Visibility.Collapsed;
                             
-                            //cmdAccount.IsEnabled = true;
                             cmdAccountRefresh.IsEnabled = true;
-                            //tabDownloadList.IsEnabled = true;
-                            //tabUploadStatusList.IsEnabled = true;
-                            //cmdAccountFotoWallaClose.IsEnabled = true;
                             cmdAccountClose.Visibility = Visibility.Visible;
                             cmdAccountClose.IsEnabled = true;
 
@@ -1019,19 +1054,30 @@ namespace ManageWalla
                             cmdAccountChangeAutoUploadFolder.IsEnabled = false;
                             cmdAccountChangeImageCopyFolder.IsEnabled = false;
                         }
+                        else if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
+                        {
+                            lblAccountPaneTitle.Content = "Account " + state.account.ProfileName;
+                            cmdUserAppEdit.IsEnabled = false;
+                            cmdUserAppSave.Visibility = Visibility.Collapsed;
+                            cmdUserAppCancel.Visibility = Visibility.Collapsed;
+
+                            cmdAccountRefresh.IsEnabled = false;
+                            cmdAccountClose.Visibility = Visibility.Visible;
+                            cmdAccountClose.IsEnabled = true;
+
+                            cmdUploadRefresh.IsEnabled = false;
+
+                            cmdUseOffline.IsEnabled = true;
+                            cmdAccountLogout.IsEnabled = false;
+                            cmdUpdateProfileLoggedOn.IsEnabled = false;
+
+                            chkAccountAutoUpload.IsEnabled = false;
+                            sldAccountImageCopySize.IsEnabled = false;
+                            cmdAccountChangeAutoUploadFolder.IsEnabled = false;
+                            cmdAccountChangeImageCopyFolder.IsEnabled = false;
+                        }
                         else
                         {
-                            //tabAccount.IsEnabled = false;
-                            //cmdAccountRefresh.IsEnabled = false;
-                            //cmdUserAppEdit.Visibility = Visibility.Collapsed;
-                            //cmdUserAppCancel.Visibility = Visibility.Collapsed;
-                            //cmdUserAppSave.Visibility = Visibility.Collapsed;
-                            //cmdAccountLogin.Visibility = Visibility.Visible;
-                            //cmdAccount.IsEnabled = false;
-                            //tabDownloadList.IsEnabled = false;
-                            //tabUploadStatusList.IsEnabled = false;
-                            //cmdAccount.IsEnabled = false;
-                            //cmdAccountFotoWallaClose.IsEnabled = false
                             lblAccountPaneTitle.Content = "";
                             cmdAccountClose.Visibility = Visibility.Collapsed;
                         }
@@ -1083,13 +1129,12 @@ namespace ManageWalla
                             txtImageViewDescription.IsEnabled = true;
                             datImageViewDate.IsEnabled = true;
                             cmdImageViewEdit.Content = "Save";
+                            cmdImageViewEdit.IsEnabled = true;
                             cmdImageViewCancel.IsEnabled = true;
                             cmdImageViewDetailToggle.IsEnabled = false;
                             cmdImageViewNext.IsEnabled = false;
                             cmdImageViewPrevious.IsEnabled = false;
                             lstImageViewTagList.IsEnabled = true;
-
-
                         }
                         else
                         {
@@ -1097,6 +1142,7 @@ namespace ManageWalla
                             txtImageViewDescription.IsEnabled = false;
                             datImageViewDate.IsEnabled = false;
                             cmdImageViewEdit.Content = "Edit";
+                            cmdImageViewEdit.IsEnabled = true;
                             cmdImageViewCancel.IsEnabled = false;
                             cmdImageViewDetailToggle.IsEnabled = true;
                             cmdImageViewNext.IsEnabled = true;
@@ -1105,6 +1151,10 @@ namespace ManageWalla
 
                             //PaneEnablePageControls(true);
                         }
+
+                        if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
+                            cmdImageViewEdit.IsEnabled = false;
+
                         PaneEnablePageControls(false);
 
                         break;
@@ -1127,7 +1177,6 @@ namespace ManageWalla
             {
                 cmdShowMenuLayout.IsEnabled = enable;
                 cmdShowExpandedLayout.IsEnabled = enable;
-                //cmdAccount.IsEnabled = enable;
                 sldImageSize.IsEnabled = enable;
                 cmdShowActionsMenu.IsEnabled = enable;
                 cmbGallerySection.IsEnabled = enable;
@@ -1151,6 +1200,25 @@ namespace ManageWalla
                     cmdImageNavigationPreviousVert.IsEnabled = enable;
                     cmdImageNavigationBeginVert.IsEnabled = enable;
                 }
+
+                if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
+                {
+                    cmdMultiSelectionMode.Visibility = Visibility.Collapsed;
+                    cmdShowActionsMenu.Visibility = Visibility.Collapsed;
+                    cmdReturnToAccount.Visibility = Visibility.Visible;
+                    radUpload.IsEnabled = false;
+                    //cmdGalleryRefresh.IsEnabled = false;
+                    ///cmdCategoryRefresh.IsEnabled = false;
+                    //cmdTagRefresh.IsEnabled = false;
+                }
+                else
+                {
+                    cmdMultiSelectionMode.Visibility = Visibility.Visible;
+                    cmdShowActionsMenu.Visibility = Visibility.Visible;
+                    cmdReturnToAccount.Visibility = Visibility.Collapsed;
+                    radUpload.IsEnabled = true;
+                }
+
             }
             finally
             {
@@ -1531,6 +1599,7 @@ namespace ManageWalla
 
                 lblImageListName.Content = bannerName;
                 lblImageListNameVert.Text = bannerName;
+                
 
                 ImagesSetNavigationButtons();
 
@@ -3681,7 +3750,8 @@ namespace ManageWalla
                 if (currentPane != PaneMode.Upload && currentPane != PaneMode.AccountEdit && uploadUIState.Mode == UploadUIState.UploadMode.None && state.userApp.AutoUpload)
                     await DoAutoUploadAsync(false);
 
-                await RefreshUploadStatusStateAsync(true, true);
+                //if (currentPane == PaneMode.Account && tabAccount.SelectedIndex == 1)
+                await RefreshUploadStatusStateAsync(false, false);
             }
             catch (Exception ex)
             {
@@ -4856,7 +4926,7 @@ namespace ManageWalla
 
             try
             {
-                await RefreshUploadStatusStateAsync(true, false);
+                await RefreshUploadStatusStateAsync(true, true);
             }
             catch (Exception ex)
             {
@@ -5330,7 +5400,7 @@ namespace ManageWalla
 
         private bool GalleryPopulateSectionDropdown(GalleryListGalleryRef galleryListRefTemp)
         {
-            if (galleryListRefTemp.SectionRef != null && galleryListRefTemp.SectionRef.Length > 0)
+            if (galleryListRefTemp.SectionRef != null && galleryListRefTemp.SectionRef.Length > 1)
             {
                 cmbGallerySectionVert.Items.Clear();
                 cmbGallerySection.Items.Clear();
@@ -6271,6 +6341,48 @@ namespace ManageWalla
         private void menuSettings_Click(object sender, RoutedEventArgs e)
         {
             previousPane = currentPane;
+            RefreshOverallPanesStructure(PaneMode.Account);
+            RefreshPanesAllControls(PaneMode.Account);
+        }
+
+        async private void cmdUseOffline_Click(object sender, RoutedEventArgs e)
+        {
+
+
+
+
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                if (state.connectionState == GlobalState.ConnectionState.OfflineMode)
+                {
+                    controller.LogoutFromOffline();
+
+                    cacheFilesSetup = false;
+                    this.Title = "fotowalla";
+                    cmdUseOffline.Content = "Offline mode";
+                }
+                else
+                {
+                    string profileName = state.account.ProfileName;
+                    ShowMessage(MessageType.Busy, "Logging out of FotoWalla");
+                    await controller.Logout();
+                    ShowMessage(MessageType.Info, "Account has been logged out.");
+                    ConcludeBusyProcess();
+
+                    UseCreateLocalCacheFiles(profileName);
+
+                    state.connectionState = GlobalState.ConnectionState.OfflineMode;
+                    this.Title = "fotowalla - offline mode";
+                    cmdUseOffline.Content = "Online mode";
+                }
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.cmdUseOffline_Click()", (int)duration.TotalMilliseconds, ""); }
+            }
+
             RefreshOverallPanesStructure(PaneMode.Account);
             RefreshPanesAllControls(PaneMode.Account);
         }

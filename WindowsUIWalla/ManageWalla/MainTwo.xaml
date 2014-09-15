@@ -42,8 +42,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40" />
                 <ColumnDefinition Width="0" />
-                <ColumnDefinition Width="0"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0"/>
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0" Grid.Row="0" Grid.RowSpan="9" Margin="2,2,2,2" Background="{StaticResource WallaBannerBackgroundBrush}" LastChildFill="True">
@@ -359,7 +359,7 @@
                         <Button x:Name="cmdGalleryView" Content="View" ToolTip="Open Gallery in your Browser" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdGalleryView_Click"  />
                     </StackPanel>
                 </StackPanel>
-
+                
                 <Label Grid.Column="0" Grid.Row="2" Content="Name"/>
                 <TextBox x:Name="txtGalleryName" Margin="2" Grid.Column="1" Grid.Row="2" MaxLines="1" MaxLength="30" PreviewTextInput="txtCategoryGalleryName_PreviewTextInput" />
 
@@ -736,7 +736,7 @@
                     <ColumnDefinition Width="0"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" x:Name="panGridRightHeader" Visibility="Collapsed" Orientation="Vertical">
+                <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" x:Name="panGridRightHeader" Visibility="Visible" Orientation="Vertical">
                     <DockPanel Margin="6,0,6,0" Background="{StaticResource WallaBannerBackgroundBrush}" HorizontalAlignment="Stretch" LastChildFill="True">
 
                         <Line Visibility="Collapsed" Stroke="{StaticResource FontBorderBrushSelected}" DockPanel.Dock="Right" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="0" />
@@ -749,6 +749,8 @@
                             Minimum="75"
                             Maximum="300"
                             Width="100" Margin="6" ValueChanged="sldImageSize_ValueChanged"></Slider>
+
+
 
                         <ToggleButton x:Name="cmdShowActionsMenu" DockPanel.Dock="Right" ContextMenuService.IsEnabled="False" IsChecked="{Binding Path=ContextMenu.IsOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}">
                             <ToggleButton.Template>
@@ -776,10 +778,10 @@
 
                                     <MenuItem x:Name="cmdShowInlineImageDetail" Header="Show image details" IsCheckable="True" IsChecked="False" Checked="cmdShowInlineImageDetail_CheckedUnChecked" Unchecked="cmdShowInlineImageDetail_CheckedUnChecked">
                                     </MenuItem>
-
+<!--
                                     <MenuItem x:Name="cmdMultiSelectionMode" Header="Select images" IsCheckable="True" IsChecked="False" Checked="cmdMultiSelectionMode_Checked" Unchecked="cmdMultiSelectionMode_Unchecked">
                                     </MenuItem>
-
+-->
                                     <Separator />
                                     <MenuItem x:Name="menuTagRemoveFrom" Header="Remove from Tag" Click="TagRemoveImages_Click" ToolTip="Remove images form the current selected tag">
 
@@ -802,6 +804,62 @@
                                 </ContextMenu>
                             </ToggleButton.ContextMenu>
                         </ToggleButton>
+
+
+
+
+                        <!-- Padding="0" Margin="2" BorderThickness="0"  -->
+                        <ToggleButton x:Name="cmdMultiSelectionMode"  DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Margin="2,0,5,0" IsChecked="False" Checked="cmdMultiSelectionMode_Checked" Unchecked="cmdMultiSelectionMode_Unchecked">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="imageMenuContent" Source="{StaticResource dropDownMenuImageSrc}" SnapsToDevicePixels="True" Height="28" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="imageMenuContent" Property="Source" Value="{StaticResource dropDownMenuSelectedImageSrc}" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="imageMenuContent" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsEnabled" Value="true" />
+                                                <Condition Property="IsMouseOver" Value="true" />
+                                            </MultiTrigger.Conditions>
+                                            <MultiTrigger.Setters>
+                                                <Setter TargetName="imageMenuContent" Property="Source" Value="{StaticResource dropDownMenuSelectedImageSrc}" />
+                                            </MultiTrigger.Setters>
+                                        </MultiTrigger>
+
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <Button x:Name="cmdReturnToAccount" VerticalAlignment="Center" DockPanel.Dock="Right" Padding="0" Margin="2" BorderThickness="0" ToolTip="Return to settings." Click="menuSettings_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image x:Name="imageNav" Source="{StaticResource expandImageSrc}" Height="32" />
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter TargetName="imageNav" Property="Opacity" Value="0.7" />
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsEnabled" Value="true" />
+                                                <Condition Property="IsMouseOver" Value="true" />
+                                            </MultiTrigger.Conditions>
+                                            <MultiTrigger.Setters>
+                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource expandImageSelectedSrc}" />
+                                            </MultiTrigger.Setters>
+                                        </MultiTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
 
                         <Line x:Name="lineActionsMenu" Visibility="Visible" DockPanel.Dock="Right" Stroke="{StaticResource FontBorderBrushSelected}" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="6,0,6,0" />
 
@@ -915,7 +973,7 @@
 
                 </StackPanel>
 
-                <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Visible" x:Name="tabGalleryConfiguration" VerticalAlignment="Stretch" Margin="2" LastChildFill="True">
+                <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Visibility="Collapsed" x:Name="tabGalleryConfiguration" VerticalAlignment="Stretch" Margin="2" LastChildFill="True">
 
                     <TabControl x:Name="tabGallery" Background="{StaticResource ImageViewBackgroundBrush}" SelectionChanged="tabGallery_SelectionChanged">
 
@@ -1925,6 +1983,8 @@
                                     <Label Content="Account" FontWeight="SemiBold" FontSize="24" VerticalContentAlignment="Center" />
                                 </StackPanel>
 
+                                <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="2000" Y2="5" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="5" />
+                                
                                 <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="5" Y1="0" X2="5" Y2="2000" StrokeThickness="0.5" Margin="0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="11" />
 
                                 <Label Grid.Column="0" Grid.Row="2" Content="Profile Name" FontWeight="SemiBold"/>
@@ -1947,7 +2007,7 @@
 
                                 <StackPanel Orientation="Horizontal" Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" >
                                     <Button x:Name="cmdAccountLogout" Content="Logout" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountLogout_Click" />
-                                    <Button x:Name="cmdUseOffline" Content="Use Offline" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}"  />
+                                    <Button x:Name="cmdUseOffline" Content="Use Offline" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdUseOffline_Click"  />
                                     <Button x:Name="cmdUpdateProfileLoggedOn" Content="Update Profile" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" />
                                 </StackPanel>
 
@@ -2013,27 +2073,27 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="38*"/>
-                                    <ColumnDefinition Width="38*"/>
-                                    <ColumnDefinition Width="379*"/>
-                                    <ColumnDefinition Width="454*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="2*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <StackPanel Orientation="Horizontal" Grid.ColumnSpan="3">
+                                <StackPanel Orientation="Horizontal" Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="0" >
                                     <Button x:Name="cmdUploadRefresh" DockPanel.Dock="Right" Tag="false" VerticalAlignment="Center" Height="32" Padding="0" Margin="2" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" BorderThickness="0" Click="cmdUploadRefresh_Click" />
-                                    <Label Content="Upload status" FontWeight="SemiBold" FontSize="24" VerticalContentAlignment="Center" Grid.Column="0" Grid.Row="0" />
+                                    <Label Content="Upload status" FontWeight="SemiBold" FontSize="24" VerticalContentAlignment="Center" />
                                 </StackPanel>
 
                                 <Line Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="5" X2="2000" Y2="5" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4" />
 
-                                <Label Content="Uploads in progresss" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Center" Grid.Column="2" Grid.Row="2" Margin="82.5,0,158,0" />
+                                <Label Content="Uploads in progress" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="2" Margin="82.5,0,158,0" />
 
-                                <Label Content="Uploads completed" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Center" Grid.Column="3" Grid.Row="2" Margin="164,0" />
+                                <Label Content="Uploads completed" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Center" Grid.Column="1" Grid.Row="2" Margin="164,0" />
 
-                                <DataGrid x:Name="datUploadsInProgress" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible" 
+                                <DataGrid x:Name="datUploadsInProgress" 
+                                          AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="True" 
                                         CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="0" Grid.Row="3" Margin="5"
-                                          ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadImageStateListInProgressKey}}" RowHeaderWidth="0" BorderThickness="0.5" Background="{x:Null}" Grid.ColumnSpan="3">
+                                          RowHeaderWidth="0" BorderThickness="0.5" Background="{x:Null}"
+                                          ItemsSource="{Binding Mode=OneWay, Source={StaticResource uploadImageStateListInProgressKey}}" >
                                     <DataGrid.Columns>
 
                                         <DataGridTemplateColumn Header="Name" Width="*" IsReadOnly="True">
@@ -2071,9 +2131,11 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
 
-                                <DataGrid x:Name="datUploadCompletedList" AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible"
-                                        SelectionMode="Single" CanUserResizeColumns="True" MinColumnWidth="40" CanUserSortColumns="True" 
-                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="3" Grid.Row="3" RowHeaderWidth="0" BorderThickness="0" GridLinesVisibility="None" CanUserResizeRows="False" RowDetailsVisibilityMode="Collapsed" FontSize="16">
+                                <DataGrid x:Name="datUploadCompletedList" 
+                                          AutoGenerateColumns="False" SelectionUnit="FullRow" Visibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                        SelectionMode="Single" CanUserResizeColumns="True" CanUserSortColumns="True" 
+                                        CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" Grid.Column="1" Grid.Row="3" Margin="5"
+                                          RowHeaderWidth="0" BorderThickness="0.5" Background="{x:Null}">
                                     <DataGrid.ItemsSource>
                                         <Binding Source="{StaticResource uploadImageStateListCompleteKey}" />
                                     </DataGrid.ItemsSource>
@@ -2113,7 +2175,7 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
 
-                                <DockPanel x:Name="panUploadStatusListUnavailable" Grid.Column="0" Grid.Row="0" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2" Visibility="Collapsed" Grid.ColumnSpan="3">
+                                <DockPanel x:Name="panUploadStatusListUnavailable" Grid.Column="0" Grid.Row="3" VerticalAlignment="Stretch" Background="#CC8CFFE5" Margin="2" Visibility="Collapsed" Grid.ColumnSpan="3">
                                     <TextBlock Text="Upload Status List" TextAlignment="Center" />
                                 </DockPanel>
 
