@@ -57,7 +57,7 @@ namespace ManageWalla
         #endregion
 
         #region Load Images
-        async public Task LoadThumb(CancellationToken cancelToken, List<ThumbCache> thumbCacheList, int thumbCacheSizeMB)
+        async public Task LoadThumb(CancellationToken cancelToken, List<ThumbCache> thumbCacheList, int thumbCacheSizeMB, GlobalState.ConnectionState connectionState)
         {
             if (imageId == 0)
                 return;
@@ -72,6 +72,12 @@ namespace ManageWalla
                 byte[] thumbArray = CacheHelper.GetImageArray(imageId, thumbCacheList);
                 if (thumbArray == null)
                 {
+                    if (connectionState == GlobalState.ConnectionState.OfflineMode)
+                    {
+                        thumbImageLoadState = LoadState.Error;
+                        return;
+                    }
+
                     /* GET /{userName}/image/{imageId}/{size}/ */
                     string requestUrl = "image/" + imageId.ToString() + "/300/300/";
                     thumbArray = await LoadImageArrayAsync(requestUrl, cancelToken);
@@ -104,7 +110,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task LoadMainCopyImage(CancellationToken cancelToken, List<MainCopyCache> mainCopyCacheList, string folder, int mainCopyCacheSizeMB)
+        async public Task LoadMainCopyImage(CancellationToken cancelToken, List<MainCopyCache> mainCopyCacheList, string folder, int mainCopyCacheSizeMB, GlobalState.ConnectionState connectionState)
         {
             if (imageId == 0)
                 return;
@@ -123,6 +129,12 @@ namespace ManageWalla
                 }
                 else
                 {
+                    if (connectionState == GlobalState.ConnectionState.OfflineMode)
+                    {
+                        mainImageLoadState = LoadState.Error;
+                        return;
+                    }
+
                     string requestUrl = "image/" + imageId.ToString() + "/maincopy";
                     byte[] mainImageArray = await LoadImageArrayAsync(requestUrl, cancelToken);
                     CacheHelper.SaveMainCopyToCache(imageId, mainImageArray, mainCopyCacheList, folder, mainCopyCacheSizeMB);
@@ -157,10 +169,16 @@ namespace ManageWalla
         #endregion
 
         #region Meta
-        async public Task LoadMeta(bool forceReload, CancellationToken cancelToken)
+        async public Task LoadMeta(bool forceReload, CancellationToken cancelToken, GlobalState.ConnectionState connectionState)
         {
             if (imageId == 0)
                 return;
+
+            if (connectionState == GlobalState.ConnectionState.OfflineMode)
+            {
+                metaLoadState = LoadState.Error;
+                return;
+            }
 
             if (metaLoadState == LoadState.Error || metaLoadState == LoadState.NotLoaded || forceReload)
                 Meta = await LoadImageMetaAsync(cancelToken);
@@ -176,7 +194,8 @@ namespace ManageWalla
 
             await SaveImageMetaAsync(Meta, cancelToken);
 
-            await LoadMeta(true, cancelToken);
+            //Dummy logged in value, assumed that the save can only be made when its logged in.
+            await LoadMeta(true, cancelToken, GlobalState.ConnectionState.LoggedOn);
         }
 
         async private Task<ImageMeta> LoadImageMetaAsync(CancellationToken cancelToken)

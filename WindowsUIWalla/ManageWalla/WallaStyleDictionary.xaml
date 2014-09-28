@@ -101,6 +101,7 @@
     </Style>
 
     <Style x:Key="PhotoListStyle" TargetType="{x:Type ListBox}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0" />
         <Setter Property="Template">
@@ -119,10 +120,7 @@
     </Style>
 
     <Style x:Key="UploadPhotoListItem" TargetType="{x:Type ListBoxItem}">
-        <Style.Resources>
-            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
-        </Style.Resources>
-
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
@@ -131,54 +129,24 @@
     </Style>
 
     <Style x:Key="PhotoListItem" TargetType="{x:Type ListBoxItem}">
-        <Style.Resources>
-            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
-        </Style.Resources>
-        <!--
-        <Setter Property="Margin" Value="2" />
-        
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="MaxHeight" Value="100" />
-        <Setter Property="MinHeight" Value="100" />
-        -->
-        
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="0" />
-
-        <Style.Triggers>
-            <!--
-            <Trigger Property="IsMouseOver" Value="true">
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <ShaderEffectLibrary:BloomEffect BaseIntensity="1" BaseSaturation="1" BloomIntensity="1" BloomSaturation="1" />
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-
-            <Trigger Property="IsSelected" Value="true">
-                <Setter Property="BorderBrush" Value="Black" />
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <ShaderEffectLibrary:BloomEffect BaseIntensity="1" BaseSaturation="1" BloomIntensity="1" BloomSaturation="1" />
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-
-            <Trigger Property="IsEnabled" Value="false">
-                <Setter Property="BorderBrush" Value="Pink" />
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <ShaderEffectLibrary:ContrastAdjustEffect Contrast="0.5"  />
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
--->
-        </Style.Triggers>
     </Style>
 
+    <Style x:Key="GalleryOptionListItem" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="BorderBrush" Value="{StaticResource FontBorderBrush}" />
+        <Setter Property="Background" Value="{StaticResource ImageViewBackgroundBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Margin" Value="10" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
 
     <!-- *********************** -->
     

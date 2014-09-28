@@ -6,6 +6,7 @@
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <walla:WallaLoadStateToVisibleConverter x:Key="WallaLoadStateToVisibleConverter" />
     
+    
     <walla:UploadImageFileList x:Key="uploadImagefileListKey" />
     <walla:UploadUIState x:Key="uploadUIStateKey" />
     <walla:GalleryOptions x:Key="galleryOptionsListKey" />
@@ -98,6 +99,13 @@
 
 
     <!--Control colors.-->
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="White"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#00A7BF"/>
+
+    <!--SelectedItem without focus-->
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#00A7BF"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="White"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="White"/>
 
 
     <!--<Color x:Key="cmbHeaderButtonSelected">White</Color>

@@ -34,7 +34,7 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("/WallaHub/v1/ws/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("/wallahub/v1/ws/")]
         public string WallaWSPath {
             get {
                 return ((string)(this["WallaWSPath"]));
@@ -43,7 +43,7 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("/WallaHub/v1/web/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("/wallahub/v1/web/")]
         public string WallaWebPath {
             get {
                 return ((string)(this["WallaWebPath"]));
@@ -127,7 +127,7 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.129")]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
         public string WallaWSHostname {
             get {
                 return ((string)(this["WallaWSHostname"]));

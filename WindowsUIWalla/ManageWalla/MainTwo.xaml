@@ -292,7 +292,7 @@
                                 <Button x:Name="cmdGalleryRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Collapsed" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdGalleryRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
 
                                 <Image x:Name="imgGallery" Source="{StaticResource galleryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
-                                <Label Content="Gallery" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
+                                <Label x:Name="lblGallery" Content="Gallery" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -312,6 +312,9 @@
                                     <Setter TargetName="imgGallery" Property="Source" Value="{StaticResource galleryImageSelectedSrc}" />
                                 </MultiTrigger.Setters>
                             </MultiTrigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="lblGallery" Property="Opacity" Value="0.7" />
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </RadioButton.Template>
@@ -420,7 +423,7 @@
                                 <Button x:Name="cmdCategoryRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Hidden" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdCategoryRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
 
                                 <Image x:Name="imgCategory" Source="{StaticResource categoryImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
-                                <Label Content="Category" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
+                                <Label x:Name="lblCategory" Content="Category" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -440,6 +443,9 @@
                                     <Setter TargetName="imgCategory" Property="Source" Value="{StaticResource categoryImageSelectedSrc}" />
                                 </MultiTrigger.Setters>
                             </MultiTrigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="lblCategory" Property="Opacity" Value="0.7" />
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </RadioButton.Template>
@@ -513,7 +519,7 @@
                                 <Button x:Name="cmdTagRefresh" Tag="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" Visibility="Hidden" DockPanel.Dock="Right" Style="{StaticResource styleButton}" Template="{StaticResource templateRefreshButton}" Click="cmdTagRefresh_Click" Padding="0" Margin="0" BorderThickness="0" />
 
                                 <Image x:Name="imgTag" Source="{StaticResource tagImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
-                                <Label Content="Tag" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
+                                <Label x:Name="lblTag" Content="Tag" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -533,6 +539,9 @@
                                     <Setter TargetName="imgTag" Property="Source" Value="{StaticResource tagImageSelectedSrc}" />
                                 </MultiTrigger.Setters>
                             </MultiTrigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="lblTag" Property="Opacity" Value="0.7" />
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </RadioButton.Template>
@@ -620,7 +629,7 @@
                                 </Label>
 
                                 <Image x:Name="imgUpload" Source="{StaticResource uploadImageSrc}" SnapsToDevicePixels="True" DockPanel.Dock="Left" Height="32" />
-                                <Label Content="Upload" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
+                                <Label x:Name="lblUpload" Content="Upload" VerticalContentAlignment="Center" Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RadioButton}},Path=Foreground}"/>
                             </DockPanel>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -639,6 +648,9 @@
                                     <Setter TargetName="imgUpload" Property="Source" Value="{StaticResource uploadImageSelectedSrc}" />
                                 </MultiTrigger.Setters>
                             </MultiTrigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="lblUpload" Property="Opacity" Value="0.7" />
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </RadioButton.Template>
@@ -997,29 +1009,27 @@
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryPresentationListKey}}"
                             		    ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Single"
+                                        ItemContainerStyle="{DynamicResource GalleryOptionListItem}"
                                         IsSynchronizedWithCurrentItem="True"
                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                        Visibility="Visible" SelectionChanged="lstGalleryPresentationList_SelectionChanged"
-                                        Margin="4">
-
+                                        Visibility="Visible" SelectionChanged="lstGalleryPresentationList_SelectionChanged" 
+                                        Margin="0" BorderThickness="0">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="100" />
-                                                </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="200"/>
-                                                    <ColumnDefinition MinWidth="100"/>
-                                                </Grid.ColumnDefinitions>
-
-                                                <Image x:Name="imageThumb" Source="{Binding PresentationImage.Source}" Grid.Column="0" Grid.Row="0" Margin="4" />
-
-                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
-                                                    <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource FontBorderBrush}"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Grid>
+                                                    <Image x:Name="imageThumb" Source="{Binding PresentationImage.Source}" Width="200"/>
+                                                
+                                                    <StackPanel x:Name="paneSelectedPane" Visibility="Visible" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
+                                                    </StackPanel>
+                                                 </Grid>
+                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100">
+                                                    <TextBlock x:Name="lblName" Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource FontBorderBrush}"/>
                                                     <TextBlock Text="{Binding Desc}" FontSize="14" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
                                                 </StackPanel>
-                                            </Grid>
+                                            </StackPanel>
+                                            
                                             <DataTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="true">
                                                     <Setter TargetName="imageThumb" Property="Effect">
@@ -1028,6 +1038,10 @@
                                                         </Setter.Value>
                                                     </Setter>
                                                 </Trigger>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                                                    <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="lblName" Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+                                                </DataTrigger>
                                             </DataTemplate.Triggers>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
@@ -1038,25 +1052,22 @@
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource galleryStyleListKey}}"
                             		    ScrollViewer.VerticalScrollBarVisibility="Auto"
                                         SelectionMode="Single"
+                                          ItemContainerStyle="{DynamicResource GalleryOptionListItem}"
                                         IsSynchronizedWithCurrentItem="True"
                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                        Visibility="Visible" SelectionChanged="lstGalleryStylesList_SelectionChanged" Margin="4">
+                                        Visibility="Visible" SelectionChanged="lstGalleryStylesList_SelectionChanged" Margin="0" BorderThickness="0">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="100" />
-                                                </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="200"/>
-                                                    <ColumnDefinition MinWidth="100"/>
-                                                </Grid.ColumnDefinitions>
+                                                <Image x:Name="imageThumb" Source="{Binding StyleImage.Source}" Width="200" />
 
-                                                <Image x:Name="imageThumb" Source="{Binding StyleImage.Source}" Grid.Column="0" Grid.Row="0" Margin="4" />
-
+                                                <StackPanel x:Name="paneSelectedPane" Visibility="Visible" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                                    <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
+                                                </StackPanel>
+                                                
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
-                                                    <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource FontBorderBrush}"/>
+                                                    <TextBlock x:Name="lblName"  Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource FontBorderBrush}"/>
                                                     <TextBlock Text="{Binding Desc}" FontSize="14" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
                                                 </StackPanel>
                                             </Grid>
@@ -1068,6 +1079,10 @@
                                                         </Setter.Value>
                                                     </Setter>
                                                 </Trigger>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                                                    <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="lblName" Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
+                                                </DataTrigger>
                                             </DataTemplate.Triggers>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
@@ -1188,9 +1203,9 @@
                                     <RowDefinition Height="32" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="105"/>
-                                    <ColumnDefinition Width="45"/>
-                                    <ColumnDefinition Width="22"/>
+                                    <ColumnDefinition Width="135"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="32"/>
                                     <ColumnDefinition Width="30"/>
                                     <ColumnDefinition MinWidth="300"/>
                                 </Grid.ColumnDefinitions>
@@ -1338,7 +1353,7 @@
                         </StackPanel>
                     </DockPanel>
                     -->
-                        <WebBrowser x:Name="webGalleryPreview" Visibility="Collapsed" DockPanel.Dock="Bottom" Panel.ZIndex="1" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"  />
+                        
                     </Grid>
                 </DockPanel>
 
@@ -1374,51 +1389,15 @@
                                             MouseUp="Image_MouseUp">
                                     </Image>
 
-
-
-                                    <!--
-                                    <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}">
-                                        <Image x:Name="imageThumbError" Source="{StaticResource errorImageSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Image.Visibility>
-                                                <Binding  Path="thumbnailImage.thumbImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
-                                                    <Binding.ConverterParameter>
-                                                        <sys:Int32>3</sys:Int32>
-                                                    </Binding.ConverterParameter>
-                                                </Binding>
-                                            </Image.Visibility>
-                                        </Image>
-                                    </Grid>
-                                    <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}">
-                                        <Image x:Name="imageThumbLoading" Source="{StaticResource busyImageSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Image.Visibility>
-                                                <Binding  Path="thumbnailImage.thumbImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
-                                                    <Binding.ConverterParameter>
-                                                        <sys:Int32>1</sys:Int32>
-                                                    </Binding.ConverterParameter>
-                                                </Binding>
-                                            </Image.Visibility>
-                                        </Image>
-                                    </Grid>
-
-                                    <Image x:Name="imageThumb" Source="{Binding thumbnailImage.Source}" MaxHeight="{Binding ElementName=sldImageSize, Path=Value}" MouseMove="Image_MouseMove" MouseUp="Image_MouseUp">
-                                        <Image.Visibility>
-                                            <Binding  Path="thumbnailImage.thumbImageLoadState" Converter="{StaticResource WallaLoadStateToVisibleConverter}">
-                                                <Binding.ConverterParameter>
-                                                    <sys:Int32>2</sys:Int32>
-                                                </Binding.ConverterParameter>
-                                            </Binding>
-                                        </Image.Visibility>
-                                    </Image>
--->
                                     <StackPanel x:Name="paneSelectedPane" Visibility="{Binding ElementName=cmdMultiSelectionMode, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
                                         <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
                                     </StackPanel>
                                 </Grid>
                                 <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane"  Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140" MouseUp="Image_MouseUp" >
-                                    <TextBlock Text="{Binding name}" HorizontalAlignment="Center" Margin="2" Foreground="{StaticResource FontBorderBrush}"/>
-                                    <TextBlock Text="{Binding description}" MaxHeight="60" FontWeight="Light" FontSize="14" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
-                                    <TextBlock Text="{Binding shotSummary}" TextWrapping="Wrap" FontWeight="Light" FontSize="14" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
-                                    <TextBlock Text="{Binding fileSummary}" TextWrapping="Wrap" Margin="6,2,2,2" FontSize="14" FontWeight="Light" Foreground="{StaticResource FontBorderBrush}" />
+                                    <TextBlock  x:Name="lblName" Text="{Binding name}" HorizontalAlignment="Center" Margin="2" Foreground="{StaticResource FontBorderBrush}"/>
+                                    <TextBlock Text="{Binding description}" MaxHeight="60" FontWeight="Light" FontSize="16" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                    <TextBlock Text="{Binding shotSummary}" TextWrapping="Wrap" FontWeight="Light" FontSize="16" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
+                                    <TextBlock Text="{Binding fileSummary}" TextWrapping="Wrap" Margin="6,2,2,2" FontSize="16" FontWeight="Light" Foreground="{StaticResource FontBorderBrush}" />
 
                                     <!--
                                     <Button Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"  
@@ -1436,6 +1415,7 @@
                                 </Trigger>
                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
                                     <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="lblName" Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
                                 </DataTrigger>
 
                                 <Trigger Property="IsEnabled" Value="false">
@@ -1594,7 +1574,7 @@
                         <Label x:Name="lblUploadOverrideDateAll" Content="Apply to all"  Grid.Column="2" Grid.Row="7" HorizontalAlignment="Right" ToolTip="Check this so every foto you are uploading has the same date"></Label>
                         <CheckBox x:Name="chkUploadOverrideDateAll" Grid.Column="3" Grid.Row="7"  IsChecked="{Binding Source={StaticResource uploadUIStateKey}, Mode=TwoWay, Path=MetaTakenDateSetAll}" Checked="chkUploadOverrideDateAll_Checked" Unchecked="chkUploadOverrideDateAll_Checked"  />
 
-                        <DatePicker x:Name="datUploadOverrideDate" IsEnabled="False" Grid.Column="2" Grid.Row="8" Margin="2" FontSize="16" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.TakenDate}" Grid.ColumnSpan="2" />
+                        <DatePicker x:Name="datUploadOverrideDate" IsEnabled="False" Grid.Column="2" Grid.Row="8" Margin="2" SelectedDate="{Binding Mode=TwoWay, Path=/Meta.TakenDate}" Grid.ColumnSpan="2" />
 
                         <Line Grid.Column="1" Grid.Row="9" Grid.ColumnSpan="3" Stroke="{StaticResource FontBorderBrushSelected}" X1="4" Y1="4" X2="400" Y2="4" StrokeThickness="0.5" Margin="0" />
 

@@ -635,6 +635,7 @@ namespace ManageWalla
 
                         radTag.IsEnabled = true;
                         radGallery.IsEnabled = true;
+                        radUpload.IsEnabled = true;
 
                         if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
                         {
@@ -759,7 +760,6 @@ namespace ManageWalla
                         radCategory.IsEnabled = true;
                         radTag.IsEnabled = true;
                         radUpload.IsEnabled = true;
-                        PaneEnablePageControls(true);
                         wrapMyGalleries.IsEnabled = true;
 
                         if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
@@ -777,6 +777,7 @@ namespace ManageWalla
                             cmdGalleryView.IsEnabled = true;
                         }
 
+                        PaneEnablePageControls(true);
                         break;
                     case PaneMode.GalleryEdit:
                     case PaneMode.GalleryAdd:
@@ -1180,6 +1181,17 @@ namespace ManageWalla
                 sldImageSize.IsEnabled = enable;
                 cmdShowActionsMenu.IsEnabled = enable;
                 cmbGallerySection.IsEnabled = enable;
+                cmdMultiSelectionMode.IsEnabled = enable;
+
+                Button cmdGalleryRefresh = (Button)radGallery.Template.FindName("cmdGalleryRefresh", radGallery);
+                if (cmdGalleryRefresh != null) { cmdGalleryRefresh.IsEnabled = enable; }
+
+                Button cmdCategoryRefresh = (Button)radCategory.Template.FindName("cmdCategoryRefresh", radCategory);
+                if (cmdGalleryRefresh != null) { cmdCategoryRefresh.IsEnabled = enable; }
+
+                Button cmdTagRefresh = (Button)radTag.Template.FindName("cmdTagRefresh", radTag);
+                if (cmdGalleryRefresh != null) { cmdTagRefresh.IsEnabled = enable; }
+
 
                 if (lstImageMainViewerList != null)
                     lstImageMainViewerList.IsEnabled = enable; 
@@ -1201,24 +1213,29 @@ namespace ManageWalla
                     cmdImageNavigationBeginVert.IsEnabled = enable;
                 }
 
+
+
                 if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
                 {
                     cmdMultiSelectionMode.Visibility = Visibility.Collapsed;
                     cmdShowActionsMenu.Visibility = Visibility.Collapsed;
                     cmdReturnToAccount.Visibility = Visibility.Visible;
                     radUpload.IsEnabled = false;
-                    //cmdGalleryRefresh.IsEnabled = false;
-                    ///cmdCategoryRefresh.IsEnabled = false;
-                    //cmdTagRefresh.IsEnabled = false;
+
+                    if (cmdGalleryRefresh != null) { cmdGalleryRefresh.IsEnabled = false; }
+                    if (cmdGalleryRefresh != null) { cmdCategoryRefresh.IsEnabled = false; }
+                    if (cmdGalleryRefresh != null) { cmdTagRefresh.IsEnabled = false; }
+
+                    if (cmdImageViewDetailToggle != null) { cmdImageViewDetailToggle.Visibility = Visibility.Collapsed; }
                 }
                 else
                 {
                     cmdMultiSelectionMode.Visibility = Visibility.Visible;
                     cmdShowActionsMenu.Visibility = Visibility.Visible;
                     cmdReturnToAccount.Visibility = Visibility.Collapsed;
-                    radUpload.IsEnabled = true;
-                }
 
+                    if (cmdImageViewDetailToggle != null) { cmdImageViewDetailToggle.Visibility = Visibility.Visible; }
+                }
             }
             finally
             {
@@ -1620,7 +1637,7 @@ namespace ManageWalla
                     for (int i = 0; i < 10; i++)
                     {
                         if (cursor + i < imageMainViewerList.Count)
-                            tasks[i] = imageMainViewerList[cursor + i].LoadThumb(cancelToken, thumbCacheList, state.userApp.ThumbCacheSizeMB);
+                            tasks[i] = imageMainViewerList[cursor + i].LoadThumb(cancelToken, thumbCacheList, state.userApp.ThumbCacheSizeMB, state.connectionState);
                     }
 
                     for (int i = 0; i < 10; i++)
@@ -1774,8 +1791,8 @@ namespace ManageWalla
                     return;
 
                 cancelTokenSource = new CancellationTokenSource();
-                await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
-                await current.LoadMeta(false, cancelTokenSource.Token);
+                await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB, state.connectionState);
+                await current.LoadMeta(false, cancelTokenSource.Token, state.connectionState);
                 ImageViewTagsUpdateFromMeta();
 
                 if (lstImageMainViewerList.SelectedIndex == 0)
@@ -1785,8 +1802,8 @@ namespace ManageWalla
                 else
                 {
                     GeneralImage previous = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex - 1];
-                    await previous.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
-                    await previous.LoadMeta(false, cancelTokenSource.Token);
+                    await previous.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB, state.connectionState);
+                    await previous.LoadMeta(false, cancelTokenSource.Token, state.connectionState);
 
                     cmdImageViewPrevious.IsEnabled = true;
                 }
@@ -1798,8 +1815,8 @@ namespace ManageWalla
                 else
                 {
                     GeneralImage next = (GeneralImage)lstImageMainViewerList.Items[lstImageMainViewerList.SelectedIndex + 1];
-                    await next.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB);
-                    await next.LoadMeta(false, cancelTokenSource.Token);
+                    await next.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB, state.connectionState);
+                    await next.LoadMeta(false, cancelTokenSource.Token, state.connectionState);
                     cmdImageViewNext.IsEnabled = true;
                 }
             }
@@ -2326,7 +2343,7 @@ namespace ManageWalla
                 GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
                 if (current != null)
                 {
-                    current.LoadMeta(true, cancelTokenSource.Token);
+                    current.LoadMeta(true, cancelTokenSource.Token, state.connectionState);
                 }
             }
             catch (Exception ex)
@@ -2938,6 +2955,7 @@ namespace ManageWalla
                     gridCategorySelectDialog.Visibility = Visibility.Collapsed;
                     if (currentPane == PaneMode.CategoryAdd || currentPane == PaneMode.CategoryEdit)
                     {
+                        gridCategorySelectDialog.Visibility = Visibility.Collapsed;
                         currentCategory.parentId = currentSelectedCategory.id;
                         lblCategoryParentName.Content = GetCategoryName(currentSelectedCategory.id);
                         paneBusy.Visibility = Visibility.Collapsed;
@@ -2950,8 +2968,16 @@ namespace ManageWalla
                     }
                     else
                     {
-                        currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
-                        await MoveImagesToCategory(currentSelectedCategory.id);
+                        if (currentSelectedCategory.id == state.userApp.UserDefaultCategoryId)
+                        {
+                            ShowMessage(MessageType.Warning, "You cannot move images to the root category.");
+                            gridCategorySelectDialog.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            //currentSelectedCategory = (CategoryListCategoryRef)item.Tag;
+                            await MoveImagesToCategory(currentSelectedCategory.id);
+                        }
                     }
                 }
                 else
@@ -3635,7 +3661,7 @@ namespace ManageWalla
             uploadUIState.CategoryName = "";
             uploadUIState.CategoryDesc = "";
             uploadUIState.MapToSubFolders = false;
-            uploadUIState.UploadToNewCategory = false;
+            uploadUIState.UploadToNewCategory = true;
             uploadUIState.Mode = UploadUIState.UploadMode.None;
             uploadUIState.RootCategoryId = state.userApp.UserDefaultCategoryId;
             uploadUIState.RootCategoryName = GetCategoryName(state.userApp.UserDefaultCategoryId);
