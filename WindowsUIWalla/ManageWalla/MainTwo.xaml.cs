@@ -70,7 +70,7 @@ namespace ManageWalla
             Error = 3
         }
 
-        private bool galleryOptionsLoaded = false;
+        //private bool galleryOptionsLoaded = false;
         private PaneMode currentPane;
         private PaneMode previousPane;
         private Tag currentTag = null;
@@ -158,17 +158,19 @@ namespace ManageWalla
 
                 if (state != null && (state.connectionState == GlobalState.ConnectionState.OfflineMode || state.connectionState == GlobalState.ConnectionState.LoggedOn))
                 {
-                    RefreshOverallPanesStructure(PaneMode.GalleryView);
-                    RefreshPanesAllControls(PaneMode.GalleryView);
-                    radGallery.IsChecked = true;
-
                     if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                     {
+                        await GalleryPopulateOptions();
+
                         timer = new System.Timers.Timer();
                         timer.Elapsed += timer_Elapsed;
                         timer.Interval = 10000.0;
                         timer.Start();
                     }
+
+                    RefreshOverallPanesStructure(PaneMode.GalleryView);
+                    RefreshPanesAllControls(PaneMode.GalleryView);
+                    radGallery.IsChecked = true;
                 }
 
                 ConcludeBusyProcess();
@@ -1038,13 +1040,15 @@ namespace ManageWalla
                         if (state != null && state.connectionState == GlobalState.ConnectionState.LoggedOn)
                         {
                             lblAccountPaneTitle.Content = "Account " + state.account.ProfileName;
-                            cmdUserAppEdit.IsEnabled = true;
+                            cmdUserAppEdit.Visibility = Visibility.Visible;
                             cmdUserAppSave.Visibility = Visibility.Collapsed;
                             cmdUserAppCancel.Visibility = Visibility.Collapsed;
                             
                             cmdAccountRefresh.IsEnabled = true;
                             cmdAccountClose.Visibility = Visibility.Visible;
                             cmdAccountClose.IsEnabled = true;
+                            tabDownloadList.IsEnabled = true;
+                            tabUploadStatusList.IsEnabled = true;
 
                             cmdUseOffline.IsEnabled = true;
                             cmdAccountLogout.IsEnabled = true;
@@ -1058,7 +1062,7 @@ namespace ManageWalla
                         else if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
                         {
                             lblAccountPaneTitle.Content = "Account " + state.account.ProfileName;
-                            cmdUserAppEdit.IsEnabled = false;
+                            cmdUserAppEdit.Visibility = Visibility.Collapsed;
                             cmdUserAppSave.Visibility = Visibility.Collapsed;
                             cmdUserAppCancel.Visibility = Visibility.Collapsed;
 
@@ -2964,6 +2968,9 @@ namespace ManageWalla
                     {
                         uploadUIState.RootCategoryId = currentSelectedCategory.id;
                         uploadUIState.RootCategoryName = GetCategoryName(currentSelectedCategory.id);
+                        if (uploadUIState.UploadToNewCategory && uploadUIState.CategoryName.Length == 0)
+                            uploadUIState.UploadToNewCategory = false;
+
                         paneBusy.Visibility = Visibility.Collapsed;
                     }
                     else
@@ -4854,15 +4861,19 @@ namespace ManageWalla
                 await Login(profileName, email, password);
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
-                    RefreshOverallPanesStructure(PaneMode.GalleryView);
-                    RefreshPanesAllControls(PaneMode.GalleryView);
-                    //cmdAccountClose.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                    radGallery.IsChecked = true;
+
+
+                    await GalleryPopulateOptions();
 
                     timer = new System.Timers.Timer();
                     timer.Elapsed += timer_Elapsed;
                     timer.Interval = 10000.0;
                     timer.Start();
+
+                    RefreshOverallPanesStructure(PaneMode.GalleryView);
+                    RefreshPanesAllControls(PaneMode.GalleryView);
+                    //cmdAccountClose.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    radGallery.IsChecked = true;
                 }
 
                 txtAccountProfileName.Text = "";
@@ -4981,13 +4992,7 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                if (!galleryOptionsLoaded)
-                {
-                    await controller.GalleryOptionsRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
-                    galleryOptionsLoaded = true;
-                    lstGalleryPresentationList.Items.Refresh();
-                    lstGalleryStylesList.Items.Refresh();
-                }
+
 
                 gallerySectionNeedRefresh = true;
                 tabGallery.SelectedIndex = 0;
@@ -5027,6 +5032,37 @@ namespace ManageWalla
             {
                 TimeSpan duration = DateTime.Now - startTime;
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.GalleryInit()", (int)duration.TotalMilliseconds, ""); }
+            }
+        }
+
+        async private Task GalleryPopulateOptions()
+        {
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                await controller.GalleryOptionsRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
+                lstGalleryPresentationList.Items.Refresh();
+                lstGallerySelectionOptions.Items.Refresh();
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+                ConcludeBusyProcess();
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("Loading allery options has been cancelled"); }
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.GalleryPopulateOptions()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -5071,7 +5107,7 @@ namespace ManageWalla
             {
                 ConcludeBusyProcess();
 	            TimeSpan duration = DateTime.Now - startTime;
-	            if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.XXXXXX()", (int)duration.TotalMilliseconds, ""); }
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.GallerySave()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 
@@ -5180,11 +5216,11 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                if (!galleryOptionsLoaded)
-                {
-                    await controller.GalleryOptionsRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
-                    galleryOptionsLoaded = true;
-                }
+                //if (!galleryOptionsLoaded)
+                //{
+                //    await controller.GalleryOptionsRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
+                //    galleryOptionsLoaded = true;
+                //}
 
                 GalleryRefreshTagsListFromState();
                 GalleryRefreshCategoryList();
@@ -6082,14 +6118,15 @@ namespace ManageWalla
         #endregion
 
         #region Gallery Event Handlers
-        private void cmdGalleryView_Click(object sender, RoutedEventArgs e)
+        async private void cmdGalleryView_Click(object sender, RoutedEventArgs e)
         {
+            DateTime startTime = DateTime.Now;
             string url = "";
+            GalleryListGalleryRef galleryListGalleryRef;
             RadioButton checkedButton = (RadioButton)wrapMyGalleries.Children.OfType<RadioButton>().Where(r => r.IsChecked == true).FirstOrDefault();
             if (checkedButton != null)
             {
-                GalleryListGalleryRef galleryListGalleryRef = (GalleryListGalleryRef)checkedButton.Tag;
-                url = controller.GetGalleryUrl(galleryListGalleryRef.name, galleryListGalleryRef.urlComplex);
+                galleryListGalleryRef = (GalleryListGalleryRef)checkedButton.Tag;
             }
             else
             {
@@ -6097,10 +6134,54 @@ namespace ManageWalla
                 return;
             }
 
-            if (url.Length > 0)
+
+
+
+            try
             {
-                System.Diagnostics.Process.Start(url);
-                ShowMessage(MessageType.Info, "Browser will load web site");
+                ShowMessage(MessageType.Busy, "Loading gallery");
+
+                if (galleryListGalleryRef.urlComplex.Length > 0)
+                {
+                    url = controller.GetGalleryUrl(galleryListGalleryRef.name, galleryListGalleryRef.urlComplex);
+                }
+                else
+                {
+                    if (cancelTokenSource != null)
+                        cancelTokenSource.Cancel();
+
+                    CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource = newCancelTokenSource;
+
+                    url = await controller.GetGalleryLogonUrlAsync(galleryListGalleryRef.name, cancelTokenSource.Token);
+
+                    if (newCancelTokenSource == cancelTokenSource)
+                        cancelTokenSource = null;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("cmdGalleryView_Click has been cancelled."); }
+            }
+            finally
+            {
+                ConcludeBusyProcess();
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.cmdGalleryView_Click()", (int)duration.TotalMilliseconds, ""); }
+            }
+
+            try
+            {
+                if (url.Length > 0)
+                {
+                    System.Diagnostics.Process.Start(url);
+                    ShowMessage(MessageType.Info, "Browser will load web site");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Gallery could not be loaded, unexpected error: " + ex.Message);
             }
         }
 

@@ -821,7 +821,9 @@
 
 
                         <!-- Padding="0" Margin="2" BorderThickness="0"  -->
-                        <ToggleButton x:Name="cmdMultiSelectionMode"  DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Margin="2,0,5,0" IsChecked="False" Checked="cmdMultiSelectionMode_Checked" Unchecked="cmdMultiSelectionMode_Unchecked">
+                        <ToggleButton x:Name="cmdMultiSelectionMode"  DockPanel.Dock="Right" Style="{StaticResource styleToggleButton}" Margin="2,0,5,0" 
+                                      IsChecked="False" Checked="cmdMultiSelectionMode_Checked" Unchecked="cmdMultiSelectionMode_Unchecked"
+                                      ToolTip="Multi selection">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType="ToggleButton">
                                     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -996,8 +998,8 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition MinWidth="340" MaxWidth="400"/>
-                                    <ColumnDefinition MinWidth="340" MaxWidth="400"/>
+                                    <ColumnDefinition MinWidth="350" MaxWidth="400"/>
+                                    <ColumnDefinition MinWidth="350" MaxWidth="400"/>
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
@@ -1024,7 +1026,7 @@
                                                         <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
                                                     </StackPanel>
                                                  </Grid>
-                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100">
+                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Width="150">
                                                     <TextBlock x:Name="lblName" Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource FontBorderBrush}"/>
                                                     <TextBlock Text="{Binding Desc}" FontSize="14" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
                                                 </StackPanel>
@@ -1059,18 +1061,19 @@
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid>
-                                                <Image x:Name="imageThumb" Source="{Binding StyleImage.Source}" Width="200" />
+                                            <StackPanel Orientation="Horizontal">
+                                                <Grid>
+                                                    <Image x:Name="imageThumb" Source="{Binding StyleImage.Source}" Width="200" />
 
-                                                <StackPanel x:Name="paneSelectedPane" Visibility="Visible" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                                    <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
-                                                </StackPanel>
-                                                
-                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0">
+                                                    <StackPanel x:Name="paneSelectedPane" Visibility="Visible" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
+                                                    </StackPanel>
+                                                </Grid>
+                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Width="150">
                                                     <TextBlock x:Name="lblName"  Text="{Binding Name}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource FontBorderBrush}"/>
                                                     <TextBlock Text="{Binding Desc}" FontSize="14" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="6,2,2,2" Foreground="{StaticResource FontBorderBrush}" />
                                                 </StackPanel>
-                                            </Grid>
+                                            </StackPanel>
                                             <DataTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="true">
                                                     <Setter TargetName="imageThumb" Property="Effect">

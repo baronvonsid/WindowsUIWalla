@@ -1239,16 +1239,26 @@ namespace ManageWalla
             }
         }
 
-        public string GetGalleryUrl(string galleryName, string urlComplex)
+        async public Task<string> GetGalleryLogonUrlAsync(string galleryName, CancellationToken cancelToken)
         {
-            if (urlComplex != null && urlComplex.Length > 0)
+            try
             {
-                return serverHelper.GetWebUrl() + "gallery/" + galleryName + "?key=" + urlComplex;
+                string logonToken = await serverHelper.GalleryGetLogonTokenAsync(galleryName, cancelToken);
+                return serverHelper.GetWebUrl() + "gallery/" + galleryName + "?logonToken=" + WebUtility.UrlEncode(logonToken);
             }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryCreatePreviewAsync has been cancelled");
+                throw cancelEx;
+            }
+        }
+
+        public string GetGalleryUrl(string galleryName, string complexUrl)
+        {
+            if (complexUrl.Length > 0)
+                return serverHelper.GetWebUrl() + "gallery/" + galleryName + "?key=" + WebUtility.UrlEncode(complexUrl);
             else
-            {
                 return serverHelper.GetWebUrl() + "gallery/" + galleryName;
-            }
         }
 
         async public Task<string> GalleryCreatePreviewAsync(Gallery gallery, CancellationToken cancelToken)
@@ -1266,7 +1276,7 @@ namespace ManageWalla
 
         public string GetGalleryPreviewUrl(string galleryPreviewKey)
         {
-            return serverHelper.GetWebUrl() + "gallerypreview/sample?key=" + galleryPreviewKey;
+            return serverHelper.GetWebUrl() + "gallery/stylepreview?key=" + WebUtility.UrlEncode(galleryPreviewKey);
         }
 
         async public Task GalleryOptionsRefreshAsync(GalleryPresentationList presentationList, GalleryStyleList styleList, CancellationToken cancelToken)

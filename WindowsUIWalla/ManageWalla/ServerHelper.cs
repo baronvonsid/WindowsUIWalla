@@ -887,6 +887,41 @@ namespace ManageWalla
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryCreatePreviewAsync()", (int)duration.TotalMilliseconds, url); }
             }
         }
+
+        async public Task<string> GalleryGetLogonTokenAsync(String galleryName, CancellationToken cancelToken)
+        {
+            DateTime startTime = DateTime.Now;
+            string url = "";
+            try
+            {
+                url = "gallery/" + Uri.EscapeUriString(galleryName) + "/gallerylogon";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                response.EnsureSuccessStatusCode();
+
+                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                reader.MoveToContent();
+                return reader.ReadElementContentAsString();
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("GalleryGetLogonTokenAsync has been cancelled."); }
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryGetLogonTokenAsync()", (int)duration.TotalMilliseconds, url); }
+            }
+        }
+        
         #endregion
 
         #region Upload
