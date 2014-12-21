@@ -487,6 +487,17 @@ namespace ManageWalla
                     gridLeft.ColumnDefinitions[0].Width = new GridLength(40);
                     gridLeft.ColumnDefinitions[1].Width = new GridLength(0);
                     gridRight.RowDefinitions[0].Height = new GridLength(0);
+
+                    if (mode == PaneMode.ImageEdit || mode == PaneMode.ImageView)
+                    {
+                        cmdShowMenuLayout.Visibility = Visibility.Collapsed;
+                        cmdBackFromMainImageLayout.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        cmdShowMenuLayout.Visibility = Visibility.Visible;
+                        cmdBackFromMainImageLayout.Visibility = Visibility.Collapsed;
+                    }
                 }
                 else
                 {
@@ -516,6 +527,7 @@ namespace ManageWalla
                         tabGalleryPreview.Visibility = Visibility.Collapsed;
                         tabGalleryConfiguration.Visibility = Visibility.Collapsed;
                         panGridRightHeader.Visibility = Visibility.Visible;
+
                         break;
                     case PaneMode.GalleryEdit:
                     case PaneMode.GalleryAdd:
@@ -709,6 +721,7 @@ namespace ManageWalla
                             cmdTagAdd.IsEnabled = true;
                             cmdTagEdit.IsEnabled = true;
                         }
+
                         PaneEnablePageControls(true);
                         break;
                     case PaneMode.TagAdd:
@@ -1140,6 +1153,8 @@ namespace ManageWalla
                             cmdImageViewNext.IsEnabled = false;
                             cmdImageViewPrevious.IsEnabled = false;
                             lstImageViewTagList.IsEnabled = true;
+
+                            cmdBackFromMainImageLayout.IsEnabled = false;
                         }
                         else
                         {
@@ -1154,8 +1169,11 @@ namespace ManageWalla
                             cmdImageViewPrevious.IsEnabled = true;
                             lstImageViewTagList.IsEnabled = false;
 
+                            cmdBackFromMainImageLayout.IsEnabled = true;
+
                             //PaneEnablePageControls(true);
                         }
+
 
                         if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
                             cmdImageViewEdit.IsEnabled = false;
@@ -1181,6 +1199,10 @@ namespace ManageWalla
             try
             {
                 cmdShowMenuLayout.IsEnabled = enable;
+
+
+
+
                 cmdShowExpandedLayout.IsEnabled = enable;
                 sldImageSize.IsEnabled = enable;
                 cmdShowActionsMenu.IsEnabled = enable;
@@ -1556,7 +1578,7 @@ namespace ManageWalla
                 if (lstUploadImageFileList == null) { return; }
                 TweakUploadImageListMargin();
             }
-            else
+            else if (mode == PaneMode.CategoryView || mode == PaneMode.CategoryAdd || mode == PaneMode.CategoryEdit || mode == PaneMode.GalleryView || mode == PaneMode.TagView || mode == PaneMode.TagAdd || mode == PaneMode.TagEdit)
             {
                 if (lstImageMainViewerList == null) { return; }
                 TweakMainImageListMargin();
@@ -2198,9 +2220,8 @@ namespace ManageWalla
         {
             try
             {
-                if (lstImageMainViewerList.SelectionMode == SelectionMode.Single)
+                if (lstImageMainViewerList.SelectionMode == SelectionMode.Single && lstImageMainViewerList.SelectedItems.Count > 0)
                 {
-                    //isExpanded = true;
                     previousPane = currentPane;
                     cmdImageViewDetailToggle.IsChecked = false;
 
@@ -2208,6 +2229,7 @@ namespace ManageWalla
                     RefreshOverallPanesStructure(currentPane);
 
                     ImageViewUpdateNextPrevious();
+
                 }
             }
             catch (Exception ex)
@@ -2216,24 +2238,24 @@ namespace ManageWalla
                 ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
             }
         }
+        
+        //async private void RevertFromImageView_MouseUp(object sender, MouseButtonEventArgs e)
+        //{
+        //    try
+        //    {
+        //        RefreshPanesAllControls(previousPane);
+        //        RefreshOverallPanesStructure(currentPane);
 
-        async private void RevertFromImageView_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            try
-            {
-                RefreshPanesAllControls(previousPane);
-                RefreshOverallPanesStructure(currentPane);
-
-                DateTime eventTime = DateTime.Now;
-                await WaitAsynchronouslyAsync();
-                TweakImageMarginSize(eventTime, currentPane);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
-            }
-        }
+        //        DateTime eventTime = DateTime.Now;
+        //        await WaitAsynchronouslyAsync();
+        //        TweakImageMarginSize(eventTime, currentPane);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex);
+        //        ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+        //    }
+        //}
 
         private void ImageViewPrevious_Click(object sender, RoutedEventArgs e)
         {
@@ -2305,6 +2327,7 @@ namespace ManageWalla
                     ShowMessage(MessageType.Busy, "Saving image data updates");
 
                     ImageViewUpdateMetaTags(current);
+
                     await current.SaveMeta(cancelTokenSource.Token);
 
                     if (newCancelTokenSource == cancelTokenSource)
@@ -3783,8 +3806,12 @@ namespace ManageWalla
                 if (currentPane != PaneMode.Upload && currentPane != PaneMode.AccountEdit && uploadUIState.Mode == UploadUIState.UploadMode.None && state.userApp.AutoUpload)
                     await DoAutoUploadAsync(false);
 
-                //if (currentPane == PaneMode.Account && tabAccount.SelectedIndex == 1)
-                await RefreshUploadStatusStateAsync(false, false);
+                bool force = false;
+
+                if (currentPane == PaneMode.Account && tabAccount.SelectedIndex == 1)
+                    force = true;
+
+                await RefreshUploadStatusStateAsync(force, true);
             }
             catch (Exception ex)
             {
@@ -3938,7 +3965,10 @@ namespace ManageWalla
                 long[] orderIds = CacheHelper.GetUploadImageListQueryIds(uploadImageStateList);
 
                 if (!force && orderIds.Length == 0)
+                {
+                    CacheHelper.DeleteUploadedFiles(uploadImageStateList, uploadUIState.AutoUploadFolder, state.userApp.MachineName, logger);
                     return;
+                }
 
                 if (!silent)
                     ShowMessage(MessageType.Busy, "Refreshing upload history list");
@@ -3950,7 +3980,7 @@ namespace ManageWalla
 
                 await controller.RefreshUploadStatusListAsync(orderIds, cancelUploadListTokenSource.Token, uploadImageStateList);
 
-                CacheHelper.DeleteUploadedFiles(uploadImageStateList, uploadUIState.AutoUploadFolder, state.userApp.MachineName);
+                CacheHelper.DeleteUploadedFiles(uploadImageStateList, uploadUIState.AutoUploadFolder, state.userApp.MachineName, logger);
 
                 if (newCancelUploadListTokenSource == cancelUploadListTokenSource)
                     cancelUploadListTokenSource = null;
@@ -4201,8 +4231,6 @@ namespace ManageWalla
             RefreshPanesAllControls(PaneMode.Upload);
         }
 
-
-
         async private void cmdUploadAll_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4219,7 +4247,7 @@ namespace ManageWalla
                     return;
                 }
 
-                if (!uploadUIState.UploadToNewCategory && uploadUIState.RootCategoryId == state.userApp.UserDefaultCategoryId)
+                if (!uploadUIState.UploadToNewCategory && (uploadUIState.RootCategoryId == state.userApp.UserDefaultCategoryId && uploadUIState.Mode == UploadUIState.UploadMode.Images))
                 {
                     ShowMessage(MessageType.Warning, "You cannot upload images directly to the root category, please create a new category.");
                     return;
@@ -4228,6 +4256,8 @@ namespace ManageWalla
                 uploadUIState.Uploading = true;
                 RefreshOverallPanesStructure(PaneMode.Upload);
                 RefreshPanesAllControls(PaneMode.Upload);
+
+                TweakImageMarginSize(DateTime.Now, currentPane);
 
                 List<string> responses = await DoUploadAsync();
 
@@ -4627,9 +4657,9 @@ namespace ManageWalla
             }
 
             if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
-                this.Title = "fotowalla - Connected";
+                this.Title = "fotowalla - connected";
             else
-                this.Title = "fotowalla - Offline";
+                this.Title = "fotowalla - offline";
         }
 
         private string StringTrim(string input, int length)
@@ -4761,7 +4791,10 @@ namespace ManageWalla
                 await controller.AccountDetailsGet(cancelTokenSource.Token);
                 state.account.Password = password;
 
-                await controller.VerifyAppAndPlatform(false);
+                if (!await controller.VerifyAppAndPlatform(false))
+                {
+                    throw new Exception("The application/platform failed validation with the server.  Please check www.fotowalla.com/support for the latest versions supported.");
+                }
 
                 await controller.SetUserApp(cancelTokenSource.Token);
 
@@ -4790,6 +4823,20 @@ namespace ManageWalla
                 ShowMessage(MessageType.Busy, "Logging out of FotoWalla");
 
                 await controller.Logout();
+
+                Properties.Settings.Default.LastUser = "";
+                Properties.Settings.Default.Save();
+
+                timer.Stop();
+                radGallery.IsChecked = false;
+                state = null;
+                thumbCacheList = null;
+                mainCopyCacheList = null;
+                imageMainViewerList.Clear();
+                //uploadImageStateList = null;
+                //currentImageList = null;
+                startingApplication = true;
+                cacheFilesSetup = false;
 
                 ShowMessage(MessageType.Info, "Account has been logged out.");
 
@@ -6392,6 +6439,9 @@ namespace ManageWalla
         {
             try
             {
+                if (gallerySectionNeedRefresh)
+                    await GalleryReloadSection(false);
+
                 string url = await GallerySetupPreview();
                 if (url.Length > 0)
                 {
@@ -6492,6 +6542,84 @@ namespace ManageWalla
 
             RefreshOverallPanesStructure(PaneMode.Account);
             RefreshPanesAllControls(PaneMode.Account);
+        }
+
+        private void cmdForgotPassword_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string url = controller.AccountForgotPasswordUrl();
+                System.Diagnostics.Process.Start(url);
+                ShowMessage(MessageType.Info, "Browser will load web site");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Web site could not be launched, unexpected error: " + ex.Message);
+            }
+        }
+
+        private void cmdSignupNewUser_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string url = controller.AccountNewUserUrl();
+                System.Diagnostics.Process.Start(url);
+                ShowMessage(MessageType.Info, "Browser will load web site");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Web site could not be launched, unexpected error: " + ex.Message);
+            }
+        }
+
+        async private void cmdBackFromMainImageLayout_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                RefreshPanesAllControls(previousPane);
+                RefreshOverallPanesStructure(currentPane);
+
+                DateTime eventTime = DateTime.Now;
+                await WaitAsynchronouslyAsync();
+                TweakImageMarginSize(eventTime, currentPane);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
+        }
+
+        async private void ImageMain_Error_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                DateTime startTime = DateTime.Now;
+                try
+                {
+                    GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
+                    if (current == null)
+                        return;
+
+                    cancelTokenSource = new CancellationTokenSource();
+                    await current.LoadMainCopyImage(cancelTokenSource.Token, mainCopyCacheList, state.userApp.MainCopyFolder, state.userApp.MainCopyCacheSizeMB, state.connectionState);
+                    await current.LoadMeta(false, cancelTokenSource.Token, state.connectionState);
+                    ImageViewTagsUpdateFromMeta();
+                }
+                finally
+                {
+                    TimeSpan duration = DateTime.Now - startTime;
+                    if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.imageThumbError_MouseUp()", (int)duration.TotalMilliseconds, ""); }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
         }
 
 

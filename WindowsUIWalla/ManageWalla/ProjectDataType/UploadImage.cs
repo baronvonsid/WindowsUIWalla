@@ -31,11 +31,19 @@ namespace ManageWalla
             Inactive = 5
         }
 
+        public enum ImageViewState
+        {
+            Loaded = 0,
+            NoPreview = 1,
+            Error = 2
+        }
+
         //public event PropertyChangedEventHandler PropertyChanged;
 
         public String FilePath { get; set; }
         public Image Image { get { return image; } }
         public string FolderPath { get; set; }
+        public ImageViewState thumbPreviewState { get; set; }
 
         //public UploadState State { get; set; }
         //public String UploadError { get; set; }
@@ -78,7 +86,11 @@ namespace ManageWalla
                 meta.Format = format;
 
                 meta.UploadDate = DateTime.Now;
-                meta.TakenDateFile = fileInfo.LastWriteTime;
+
+                if (fileInfo.LastWriteTime > DateTime.Now.AddYears(200))
+                    meta.TakenDateFile = fileInfo.LastWriteTime;
+                else
+                    meta.TakenDateFile = DateTime.Now;
 
                 meta.TakenDate = DateTime.Now;
                 meta.TakenDateSet = false;
@@ -135,14 +147,18 @@ namespace ManageWalla
                     case "GIF":
                         break;
                     default:
-                        return UnavailableBitmapThumbnail(true);
+                        thumbPreviewState = ImageViewState.NoPreview;
+                        return null;
                 }
 
                 FileInfo fileInfo = new FileInfo(filePath);
 
                 //10 MB.
                 if (fileInfo.Length > 10485760)
-                    return UnavailableBitmapThumbnail(true);
+                {
+                    thumbPreviewState = ImageViewState.NoPreview;
+                    return null;
+                }
 
                 bool isLandscape = await IsLandscape(filePath);
 
@@ -190,7 +206,15 @@ namespace ManageWalla
                 Image image = new Image();
                 image.Source = croppedBitmap;
 
+                thumbPreviewState = ImageViewState.Loaded;
+
                 return image;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                thumbPreviewState = ImageViewState.Error;
+                return null;
             }
             finally
             {
@@ -233,6 +257,7 @@ namespace ManageWalla
             }
         }
 
+        /*
         private Image UnavailableBitmapThumbnail(bool unavailable)
         {
             string loadingImagePath = "";
@@ -258,6 +283,7 @@ namespace ManageWalla
 
             return newImage;
         }
+        */
         #endregion
     }
 }

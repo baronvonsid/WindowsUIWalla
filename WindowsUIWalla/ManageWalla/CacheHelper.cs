@@ -8,6 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+using log4net;
 
 namespace ManageWalla
 {
@@ -370,7 +371,7 @@ namespace ManageWalla
             //Loop through uploadStatusList and reflect new reality in uploadHistoryCacheList 
         }
 
-        public static void DeleteUploadedFiles(UploadImageStateList uploadImageStateList, string autoUploadFolder, string machineName)
+        public static void DeleteUploadedFiles(UploadImageStateList uploadImageStateList, string autoUploadFolder, string machineName, ILog logger)
         {
             var needDeletingItems = uploadImageStateList.Where(
                                             r => r.status == UploadImage.ImageStatus.Complete
@@ -390,6 +391,7 @@ namespace ManageWalla
                 }
                 catch (Exception ex)
                 {
+                    logger.Error(ex);
                     uploadedItem.errorMessage = "File cannot be deleted.  Error: " + ex.Message;
                     uploadedItem.lastUpdated = DateTime.Now;
                 }

@@ -5,7 +5,7 @@
 
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <walla:WallaLoadStateToVisibleConverter x:Key="WallaLoadStateToVisibleConverter" />
-    
+    <walla:WallaUploadImageStateToVisibleConverter x:Key="WallaUploadImageStateToVisibleConverter" />
     
     <walla:UploadImageFileList x:Key="uploadImagefileListKey" />
     <walla:UploadUIState x:Key="uploadUIStateKey" />
@@ -23,29 +23,25 @@
     <walla:WallaByteToMBConverter x:Key="WallaByteToMBConverterKey" />
     <walla:WallaCacheSizeConverter x:Key="WallaCacheSizeConverterKey" />
     
-    <!--
-    <XmlNamespaceMappingCollection x:Key="wallaNamespaceMappingKey">
-        <XmlNamespaceMapping Uri="http://www.example.org/UploadStatusList" Prefix="s" />
-    </XmlNamespaceMappingCollection>
-
-    <XmlDataProvider x:Key="uploadStatusListXmlKey"  XmlNamespaceManager="{StaticResource wallaNamespaceMappingKey}" />
--->
 
 
-    <!--<ImageSource x:Key="loadingImageSrc">resources/anim/loading.gif</ImageSource>
-    <ImageSource x:Key="infoImageSrc">resources/icons/info.gif</ImageSource>-->
-    <ImageSource x:Key="errorImageSrc">resources/icons/error.gif</ImageSource>
-    <ImageSource x:Key="warningImageSrc">resources/icons/warning.gif</ImageSource>
-    <ImageSource x:Key="busyImageAnimSrc">resources/anim/busy.gif</ImageSource>
-    <!--<ImageSource x:Key="busyImageSrc">resources/anim/busy.gif</ImageSource>-->
+    <!-- application general -->
+    <ImageSource x:Key="fotowallaNameSrc">resources/icons/fotowallaLogo.png</ImageSource>
+    <ImageSource x:Key="fotowallaNameSelectedSrc">resources/icons/fotowallaLogo_selected.png</ImageSource>
+    <ImageSource x:Key="errorImageSrc">resources/todo/error.gif</ImageSource> <!-- TODO change to red -->
+    <ImageSource x:Key="warningImageSrc">resources/todo/warning.gif</ImageSource><!-- TODO change to yellow -->
+    <ImageSource x:Key="errorRefreshImageSelectedSrc">resources/todo/errorrefresh_selected.gif</ImageSource> <!-- TODO change to red -->
+    <ImageSource x:Key="errorRefreshImageSrc">resources/todo/errorrefresh.gif</ImageSource>
+    <ImageSource x:Key="infoImageSrc">resources/todo/info.gif</ImageSource> <!-- TODO -->
+    <ImageSource x:Key="busyImageSrc">resources/todo/busy.gif</ImageSource>
+    <ImageSource x:Key="refreshImageSrc">resources/icons/refresh.gif</ImageSource>
+    <ImageSource x:Key="refreshImageSelectedSrc">resources/icons/refresh_selected.gif</ImageSource>
+    <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.png</ImageSource>
+    <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notselected.png</ImageSource>
+    <ImageSource x:Key="imageSelectedSrc">resources/todo/image_selected.png</ImageSource> <!-- More distinct -->
+    <ImageSource x:Key="menuItemImageSrc">resources/todo/menuItem.gif</ImageSource> <!-- More distinct -->    
     
-
-    <ImageSource x:Key="accountCloseImageSrc">resources/icons/error.gif</ImageSource>
-    <ImageSource x:Key="accountCloseSelectedImageSrc">resources/icons/warning.gif</ImageSource>
-    
-
-    <ImageSource x:Key="menuItemImageSrc">resources/icons/menuItem.gif</ImageSource>
-
+    <!-- main entities -->
     <ImageSource x:Key="categoryImageSrc">resources/icons/category.png</ImageSource>
     <ImageSource x:Key="categoryImageSelectedSrc">resources/icons/category_selected.png</ImageSource>
     <ImageSource x:Key="tagImageSrc">resources/icons/tag.png</ImageSource>
@@ -54,49 +50,39 @@
     <ImageSource x:Key="galleryImageSelectedSrc">resources/icons/gallery_selected.png</ImageSource>    
     <ImageSource x:Key="uploadImageSrc">resources/icons/upload.png</ImageSource>
     <ImageSource x:Key="uploadImageSelectedSrc">resources/icons/upload_selected.png</ImageSource>
+    <ImageSource x:Key="downloadSrc">resources/todo/download.gif</ImageSource> <!-- TODO -->
+    <ImageSource x:Key="downloadSelectedSrc">resources/todo/download_selected.gif</ImageSource> <!-- TODO -->    
     
-    <!--<ImageSource x:Key="fotoWallaImageSrc">resources/icons/fotoWalla.gif</ImageSource>-->
-
-    <ImageSource x:Key="refreshImageSrc">resources/icons/refresh.gif</ImageSource>
-    <ImageSource x:Key="refreshImageSelectedSrc">resources/icons/refresh_selected.gif</ImageSource>
-    <ImageSource x:Key="refreshImageRotatingSrc">resources/anim/refresh_rotating.gif</ImageSource>
-    <ImageSource x:Key="accountImageSrc">resources/icons/fotowallaLogo.png</ImageSource>
-    <ImageSource x:Key="accountImageSelectedSrc">resources/icons/fotowallaLogoSelected.png</ImageSource>
+    <!-- navigations -->
     <ImageSource x:Key="expandImageSrc">resources/icons/expand.gif</ImageSource>
     <ImageSource x:Key="contractImageSrc">resources/icons/contract.gif</ImageSource>
     <ImageSource x:Key="expandImageSelectedSrc">resources/icons/expand_selected.gif</ImageSource>
     <ImageSource x:Key="contractImageSelectedSrc">resources/icons/contract_selected.gif</ImageSource>
-
-    <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.png</ImageSource>
-    <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notSelected.png</ImageSource>
-
-    <ImageSource x:Key="imageSelectedSrc">resources/icons/imageSelected.png</ImageSource>
-    
-    
-    <ImageSource x:Key="imageDetailImageSrc">resources/icons/imageDetail.gif</ImageSource>
-    <ImageSource x:Key="imageSummaryImageSrc">resources/icons/imageSummary.gif</ImageSource>
-
     <ImageSource x:Key="navFirstImageSelectedSrc">resources/icons/navFirst_selected.gif</ImageSource>
     <ImageSource x:Key="navNextImageSelectedSrc">resources/icons/navNext_selected.gif</ImageSource>
     <ImageSource x:Key="navPreviousImageSelectedSrc">resources/icons/navPrevious_selected.gif</ImageSource>
     <ImageSource x:Key="navLastImageSelectedSrc">resources/icons/navLast_selected.gif</ImageSource>
-
     <ImageSource x:Key="navFirstImageSrc">resources/icons/navFirst.gif</ImageSource>
     <ImageSource x:Key="navNextImageSrc">resources/icons/navNext.gif</ImageSource>
     <ImageSource x:Key="navPreviousImageSrc">resources/icons/navPrevious.gif</ImageSource>
     <ImageSource x:Key="navLastImageSrc">resources/icons/navLast.gif</ImageSource>
+
+    <ImageSource x:Key="navScrollRightImageSrc">resources/todo/navScrollRight.gif</ImageSource>
+    <ImageSource x:Key="navScrollRightImageSelectedSrc">resources/todo/navScrollRight_selected.gif</ImageSource>
+    <ImageSource x:Key="navScrollLeftImageSrc">resources/todo/navScrollLeft.gif</ImageSource>
+    <ImageSource x:Key="navScrollLeftImageSelectedSrc">resources/todo/navScrollLeft_selected.gif</ImageSource>
     
+    <!-- actions -->
     <ImageSource x:Key="dropDownMenuImageSrc">resources/icons/menu.png</ImageSource>
-    <ImageSource x:Key="dropDownMenuSelectedImageSrc">resources/icons/menu_selected.png</ImageSource>
-    
-    <ImageSource x:Key="removeFromTagImageSrc">resources/icons/removeFromTag.gif</ImageSource>
-    <ImageSource x:Key="deleteImagesImageSrc">resources/icons/deleteImages.gif</ImageSource>
-    <ImageSource x:Key="downloadOriginalsImageSrc">resources/icons/downloadOriginals.gif</ImageSource>
-
-    <ImageSource x:Key="privateImageSrc">resources/icons/private.gif</ImageSource>
-    <ImageSource x:Key="sharedSecureImageSrc">resources/icons/sharedSecure.gif</ImageSource>
-    <ImageSource x:Key="sharedOpenImageSrc">resources/icons/sharedOpen.gif</ImageSource>
-
+    <ImageSource x:Key="dropDownMenuImageSelectedSrc">resources/icons/menu_selected.png</ImageSource>
+    <ImageSource x:Key="privateImageSrc">resources/todo/private.gif</ImageSource> <!-- Walla version -->
+    <ImageSource x:Key="sharedSecureImageSrc">resources/todo/sharedsecure.gif</ImageSource> <!-- Walla version -->
+    <ImageSource x:Key="sharedOpenImageSrc">resources/todo/sharedopen.gif</ImageSource> <!-- Walla version -->
+    <ImageSource x:Key="detailImageSrc">resources/icons/menu.png</ImageSource> <!-- to do new icon -->
+    <ImageSource x:Key="detailImageSelectedSrc">resources/icons/menu_selected.png</ImageSource> <!-- to do new icon -->
+    <ImageSource x:Key="multiSelectionImageSrc">resources/icons/menu.png</ImageSource> <!-- to do new icon -->
+    <ImageSource x:Key="multiSelectionImageSelectedSrc">resources/icons/menu_selected.png</ImageSource> <!-- to do new icon -->
+    <ImageSource x:Key="noPreviewImageSrc">resources/todo/private.gif</ImageSource> <!-- to do new icon --> 
 
     <!--Control colors.-->
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="White"/>
@@ -107,6 +93,20 @@
     <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="White"/>
     <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="White"/>
 
+
+
+    <!--
+    Not sure
+
+    
+        <ImageSource x:Key="accountCloseImageSrc">resources/icons/error.gif</ImageSource>
+    <ImageSource x:Key="accountCloseSelectedImageSrc">resources/icons/warning.gif</ImageSource>
+    
+    <ImageSource x:Key="fotoWallaImageSrc">resources/icons/fotoWalla.gif</ImageSource>
+    
+    -->
+    
+    
 
     <!--<Color x:Key="cmbHeaderButtonSelected">White</Color>
     <Color x:Key="cmbHeaderButtonMouseOver">White</Color>

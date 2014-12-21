@@ -22,7 +22,7 @@ namespace ManageWalla
         [System.STAThreadAttribute()]
         public static void Main()
         {
-            SplashScreen splashScreen = new SplashScreen("resources/icons/SplashScreen.png");
+            SplashScreen splashScreen = new SplashScreen("resources/icons/splashScreen.png");
             splashScreen.Show(true);
             
 

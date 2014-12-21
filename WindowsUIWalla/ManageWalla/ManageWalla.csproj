@@ -28,7 +28,7 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.1.0.0</ApplicationVersion>
+    <ApplicationVersion>1.3.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -151,9 +151,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="WpfAnimatedGif">
-      <HintPath>..\..\..\WindowsUIWalla-Dependencies\WpfAnimatedGif.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
@@ -177,6 +174,7 @@
     <Compile Include="ProjectDataType\ImageMainViewerList.cs" />
     <Compile Include="ProjectDataType\ThumbCache.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="ValueConverters\WallaUploadImageStateToVisibleConverter.cs" />
     <Compile Include="ValueConverters\WallaLoadStateToVisibleConverter.cs" />
     <Compile Include="ValueConverters\WallaCacheSizeConverter.cs" />
     <Compile Include="ValueConverters\WallaByteToMBConverter.cs" />
@@ -298,21 +296,15 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\error.gif" />
-    <Resource Include="resources\icons\menuItem.gif" />
-    <Resource Include="resources\icons\warning.gif" />
+    <Resource Include="resources\todo\error.gif" />
+    <Resource Include="resources\todo\busy.gif" />
+    <Resource Include="resources\todo\warning.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\expand.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\contract.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\reload.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\imageDetail.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\navNext.gif" />
@@ -327,25 +319,13 @@
     <Resource Include="resources\icons\navLast.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\imageSummary.gif" />
+    <Resource Include="resources\todo\sharedOpen.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\removeFromTag.gif" />
+    <Resource Include="resources\todo\private.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\deleteImages.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\downloadOriginals.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\sharedOpen.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\private.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\sharedSecure.gif" />
+    <Resource Include="resources\todo\sharedSecure.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\tag.png" />
@@ -362,19 +342,19 @@
     <Resource Include="resources\icons\upload_selected.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\imageSelected.png" />
+    <Resource Include="resources\todo\image_selected.png" />
     <Resource Include="resources\icons\selected.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\refresh.gif" />
-    <Resource Include="resources\icons\refresh_selected.gif" />
+    <Resource Include="resources\todo\errorRefresh.gif" />
+    <Resource Include="resources\todo\errorRefresh_selected.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\anim\refresh_rotating.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\fotowallaLogo.png" />
-    <Resource Include="resources\icons\fotowallaLogoSelected.png" />
+    <Resource Include="resources\icons\fotowallaLogo_selected.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\anim\busy.gif" />
@@ -390,7 +370,7 @@
     <Resource Include="resources\icons\expand_selected.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\notSelected.png" />
+    <Resource Include="resources\icons\notselected.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\icons\application_large.png" />
@@ -403,7 +383,62 @@
     <Resource Include="Walla.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\SplashScreen.png" />
+    <PublishFile Include="PresentationUI">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="System.Net.Http.Formatting">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\refresh.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\refresh_selected.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\download.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\download_selected.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\splashScreen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\info.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\menuItem.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\menuItem - Copy.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\navScrollRight.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\navScrollRight_selected.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\navScrollLeft.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\todo\navScrollLeft_selected.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

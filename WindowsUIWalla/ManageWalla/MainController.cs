@@ -209,8 +209,8 @@ namespace ManageWalla
 
                 string machineName = System.Environment.MachineName;
 
-                string uploadFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Auto Upload");
-                string copyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "FotoWalla Copies");
+                string uploadFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), state.account.ProfileName + " auto upload (fw)");
+                string copyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), state.account.ProfileName + " copies (fw)");
 
                 UserApp newUserApp = new UserApp();
                 newUserApp.MachineName = machineName;
@@ -254,6 +254,16 @@ namespace ManageWalla
                 logger.Debug("UserAppUpdateAsync has been cancelled");
                 throw cancelEx;
             }
+        }
+        
+        public string AccountNewUserUrl()
+        {
+            return serverHelper.GetWebUrl(false) + "newaccount?accountType=1";
+        }
+
+        public string AccountForgotPasswordUrl()
+        {
+            return serverHelper.GetWebUrl(false) + "forgotpassword";
         }
         #endregion
 
@@ -1244,7 +1254,7 @@ namespace ManageWalla
             try
             {
                 string logonToken = await serverHelper.GalleryGetLogonTokenAsync(galleryName, cancelToken);
-                return serverHelper.GetWebUrl() + "gallery/" + galleryName + "?logonToken=" + WebUtility.UrlEncode(logonToken);
+                return serverHelper.GetWebUrl(true) + "gallery/" + galleryName + "?logonToken=" + WebUtility.UrlEncode(logonToken);
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -1256,9 +1266,9 @@ namespace ManageWalla
         public string GetGalleryUrl(string galleryName, string complexUrl)
         {
             if (complexUrl.Length > 0)
-                return serverHelper.GetWebUrl() + "gallery/" + galleryName + "?key=" + WebUtility.UrlEncode(complexUrl);
+                return serverHelper.GetWebUrl(true) + "gallery/" + galleryName + "?key=" + WebUtility.UrlEncode(complexUrl);
             else
-                return serverHelper.GetWebUrl() + "gallery/" + galleryName;
+                return serverHelper.GetWebUrl(true) + "gallery/" + galleryName;
         }
 
         async public Task<string> GalleryCreatePreviewAsync(Gallery gallery, CancellationToken cancelToken)
@@ -1276,7 +1286,7 @@ namespace ManageWalla
 
         public string GetGalleryPreviewUrl(string galleryPreviewKey)
         {
-            return serverHelper.GetWebUrl() + "gallery/stylepreview?key=" + WebUtility.UrlEncode(galleryPreviewKey);
+            return serverHelper.GetWebUrl(true) + "gallery/stylepreview?key=" + WebUtility.UrlEncode(galleryPreviewKey);
         }
 
         async public Task GalleryOptionsRefreshAsync(GalleryPresentationList presentationList, GalleryStyleList styleList, CancellationToken cancelToken)

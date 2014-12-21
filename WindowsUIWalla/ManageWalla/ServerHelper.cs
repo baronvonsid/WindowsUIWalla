@@ -215,9 +215,14 @@ namespace ManageWalla
             }
         }
 
-        public string GetWebUrl()
+        public string GetWebUrl(bool withName)
         {
-            return "http://" + hostName + ":" + port.ToString() + webPath + userName + "/";
+            string url = "http://" + hostName + ":" + port.ToString() + webPath;
+
+            if (withName)
+                url = url + userName + "/";
+
+            return url;
         }
 
         async public Task<bool> VerifyAppAndPlatform(ClientApp clientApp, bool verify)
