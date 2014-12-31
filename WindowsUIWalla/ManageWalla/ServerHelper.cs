@@ -76,7 +76,7 @@ namespace ManageWalla
             {
                 http = new HttpClient(handler);
                 http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
-
+                
                 url = "logontoken";
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
@@ -134,6 +134,8 @@ namespace ManageWalla
                 http = new HttpClient(handler);
                 
                 http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath + logon.ProfileName + "/");
+                http.Timeout = new TimeSpan(0, 5, 0);
+
                 this.userName = logon.ProfileName;
                 return true;
             }
@@ -984,10 +986,18 @@ namespace ManageWalla
                 logger.Error(httpEx);
                 return httpEx.Message;
             }
-            catch (OperationCanceledException cancelEx)
+            catch (OperationCanceledException ex)
             {
-                if (logger.IsDebugEnabled) {logger.Debug("UploadImageAsync has been cancelled.");}
-                throw cancelEx;
+                if (cancelToken.IsCancellationRequested)
+                {
+                    if (logger.IsDebugEnabled) { logger.Debug("UploadImageAsync has been cancelled."); }
+                    throw ex;
+                }
+                else
+                {
+                    logger.Error(ex);
+                    return "Upload cancelled, connection too slow. 5 minute timeout breached.";
+                }
             }
             catch (Exception ex)
             {

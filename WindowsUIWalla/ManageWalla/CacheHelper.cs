@@ -186,15 +186,23 @@ namespace ManageWalla
             //long targetSizeMB = Properties.Settings.Default.ThumbCacheSizeMB;
             long totalSize = (long)thumbCacheList.Sum(r => r.imageSize);
 
-            long thumbSize = 14000; //30KB average
+            long thumbSize = 40000; 
             long buffer = thumbSize * 10;
-            long targetSizeBytes = thumbCacheSizeMB * 131072;
+            long targetSizeBytes = thumbCacheSizeMB * 1024 * 1024;
             while (totalSize > (targetSizeBytes - buffer))
             {
                 //Find oldest entry and remove form list.
-                ThumbCache oldest = thumbCacheList.First(m => m.lastAccessed == (thumbCacheList.Max(e => e.lastAccessed)));
+                var oldest = thumbCacheList.OrderByDescending(t => t.lastAccessed).FirstOrDefault();
+
+                //DateTime maxDate = thumbCacheList.Max(e => e.lastAccessed);
+                //ThumbCache oldest = thumbCacheList.FirstOrDefault<ThumbCache>(m => m.lastAccessed == maxDate);
+                if (oldest == null)
+                    return;
+
+                //ThumbCache oldest2 = thumbCacheList.First<ThumbCache>(m => m.lastAccessed == (thumbCacheList.Max(e => e.lastAccessed)));
                 thumbCacheList.Remove(oldest);
-                targetSizeBytes = targetSizeBytes - oldest.imageSize;
+                //targetSizeBytes = targetSizeBytes - oldest.imageSize;
+                totalSize = (long)thumbCacheList.Sum(r => r.imageSize);
             }
 
         }

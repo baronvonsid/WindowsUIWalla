@@ -20,6 +20,7 @@ using System.Collections;
 using System.Threading;
 using System.Windows.Media.Animation; 
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows.Controls.Primitives;
 
 namespace ManageWalla
 {
@@ -264,10 +265,12 @@ namespace ManageWalla
             DateTime startTime = DateTime.Now;
             try
             {
+                uploadImageStateList.Clear();
                 controller.SetUpCacheFiles(profileName, uploadImageStateList, galleryPresentationList, galleryStyleList);
                 state = controller.GetState();
                 thumbCacheList = controller.GetThumbCacheList();
                 mainCopyCacheList = controller.GetMainCopyCacheList();
+                
 
                 cacheFilesSetup = true;
             }
@@ -492,11 +495,17 @@ namespace ManageWalla
                     {
                         cmdShowMenuLayout.Visibility = Visibility.Collapsed;
                         cmdBackFromMainImageLayout.Visibility = Visibility.Visible;
+
+                        lblImageViewNameVert.Visibility = Visibility.Visible;
+                        lblImageListNameVert.Visibility = Visibility.Collapsed;
                     }
                     else
                     {
                         cmdShowMenuLayout.Visibility = Visibility.Visible;
                         cmdBackFromMainImageLayout.Visibility = Visibility.Collapsed;
+
+                        lblImageViewNameVert.Visibility = Visibility.Collapsed;
+                        lblImageListNameVert.Visibility = Visibility.Visible;
                     }
                 }
                 else
@@ -1128,8 +1137,8 @@ namespace ManageWalla
                     case PaneMode.ImageView:
                     case PaneMode.ImageEdit:
                         panNavigationVert.Visibility = Visibility.Hidden;
-                        lblImageViewNameVert.Visibility = Visibility.Visible;
-                        lblImageListNameVert.Visibility = Visibility.Collapsed;
+                        //lblImageViewNameVert.Visibility = Visibility.Visible;
+                        //lblImageListNameVert.Visibility = Visibility.Collapsed;
                         cmbGallerySectionVert.Visibility = Visibility.Collapsed;
 
                         if (cmdImageViewDetailToggle.IsChecked == true)
@@ -1200,9 +1209,6 @@ namespace ManageWalla
             {
                 cmdShowMenuLayout.IsEnabled = enable;
 
-
-
-
                 cmdShowExpandedLayout.IsEnabled = enable;
                 sldImageSize.IsEnabled = enable;
                 cmdShowActionsMenu.IsEnabled = enable;
@@ -1238,8 +1244,6 @@ namespace ManageWalla
                     cmdImageNavigationPreviousVert.IsEnabled = enable;
                     cmdImageNavigationBeginVert.IsEnabled = enable;
                 }
-
-
 
                 if (state != null && state.connectionState == GlobalState.ConnectionState.OfflineMode)
                 {
@@ -1493,9 +1497,9 @@ namespace ManageWalla
 
         private void TweakUploadImageListMargin()
         {
-            double paneWidth = lstUploadImageFileList.ActualWidth - 22.0;
-            double imageWidth = 131.0;
-            double imageWidthWithMargin = imageWidth + 4.0;
+            double paneWidth = lstUploadImageFileList.ActualWidth - System.Windows.SystemParameters.VerticalScrollBarWidth - 10.0;
+            double imageWidth = 91.0;
+            double imageWidthWithMargin = imageWidth + 6.0;
 
             double imageWidthCount = Math.Floor(paneWidth / (imageWidthWithMargin));
             double remainder = paneWidth - (imageWidthCount * (imageWidth));
@@ -1523,10 +1527,13 @@ namespace ManageWalla
 
         private void TweakMainImageListMargin()
         {
+            
+
             bool isDetail = (bool)cmdShowInlineImageDetail.IsChecked;
-            double paneWidth = lstImageMainViewerList.ActualWidth - 22.0;
+
+            double paneWidth = lstImageMainViewerList.ActualWidth - System.Windows.SystemParameters.VerticalScrollBarWidth - 10.0; // -22.0;
             double imageWidth = sldImageSize.Value + 1;
-            double imageWidthWithMargin = imageWidth + 4.0;
+            double imageWidthWithMargin = imageWidth + 6.0;
 
             if (isDetail)
             {
@@ -1554,14 +1561,19 @@ namespace ManageWalla
 
             lastMarginTweakTime = DateTime.Now;
 
+            //Console.Out.WriteLine(sldImageSize.Value.ToString());
+
+            //double total = (imageWidthCount * (newMargin * 2)) + (imageWidthCount * imageWidth);
             /*
-            double total = (imageWidthCount * (newMargin * 2)) + (imageWidthCount * imageWidth);
             Console.Out.WriteLine("Main");
             Console.Out.WriteLine("New total:" + total.ToString());
             Console.Out.WriteLine("Image Size:" + imageWidth.ToString());
             Console.Out.WriteLine("Margin Changed:" + newMargin.ToString());
             Console.Out.WriteLine("Altered width:" + paneWidth.ToString());
+            
             Console.Out.WriteLine("Actual width:" + lstImageMainViewerList.ActualWidth.ToString());
+            Console.Out.WriteLine("New total:" + total.ToString());
+            Console.Out.WriteLine("Count:" + imageWidthCount.ToString());
             */
         }
 
@@ -1585,11 +1597,27 @@ namespace ManageWalla
             }
         }
 
+        void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
+        {
+
+            if (lstImageMainViewerList.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            {
+
+                lstImageMainViewerList.ScrollIntoView(lstImageMainViewerList.Items[0]);
+                lstImageMainViewerList.ItemContainerGenerator.StatusChanged -= ItemContainerGenerator_StatusChanged;
+
+            }
+
+        }
+
         async private Task ImageListUpdateControls(CancellationToken cancelToken)
         {
             DateTime startTime = DateTime.Now;
             try
             {
+
+
+
                 imageMainViewerList.Clear();
 
                 //tweakMainImageSize = false;
@@ -1638,11 +1666,18 @@ namespace ManageWalla
 
                         imageMainViewerList.Add(newImage);
                     }
+
+
+                    if (lstImageMainViewerList.Items.Count > 0)
+                    {
+                        lstImageMainViewerList.ItemContainerGenerator.StatusChanged += ItemContainerGenerator_StatusChanged;
+                        //lstImageMainViewerList.UpdateLayout();
+                        //lstImageMainViewerList.ScrollIntoView(lstImageMainViewerList.Items[0]);
+                    }
                 }
 
                 lblImageListName.Content = bannerName;
                 lblImageListNameVert.Text = bannerName;
-                
 
                 ImagesSetNavigationButtons();
 
@@ -2753,6 +2788,9 @@ namespace ManageWalla
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
 
+                if (lstImageMainViewerList.SelectedItems != null)
+                    lstImageMainViewerList.SelectedItems.Clear();
+
                 ConcludeBusyProcess();
                 await RefreshAndDisplayCategoryList(true);
 
@@ -3616,6 +3654,9 @@ namespace ManageWalla
                     ShowMessage(MainTwo.MessageType.Error, "Images could not be added to the Tag, there was an error on the server: " + ex.Message);
                 }
 
+                if (lstImageMainViewerList.SelectedItems != null)
+                    lstImageMainViewerList.SelectedItems.Clear();
+
                 try
                 {
                     await RefreshAndDisplayTagList(true);
@@ -4042,6 +4083,8 @@ namespace ManageWalla
                 {
                     ShowMessage(MessageType.Busy, "Files being analysed for upload");
 
+                    TweakImageMarginSize(DateTime.Now, currentPane);
+
                     List<string> responses = null;
                     if (folder.GetDirectories().Length > 0)
                     {
@@ -4132,6 +4175,7 @@ namespace ManageWalla
                 try
                 {
                     ShowMessage(MessageType.Busy, "Files being analysed for upload");
+                    TweakImageMarginSize(DateTime.Now, currentPane);
 
                     List<string> responses = null;
                     responses = await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots, cancelUploadTokenSource.Token);
@@ -6621,6 +6665,50 @@ namespace ManageWalla
                 ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
             }
         }
+
+        async private void ImageThumb_Error_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                DateTime startTime = DateTime.Now;
+                try
+                {
+                    var buttonClicked = sender as Button;
+                    DependencyObject dependencyItem = buttonClicked;
+                    while (dependencyItem is ListBoxItem == false)
+                    {
+                        dependencyItem = VisualTreeHelper.GetParent(dependencyItem);
+                    }
+                    var clickedListBoxItem = (ListBoxItem)dependencyItem;
+
+                    GeneralImage current = (GeneralImage)clickedListBoxItem.DataContext;
+                    //Button button = (Button)sender;
+                    //DependencyObject parentObj = LogicalTreeHelper.GetParent(button);
+                    //ListBoxItem current = parentObj as ListBoxItem;
+
+
+                    //GeneralImage current = (GeneralImage)lstImageMainViewerList.Items.CurrentItem;
+                    if (current == null)
+                        return;
+
+                    cancelTokenSource = new CancellationTokenSource();
+
+                    await current.LoadThumb(cancelTokenSource.Token, thumbCacheList, state.userApp.ThumbCacheSizeMB, state.connectionState);
+                }
+                finally
+                {
+                    TimeSpan duration = DateTime.Now - startTime;
+                    if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.imageThumbError_MouseUp()", (int)duration.TotalMilliseconds, ""); }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
+            }
+        }
+        
 
 
 

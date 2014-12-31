@@ -83,6 +83,7 @@ namespace ManageWalla
                     thumbArray = await LoadImageArrayAsync(requestUrl, cancelToken);
                     CacheHelper.SaveImageArray(imageId, thumbArray, thumbCacheList, thumbCacheSizeMB);
                 }
+                logger.Debug(thumbCacheList.Count.ToString());
 
                 thumbnailImage = ConvertByteArrayToImage(thumbArray);
                 thumbImageLoadState = LoadState.Loaded;

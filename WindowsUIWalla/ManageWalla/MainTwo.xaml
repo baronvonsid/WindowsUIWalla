@@ -778,7 +778,7 @@
                         <Line Visibility="Collapsed" Stroke="{StaticResource FontBorderBrushSelected}" DockPanel.Dock="Right" X1="1" Y1="0" X2="1" Y2="42" StrokeThickness="0.5" Margin="0" />
 
                         <Slider x:Name="sldImageSize" DockPanel.Dock="Left" Ticks="1, 2, 3, 4, 5" HorizontalAlignment="Left" VerticalAlignment="Center"
-                            Value="130"
+                            Value="100"
                             Delay="500"
                             Interval="10"
                             TickPlacement="BottomRight"
@@ -1023,7 +1023,7 @@
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition MinWidth="380" MaxWidth="400"/>
-                                    <ColumnDefinition MinWidth="300" MaxWidth="400"/>
+                                    <ColumnDefinition MinWidth="380" MaxWidth="400"/>
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
@@ -1384,7 +1384,7 @@
                     </Grid>
                 </DockPanel>
 
-                <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}" 
+                <ListBox Grid.Column="0" Grid.Row="1" Style="{DynamicResource PhotoListStyle}"
                             		    x:Name ="lstImageMainViewerList" 
                             		    ItemsSource="{Binding Mode=OneWay, Source={StaticResource imageMainViewerListKey}}"
                             		    ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -1399,15 +1399,36 @@
                             <StackPanel Orientation="Horizontal">
                                 <Grid>
 
-                                    <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}">
+                                    <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}"
+                                          Visibility="{Binding Path=thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='3'}">
+                                        <!--
                                         <Image x:Name="imageThumbError" Source="{StaticResource errorRefreshImageSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="Error loading thumbnail" 
                                                Visibility="{Binding Path=thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='3'}">
                                         </Image>
+-->
+                                        <Button HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            BorderThickness="0" ToolTip="Error loading image, click to retry" Click="ImageThumb_Error_Click">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="{x:Type Button}">
+                                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                        <Image x:Name="imageErrorReload" Source="{StaticResource errorRefreshImageSrc}" Height="32" />
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="true">
+                                                            <Setter TargetName="imageErrorReload" Property="Source" Value="{StaticResource errorRefreshImageSelectedSrc}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+
+
                                     </Grid>
 
                                     <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}">
                                         <Image x:Name="imageThumbLoading" Source="{StaticResource busyImageSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               Visibility="{Binding Path=thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='1'}">
+                                               Visibility="{Binding Path=thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='1'}"
+                                               Style="{StaticResource Spinner}">
                                         </Image>
                                     </Grid>
 
@@ -1469,19 +1490,19 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <Grid>
-                                    <Grid Height="130" Width="130">
+                                    <Grid Height="90" Width="90">
                                         <Image x:Name="imageThumbError" Height="32" Source="{StaticResource errorImageSrc}" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="Error loading preview" 
                                                Visibility="{Binding Path=thumbPreviewState, Converter={StaticResource WallaUploadImageStateToVisibleConverter}, ConverterParameter='2'}">
                                         </Image>
                                     </Grid>
 
-                                    <Grid Height="130" Width="130">
+                                    <Grid Height="90" Width="90">
                                         <Image x:Name="imageThumbNoPreview" Height="32" Source="{StaticResource noPreviewImageSrc}" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="No preview available"
                                                Visibility="{Binding Path=thumbPreviewState, Converter={StaticResource WallaUploadImageStateToVisibleConverter}, ConverterParameter='1'}">
                                         </Image>
                                     </Grid>
 
-                                    <Image x:Name="imageThumb" Source="{Binding Image.Source}" Height="130" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    <Image x:Name="imageThumb" Source="{Binding Image.Source}" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center"
                                             Visibility="{Binding Path=thumbPreviewState, Converter={StaticResource WallaUploadImageStateToVisibleConverter}, ConverterParameter='0'}">
                                     </Image>
 
