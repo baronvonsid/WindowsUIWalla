@@ -104,6 +104,8 @@ namespace ManageWalla
 
         public static bool CacheFilesPresent(string profileName)
         {
+            Console.Out.WriteLine(Application.UserAppDataPath);
+
             string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
             return File.Exists(fileName);
         }

@@ -129,6 +129,10 @@ namespace ManageWalla
 
             CacheHelper.GalleryStylePopulateFromState(state, styleListParam);
             galleryStyleList = styleListParam;
+
+            //Clear out temp upload folder
+            CreateClearTempFolder(profileName);
+
         }
 
         async public Task<bool> CheckOnline()
@@ -264,6 +268,24 @@ namespace ManageWalla
         public string AccountForgotPasswordUrl()
         {
             return serverHelper.GetWebUrl(false) + "forgotpassword";
+        }
+
+        private void CreateClearTempFolder(String profileName)
+        {
+            string tempFolderName = Path.Combine(System.Windows.Forms.Application.UserAppDataPath, profileName + "-temp");
+
+            if (Directory.Exists(tempFolderName))
+            {
+                string[] filesToDelete = Directory.GetFiles(tempFolderName, "*.tmp");
+                for (int i = 0; i < filesToDelete.Length; i++)
+                {
+                    File.Delete(filesToDelete[i]);
+                }
+            }
+            else
+            {
+                Directory.CreateDirectory(tempFolderName);
+            }
         }
         #endregion
 
@@ -427,7 +449,11 @@ namespace ManageWalla
                         currentUpload.Meta.OriginalFileName, currentUpload.FilePath, currentUpload.Meta.Name, 
                         currentUpload.Meta.Size, isAuto, state.userApp.id, state.userApp.MachineName);
 
+                    await currentUpload.CompressFile(state.account.ProfileName);
+
                     string response = await serverHelper.UploadImageAsync(currentUpload, newUploadEntry, cancelToken);
+
+                    
                     if (response == null)
                     {
                         newUploadEntry.lastUpdated = DateTime.Now;
@@ -441,7 +467,9 @@ namespace ManageWalla
                         responseErrors.Add(currentUpload.Meta.OriginalFileName + " error: " + response);
                     }
                     currentMain.RefreshUploadStatusListBinding();
-                    
+
+                    await currentUpload.RemoveCompressedFile(); 
+
                     meFots.Remove(currentUpload);
                 }
                 return responseErrors;

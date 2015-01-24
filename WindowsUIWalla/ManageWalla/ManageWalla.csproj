@@ -127,6 +127,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting">
@@ -297,11 +299,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\todo\error.gif" />
-    <Resource Include="resources\todo\busy.gif" />
-    <Resource Include="resources\todo\warning.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="resources\icons\expand.gif" />
   </ItemGroup>
   <ItemGroup>
@@ -323,9 +320,6 @@
     <Resource Include="resources\todo\sharedOpen.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\todo\private.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="resources\todo\sharedSecure.gif" />
   </ItemGroup>
   <ItemGroup>
@@ -343,12 +337,7 @@
     <Resource Include="resources\icons\upload_selected.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\todo\image_selected.png" />
     <Resource Include="resources\icons\selected.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\todo\errorRefresh.gif" />
-    <Resource Include="resources\todo\errorRefresh_selected.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\anim\refresh_rotating.gif" />
@@ -406,28 +395,10 @@
     </PublishFile>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\icons\refresh.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\icons\refresh_selected.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\todo\download.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\todo\download_selected.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="resources\icons\splashScreen.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\todo\info.gif" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="resources\todo\menuItem.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="resources\todo\menuItem - Copy.gif" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\todo\navScrollRight.gif" />
@@ -440,6 +411,45 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="resources\todo\navScrollLeft_selected.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\download.png" />
+    <Resource Include="resources\icons\download_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\image_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\refresh.png" />
+    <Resource Include="resources\icons\refresh_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\warning.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\private.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\errorRefresh.png" />
+    <Resource Include="resources\icons\errorRefresh_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\loading.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\error.png" />
+    <Resource Include="resources\icons\info.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\info_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\errorRefresh_12x12.png" />
+    <Resource Include="resources\icons\errorRefresh_selected_12x12.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\viewImageDetail.png" />
+    <Resource Include="resources\icons\viewImageDetail_selected.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

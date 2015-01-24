@@ -28,18 +28,18 @@
     <!-- application general -->
     <ImageSource x:Key="fotowallaNameSrc">resources/icons/fotowallaLogo.png</ImageSource>
     <ImageSource x:Key="fotowallaNameSelectedSrc">resources/icons/fotowallaLogo_selected.png</ImageSource>
-    <ImageSource x:Key="errorImageSrc">resources/todo/error.gif</ImageSource> <!-- TODO change to red -->
-    <ImageSource x:Key="warningImageSrc">resources/todo/warning.gif</ImageSource><!-- TODO change to yellow -->
-    <ImageSource x:Key="errorRefreshImageSelectedSrc">resources/todo/errorrefresh_selected.gif</ImageSource> <!-- TODO change to red -->
-    <ImageSource x:Key="errorRefreshImageSrc">resources/todo/errorrefresh.gif</ImageSource>
-    <ImageSource x:Key="infoImageSrc">resources/todo/info.gif</ImageSource> <!-- TODO -->
-    <ImageSource x:Key="busyImageSrc">resources/todo/busy.gif</ImageSource>
-    <ImageSource x:Key="refreshImageSrc">resources/icons/refresh.gif</ImageSource>
-    <ImageSource x:Key="refreshImageSelectedSrc">resources/icons/refresh_selected.gif</ImageSource>
+    <ImageSource x:Key="errorImageSrc">resources/icons/error.png</ImageSource>
+    <ImageSource x:Key="warningImageSrc">resources/icons/warning.png</ImageSource>
+    <ImageSource x:Key="errorRefreshImageSelectedSrc">resources/icons/errorrefresh_selected.png</ImageSource>
+    <ImageSource x:Key="errorRefreshImageSrc">resources/icons/errorrefresh.png</ImageSource>
+    <ImageSource x:Key="infoImageSrc">resources/icons/info.png</ImageSource>
+    <ImageSource x:Key="loadingImageSrc">resources/icons/loading.png</ImageSource>
+    <ImageSource x:Key="refreshImageSrc">resources/icons/refresh.png</ImageSource>
+    <ImageSource x:Key="refreshImageSelectedSrc">resources/icons/refresh_selected.png</ImageSource>
     <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.png</ImageSource>
     <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notselected.png</ImageSource>
-    <ImageSource x:Key="imageSelectedSrc">resources/todo/image_selected.png</ImageSource> <!-- More distinct -->
-    <ImageSource x:Key="menuItemImageSrc">resources/todo/menuItem.gif</ImageSource> <!-- More distinct -->    
+    <ImageSource x:Key="imageSelectedSrc">resources/icons/image_selected.png</ImageSource>
+    <ImageSource x:Key="menuItemImageSrc">resources/icons/selected.png</ImageSource> <!-- More distinct -->    
     
     <!-- main entities -->
     <ImageSource x:Key="categoryImageSrc">resources/icons/category.png</ImageSource>
@@ -50,8 +50,8 @@
     <ImageSource x:Key="galleryImageSelectedSrc">resources/icons/gallery_selected.png</ImageSource>    
     <ImageSource x:Key="uploadImageSrc">resources/icons/upload.png</ImageSource>
     <ImageSource x:Key="uploadImageSelectedSrc">resources/icons/upload_selected.png</ImageSource>
-    <ImageSource x:Key="downloadSrc">resources/todo/download.gif</ImageSource> <!-- TODO -->
-    <ImageSource x:Key="downloadSelectedSrc">resources/todo/download_selected.gif</ImageSource> <!-- TODO -->    
+    <ImageSource x:Key="downloadSrc">resources/icons/download.png</ImageSource>
+    <ImageSource x:Key="downloadSelectedSrc">resources/icons/download_selected.png</ImageSource>  
     
     <!-- navigations -->
     <ImageSource x:Key="expandImageSrc">resources/icons/expand.gif</ImageSource>
@@ -75,16 +75,16 @@
     <!-- actions -->
     <ImageSource x:Key="dropDownMenuImageSrc">resources/icons/menu.png</ImageSource>
     <ImageSource x:Key="dropDownMenuImageSelectedSrc">resources/icons/menu_selected.png</ImageSource>
-    <ImageSource x:Key="privateImageSrc">resources/todo/private.gif</ImageSource> <!-- Walla version -->
+    <ImageSource x:Key="privateImageSrc">resources/icons/private.png</ImageSource>
     <ImageSource x:Key="sharedSecureImageSrc">resources/todo/sharedsecure.gif</ImageSource> <!-- Walla version -->
     <ImageSource x:Key="sharedOpenImageSrc">resources/todo/sharedopen.gif</ImageSource> <!-- Walla version -->
-    <ImageSource x:Key="detailImageSrc">resources/icons/menu.png</ImageSource> <!-- to do new icon -->
-    <ImageSource x:Key="detailImageSelectedSrc">resources/icons/menu_selected.png</ImageSource> <!-- to do new icon -->
+    <ImageSource x:Key="detailImageSrc">resources/icons/viewImageDetail.png</ImageSource>
+    <ImageSource x:Key="detailImageSelectedSrc">resources/icons/viewImageDetail_selected.png</ImageSource>
     <ImageSource x:Key="multiSelectionImageSrc">resources/icons/menu.png</ImageSource> <!-- to do new icon -->
     <ImageSource x:Key="multiSelectionImageSelectedSrc">resources/icons/menu_selected.png</ImageSource> <!-- to do new icon -->
-    <ImageSource x:Key="noPreviewImageSrc">resources/todo/private.gif</ImageSource> <!-- to do new icon --> 
+    <ImageSource x:Key="noPreviewImageSrc">resources/icons/warning.png</ImageSource> <!-- to do new icon -->
 
-    <!--Control colors.-->
+    <!-- Control colors -->
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="White"/>
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#00A7BF"/>
 
@@ -122,11 +122,10 @@
     <SolidColorBrush x:Key="WallaBannerBackgroundBrush" Color="White" />
 
     <!-- #00A7BF -->
-
     <SolidColorBrush x:Key="PaneHeaderBackgroundSelectedBrush" Color="#FF00A7BF" />
     <SolidColorBrush x:Key="PaneHeaderNotSelectedBrush" Color="White" />
     <SolidColorBrush x:Key="PaneBodyBackgroundBrush" Color="White" />
-    
+
     
     <!-- Font and Border -->
     <SolidColorBrush x:Key="FontBorderBrush" Color="#374A5D" />

@@ -928,7 +928,6 @@ namespace ManageWalla
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.GalleryGetLogonTokenAsync()", (int)duration.TotalMilliseconds, url); }
             }
         }
-        
         #endregion
 
         #region Upload
@@ -936,6 +935,7 @@ namespace ManageWalla
         {
             DateTime startTime = DateTime.Now;
             string url = "";
+            FileStream fileStream = null;
             try
             {
                 //Initial Request setup
@@ -944,7 +944,7 @@ namespace ManageWalla
                 requestImage.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 //Associate file to upload.
-                FileStream fileStream = new FileStream(image.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+                fileStream = new FileStream(image.CompressedName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
                 
                 StreamContent streamContent = new StreamContent(fileStream);
                 requestImage.Content = streamContent;
@@ -1006,6 +1006,7 @@ namespace ManageWalla
             }
             finally
             {
+                if (fileStream != null) { try { fileStream.Close(); } catch { } }
                 TimeSpan duration = DateTime.Now - startTime;
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.UploadImageAsync()", (int)duration.TotalMilliseconds, url); }
             }

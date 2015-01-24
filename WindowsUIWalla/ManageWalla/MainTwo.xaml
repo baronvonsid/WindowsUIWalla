@@ -8,12 +8,6 @@
     Title="fotowalla" FontFamily="Browallia New"  Closing="mainTwo_Closing" Loaded="mainTwo_Loaded" 
     SizeChanged="mainTwo_SizeChanged" FontSize="18" TextOptions.TextFormattingMode="Display" Height="650" Width="1000">
 
-    <!-- gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" 
-    Source="{StaticResource busyImageSrc}"
-    
-   <Image x:Name="imgBusy" Source="{DynamicResource busyImageAnimSrc}" Height="30" />
-    <Image x:Name="imgBusy" gif:ImageBehavior.AnimatedSource="{DynamicResource busyImageAnimSrc}" Height="30" />
-    -->
 
     <Window.Resources>
         <CollectionViewSource x:Key="uploadImageStateListInProgressKey" 
@@ -1425,10 +1419,10 @@
 
                                     </Grid>
 
-                                    <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}">
-                                        <Image x:Name="imageThumbLoading" Source="{StaticResource busyImageSrc}" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               Visibility="{Binding Path=thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='1'}"
-                                               Style="{StaticResource Spinner}">
+                                    <Grid Height="{Binding ElementName=sldImageSize, Path=Value}" Width="{Binding ElementName=sldImageSize, Path=Value}"
+                                          Visibility="{Binding Path=thumbImageLoadState, Converter={StaticResource WallaLoadStateToVisibleConverter}, ConverterParameter='1'}">
+                                        <Image x:Name="imageThumbLoading" Source="{StaticResource loadingImageSrc}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Style="{StaticResource SpinnerSmall}">
                                         </Image>
                                     </Grid>
 
@@ -1783,8 +1777,8 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Image Source="{DynamicResource busyImageSrc}" Grid.Column="0" Grid.Row="0"
-                                Style="{DynamicResource Spinner}">
+                        <Image Source="{DynamicResource loadingImageSrc}" Grid.Column="0" Grid.Row="0"
+                                Style="{DynamicResource SpinnerSmall}">
                         </Image>
                         <Label Grid.Column="0" Grid.Row="1">loading...</Label>
                     </Grid>
@@ -2392,7 +2386,7 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <!-- <Image x:Name="imgBusy" Source="{DynamicResource busyImageAnimSrc}" Height="30" /> -->
-                <Image x:Name="imgBusy" Source="{DynamicResource busyImageSrc}" Height="32" Style="{StaticResource Spinner}"/>
+                <Image x:Name="imgBusy" Source="{DynamicResource loadingImageSrc}" Style="{StaticResource SpinnerSmall}"/>
                 <Image x:Name="imgAlert" Source="{StaticResource errorImageSrc}" Height="32" />
                 <TextBlock x:Name="lblAlertDialogHeader" TextWrapping="Wrap" Margin="20,0,0,0" Text="Loading.." Foreground="{StaticResource FontBorderBrush}" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
             </StackPanel>

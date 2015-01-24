@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.IO;
+using System.IO.Compression;
 using System.ComponentModel;
 using Shell32;
 using System.Windows;
@@ -39,8 +40,9 @@ namespace ManageWalla
         }
 
         //public event PropertyChangedEventHandler PropertyChanged;
+        public string CompressedName { get; set; }
+        public string FilePath { get; set; }
 
-        public String FilePath { get; set; }
         public Image Image { get { return image; } }
         public string FolderPath { get; set; }
         public ImageViewState thumbPreviewState { get; set; }
@@ -53,11 +55,14 @@ namespace ManageWalla
             get { return meta; }
         }
 
+
+
         #region Methods
         async public Task<string> Setup(string path, bool loadImage)
         {
             try
             {
+                CompressedName = "";
                 FolderPath = Path.GetDirectoryName(path);
                 FilePath = path;
                 string format = GetFormat(FilePath);
@@ -228,6 +233,36 @@ namespace ManageWalla
             string response = await Setup(FilePath, false);
             if (response != "OK")
                 throw new Exception(response);
+        }
+
+        async public Task CompressFile(string profileName)
+        {
+            string workingFolder = Path.Combine(System.Windows.Forms.Application.UserAppDataPath, profileName + "-temp");
+
+            //Create tempFileName
+            string tempName = DateTime.Now.ToString("hhmmssfff") + "-" + meta.Size + ".tmp";
+            CompressedName = Path.Combine(workingFolder, tempName);
+
+            //Create archive and add file
+            using (ZipArchive archive = ZipFile.Open(CompressedName, ZipArchiveMode.Create))
+            {
+                await System.Threading.Tasks.Task.Run(() =>
+                    {
+                        archive.CreateEntryFromFile(FilePath, Path.GetFileName(FilePath));
+                    });
+            }
+        }
+
+        async public Task RemoveCompressedFile()
+        {
+            if (File.Exists(CompressedName))
+            {
+                await System.Threading.Tasks.Task.Run(() =>
+                {
+                    File.Delete(CompressedName);
+                });
+            }
+            CompressedName = "";
         }
 
         private string GetFormat(string fileName)

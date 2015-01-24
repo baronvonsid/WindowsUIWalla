@@ -81,6 +81,12 @@ namespace ManageWalla
                     /* GET /{userName}/image/{imageId}/{size}/ */
                     string requestUrl = "image/" + imageId.ToString() + "/300/300/";
                     thumbArray = await LoadImageArrayAsync(requestUrl, cancelToken);
+                    if (thumbArray == null)
+                    {
+                        thumbImageLoadState = LoadState.Error;
+                        return;
+                    }
+                    
                     CacheHelper.SaveImageArray(imageId, thumbArray, thumbCacheList, thumbCacheSizeMB);
                 }
                 logger.Debug(thumbCacheList.Count.ToString());

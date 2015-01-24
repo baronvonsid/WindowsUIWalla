@@ -21,8 +21,8 @@ namespace ManageWalla
             string elementTypeParam = (string)parameter;
             GeneralImage.LoadState elementType = (GeneralImage.LoadState)int.Parse(elementTypeParam);
 
-            //GeneralImage.LoadState elementType = (GeneralImage.LoadState)int.Parse(elementTypeStr);
-            if (loadState == elementType)
+            //Cheat so notloaded acts the same as requested.
+            if (loadState == elementType || (loadState == GeneralImage.LoadState.NotLoaded && elementType == GeneralImage.LoadState.Requested))
             {
                 return Visibility.Visible;
             }
