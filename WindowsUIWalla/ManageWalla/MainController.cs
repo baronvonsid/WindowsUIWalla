@@ -156,17 +156,15 @@ namespace ManageWalla
 
         async public Task<string> Logon(string profileName, string email, string password)
         {
-            Logon logon = new Logon();
-            if (profileName.Length > 0)
-                logon.ProfileName = profileName;
-            else
-                logon.Email = email;
-
-            logon = await serverHelper.GetLogonToken(logon);
+            Logon logon = await serverHelper.GetLogonToken();
             if (logon == null || logon.Key.Length != 32)
                 return "Logon failed";
 
             //logon.ProfileName = profileName;
+            if (profileName.Length > 0)
+                logon.ProfileName = profileName;
+            else
+                logon.Email = email;
             logon.Password = password;
 
             if (await serverHelper.Logon(logon))

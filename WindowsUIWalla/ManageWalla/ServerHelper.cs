@@ -68,26 +68,21 @@ namespace ManageWalla
             }
         }
 
-        async public Task<Logon> GetLogonToken(Logon logon)
+        async public Task<Logon> GetLogonToken()
         {
             DateTime startTime = DateTime.Now;
             string url = "";
+            Logon logon = null;
             try
             {
                 http = new HttpClient(handler);
                 http.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
                 
-                url = "logontoken";
+                url = "logon/token";
 
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-
-                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-                xmlFormatter.UseXmlSerializer = true;
-                HttpContent content = new ObjectContent<Logon>(logon, xmlFormatter);
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
-                request.Content = content;
+                //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
 
                 HttpResponseMessage response = await http.SendAsync(request);
                 response.EnsureSuccessStatusCode();
