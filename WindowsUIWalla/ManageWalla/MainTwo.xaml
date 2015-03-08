@@ -1041,7 +1041,7 @@
                                                     <Image x:Name="imageThumb" Source="{Binding PresentationImage.Source}" Width="200"/>
                                                 
                                                     <StackPanel x:Name="paneSelectedPane" Visibility="Visible" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
+                                                        <Image x:Name="imageSelected" Visibility="Visible" Source="{StaticResource imageNotSelectedSrc}" />
                                                     </StackPanel>
                                                  </Grid>
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Width="150">
@@ -1059,7 +1059,7 @@
                                                     </Setter>
                                                 </Trigger>
                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
-                                                    <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="imageSelected" Property="Source" Value="{StaticResource imageSelectedSrc}" />
                                                     <Setter TargetName="lblName" Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
                                                 </DataTrigger>
                                             </DataTemplate.Triggers>
@@ -1084,7 +1084,7 @@
                                                     <Image x:Name="imageThumb" Source="{Binding StyleImage.Source}" Width="200" />
 
                                                     <StackPanel x:Name="paneSelectedPane" Visibility="Visible" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
+                                                        <Image x:Name="imageSelected" Visibility="Visible" Source="{StaticResource imageNotSelectedSrc}" />
                                                     </StackPanel>
                                                 </Grid>
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Width="150">
@@ -1101,7 +1101,7 @@
                                                     </Setter>
                                                 </Trigger>
                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
-                                                    <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="imageSelected" Property="Source" Value="{StaticResource imageSelectedSrc}" />
                                                     <Setter TargetName="lblName" Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
                                                 </DataTrigger>
                                             </DataTemplate.Triggers>
@@ -1432,7 +1432,7 @@
                                     </Image>
 
                                     <StackPanel x:Name="paneSelectedPane" Visibility="{Binding ElementName=cmdMultiSelectionMode, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
+                                        <Image x:Name="imageSelected" Visibility="Visible" Source="{StaticResource imageNotSelectedSrc}" Height="14" />
                                     </StackPanel>
                                 </Grid>
                                 <StackPanel Orientation="Vertical" x:Name="imageInlineDetailPane"  Visibility="{Binding ElementName=cmdShowInlineImageDetail, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="140" MouseUp="Image_MouseUp" >
@@ -1451,7 +1451,7 @@
                                     </Setter>
                                 </Trigger>
                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
-                                    <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="imageSelected" Property="Source" Value="{StaticResource imageSelectedSrc}" />
                                     <Setter TargetName="lblName" Property="Foreground" Value="{StaticResource FontBorderBrushSelected}" />
                                 </DataTrigger>
 
@@ -1501,7 +1501,7 @@
                                     </Image>
 
                                     <StackPanel x:Name="paneSelectedPane" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                                        <Image x:Name="imageSelected" Visibility="Hidden" Source="{StaticResource imageSelectedSrc}" Height="14" />
+                                        <Image x:Name="imageSelected" Visibility="Visible" Source="{StaticResource imageNotSelectedSrc}" Height="14" />
                                     </StackPanel>
                                     
                                 </Grid>
@@ -1515,7 +1515,7 @@
                                     </Setter>
                                 </Trigger>
                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
-                                    <Setter TargetName="imageSelected" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="imageSelected" Property="Source" Value="{StaticResource imageSelectedSrc}" />
                                 </DataTrigger>
                                 <Trigger Property="IsEnabled" Value="false">
                                     <Setter  TargetName="imageThumb" Property="Effect">
@@ -1789,7 +1789,7 @@
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
                                     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <Image x:Name="imageNav" Source="{StaticResource navPreviousImageSrc}" Height="32" />
+                                        <Image x:Name="imageNav" Source="{StaticResource navScrollLeftImageSrc}" Height="32" />
                                     </Grid>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsEnabled" Value="false">
@@ -1801,7 +1801,7 @@
                                                 <Condition Property="IsMouseOver" Value="true" />
                                             </MultiTrigger.Conditions>
                                             <MultiTrigger.Setters>
-                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navPreviousImageSelectedSrc}" />
+                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navScrollLeftImageSelectedSrc}" />
                                             </MultiTrigger.Setters>
                                         </MultiTrigger>
                                     </ControlTemplate.Triggers>
@@ -1841,7 +1841,7 @@
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
                                     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <Image x:Name="imageNav" Source="{StaticResource navNextImageSrc}" Height="32" />
+                                        <Image x:Name="imageNav" Source="{StaticResource navScrollRightImageSrc}" Height="32" />
                                     </Grid>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsEnabled" Value="false">
@@ -1853,7 +1853,7 @@
                                                 <Condition Property="IsMouseOver" Value="true" />
                                             </MultiTrigger.Conditions>
                                             <MultiTrigger.Setters>
-                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navNextImageSelectedSrc}" />
+                                                <Setter TargetName="imageNav" Property="Source" Value="{StaticResource navScrollRightImageSelectedSrc}" />
                                             </MultiTrigger.Setters>
                                         </MultiTrigger>
                                     </ControlTemplate.Triggers>

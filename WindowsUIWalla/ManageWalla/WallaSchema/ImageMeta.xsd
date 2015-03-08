@@ -16,6 +16,7 @@ targetNamespace="http://ws.fotowalla.com/ImageMeta"
 	    <element type="int" name="Width" default="0"/>
 	    <element type="int" name="Height" default="0"/>
 	    <element type="long" name="Size" default="0"/>
+	    <element type="long" name="CompressedSize" default="0"/>
 	    <element type="string" name="CameraMaker"/>
 	    <element type="string" name="CameraModel"/>
 	    <element type="string" name="Aperture"/>
@@ -25,7 +26,7 @@ targetNamespace="http://ws.fotowalla.com/ImageMeta"
 	    <element type="dateTime" name="TakenDate"/>
 	    <element type="boolean" name="TakenDateSet"/>
 	    <element type="dateTime" name="TakenDateFile"/>
-	    <element type="dateTime" name="TakenDateMeta"/>
+	    <element type="dateTime" name="TakenDateMeta" />
 	    <element type="dateTime" name="UploadDate"/>
 	    <element type="string" name="UdfChar1"/>
 	    <element type="string" name="UdfChar2"/>

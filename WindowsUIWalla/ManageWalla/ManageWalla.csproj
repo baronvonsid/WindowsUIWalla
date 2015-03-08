@@ -182,15 +182,18 @@
     <Compile Include="ValueConverters\WallaCacheSizeConverter.cs" />
     <Compile Include="ValueConverters\WallaByteToMBConverter.cs" />
     <Compile Include="WallaDataType\Account.cs" />
+    <Compile Include="WallaDataType\AccountStorage.cs" />
     <Compile Include="WallaDataType\Category.cs" />
     <Compile Include="WallaDataType\CategoryList.cs" />
     <Compile Include="WallaDataType\ClientApp.cs" />
     <Compile Include="WallaDataType\Gallery.cs" />
     <Compile Include="WallaDataType\GalleryList.cs" />
+    <Compile Include="WallaDataType\GalleryLogon.cs" />
     <Compile Include="WallaDataType\GalleryOptions.cs" />
     <Compile Include="WallaDataType\ImageIdList.cs" />
     <Compile Include="WallaDataType\ImageList.cs" />
     <Compile Include="WallaDataType\Logon.cs" />
+    <Compile Include="WallaDataType\Machine.cs" />
     <Compile Include="WallaDataType\Tag.cs" />
     <Compile Include="MainController.cs" />
     <Compile Include="ProjectDataType\UploadUIState.cs" />
@@ -252,20 +255,60 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="WallaSchema\Account.xsd" />
-    <None Include="WallaSchema\Category.xsd" />
-    <None Include="WallaSchema\CategoryList.xsd" />
-    <None Include="WallaSchema\ClientApp.xsd" />
-    <None Include="WallaSchema\Gallery.xsd" />
-    <None Include="WallaSchema\GalleryList.xsd" />
-    <None Include="WallaSchema\GalleryOptions.xsd" />
-    <None Include="WallaSchema\ImageIdList.xsd" />
-    <None Include="WallaSchema\ImageList.xsd" />
-    <None Include="WallaSchema\ImageMeta.xsd" />
-    <None Include="WallaSchema\TagList.xsd" />
-    <None Include="WallaSchema\Tag.xsd" />
-    <None Include="WallaSchema\UploadStatusList.xsd" />
-    <None Include="WallaSchema\UserApp.xsd" />
+    <None Include="WallaSchema\Account.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\AccountStorage.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\Category.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\CategoryList.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\ClientApp.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\Gallery.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\GalleryList.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\GalleryLogon.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\GalleryOptions.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\ImageIdList.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\ImageList.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\ImageMeta.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\Logon.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\Machine.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\TagList.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\Tag.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\UploadStatusList.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\UserApp.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -450,6 +493,26 @@
   <ItemGroup>
     <Resource Include="resources\icons\viewImageDetail.png" />
     <Resource Include="resources\icons\viewImageDetail_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\image_notselected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\navScrollLeft.png" />
+    <Resource Include="resources\icons\navScrollLeft_selected.png" />
+    <Resource Include="resources\icons\navScrollRight.png" />
+    <Resource Include="resources\icons\navScrollRight_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\sharedOpen.png" />
+    <Resource Include="resources\icons\sharedSecure.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\noPreview.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\icons\multiSelectOff.png" />
+    <Resource Include="resources\icons\multiSelectOn.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

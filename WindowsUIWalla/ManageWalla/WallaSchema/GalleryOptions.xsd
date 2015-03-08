@@ -16,6 +16,12 @@
                     <attribute type="string" name="jspName" />
                     <attribute type="string" name="cssExtension" />
                     <attribute type="int" name="maxSections" />
+                    <attribute type="int" name="maxImagesInSection" />
+                    <attribute type="boolean" name="optionGalleryName" />
+                    <attribute type="boolean" name="optionGalleryDesc" />
+                    <attribute type="boolean" name="optionImageName" />
+                    <attribute type="boolean" name="optionImageDesc" />
+                    <attribute type="boolean" name="optionGroupingDesc" />
               </complexType>
               </element>
             </sequence>

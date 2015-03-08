@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://ws.fotowalla.com/GalleryLogon"
+	xmlns:tns="http://ws.fotowalla.com/GalleryLogon" 
+	elementFormDefault="qualified">
+
+  <element name="GalleryLogon">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="1">
+      		<element type="long" name="UserId" />
+	      	<element type="string" name="ProfileName" />
+	      	<element type="string" name="GalleryName" />
+			<element type="string" name="Password" />
+			<element type="string" name="PasswordHash" />
+			<element type="string" name="GallerySalt" />
+			<element type="string" name="TempSalt" />
+			<element type="string" name="ComplexUrl" />
+			<element type="int" name="AccessType" />
+			<element type="string" name="Key" />
+       </sequence>
+    </complexType>
+  </element>
+</schema>

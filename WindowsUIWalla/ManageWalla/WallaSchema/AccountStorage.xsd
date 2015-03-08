@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://ws.fotowalla.com/AccountStorage"
+	xmlns:tns="http://ws.fotowalla.com/AccountStorage" 
+	elementFormDefault="qualified">
+
+    <element name="AccountStorage">
+      <complexType>
+        <sequence>
+         <element type="string" name="StorageMessage" />
+		 <element type="double" name="StorageGBLimit" />
+		 <element type="int" name="MonthlyUploadCap" />
+		 <element type="int" name="UploadCount30Days" />
+          <element type="double" name="SizeGB" />
+          <element type="double" name="CompressedSizeGB" />
+          <element type="int" name="ImageCount" />
+          <element name="FormatRef" maxOccurs="unbounded" minOccurs="0">
+           <complexType>
+           	<sequence maxOccurs="1" minOccurs="0">
+                  <element type="string" name="Format" />
+                  <element type="double" name="SizeGB"/>
+                  <element type="double" name="CompressedSizeGB"/>
+                  <element type="int" name="ImageCount" />
+                </sequence>
+           </complexType>
+          </element>
+          <element name="UploadSourceRef" maxOccurs="unbounded" minOccurs="0">
+           <complexType>
+           	<sequence maxOccurs="1" minOccurs="0">
+                  <element type="string" name="Name" />
+                  <element type="double" name="SizeGB"/>
+                  <element type="double" name="CompressedSizeGB"/>
+                  <element type="int" name="ImageCount" />
+                </sequence>
+           </complexType>
+          </element>
+          <element name="ImageYearRef" maxOccurs="unbounded" minOccurs="0">
+           <complexType>
+           	<sequence maxOccurs="1" minOccurs="0">
+                  <element type="string" name="Year" />
+                  <element type="double" name="SizeGB"/>
+                  <element type="double" name="CompressedSizeGB"/>
+                  <element type="int" name="ImageCount" />
+                </sequence>
+           </complexType>
+          </element>
+        </sequence>
+        <attribute type="long" name="id" default="0"/>
+      </complexType>
+    </element>
+</schema>

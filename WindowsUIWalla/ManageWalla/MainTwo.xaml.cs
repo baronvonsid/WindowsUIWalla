@@ -4678,9 +4678,11 @@ namespace ManageWalla
             {
                 lblAccountType.Content = state.account.AccountTypeName;
                 lblAccountOpen.Content = state.account.OpenDate.ToShortDateString();
-                lblAccountStorageLimitGB.Content = state.account.StorageGBLimit + " GB";
-                lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + " GB - " + state.account.TotalImages.ToString() + " Images";
-                lblAccountEmail.Content = state.account.Email;
+
+                //TODO get storage details.
+                //lblAccountStorageLimitGB.Content = state.account + " GB";
+                //lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + " GB - " + state.account.TotalImages.ToString() + " Images";
+                //lblAccountEmail.Content = state.account.Email;
                 lblAccountProfileName.Content = state.account.ProfileName;
             }
 

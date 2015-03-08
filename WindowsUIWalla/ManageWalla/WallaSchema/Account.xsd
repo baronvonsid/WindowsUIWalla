@@ -9,21 +9,43 @@ targetNamespace="http://ws.fotowalla.com/Account"
       <sequence maxOccurs="1" minOccurs="0">
         <element type="string" name="ProfileName"/>
         <element type="string" name="Desc"/>
-        <element type="string" name="Email"/>
+        <element type="string" name="Country"/>
+        <element type="string" name="Timezone"/>
+        <element type="boolean" name="Newsletter"/>
         <element type="string" name="Password"/>
-        <element type="int" name="Status" /> <!-- 1 - Initial details received, 2 - Email confirmed, 
-        											3 - billing confirmed, 4 - billing issue
-        											5 - live, 6 - shutdown pending, 7 closed. -->
-        <element type="int" name="AccountType" />
-        <element type="string" name="AccountTypeName" />
+        <element type="int" name="Status" /> 
+        <!-- 		
+	        1 - initial details setup
+			2 - live (email and banking done)
+			3 - shutdown pending
+			4 - closed
+		-->
+		<element type="string" name="AccountMessage" />
+		<element type="int" name="AccountType" />
+		<element type="string" name="AccountTypeName" />
+		<element type="date" name="PasswordChangeDate" />
         <element type="date" name="OpenDate" />
         <element type="date" name="CloseDate" />
-        <element type="double" name="StorageGBLimit" />
-        <element type="double" name="StorageGBCurrent" />
-        <element type="int" name="TotalImages" />
-        <element type="int" name="MonthlyUploadCap" />
-        <element type="int" name="UploadCount30Days" />
         <element type="string" name="Key" />
+		<element type="string" name="SecurityMessage" />
+
+        <element name="Emails">
+          <complexType>
+            <sequence>
+              <element name="EmailRef" maxOccurs="unbounded" minOccurs="0">
+              <complexType>
+              	<sequence maxOccurs="1" minOccurs="0">
+					<element type="string" name="Address" />
+					<element type="boolean" name="Principle" />
+					<element type="boolean" name="Secondary" />
+					<element type="boolean" name="Verified" />
+				</sequence>
+              </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+
        </sequence>
       <attribute type="long" name="id" default="0"/>
       <attribute type="int" name="version" default="0"/>

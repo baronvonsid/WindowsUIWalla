@@ -39,7 +39,8 @@
     <ImageSource x:Key="radioSelectedImageSrc">resources/icons/selected.png</ImageSource>
     <ImageSource x:Key="radioNotSelectedImageSrc">resources/icons/notselected.png</ImageSource>
     <ImageSource x:Key="imageSelectedSrc">resources/icons/image_selected.png</ImageSource>
-    <ImageSource x:Key="menuItemImageSrc">resources/icons/selected.png</ImageSource> <!-- More distinct -->    
+    <ImageSource x:Key="imageNotSelectedSrc">resources/icons/image_notselected.png</ImageSource>
+    <ImageSource x:Key="menuItemImageSrc">resources/icons/selected.png</ImageSource> 
     
     <!-- main entities -->
     <ImageSource x:Key="categoryImageSrc">resources/icons/category.png</ImageSource>
@@ -67,22 +68,22 @@
     <ImageSource x:Key="navPreviousImageSrc">resources/icons/navPrevious.gif</ImageSource>
     <ImageSource x:Key="navLastImageSrc">resources/icons/navLast.gif</ImageSource>
 
-    <ImageSource x:Key="navScrollRightImageSrc">resources/todo/navScrollRight.gif</ImageSource>
-    <ImageSource x:Key="navScrollRightImageSelectedSrc">resources/todo/navScrollRight_selected.gif</ImageSource>
-    <ImageSource x:Key="navScrollLeftImageSrc">resources/todo/navScrollLeft.gif</ImageSource>
-    <ImageSource x:Key="navScrollLeftImageSelectedSrc">resources/todo/navScrollLeft_selected.gif</ImageSource>
+    <ImageSource x:Key="navScrollRightImageSrc">resources/icons/navScrollRight.png</ImageSource>
+    <ImageSource x:Key="navScrollRightImageSelectedSrc">resources/icons/navScrollRight_selected.png</ImageSource>
+    <ImageSource x:Key="navScrollLeftImageSrc">resources/icons/navScrollLeft.png</ImageSource>
+    <ImageSource x:Key="navScrollLeftImageSelectedSrc">resources/icons/navScrollLeft_selected.png</ImageSource>
     
     <!-- actions -->
     <ImageSource x:Key="dropDownMenuImageSrc">resources/icons/menu.png</ImageSource>
     <ImageSource x:Key="dropDownMenuImageSelectedSrc">resources/icons/menu_selected.png</ImageSource>
     <ImageSource x:Key="privateImageSrc">resources/icons/private.png</ImageSource>
-    <ImageSource x:Key="sharedSecureImageSrc">resources/todo/sharedsecure.gif</ImageSource> <!-- Walla version -->
-    <ImageSource x:Key="sharedOpenImageSrc">resources/todo/sharedopen.gif</ImageSource> <!-- Walla version -->
+    <ImageSource x:Key="sharedSecureImageSrc">resources/icons/sharedSecure.png</ImageSource>
+    <ImageSource x:Key="sharedOpenImageSrc">resources/icons/sharedOpen.png</ImageSource> 
     <ImageSource x:Key="detailImageSrc">resources/icons/viewImageDetail.png</ImageSource>
     <ImageSource x:Key="detailImageSelectedSrc">resources/icons/viewImageDetail_selected.png</ImageSource>
-    <ImageSource x:Key="multiSelectionImageSrc">resources/icons/menu.png</ImageSource> <!-- to do new icon -->
-    <ImageSource x:Key="multiSelectionImageSelectedSrc">resources/icons/menu_selected.png</ImageSource> <!-- to do new icon -->
-    <ImageSource x:Key="noPreviewImageSrc">resources/icons/warning.png</ImageSource> <!-- to do new icon -->
+    <ImageSource x:Key="multiSelectionImageSrc">resources/icons/multiSelectOff.png</ImageSource>
+    <ImageSource x:Key="multiSelectionImageSelectedSrc">resources/icons/multiSelectOn.png</ImageSource> 
+    <ImageSource x:Key="noPreviewImageSrc">resources/icons/noPreview.png</ImageSource>
 
     <!-- Control colors -->
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="White"/>

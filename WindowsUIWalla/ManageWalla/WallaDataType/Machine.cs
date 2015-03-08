@@ -22,21 +22,15 @@ namespace ManageWalla {
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/UserApp")]
     [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/UserApp", IsNullable=false)]
-    public partial class UserApp {
-        
-        private int appIdField;
+    public partial class UserApp555 {
         
         private int platformIdField;
-        
-        private string machineNameField;
         
         private System.DateTime lastUsedField;
         
         private long tagIdField;
         
-        private long userAppCategoryIdField;
-        
-        private long userDefaultCategoryIdField;
+        private long categoryIdField;
         
         private long galleryIdField;
         
@@ -44,35 +38,22 @@ namespace ManageWalla {
         
         private int mainCopyCacheSizeMBField;
         
-        private int fetchSizeField;
+        private int imageFetchSizeField;
         
         private string mainCopyFolderField;
         
         private string autoUploadFolderField;
         
-        private bool autoUploadField;
-        
         private long idField;
         
         private int versionField;
         
-        public UserApp() {
+        public UserApp555() {
             this.tagIdField = ((long)(0));
-            this.userAppCategoryIdField = ((long)(0));
-            this.userDefaultCategoryIdField = ((long)(0));
+            this.categoryIdField = ((long)(0));
             this.galleryIdField = ((long)(0));
             this.idField = ((long)(0));
             this.versionField = 0;
-        }
-        
-        /// <remarks/>
-        public int AppId {
-            get {
-                return this.appIdField;
-            }
-            set {
-                this.appIdField = value;
-            }
         }
         
         /// <remarks/>
@@ -86,16 +67,7 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        public string MachineName {
-            get {
-                return this.machineNameField;
-            }
-            set {
-                this.machineNameField = value;
-            }
-        }
-        
-        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(DataType="date")]
         public System.DateTime LastUsed {
             get {
                 return this.lastUsedField;
@@ -116,22 +88,12 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        public long UserAppCategoryId {
+        public long CategoryId {
             get {
-                return this.userAppCategoryIdField;
+                return this.categoryIdField;
             }
             set {
-                this.userAppCategoryIdField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public long UserDefaultCategoryId {
-            get {
-                return this.userDefaultCategoryIdField;
-            }
-            set {
-                this.userDefaultCategoryIdField = value;
+                this.categoryIdField = value;
             }
         }
         
@@ -166,12 +128,12 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        public int FetchSize {
+        public int ImageFetchSize {
             get {
-                return this.fetchSizeField;
+                return this.imageFetchSizeField;
             }
             set {
-                this.fetchSizeField = value;
+                this.imageFetchSizeField = value;
             }
         }
         
@@ -192,16 +154,6 @@ namespace ManageWalla {
             }
             set {
                 this.autoUploadFolderField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public bool AutoUpload {
-            get {
-                return this.autoUploadField;
-            }
-            set {
-                this.autoUploadField = value;
             }
         }
         
