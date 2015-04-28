@@ -24,14 +24,15 @@ namespace ManageWalla
         {
             SplashScreen splashScreen = new SplashScreen("resources/icons/splashScreen.png");
             splashScreen.Show(true);
-            
+
+            System.Threading.Thread.Sleep(2000);
 
 
             ManageWalla.App app = new ManageWalla.App();
             app.StartupUri = new Uri("MainTwo.xaml", System.UriKind.Relative);
             app.InitializeComponent();
             //splashScreen.Close(TimeSpan.FromSeconds(5));
-            System.Threading.Thread.Sleep(2000);
+            
             app.Run();
 
         }

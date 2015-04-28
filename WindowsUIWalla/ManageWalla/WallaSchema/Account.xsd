@@ -13,7 +13,7 @@ targetNamespace="http://ws.fotowalla.com/Account"
         <element type="string" name="Timezone"/>
         <element type="boolean" name="Newsletter"/>
         <element type="string" name="Password"/>
-        <element type="int" name="Status" /> 
+        <element type="int" name="Status" />
         <!-- 		
 	        1 - initial details setup
 			2 - live (email and banking done)
@@ -23,9 +23,9 @@ targetNamespace="http://ws.fotowalla.com/Account"
 		<element type="string" name="AccountMessage" />
 		<element type="int" name="AccountType" />
 		<element type="string" name="AccountTypeName" />
-		<element type="date" name="PasswordChangeDate" />
-        <element type="date" name="OpenDate" />
-        <element type="date" name="CloseDate" />
+		<element type="dateTime" name="PasswordChangeDate" />
+        <element type="dateTime" name="OpenDate" />
+        <element type="dateTime" name="CloseDate" />
         <element type="string" name="Key" />
 		<element type="string" name="SecurityMessage" />
 

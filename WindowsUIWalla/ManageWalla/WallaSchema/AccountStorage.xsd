@@ -21,6 +21,7 @@ targetNamespace="http://ws.fotowalla.com/AccountStorage"
                   <element type="double" name="SizeGB"/>
                   <element type="double" name="CompressedSizeGB"/>
                   <element type="int" name="ImageCount" />
+                  <element type="string" name="Colour" />
                 </sequence>
            </complexType>
           </element>
@@ -31,6 +32,7 @@ targetNamespace="http://ws.fotowalla.com/AccountStorage"
                   <element type="double" name="SizeGB"/>
                   <element type="double" name="CompressedSizeGB"/>
                   <element type="int" name="ImageCount" />
+                  <element type="string" name="Colour" />
                 </sequence>
            </complexType>
           </element>
@@ -41,6 +43,7 @@ targetNamespace="http://ws.fotowalla.com/AccountStorage"
                   <element type="double" name="SizeGB"/>
                   <element type="double" name="CompressedSizeGB"/>
                   <element type="int" name="ImageCount" />
+                  <element type="string" name="Colour" />
                 </sequence>
            </complexType>
           </element>

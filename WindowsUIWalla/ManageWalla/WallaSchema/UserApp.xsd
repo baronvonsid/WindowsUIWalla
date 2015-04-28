@@ -21,6 +21,7 @@ targetNamespace="http://ws.fotowalla.com/UserApp"
 	      <element type="string" name="MainCopyFolder" />
 	      <element type="string" name="AutoUploadFolder" />
 	      <element type="boolean" name="AutoUpload" />
+	      <element type="boolean" name="Blocked" />
        </sequence>
       <attribute type="long" name="id" default="0"/>
       <attribute type="int" name="version" default="0"/>

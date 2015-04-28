@@ -338,6 +338,40 @@ namespace ManageWalla
             proxy.BaseAddress = new Uri("http://" + hostName + ":" + port.ToString() + wsPath);
             return proxy;
         }
+
+        async public Task<string> AccountGetPassThroughTokenAsync(CancellationToken cancelToken)
+        {
+            DateTime startTime = DateTime.Now;
+            string url = "";
+            try
+            {
+                url = "logontoken/";
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+
+                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                response.EnsureSuccessStatusCode();
+
+                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                reader.MoveToContent();
+                return reader.ReadElementContentAsString();
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("AccountGetPassThroughTokenAsync has been cancelled."); }
+                throw cancelEx;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                throw ex;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.AccountGetPassThroughTokenAsync()", (int)duration.TotalMilliseconds, url); }
+            }
+        }
         #endregion
 
         #region Tag

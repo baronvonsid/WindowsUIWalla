@@ -182,6 +182,8 @@ namespace ManageWalla {
         
         private int imageCountField;
         
+        private string colourField;
+        
         /// <remarks/>
         public string Format {
             get {
@@ -221,6 +223,16 @@ namespace ManageWalla {
                 this.imageCountField = value;
             }
         }
+        
+        /// <remarks/>
+        public string Colour {
+            get {
+                return this.colourField;
+            }
+            set {
+                this.colourField = value;
+            }
+        }
     }
     
     /// <remarks/>
@@ -238,6 +250,8 @@ namespace ManageWalla {
         private double compressedSizeGBField;
         
         private int imageCountField;
+        
+        private string colourField;
         
         /// <remarks/>
         public string Name {
@@ -278,6 +292,16 @@ namespace ManageWalla {
                 this.imageCountField = value;
             }
         }
+        
+        /// <remarks/>
+        public string Colour {
+            get {
+                return this.colourField;
+            }
+            set {
+                this.colourField = value;
+            }
+        }
     }
     
     /// <remarks/>
@@ -295,6 +319,8 @@ namespace ManageWalla {
         private double compressedSizeGBField;
         
         private int imageCountField;
+        
+        private string colourField;
         
         /// <remarks/>
         public string Year {
@@ -333,6 +359,16 @@ namespace ManageWalla {
             }
             set {
                 this.imageCountField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public string Colour {
+            get {
+                return this.colourField;
+            }
+            set {
+                this.colourField = value;
             }
         }
     }

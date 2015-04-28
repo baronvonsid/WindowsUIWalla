@@ -373,8 +373,8 @@ namespace ManageWalla
 
                             DoubleAnimationUsingKeyFrames opacityBusyFrameAnim = new DoubleAnimationUsingKeyFrames();
                             opacityBusyFrameAnim.FillBehavior = FillBehavior.HoldEnd;
-                            opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(2.0)));
-                            opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(4.0)));
+                            opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, TimeSpan.FromSeconds(1.0)));
+                            opacityBusyFrameAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.5, TimeSpan.FromSeconds(2.0)));
                             paneBusy.BeginAnimation(Border.OpacityProperty, opacityBusyFrameAnim);
                         }
 
@@ -1074,7 +1074,7 @@ namespace ManageWalla
 
                             cmdUseOffline.IsEnabled = true;
                             cmdAccountLogout.IsEnabled = true;
-                            cmdUpdateProfileLoggedOn.IsEnabled = true;
+                            cmdAccountSettingsView.IsEnabled = true;
 
                             chkAccountAutoUpload.IsEnabled = false;
                             sldAccountImageCopySize.IsEnabled = false;
@@ -1096,7 +1096,7 @@ namespace ManageWalla
 
                             cmdUseOffline.IsEnabled = true;
                             cmdAccountLogout.IsEnabled = false;
-                            cmdUpdateProfileLoggedOn.IsEnabled = false;
+                            cmdAccountSettingsView.IsEnabled = false;
 
                             chkAccountAutoUpload.IsEnabled = false;
                             sldAccountImageCopySize.IsEnabled = false;
@@ -1123,7 +1123,7 @@ namespace ManageWalla
                         tabDownloadList.IsEnabled = false;
                         tabUploadStatusList.IsEnabled = false;
                         cmdUseOffline.IsEnabled = false;
-                        cmdUpdateProfileLoggedOn.IsEnabled = false;
+                        cmdAccountSettingsView.IsEnabled = false;
 
 
                         chkAccountAutoUpload.IsEnabled = true;
@@ -1693,15 +1693,15 @@ namespace ManageWalla
                     if (cancelToken != null)
                         cancelToken.ThrowIfCancellationRequested();
 
-                    Task[] tasks = new Task[10];
+                    Task[] tasks = new Task[3];
 
-                    for (int i = 0; i < 10; i++)
+                    for (int i = 0; i < 3; i++)
                     {
                         if (cursor + i < imageMainViewerList.Count)
                             tasks[i] = imageMainViewerList[cursor + i].LoadThumb(cancelToken, thumbCacheList, state.userApp.ThumbCacheSizeMB, state.connectionState);
                     }
 
-                    for (int i = 0; i < 10; i++)
+                    for (int i = 0; i < 3; i++)
                     {
                         if (tasks[i] != null)
                             await tasks[i];
@@ -1719,7 +1719,7 @@ namespace ManageWalla
                     }
                     */
 
-                    cursor = cursor + 10;
+                    cursor = cursor + 3;
                     if (cursor >= imageMainViewerList.Count)
                         moreToLoad = false;
                 }
@@ -4679,10 +4679,11 @@ namespace ManageWalla
                 lblAccountType.Content = state.account.AccountTypeName;
                 lblAccountOpen.Content = state.account.OpenDate.ToShortDateString();
 
-                //TODO get storage details.
-                //lblAccountStorageLimitGB.Content = state.account + " GB";
-                //lblAccountCurrentUtil.Content = state.account.StorageGBCurrent + " GB - " + state.account.TotalImages.ToString() + " Images";
-                //lblAccountEmail.Content = state.account.Email;
+                foreach (AccountEmailRef email in state.account.Emails)
+                {
+                    if (email.Principle)
+                        lblAccountEmail.Content = email.Address;
+                }
                 lblAccountProfileName.Content = state.account.ProfileName;
             }
 
@@ -5003,6 +5004,12 @@ namespace ManageWalla
                 logger.Error(ex);
                 ShowMessage(MessageType.Error, "The logout process failed with an unexpected problem: " + ex.Message);
             }
+        }
+
+        private void txtAccountPassword_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+                cmdAccountLogin.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         }
 
         private void cmdAccountChangeImageCopyFolder_Click(object sender, RoutedEventArgs e)
@@ -6620,6 +6627,53 @@ namespace ManageWalla
             }
         }
 
+        async private void cmdAccountSettingsView_Click(object sender, RoutedEventArgs e)
+        {
+            DateTime startTime = DateTime.Now;
+            string url = "";
+
+            try
+            {
+                ShowMessage(MessageType.Busy, "Loading settings");
+
+                if (cancelTokenSource != null)
+                    cancelTokenSource.Cancel();
+
+                CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
+                cancelTokenSource = newCancelTokenSource;
+
+                url = await controller.GetAccountSettingsUrlAsync(cancelTokenSource.Token);
+
+                if (newCancelTokenSource == cancelTokenSource)
+                    cancelTokenSource = null;
+
+            }
+            catch (OperationCanceledException)
+            {
+                if (logger.IsDebugEnabled) { logger.Debug("cmdAccountSettingsView_Click has been cancelled."); }
+            }
+            finally
+            {
+                ConcludeBusyProcess();
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.cmdAccountSettingsView_Click()", (int)duration.TotalMilliseconds, ""); }
+            }
+
+            try
+            {
+                if (url.Length > 0)
+                {
+                    System.Diagnostics.Process.Start(url);
+                    ShowMessage(MessageType.Info, "Browser will load web site");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                ShowMessage(MessageType.Error, "Account settings could not be loaded, unexpected error: " + ex.Message);
+            }
+        }
+
         async private void cmdBackFromMainImageLayout_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -6710,6 +6764,12 @@ namespace ManageWalla
                 ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
             }
         }
+
+
+
+
+
+
         
 
 

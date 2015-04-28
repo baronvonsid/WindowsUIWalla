@@ -268,6 +268,20 @@ namespace ManageWalla
             return serverHelper.GetWebUrl(false) + "forgotpassword";
         }
 
+        async public Task<string> GetAccountSettingsUrlAsync(CancellationToken cancelToken)
+        {
+            try
+            {
+                string logonToken = await serverHelper.AccountGetPassThroughTokenAsync(cancelToken);
+                return serverHelper.GetWebUrl(true) + "settings/account?logonToken=" + WebUtility.UrlEncode(logonToken);
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("GalleryCreatePreviewAsync has been cancelled");
+                throw cancelEx;
+            }
+        }
+
         private void CreateClearTempFolder(String profileName)
         {
             string tempFolderName = Path.Combine(System.Windows.Forms.Application.UserAppDataPath, profileName + "-temp");

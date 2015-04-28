@@ -52,6 +52,8 @@ namespace ManageWalla {
         
         private bool autoUploadField;
         
+        private bool blockedField;
+        
         private long idField;
         
         private int versionField;
@@ -202,6 +204,16 @@ namespace ManageWalla {
             }
             set {
                 this.autoUploadField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public bool Blocked {
+            get {
+                return this.blockedField;
+            }
+            set {
+                this.blockedField = value;
             }
         }
         

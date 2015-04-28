@@ -166,7 +166,6 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(DataType="date")]
         public System.DateTime PasswordChangeDate {
             get {
                 return this.passwordChangeDateField;
@@ -177,7 +176,6 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(DataType="date")]
         public System.DateTime OpenDate {
             get {
                 return this.openDateField;
@@ -188,7 +186,6 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(DataType="date")]
         public System.DateTime CloseDate {
             get {
                 return this.closeDateField;
