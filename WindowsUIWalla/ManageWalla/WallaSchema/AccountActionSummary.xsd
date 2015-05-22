@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://ws.fotowalla.com/AccountActionSummary"
+	xmlns:tns="http://ws.fotowalla.com/AccountActionSummary" 
+	elementFormDefault="qualified" >
+
+<!-- 	
+xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	jaxb:extensionBindingPrefixes="xjc" jaxb:version="2.0" 
+
+    <annotation>
+        <appinfo>
+            <jaxb:globalBindings>
+                <xjc:serializable uid="-6026937020915831338" />
+                <xjc:javaType name="java.util.Date"
+					xmlType="xs:dateTime"
+					parseMethod="walla.utils.JaxbDateTimeConvert.parseDateTime"
+					printMethod="walla.utils.JaxbDateTimeConvert.printDateTime" />
+            </jaxb:globalBindings>
+        </appinfo>
+    </annotation>
+-->
+
+    <element name="AccountActionSummary">
+      <complexType>
+        <sequence>
+		  <element type="string" name="Action" />
+		  <element type="long" name="ActionId" />
+		  
+          <element name="AccountActionRef" maxOccurs="unbounded" minOccurs="0">
+           <complexType>
+           	<sequence maxOccurs="1" minOccurs="0">
+                  <element type="string" name="ActionDesc" />
+                  <element type="int" name="NumTimes"/>
+                  <element type="dateTime" name="ActionDate"/>
+                </sequence>
+           </complexType>
+          </element>
+
+          <element name="GalleryActionRef" maxOccurs="unbounded" minOccurs="0">
+           <complexType>
+           	<sequence maxOccurs="1" minOccurs="0">
+                  <element type="string" name="GalleryName" />
+                  <element type="string" name="GalleryDesc" />
+                  <element type="int" name="ViewTotal"/>
+                  <element type="int" name="ViewMonth"/>
+                </sequence>
+           </complexType>
+          </element>
+          
+          <element name="UserAppRef" maxOccurs="unbounded" minOccurs="0">
+           <complexType>
+           	<sequence maxOccurs="1" minOccurs="0">
+           	   <element type="long" name="UserAppId" />
+               <element type="string" name="AppName" />
+               <element type="string" name="Platform"/>
+               <element type="string" name="MachineName"/>
+               <element type="boolean" name="Blocked" />
+               <element type="dateTime" name="LastUsed" />
+               
+               <element name="UserAppActionRef" maxOccurs="unbounded" minOccurs="0">
+	           <complexType>
+	           	<sequence maxOccurs="1" minOccurs="0">
+                  <element type="string" name="ActionDesc" />
+                  <element type="int" name="NumTimes"/>
+                  <element type="dateTime" name="ActionDate"/>
+	            </sequence>
+	           </complexType>
+	          </element>
+
+             </sequence>
+           </complexType>
+          </element>
+        </sequence>
+      </complexType>
+    </element>
+</schema>
