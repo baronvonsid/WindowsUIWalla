@@ -830,6 +830,9 @@
                                     <MenuItem IsEnabled="False" Header="Download Images - Original"  ToolTip="Requests a download of the originals, available in the downloads section when complete." />
                                     <Separator />
                                     <MenuItem x:Name="menuSettings" Header="Account Settings"  ToolTip="View\update application preferences. Check the status of Uploads\Downloads" Click="menuSettings_Click" />
+                                    <Separator />
+                                    <MenuItem x:Name="menuAbout" Header="About..."  ToolTip="View information about this application" Click="menuAbout_Click"  />
+
 
                                 </ContextMenu>
                             </ToggleButton.ContextMenu>
@@ -1528,6 +1531,39 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+
+                <Grid x:Name="paneUploadLarge" Visibility="Collapsed" Background="{StaticResource AlertBackgroundBrush}" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="4" />
+                        <RowDefinition MinHeight="80" MaxHeight="350" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300" />
+                    </Grid.ColumnDefinitions>
+
+                    <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="5" StrokeThickness="0.5" Stroke="{StaticResource FontBorderBrush}"></Rectangle>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Image Source="{StaticResource infoImageSrc}" Height="32" />
+                        <TextBlock TextWrapping="Wrap" Margin="20,0,0,0" Foreground="{StaticResource FontBorderBrush}" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="0">
+                            <TextBlock.Text>
+                                <Binding Path="Count" Source="{StaticResource uploadImagefileListKey}">
+                                    <Binding.StringFormat>Uploading {0} Fotos</Binding.StringFormat>
+                                </Binding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                    <Line  Stroke="{StaticResource FontBorderBrushSelected}" X1="0" Y1="2" X2="300" Y2="2" StrokeThickness="0.5" Margin="0" Grid.Column="0" Grid.Row="1" />
+
+
+                    <ScrollViewer Grid.Column="0" Grid.Row="2" Margin="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <TextBlock Margin="5" FontSize="16" TextWrapping="Wrap" HorizontalAlignment="Center" Text="No preview available when uploading a large quantity of photos." Foreground="{StaticResource FontBorderBrush}" />
+                    </ScrollViewer>
+
+                </Grid>
+
+
 
                 <DockPanel x:Name="panUpload" Grid.Column="1" Grid.Row="1" Background="{StaticResource PaneBodyBackgroundBrush}" Visibility="Collapsed">
                     <Grid x:Name="grdUploadImageDetails" DataContext="{StaticResource uploadImagefileListKey}">
@@ -2322,6 +2358,7 @@
                         <RowDefinition Height="10" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="60" />
+                        <RowDefinition Height="0" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="200" />
@@ -2361,6 +2398,8 @@
                         <Button x:Name="cmdAccountLogin" Content="Login" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdAccountLogin_Click" />
                         <Button x:Name="cmdForgotPassword" Content="Forgot Password" Style="{StaticResource styleButton}" Template="{StaticResource templateButton}" Click="cmdForgotPassword_Click" />
                     </StackPanel>
+
+                    <TextBlock x:Name="txtLogonWarning" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="4" Margin="6" FontSize="16" Foreground="Red"  HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Background="GhostWhite">Application warning!!</TextBlock>
 
                 </Grid>
 

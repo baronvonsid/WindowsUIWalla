@@ -12,7 +12,8 @@ targetNamespace="http://ws.fotowalla.com/Logon"
 			<element type="string" name="Password" />
 			<element type="string" name="OldPassword" />
 			<element type="string" name="Key" />
-			<element type="string" name="SecurityMessage" />
+			<element type="string" name="Status" />
+			<element type="string" name="Message" />
        </sequence>
     </complexType>
   </element>

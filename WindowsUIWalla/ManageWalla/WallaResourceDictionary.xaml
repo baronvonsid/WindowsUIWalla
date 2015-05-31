@@ -9,7 +9,7 @@
     
     <walla:UploadImageFileList x:Key="uploadImagefileListKey" />
     <walla:UploadUIState x:Key="uploadUIStateKey" />
-    <walla:GalleryOptions x:Key="galleryOptionsListKey" />
+    <walla:GalleryOption x:Key="GalleryOptionListKey" />
     
     <walla:UploadImageStateList x:Key="uploadImageStateListKey"  />
     <walla:GalleryPresentationList x:Key="galleryPresentationListKey"  />

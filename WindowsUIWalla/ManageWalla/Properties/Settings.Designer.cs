@@ -52,46 +52,10 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Walla-LocalGlobalState.db")]
-        public string GlobalStateCacheFileName {
-            get {
-                return ((string)(this["GlobalStateCacheFileName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1234567890")]
         public string WallaAppKey {
             get {
                 return ((string)(this["WallaAppKey"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Walla-LocalThumbCache.db")]
-        public string ThumbCacheFileName {
-            get {
-                return ((string)(this["ThumbCacheFileName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Walla-LocalMainCopyCache.db")]
-        public string MainCopyCacheFileName {
-            get {
-                return ((string)(this["MainCopyCacheFileName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Walla-LocalUploadImageStateCache.db")]
-        public string UploadImageStateFileName {
-            get {
-                return ((string)(this["UploadImageStateFileName"]));
             }
         }
         
@@ -116,24 +80,6 @@ namespace ManageWalla.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("www.google.com")]
-        public string WebServerTest {
-            get {
-                return ((string)(this["WebServerTest"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
-        public string WallaWSHostname {
-            get {
-                return ((string)(this["WallaWSHostname"]));
-            }
-        }
-        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
@@ -143,6 +89,60 @@ namespace ManageWalla.Properties {
             }
             set {
                 this["Setting"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WallaState.db")]
+        public string GlobalStateCacheFileName {
+            get {
+                return ((string)(this["GlobalStateCacheFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WallaThumbs.db")]
+        public string ThumbCacheFileName {
+            get {
+                return ((string)(this["ThumbCacheFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WallaMainCopy.db")]
+        public string MainCopyCacheFileName {
+            get {
+                return ((string)(this["MainCopyCacheFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("WallaUploads.db")]
+        public string UploadImageStateFileName {
+            get {
+                return ((string)(this["UploadImageStateFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("www.ask.com")]
+        public string WebServerTest {
+            get {
+                return ((string)(this["WebServerTest"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("85.13.193.30")]
+        public string WallaWSHostname {
+            get {
+                return ((string)(this["WallaWSHostname"]));
             }
         }
     }

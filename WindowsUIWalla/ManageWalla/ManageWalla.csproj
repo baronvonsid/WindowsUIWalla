@@ -29,7 +29,7 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.6.0.0</ApplicationVersion>
+    <ApplicationVersion>1.10.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -95,16 +95,16 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>fotowalla-windows7-1-0.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>ManageWalla_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>1F4E25AD69293607B51B77021F8D856263A16ADD</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>FC3D1D1A448F450077A207A06C0A8D1808B95BC0</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestKeyFile>ManageWalla_TemporaryKey.pfx</ManifestKeyFile>
@@ -156,6 +156,12 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -182,14 +188,16 @@
     <Compile Include="ValueConverters\WallaCacheSizeConverter.cs" />
     <Compile Include="ValueConverters\WallaByteToMBConverter.cs" />
     <Compile Include="WallaDataType\Account.cs" />
+    <Compile Include="WallaDataType\AccountActionSummary.cs" />
     <Compile Include="WallaDataType\AccountStorage.cs" />
+    <Compile Include="WallaDataType\AppDetail.cs" />
     <Compile Include="WallaDataType\Category.cs" />
     <Compile Include="WallaDataType\CategoryList.cs" />
     <Compile Include="WallaDataType\ClientApp.cs" />
     <Compile Include="WallaDataType\Gallery.cs" />
     <Compile Include="WallaDataType\GalleryList.cs" />
     <Compile Include="WallaDataType\GalleryLogon.cs" />
-    <Compile Include="WallaDataType\GalleryOptions.cs" />
+    <Compile Include="WallaDataType\GalleryOption.cs" />
     <Compile Include="WallaDataType\ImageIdList.cs" />
     <Compile Include="WallaDataType\ImageList.cs" />
     <Compile Include="WallaDataType\Logon.cs" />
@@ -240,6 +248,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -248,6 +259,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="fotowalla-windows7-1-0.pfx" />
+    <None Include="ManageWalla_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -258,7 +270,13 @@
     <None Include="WallaSchema\Account.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="WallaSchema\AccountActionSummary.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="WallaSchema\AccountStorage.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WallaSchema\AppDetail.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="WallaSchema\Category.xsd">
@@ -279,7 +297,7 @@
     <None Include="WallaSchema\GalleryLogon.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="WallaSchema\GalleryOptions.xsd">
+    <None Include="WallaSchema\GalleryOption.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="WallaSchema\ImageIdList.xsd">

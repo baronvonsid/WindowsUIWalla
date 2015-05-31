@@ -33,8 +33,11 @@ namespace ManageWalla
         //private long userId;
         private string userName;
         private string webPath;
+        private string password;
         private CookieContainer cookie;
         private HttpClientHandler handler;
+        private DateTime lastReInitAttempt = DateTime.Now.AddMinutes(-1);
+        private AppDetail appDetailCached = null;
 
         public ServerHelper(string hostNameParam, int portParam, string wsPathParam, string appKeyParam, string webPathParam)
         {
@@ -68,7 +71,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<Logon> GetLogonToken()
+        async public Task<Logon> GetLogonToken(AppDetail appDetail)
         {
             DateTime startTime = DateTime.Now;
             string url = "";
@@ -80,9 +83,14 @@ namespace ManageWalla
                 
                 url = "logon/token";
 
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+
+                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                xmlFormatter.UseXmlSerializer = true;
+                HttpContent content = new ObjectContent<AppDetail>(appDetail, xmlFormatter);
+                request.Content = content;
 
                 HttpResponseMessage response = await http.SendAsync(request);
                 response.EnsureSuccessStatusCode();
@@ -90,6 +98,7 @@ namespace ManageWalla
                 XmlSerializer serialKiller = new XmlSerializer(typeof(Logon));
                 logon = (Logon)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
 
+                appDetailCached = appDetail;
                 return logon;
             }
             catch (Exception ex)
@@ -132,6 +141,7 @@ namespace ManageWalla
                 http.Timeout = new TimeSpan(0, 5, 0);
 
                 this.userName = logon.ProfileName;
+                this.password = logon.Password;
                 return true;
             }
             catch (Exception ex)
@@ -145,7 +155,6 @@ namespace ManageWalla
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.Logon()", (int)duration.TotalMilliseconds, url); }
             }
         }
-
 
         async public Task<bool> Logout()
         {
@@ -178,7 +187,6 @@ namespace ManageWalla
             }
         }
 
-
         async public Task<Account> AccountGet(CancellationToken cancelToken)
         {
             DateTime startTime = DateTime.Now;
@@ -187,12 +195,18 @@ namespace ManageWalla
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "");
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await AccountGet(cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlSerializer serialKiller = new XmlSerializer(typeof(Account));
                 Account account = (Account)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
                 return account;
             }
             catch (OperationCanceledException cancelEx)
@@ -222,6 +236,7 @@ namespace ManageWalla
             return url;
         }
 
+        /*
         async public Task<bool> VerifyAppAndPlatform(ClientApp clientApp, bool verify)
         {
             DateTime startTime = DateTime.Now;
@@ -263,6 +278,7 @@ namespace ManageWalla
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.VerifyApp()", (int)duration.TotalMilliseconds, ""); }
             }
         }
+        */
 
         async public Task<UserApp> UserAppGet(long userAppId)
         {
@@ -275,8 +291,11 @@ namespace ManageWalla
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 HttpResponseMessage response = await http.SendAsync(request);
-                response.EnsureSuccessStatusCode();
 
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                    return null;
+
+                response.EnsureSuccessStatusCode();
                 XmlSerializer serialKiller = new XmlSerializer(typeof(UserApp));
                 UserApp userApp = (UserApp)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
                 
@@ -301,14 +320,14 @@ namespace ManageWalla
             try
             {
                 url = "userapp";
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<UserApp>(userApp, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
                 response.EnsureSuccessStatusCode();
 
                 XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
@@ -349,9 +368,16 @@ namespace ManageWalla
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await AccountGetPassThroughTokenAsync(cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
                 reader.MoveToContent();
                 return reader.ReadElementContentAsString();
@@ -372,6 +398,28 @@ namespace ManageWalla
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.AccountGetPassThroughTokenAsync()", (int)duration.TotalMilliseconds, url); }
             }
         }
+
+        async private Task<bool> SessionExpiredReInit()
+        {
+            //Don't allow continuous re-tries.
+            if (lastReInitAttempt > DateTime.Now.AddMinutes(-1))
+                return false;
+
+            lastReInitAttempt = DateTime.Now;
+
+            cookie = new CookieContainer();
+            handler = new HttpClientHandler();
+            handler.CookieContainer = cookie;
+
+            Logon logon = await GetLogonToken(appDetailCached);
+            if (logon == null || logon.Key.Length != 32)
+                return false;
+
+            logon.ProfileName = userName;
+            logon.Password = password;
+
+            return await Logon(logon);
+        }
         #endregion
 
         #region Tag
@@ -391,22 +439,21 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(TagList));
-                    TagList tagList = (TagList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
-                    cancelToken.ThrowIfCancellationRequested();
-
-                    return tagList;
+                    if (await SessionExpiredReInit())
+                        return await TagGetListAsync(lastModified, cancelToken);
                 }
-                else if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                return null;
+                else if (response.StatusCode == HttpStatusCode.NotModified)
+                    return null;
+
+                response.EnsureSuccessStatusCode();
+                XmlSerializer serialKiller = new XmlSerializer(typeof(TagList));
+                TagList tagList = (TagList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                return tagList;
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -440,7 +487,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(newTag, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await TagUpdateAsync(newTag, oldTagName, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException cancelEx)
@@ -475,8 +530,17 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await TagCreateAsync(tag, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
+
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -505,14 +569,18 @@ namespace ManageWalla
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
-
-                XmlSerializer serialKiller = new XmlSerializer(typeof(Tag));
-                Tag tag = (Tag)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
                 cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await TagGetMeta(tagName, cancelToken);
+                }
+                    
+                response.EnsureSuccessStatusCode();
+                XmlSerializer serialKiller = new XmlSerializer(typeof(Tag));
+                Tag tag = (Tag)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
                 return tag;
             }
             catch (OperationCanceledException cancelEx)
@@ -546,7 +614,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Tag>(tag, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await TagDeleteAsync(tag, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException cancelEx)
@@ -589,8 +665,17 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<ImageIdList>(imagesToMove, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await TagAddRemoveImagesAsync(tagName, imagesToMove, add, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
+
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -627,19 +712,21 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(GalleryList));
-                    GalleryList galleryList = (GalleryList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    return galleryList;
+                    if (await SessionExpiredReInit())
+                        return await GalleryGetListAsync(lastModified, cancelToken);
                 }
-                else if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                return null;
+                else if (response.StatusCode == HttpStatusCode.NotModified)
+                    return null;
+
+                response.EnsureSuccessStatusCode();
+                XmlSerializer serialKiller = new XmlSerializer(typeof(GalleryList));
+                GalleryList galleryList = (GalleryList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                return galleryList;
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -673,7 +760,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await GalleryUpdateAsync(gallery, oldGalleryName, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException cancelEx)
@@ -708,7 +803,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await GalleryCreateAsync(gallery, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException cancelEx)
@@ -738,12 +841,18 @@ namespace ManageWalla
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await GalleryGetMeta(galleryName, cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlSerializer serialKiller = new XmlSerializer(typeof(Gallery));
                 Gallery gallery = (Gallery)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
                 return gallery;
             }
             catch (OperationCanceledException cancelEx)
@@ -777,7 +886,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await GalleryDeleteAsync(gallery, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException)
@@ -796,13 +913,13 @@ namespace ManageWalla
             }
         }
 
-        async public Task<GalleryOptions> GalleryGetOptionsAsync(DateTime? lastModified, CancellationToken cancelToken)
+        async public Task<GalleryOption> GalleryGetOptionsAsync(DateTime? lastModified, CancellationToken cancelToken)
         {
             DateTime startTime = DateTime.Now;
             string url = "";
             try
             {
-                url = "gallery/galleryoptions";
+                url = "gallery/galleryoption";
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
                 //request.Headers.TryAddWithoutValidation("Content-Type", "application/xml");
@@ -812,19 +929,21 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(GalleryOptions));
-                    GalleryOptions galleryOptions = (GalleryOptions)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    return galleryOptions;
+                    if (await SessionExpiredReInit())
+                        return await GalleryGetOptionsAsync(lastModified, cancelToken);
                 }
-                else if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                return null;
+                else if (response.StatusCode == HttpStatusCode.NotModified)
+                    return null;
+
+                response.EnsureSuccessStatusCode();
+                XmlSerializer serialKiller = new XmlSerializer(typeof(GalleryOption));
+                GalleryOption GalleryOption = (GalleryOption)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                return GalleryOption;
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -858,12 +977,18 @@ namespace ManageWalla
                 HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
                 request.Content = content;
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await GalleryGetSections(gallery, cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlSerializer serialKiller = new XmlSerializer(typeof(Gallery));
                 Gallery newGallery = (Gallery)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
                 return newGallery;
             }
             catch (OperationCanceledException cancelEx)
@@ -898,18 +1023,23 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Gallery>(gallery, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await GalleryCreatePreviewAsync(gallery, cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
                 reader.MoveToContent();
-                string galleryPreviewKey = reader.ReadElementContentAsString();
-
-                return galleryPreviewKey;
+                return reader.ReadElementContentAsString();
             }
             catch (OperationCanceledException cancelEx)
             {
-                if (logger.IsDebugEnabled) {logger.Debug("GalleryCreateAsync has been cancelled.");}
+                if (logger.IsDebugEnabled) { logger.Debug("GalleryCreatePreviewAsync has been cancelled."); }
                 throw cancelEx;
             }
             catch (Exception ex)
@@ -934,9 +1064,16 @@ namespace ManageWalla
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await GalleryGetLogonTokenAsync(galleryName, cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
                 reader.MoveToContent();
                 return reader.ReadElementContentAsString();
@@ -964,50 +1101,67 @@ namespace ManageWalla
         {
             DateTime startTime = DateTime.Now;
             string url = "";
-            FileStream fileStream = null;
+            HttpResponseMessage response = null;
+            //FileStream fileStream = null;
             try
             {
                 //Initial Request setup
                 url = "image";
                 HttpRequestMessage requestImage = new HttpRequestMessage(HttpMethod.Post, url);
                 requestImage.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+                requestImage.Headers.ExpectContinue = true;
 
                 //Associate file to upload.
-                fileStream = new FileStream(image.CompressedName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
-                
-                StreamContent streamContent = new StreamContent(fileStream);
-                requestImage.Content = streamContent;
-                streamContent.Headers.ContentLength = fileStream.Length;
-                streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                using (FileStream fileStream = new FileStream(image.CompressedName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+                {
+                    StreamContent streamContent = new StreamContent(fileStream);
+                    requestImage.Content = streamContent;
+                    streamContent.Headers.ContentLength = fileStream.Length;
+                    streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
-                //Upload file asynchronously and check response.
-                HttpResponseMessage response = await http.SendAsync(requestImage, cancelToken);
-                response.EnsureSuccessStatusCode();
+                    //Upload file asynchronously and check response.
+                    response = await http.SendAsync(requestImage, cancelToken);
+                    fileStream.Close();
+                }
 
-                XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
-                reader.MoveToContent();
-                long imageId = reader.ReadElementContentAsLong();
-                image.Meta.id = imageId;
+                cancelToken.ThrowIfCancellationRequested();
 
-                newUploadEntry.lastUpdated = DateTime.Now;
-                newUploadEntry.imageId = imageId;
-                newUploadEntry.status = UploadImage.ImageStatus.FileReceived;
-                image.Meta.Status = 1;
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await UploadImageAsync(image, newUploadEntry, cancelToken);
+                    else
+                        response.EnsureSuccessStatusCode();
+                }
+                else
+                {
+                    response.EnsureSuccessStatusCode();
 
-                url = "image/" + imageId.ToString() + "/meta";
-                HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, url);
-                requestMeta.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
+                    XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
+                    reader.MoveToContent();
+                    long imageId = reader.ReadElementContentAsLong();
+                    image.Meta.id = imageId;
 
-                XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
-                xmlFormatter.UseXmlSerializer = true;
+                    newUploadEntry.lastUpdated = DateTime.Now;
+                    newUploadEntry.imageId = imageId;
+                    newUploadEntry.status = UploadImage.ImageStatus.FileReceived;
+                    image.Meta.Status = 1;
 
-                //Upload info + image.Meta.Name
+                    url = "image/" + imageId.ToString() + "/meta";
+                    HttpRequestMessage requestMeta = new HttpRequestMessage(HttpMethod.Put, url);
+                    requestMeta.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpContent content = new ObjectContent<ImageMeta>(image.Meta, xmlFormatter);
-                requestMeta.Content = content;
-                HttpResponseMessage responseMeta = await http.SendAsync(requestMeta, cancelToken);
-                responseMeta.EnsureSuccessStatusCode();
+                    XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
+                    xmlFormatter.UseXmlSerializer = true;
 
+                    //Upload info + image.Meta.Name
+
+                    HttpContent content = new ObjectContent<ImageMeta>(image.Meta, xmlFormatter);
+                    requestMeta.Content = content;
+                    HttpResponseMessage responseMeta = await http.SendAsync(requestMeta, cancelToken);
+                    cancelToken.ThrowIfCancellationRequested();
+                    responseMeta.EnsureSuccessStatusCode();
+                }
                 return null;
             }
             catch (HttpRequestException httpEx)
@@ -1035,7 +1189,6 @@ namespace ManageWalla
             }
             finally
             {
-                if (fileStream != null) { try { fileStream.Close(); } catch { } }
                 TimeSpan duration = DateTime.Now - startTime;
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "ServerHelper.UploadImageAsync()", (int)duration.TotalMilliseconds, url); }
             }
@@ -1055,16 +1208,20 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<ImageIdList>(orderIdList, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(UploadStatusList));
-                    UploadStatusList uploadStatusList = (UploadStatusList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    return uploadStatusList;
+                    if (await SessionExpiredReInit())
+                        return await UploadGetStatusListAsync(orderIdList, cancelToken);
                 }
-                return null;
+
+                response.EnsureSuccessStatusCode();
+                XmlSerializer serialKiller = new XmlSerializer(typeof(UploadStatusList));
+                UploadStatusList uploadStatusList = (UploadStatusList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                return uploadStatusList;
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -1099,12 +1256,18 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await CategoryCreateAsync(category, cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlReader reader = XmlReader.Create(response.Content.ReadAsStreamAsync().Result);
                 reader.MoveToContent();
-
                 return reader.ReadElementContentAsLong();
             }
             catch (OperationCanceledException cancelEx)
@@ -1139,20 +1302,21 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(CategoryList));
-                    CategoryList categoryList = (CategoryList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    return categoryList;
+                    if (await SessionExpiredReInit())
+                        return await CategoryGetListAsync(lastModified, cancelToken);
                 }
-                else if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
+                else if (response.StatusCode == HttpStatusCode.NotModified)
+                    return null;
 
-                return null;
+                response.EnsureSuccessStatusCode();
+                XmlSerializer serialKiller = new XmlSerializer(typeof(CategoryList));
+                CategoryList categoryList = (CategoryList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                return categoryList;
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -1185,7 +1349,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await CategoryUpdateAsync(category, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException cancelEx)
@@ -1215,12 +1387,18 @@ namespace ManageWalla
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await CategoryGetMeta(categoryId, cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlSerializer serialKiller = new XmlSerializer(typeof(Category));
                 Category category = (Category)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
                 return category;
             }
             catch (OperationCanceledException cancelEx)
@@ -1254,7 +1432,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<Category>(category, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await CategoryDeleteAsync(category, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException cancelEx)
@@ -1290,9 +1476,16 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<ImageIdList>(imagesToMove, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await CategoryMoveImagesAsync(categoryId, imagesToMove, cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 return "OK";
             }
             catch (OperationCanceledException cancelEx)
@@ -1367,19 +1560,21 @@ namespace ManageWalla
                     request.Headers.IfModifiedSince = new DateTimeOffset(lastModified.Value);
                 }
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
-                    ImageList categoryImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-                    return categoryImageList;
+                    if (await SessionExpiredReInit())
+                        return await GetImageListAsync(type, id, lastModified, cursor, size, searchQueryString, sectionId, cancelToken);
                 }
-                else if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                return null;
+                else if (response.StatusCode == HttpStatusCode.NotModified)
+                    return null;
+
+                response.EnsureSuccessStatusCode();
+                XmlSerializer serialKiller = new XmlSerializer(typeof(ImageList));
+                ImageList categoryImageList = (ImageList)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
+                return categoryImageList;
             }
             catch (OperationCanceledException cancelEx)
             {
@@ -1413,7 +1608,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<ImageList>(imageList, xmlFormatter);
                 request.Content = content;
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await DeleteImagesAsync(imageList, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException cancelEx)
@@ -1443,12 +1646,18 @@ namespace ManageWalla
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.AcceptCharset.Add(new System.Net.Http.Headers.StringWithQualityHeaderValue("utf-8"));
 
-                HttpResponseMessage response = await http.SendAsync(request, cancelToken);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        return await ImageGetMeta(imageId, cancelToken);
+                }
+
+                response.EnsureSuccessStatusCode();
                 XmlSerializer serialKiller = new XmlSerializer(typeof(ImageMeta));
                 ImageMeta imageMeta = (ImageMeta)serialKiller.Deserialize(await response.Content.ReadAsStreamAsync());
-
                 return imageMeta;
             }
             catch (OperationCanceledException cancelEx)
@@ -1482,7 +1691,15 @@ namespace ManageWalla
                 xmlFormatter.UseXmlSerializer = true;
                 HttpContent content = new ObjectContent<ImageMeta>(imageMeta, xmlFormatter);
                 requestMeta.Content = content;
-                HttpResponseMessage response = await http.SendAsync(requestMeta, cancelToken);
+                HttpResponseMessage response = await http.SendAsync(requestMeta, HttpCompletionOption.ResponseContentRead, cancelToken);
+                cancelToken.ThrowIfCancellationRequested();
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await SessionExpiredReInit())
+                        await ImageUpdateMetaAsync(imageMeta, cancelToken);
+                }
+
                 response.EnsureSuccessStatusCode();
             }
             catch (OperationCanceledException cancelEx)

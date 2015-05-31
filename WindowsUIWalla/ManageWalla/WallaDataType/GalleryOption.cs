@@ -20,13 +20,13 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryOptions")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/GalleryOptions", IsNullable=false)]
-    public partial class GalleryOptions {
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryOption")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="http://ws.fotowalla.com/GalleryOption", IsNullable=false)]
+    public partial class GalleryOption {
         
-        private GalleryOptionsPresentationRef[] presentationField;
+        private GalleryOptionPresentationRef[] presentationField;
         
-        private GalleryOptionsStyleRef[] styleField;
+        private GalleryOptionStyleRef[] styleField;
         
         private System.DateTime lastChangedField;
         
@@ -34,7 +34,7 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayItemAttribute("PresentationRef", IsNullable=false)]
-        public GalleryOptionsPresentationRef[] Presentation {
+        public GalleryOptionPresentationRef[] Presentation {
             get {
                 return this.presentationField;
             }
@@ -45,7 +45,7 @@ namespace ManageWalla {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayItemAttribute("StyleRef", IsNullable=false)]
-        public GalleryOptionsStyleRef[] Style {
+        public GalleryOptionStyleRef[] Style {
             get {
                 return this.styleField;
             }
@@ -82,8 +82,8 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryOptions")]
-    public partial class GalleryOptionsPresentationRef {
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryOption")]
+    public partial class GalleryOptionPresentationRef {
         
         private int presentationIdField;
         
@@ -351,8 +351,8 @@ namespace ManageWalla {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryOptions")]
-    public partial class GalleryOptionsStyleRef {
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://ws.fotowalla.com/GalleryOption")]
+    public partial class GalleryOptionStyleRef {
         
         private int styleIdField;
         

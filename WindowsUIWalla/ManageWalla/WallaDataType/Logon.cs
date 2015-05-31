@@ -34,7 +34,9 @@ namespace ManageWalla {
         
         private string keyField;
         
-        private string securityMessageField;
+        private string statusField;
+        
+        private string messageField;
         
         /// <remarks/>
         public string ProfileName {
@@ -87,12 +89,22 @@ namespace ManageWalla {
         }
         
         /// <remarks/>
-        public string SecurityMessage {
+        public string Status {
             get {
-                return this.securityMessageField;
+                return this.statusField;
             }
             set {
-                this.securityMessageField = value;
+                this.statusField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public string Message {
+            get {
+                return this.messageField;
+            }
+            set {
+                this.messageField = value;
             }
         }
     }

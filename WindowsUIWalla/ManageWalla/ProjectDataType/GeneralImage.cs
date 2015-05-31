@@ -283,6 +283,7 @@ namespace ManageWalla
             BitmapImage loadingImage = new BitmapImage();
             loadingImage.BeginInit();
             loadingImage.DecodePixelWidth = 32;
+            loadingImage.CacheOption = BitmapCacheOption.OnLoad;
             loadingImage.UriSource = new Uri(loadingImagePath);
             loadingImage.EndInit();
             loadingImage.Freeze();
@@ -296,6 +297,7 @@ namespace ManageWalla
         {
             BitmapImage loadingImage = new BitmapImage();
             loadingImage.BeginInit();
+            loadingImage.CacheOption = BitmapCacheOption.OnLoad;
             loadingImage.UriSource = new Uri(fileName);
             loadingImage.EndInit();
             loadingImage.Freeze();

@@ -16,7 +16,7 @@ namespace ManageWalla
         public DateTime lastLoggedIn { get; set; }
         public Account account { get; set; }
         public UserApp userApp { get; set; }
-        public GalleryOptions galleryOptions { get; set; }
+        public GalleryOption GalleryOption { get; set; }
 
         //Business Objects
         public TagList tagList { get; set; }

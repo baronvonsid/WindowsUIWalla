@@ -25,6 +25,8 @@ namespace ManageWalla
         private string autoUploadFolder = "";
         private string autoUploadCategoryName = "";
 
+        private bool largeUpload = false;
+
 		private string metaUdfChar1 = null;
 		private string metaUdfChar2 = null;
 		private string metaUdfChar3 = null;
@@ -193,6 +195,16 @@ namespace ManageWalla
         public bool Uploading {
             get { return uploading; }
             set { uploading = value; }
+        }
+
+        public bool LargeUpload
+        {
+            get { return largeUpload; }
+            set
+            {
+                largeUpload = value;
+                OnPropertyChanged("LargeUpload");
+            }
         }
 
         #endregion

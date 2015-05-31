@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://ws.fotowalla.com/ResponseDetail"
+	xmlns:tns="http://ws.fotowalla.com/ResponseDetail"
+	elementFormDefault="qualified">
+
+  <element name="ResponseDetail">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="1">
+	      	<element type="string" name="Status" /> <!-- OK, INFO, WARN, ERROR -->
+	      	<element type="string" name="Message" />
+       </sequence>
+    </complexType>
+  </element>
+</schema>

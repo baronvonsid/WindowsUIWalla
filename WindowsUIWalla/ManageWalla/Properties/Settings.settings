@@ -11,20 +11,8 @@
     <Setting Name="WallaWebPath" Type="System.String" Scope="Application">
       <Value Profile="(Default)">/wallahub/v1/web/</Value>
     </Setting>
-    <Setting Name="GlobalStateCacheFileName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Walla-LocalGlobalState.db</Value>
-    </Setting>
     <Setting Name="WallaAppKey" Type="System.String" Scope="Application">
       <Value Profile="(Default)">1234567890</Value>
-    </Setting>
-    <Setting Name="ThumbCacheFileName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Walla-LocalThumbCache.db</Value>
-    </Setting>
-    <Setting Name="MainCopyCacheFileName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Walla-LocalMainCopyCache.db</Value>
-    </Setting>
-    <Setting Name="UploadImageStateFileName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Walla-LocalUploadImageStateCache.db</Value>
     </Setting>
     <Setting Name="OS" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Windows</Value>
@@ -32,14 +20,26 @@
     <Setting Name="LastUser" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="WebServerTest" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">www.google.com</Value>
-    </Setting>
-    <Setting Name="WallaWSHostname" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">localhost</Value>
-    </Setting>
     <Setting Name="Setting" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="GlobalStateCacheFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WallaState.db</Value>
+    </Setting>
+    <Setting Name="ThumbCacheFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WallaThumbs.db</Value>
+    </Setting>
+    <Setting Name="MainCopyCacheFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WallaMainCopy.db</Value>
+    </Setting>
+    <Setting Name="UploadImageStateFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">WallaUploads.db</Value>
+    </Setting>
+    <Setting Name="WebServerTest" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">www.ask.com</Value>
+    </Setting>
+    <Setting Name="WallaWSHostname" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">85.13.193.30</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://ws.fotowalla.com/AppDetail"
+	xmlns:tns="http://ws.fotowalla.com/AppDetail"
+	elementFormDefault="qualified">
+
+  <element name="AppDetail">
+    <complexType>
+      <sequence maxOccurs="1" minOccurs="1">
+	      	<element type="string" name="AppKey" />
+	      	<element type="int" name="AppMajorVersion" />
+	      	<element type="int" name="AppMinorVersion" />
+	      	<element type="long" name="AppCRC" />
+	      	
+			<element type="string" name="PlatformOS" />
+			<element type="string" name="PlatformType" />
+			<element type="int" name="OSMajorVersion" />
+			<element type="int" name="OSMinorVersion" />
+			
+			<element type="long" name="UserAppId" />
+       </sequence>
+    </complexType>
+  </element>
+</schema>

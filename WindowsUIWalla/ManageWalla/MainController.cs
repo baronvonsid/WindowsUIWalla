@@ -22,6 +22,8 @@ using log4net;
 using log4net.Config;
 using System.Configuration;
 using System.Threading;
+using System.Reflection;
+using System.Deployment;
 
 /*
     - Code refactor - Done Upload.
@@ -74,10 +76,12 @@ namespace ManageWalla
             return mainCopyCacheList;
         }
 
-        public void Dispose()
+        async public void Dispose()
         {
             if (state == null)
                 return;
+
+            await Logout();
 
             SaveCacheToDisk();
         }
@@ -140,31 +144,58 @@ namespace ManageWalla
             return await serverHelper.isOnline(Properties.Settings.Default.WebServerTest);
         }
 
-        async public Task<bool> VerifyAppAndPlatform(bool verifyOnly)
+        async public Task<Logon> GetLogonToken()
         {
+            int major = 0;
+            int minor = 0;
+            GetVersion(ref major, ref minor);
+
+            //TODO Get file size properly.
+
             System.OperatingSystem osInfo = System.Environment.OSVersion;
+            //AssemblyName currentAssembly = Assembly.GetExecutingAssembly().GetName();
+            //FileInfo file = new FileInfo(currentAssembly.EscapedCodeBase);
 
-            ClientApp clientApp = new ClientApp();
-            clientApp.WSKey = Properties.Settings.Default.WallaAppKey;
-            clientApp.OS = Properties.Settings.Default.OS;
-            clientApp.MachineType = "PC";
-            clientApp.Major = osInfo.Version.Major;
-            clientApp.Minor = osInfo.Version.Minor;
+            /*Set app detail, including current platform.*/
+            AppDetail appDetail = new AppDetail();
+            appDetail.AppKey = Properties.Settings.Default.WallaAppKey;
+            appDetail.AppCRC = 101;  // file.Length;
+            appDetail.AppMajorVersion = major;
+            appDetail.AppMinorVersion = minor;
+            appDetail.PlatformOS = Properties.Settings.Default.OS;
+            appDetail.PlatformType = "PC";
+            appDetail.OSMajorVersion = osInfo.Version.Major;
+            appDetail.OSMinorVersion = osInfo.Version.Minor;
 
-            return await serverHelper.VerifyAppAndPlatform(clientApp, verifyOnly);
+            Logon logon = await serverHelper.GetLogonToken(appDetail);
+            if (logon == null || logon.Key.Length != 32)
+                return null;
+
+            return logon;
         }
 
-        async public Task<string> Logon(string profileName, string email, string password)
+        private void GetVersion(ref int major, ref int minor)
         {
-            Logon logon = await serverHelper.GetLogonToken();
-            if (logon == null || logon.Key.Length != 32)
-                return "Logon failed";
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            major = version.Major;
+            minor = version.Minor;
+        }
+
+        async public Task<string> Logon(string logonToken, string profileName, string email, string password)
+        {
+            Logon logon = new Logon();
+            logon.Key = logonToken;
+
+            //Logon logon = await serverHelper.GetLogonToken();
+            //if (logon == null || logon.Key.Length != 32)
+            //    return "Logon failed";
 
             //logon.ProfileName = profileName;
             if (profileName.Length > 0)
                 logon.ProfileName = profileName;
             else
                 logon.Email = email;
+
             logon.Password = password;
 
             if (await serverHelper.Logon(logon))
@@ -201,48 +232,84 @@ namespace ManageWalla
             }
         }
 
-        async public Task SetUserApp(CancellationToken cancelToken)
+        async public Task<bool> SetUserApp(CancellationToken cancelToken)
         {
             long userAppId;
+            UserApp userApp = null;
+            UserApp newUserApp = null;
 
             if (state.userApp == null)
             {
                 //TODO add find existing user app function.
-
-                string machineName = System.Environment.MachineName;
-
-                string uploadFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), state.account.ProfileName + " auto upload (fw)");
-                string copyFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), state.account.ProfileName + " copies (fw)");
-
-                UserApp newUserApp = new UserApp();
-                newUserApp.MachineName = machineName;
-                newUserApp.AutoUpload = true;
-                newUserApp.AutoUploadFolder = uploadFolder;
-                newUserApp.MainCopyFolder = copyFolder;
-
+                newUserApp = UserAppInitialiseObject(state.userApp);
                 userAppId = await serverHelper.UserAppCreateUpdateAsync(newUserApp, cancelToken);
 
-                if (!Directory.Exists(uploadFolder))
-                    Directory.CreateDirectory(uploadFolder);
-
-                if (!Directory.Exists(copyFolder))
-                    Directory.CreateDirectory(copyFolder);
+                //New user app created ok, retrieve the values now.
+                userApp = await serverHelper.UserAppGet(userAppId);
             }
             else
             {
-                userAppId = state.userApp.id;
+                userApp = await serverHelper.UserAppGet(state.userApp.id);
+                if (userApp == null)
+                {
+                    //Problem with existing userapp.
+                    //Create a new user app, use existing values if possible.
+                    newUserApp = UserAppInitialiseObject(state.userApp);
+                    userAppId = await serverHelper.UserAppCreateUpdateAsync(newUserApp, cancelToken);
+
+                    //New user app created ok, retrieve the values now.
+                    userApp = await serverHelper.UserAppGet(userAppId);
+                }
             }
 
-            UserApp userApp = await serverHelper.UserAppGet(userAppId);
-            if (userApp != null)
+            if (userApp.Blocked)
+                return false;
+
+            state.userApp = userApp;
+            return true;
+            
+        }
+
+        private UserApp UserAppInitialiseObject(UserApp existing)
+        {
+            string uploadFolderDefault = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), state.account.ProfileName + " auto upload (fw)");
+            string copyFolderDefault = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), state.account.ProfileName + " copies (fw)");
+
+            UserApp newUserApp = new UserApp();
+            newUserApp.MachineName = System.Environment.MachineName;
+
+            if (existing != null)
             {
-                state.userApp = userApp;
+                newUserApp.AutoUpload = existing.AutoUpload;
+
+                if (Directory.Exists(existing.AutoUploadFolder))
+                    newUserApp.AutoUploadFolder = existing.AutoUploadFolder;
+                else
+                    newUserApp.AutoUploadFolder = uploadFolderDefault;
+
+                if (Directory.Exists(existing.MainCopyFolder))
+                    newUserApp.MainCopyFolder = existing.MainCopyFolder;
+                else
+                    newUserApp.MainCopyFolder = copyFolderDefault;
+
+                newUserApp.MainCopyCacheSizeMB = existing.MainCopyCacheSizeMB;
+                newUserApp.ThumbCacheSizeMB = existing.ThumbCacheSizeMB;
             }
             else
             {
-                throw new Exception("Valid settings for this application could not be established on the server.");
+                newUserApp.AutoUpload = true;
+                newUserApp.AutoUploadFolder = uploadFolderDefault;
+                newUserApp.MainCopyFolder = copyFolderDefault;
             }
 
+            /*Before sending to the server, ensure these are valid.*/
+            if (!Directory.Exists(newUserApp.AutoUploadFolder))
+                Directory.CreateDirectory(newUserApp.AutoUploadFolder);
+
+            if (!Directory.Exists(newUserApp.MainCopyFolder))
+                Directory.CreateDirectory(newUserApp.MainCopyFolder);
+
+            return newUserApp;
         }
 
         async public Task UserAppUpdateAsync(UserApp userApp, CancellationToken cancelToken)
@@ -302,7 +369,7 @@ namespace ManageWalla
         #endregion
 
         #region Upload Methods
-        async public Task<List<string>> LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots, CancellationToken cancelToken)
+        async public Task<List<string>> LoadImagesFromArray(String[] fileNames, UploadImageFileList meFots, bool loadThumb, CancellationToken cancelToken)
         {
             DateTime startTime = DateTime.Now;
             List<string> errorResponses = new List<string>();
@@ -311,7 +378,7 @@ namespace ManageWalla
                 for (int i = 0; i < fileNames.Length; i++)
                 {
                     UploadImage newImage = new UploadImage();
-                    string response = await newImage.Setup(fileNames[i], true);
+                    string response = await newImage.Setup(fileNames[i], loadThumb);
                     if (response == "OK")
                     {
                         meFots.Add(newImage);
@@ -465,7 +532,6 @@ namespace ManageWalla
 
                     string response = await serverHelper.UploadImageAsync(currentUpload, newUploadEntry, cancelToken);
 
-                    
                     if (response == null)
                     {
                         newUploadEntry.lastUpdated = DateTime.Now;
@@ -547,7 +613,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task<List<string>> LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots, CancellationToken cancelToken)
+        async public Task<List<string>> LoadImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, UploadImageFileList meFots, bool loadThumb, CancellationToken cancelToken)
         {
             DateTime startTime = DateTime.Now;
             List<string> errorResponses = new List<string>();
@@ -557,7 +623,7 @@ namespace ManageWalla
                 {
                     foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
                     {
-                        List<string> tempErrorResponses = await LoadImagesFromFolder(folder, recursive, meFots, cancelToken);
+                        List<string> tempErrorResponses = await LoadImagesFromFolder(folder, recursive, meFots, loadThumb, cancelToken);
                         errorResponses.AddRange(tempErrorResponses);
                     }
                 }
@@ -567,7 +633,7 @@ namespace ManageWalla
                     if (IsFormatOK(file.Extension.ToUpper().Substring(1)))
                     {
                         UploadImage newImage = new UploadImage();
-                        string response = await newImage.Setup(file.FullName, true);
+                        string response = await newImage.Setup(file.FullName, loadThumb);
                         if (response == "OK")
                         {
                             meFots.Add(newImage);
@@ -593,6 +659,42 @@ namespace ManageWalla
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.LoadImagesFromFolder()", (int)duration.TotalMilliseconds, imageDirectory); }
             }
         }
+
+        async public Task<long> CountImagesFromFolder(DirectoryInfo imageDirectory, bool recursive, long count, CancellationToken cancelToken)
+        {
+            DateTime startTime = DateTime.Now;
+            try
+            {
+                if (recursive)
+                {
+                    foreach (DirectoryInfo folder in imageDirectory.GetDirectories())
+                    {
+                        count = count + await CountImagesFromFolder(folder, recursive, count, cancelToken);
+                    }
+                }
+
+                foreach (FileInfo file in imageDirectory.GetFiles().OfType<FileInfo>())
+                {
+                    if (IsFormatOK(file.Extension.ToUpper().Substring(1)))
+                    {
+                        count = count + 1;
+                    }
+                }
+
+                return count;
+            }
+            catch (OperationCanceledException cancelEx)
+            {
+                logger.Debug("CountImagesFromFolder has been cancelled");
+                throw cancelEx;
+            }
+            finally
+            {
+                TimeSpan duration = DateTime.Now - startTime;
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.CountImagesFromFolder()", (int)duration.TotalMilliseconds, imageDirectory); }
+            }
+        }
+
 
         private bool IsFormatOK(string fileExtension)
         {
@@ -1329,42 +1431,42 @@ namespace ManageWalla
             return serverHelper.GetWebUrl(true) + "gallery/stylepreview?key=" + WebUtility.UrlEncode(galleryPreviewKey);
         }
 
-        async public Task GalleryOptionsRefreshAsync(GalleryPresentationList presentationList, GalleryStyleList styleList, CancellationToken cancelToken)
+        async public Task GalleryOptionRefreshAsync(GalleryPresentationList presentationList, GalleryStyleList styleList, CancellationToken cancelToken)
         {
             DateTime startTime = DateTime.Now;
             try
             {
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
-                    GalleryOptions galleryOptions;
-                    if (state.galleryOptions != null)
+                    GalleryOption GalleryOption;
+                    if (state.GalleryOption != null)
                     {
-                        galleryOptions = await serverHelper.GalleryGetOptionsAsync(state.galleryOptions.lastChanged, cancelToken);
-                        if (galleryOptions == null)
+                        GalleryOption = await serverHelper.GalleryGetOptionsAsync(state.GalleryOption.lastChanged, cancelToken);
+                        if (GalleryOption == null)
                         {
                             return;
                         }
                         else
                         {
-                            state.galleryOptions = galleryOptions;
+                            state.GalleryOption = GalleryOption;
                         }
                     }
                     else
                     {
-                        galleryOptions = await serverHelper.GalleryGetOptionsAsync(null, cancelToken);
-                        if (galleryOptions == null)
+                        GalleryOption = await serverHelper.GalleryGetOptionsAsync(null, cancelToken);
+                        if (GalleryOption == null)
                         {
                             throw new Exception("Unexpected problem loading the gallery options, none populated");
                         }
                         else
                         {
-                            state.galleryOptions = galleryOptions;
+                            state.GalleryOption = GalleryOption;
                         }
                     }
 
                     //Rebuild Prentation Object.
                     presentationList.Clear();
-                    foreach (GalleryOptionsPresentationRef current in state.galleryOptions.Presentation)
+                    foreach (GalleryOptionPresentationRef current in state.GalleryOption.Presentation)
                     {
                         GalleryPresentationItem newItem = new GalleryPresentationItem();
                         newItem.PresentationId = current.presentationId;
@@ -1375,7 +1477,7 @@ namespace ManageWalla
                     }
 
                     styleList.Clear();
-                    foreach (GalleryOptionsStyleRef current in state.galleryOptions.Style)
+                    foreach (GalleryOptionStyleRef current in state.GalleryOption.Style)
                     {
                         GalleryStyleItem newItem = new GalleryStyleItem();
                         newItem.StyleId = current.styleId;
@@ -1401,13 +1503,13 @@ namespace ManageWalla
             }
             catch (OperationCanceledException cancelEx)
             {
-                logger.Debug("GalleryOptionsRefreshAsync has been cancelled.");
+                logger.Debug("GalleryOptionRefreshAsync has been cancelled.");
                 throw (cancelEx);
             }
             finally
             {
                 TimeSpan duration = DateTime.Now - startTime;
-                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.GalleryOptionsRefreshAsync()", (int)duration.TotalMilliseconds, ""); }
+                if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainController.GalleryOptionRefreshAsync()", (int)duration.TotalMilliseconds, ""); }
             }
         }
 

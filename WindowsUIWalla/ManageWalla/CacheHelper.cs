@@ -16,6 +16,7 @@ namespace ManageWalla
     {
         private static byte[] key = { 9, 2, 7, 1, 5, 4, 7, 8, 5, 7, 9, 2, 7, 1, 5, 4, 7, 8, 5, 7, 9, 2, 7, 1, 5, 4, 7, 8, 5, 7, 3, 4 };
         private static byte[] iv = { 9, 2, 7, 1, 5, 4, 7, 8, 5, 7, 9, 2, 7, 1, 5, 4 };
+        private static string version = Application.ProductVersion.Replace(".", "-");
 
         #region GlobalState
         public static GlobalState GetGlobalState(string profileName)
@@ -64,7 +65,7 @@ namespace ManageWalla
 
         public static void SaveGlobalState(GlobalState state, string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
             AesCryptoServiceProvider aes = new AesCryptoServiceProvider();
             aes.KeySize = 256;
 
@@ -81,7 +82,9 @@ namespace ManageWalla
 
         private static GlobalState RetrieveFromFile(string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
+            string version = Application.ProductVersion.Replace(".","-");
+
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
             GlobalState stateTemp = null;
 
             AesCryptoServiceProvider aes = new AesCryptoServiceProvider();
@@ -104,9 +107,7 @@ namespace ManageWalla
 
         public static bool CacheFilesPresent(string profileName)
         {
-            Console.Out.WriteLine(Application.UserAppDataPath);
-
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.GlobalStateCacheFileName);
             return File.Exists(fileName);
         }
 
@@ -150,7 +151,7 @@ namespace ManageWalla
 
         public static void SaveThumbCacheList(List<ThumbCache> thumbCacheList, string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.ThumbCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.ThumbCacheFileName);
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -211,7 +212,7 @@ namespace ManageWalla
 
         private static List<ThumbCache> RetrieveThumbCacheFromFile(string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.ThumbCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.ThumbCacheFileName);
             List<ThumbCache> thumbStateTemp = null;
 
             if (File.Exists(fileName))
@@ -242,7 +243,7 @@ namespace ManageWalla
 
         public static void SaveMainCopyCacheList(List<MainCopyCache> mainCopyCacheList, string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.MainCopyCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.MainCopyCacheFileName);
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -328,7 +329,7 @@ namespace ManageWalla
 
         private static List<MainCopyCache> RetrieveMainCopyCacheFromFile(string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.MainCopyCacheFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.MainCopyCacheFileName);
             List<MainCopyCache> mainCopyTemp = null;
 
             if (File.Exists(fileName))
@@ -353,7 +354,7 @@ namespace ManageWalla
 
         public static void SaveUploadImageStateList(UploadImageStateList uploadImageStateList, string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.UploadImageStateFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.UploadImageStateFileName);
 
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -371,7 +372,19 @@ namespace ManageWalla
                                             || r.status == UploadImage.ImageStatus.FileReceived) 
                                             && r.lastUpdated > DateTime.Now.AddMonths(-1));
 
-            return queryItems.Select(r => r.imageId).ToArray();
+            long[] arrayTemp = queryItems.Select(r => r.imageId).ToArray();
+            if (arrayTemp.Length > 100)
+            {
+                long[] arrayReduced = new long[100];
+                for (int i = 0; i < 100; i++)
+                    arrayReduced[i] = arrayTemp[i];
+
+                return arrayReduced;
+            }
+            else
+                return arrayTemp;
+
+
         }
 
         public static void UpdateUploadImageStateListWithServerStatus(UploadImageStateList uploadImageStateList, UploadStatusList uploadStatusList)
@@ -463,7 +476,7 @@ namespace ManageWalla
 
         private static void RetrieveUploadImageStateFromFile(UploadImageStateList uploadImageStateList,string profileName)
         {
-            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + Properties.Settings.Default.UploadImageStateFileName);
+            string fileName = Path.Combine(Application.UserAppDataPath, profileName + "-" + version + "-" + Properties.Settings.Default.UploadImageStateFileName);
             UploadImageStateList uploadImageStateListTemp = null;
 
             if (File.Exists(fileName))

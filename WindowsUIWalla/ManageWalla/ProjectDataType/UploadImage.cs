@@ -121,7 +121,7 @@ namespace ManageWalla
             {
                 myBitmapImage = new BitmapImage();
                 myBitmapImage.BeginInit();
-
+                myBitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                 myBitmapImage.DecodePixelWidth = 10;
                 myBitmapImage.UriSource = new Uri(filePath);
                 myBitmapImage.EndInit();
@@ -171,7 +171,7 @@ namespace ManageWalla
                 {
                     myBitmapImage = new BitmapImage();
                     myBitmapImage.BeginInit();
-
+                    myBitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                     if (isLandscape)
                         myBitmapImage.DecodePixelHeight = 200;
                     else

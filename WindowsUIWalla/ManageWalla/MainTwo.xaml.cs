@@ -71,7 +71,7 @@ namespace ManageWalla
             Error = 3
         }
 
-        //private bool galleryOptionsLoaded = false;
+        //private bool GalleryOptionLoaded = false;
         private PaneMode currentPane;
         private PaneMode previousPane;
         private Tag currentTag = null;
@@ -108,6 +108,9 @@ namespace ManageWalla
         private bool isExpanded = false;
         private MessageType currentDialogType = MessageType.None;
         private bool gallerySectionNeedRefresh = true;
+        private Logon logon = null;
+        private bool isBlocked = false;
+
 
         #endregion
 
@@ -147,22 +150,37 @@ namespace ManageWalla
 
                 //Initialise UI for logon.
                 previousPane = PaneMode.GalleryView;
+                logon = await controller.GetLogonToken();
                 RefreshOverallPanesStructure(PaneMode.Account);
                 RefreshPanesAllControls(PaneMode.Account);
+
+                if (logon == null)
+                {
+                    //Fatal error stop everything.
+                    ConcludeBusyProcess();
+                    return;
+                }
 
                 string profileName = Properties.Settings.Default.LastUser;
                 if (await ApplicationInit(profileName))
                 {
                     AccountRefreshFromState();
                     await Login(state.account.ProfileName, "", state.account.Password);
+
+                    if (isBlocked)
+                    {
+                        await controller.Logout();
+                        state.connectionState = GlobalState.ConnectionState.FailedLogin;
+                        RefreshOverallPanesStructure(PaneMode.Account);
+                        RefreshPanesAllControls(PaneMode.Account);
+                        return;
+                    }
                 }
 
                 if (state != null && (state.connectionState == GlobalState.ConnectionState.OfflineMode || state.connectionState == GlobalState.ConnectionState.LoggedOn))
                 {
                     if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                     {
-                        await GalleryPopulateOptions();
-
                         timer = new System.Timers.Timer();
                         timer.Elapsed += timer_Elapsed;
                         timer.Interval = 10000.0;
@@ -172,6 +190,10 @@ namespace ManageWalla
                     RefreshOverallPanesStructure(PaneMode.GalleryView);
                     RefreshPanesAllControls(PaneMode.GalleryView);
                     radGallery.IsChecked = true;
+
+                    //if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                    //    await GalleryPopulateOptions();
+
                 }
 
                 ConcludeBusyProcess();
@@ -179,10 +201,14 @@ namespace ManageWalla
             catch (Exception ex)
             {
                 logger.Error(ex);
-                this.Hide();
-                MessageBoxResult result = MessageBox.Show("There was a problem starting fotowalla and will now close.  " + ex.Message, "Problem loading the app.",MessageBoxButton.OK);
-                if (result == MessageBoxResult.OK)
-                    Application.Current.Shutdown();
+                logon = null;
+                RefreshOverallPanesStructure(PaneMode.Account);
+                RefreshPanesAllControls(PaneMode.Account);
+                ConcludeBusyProcess();
+                
+                //MessageBoxResult result = MessageBox.Show("There was a problem starting fotowalla and will now close.  " + ex.Message, "Problem loading the app.",MessageBoxButton.OK);
+                //if (result == MessageBoxResult.OK)
+                //    Application.Current.Shutdown();
             }
             finally
             {
@@ -239,10 +265,10 @@ namespace ManageWalla
                 }
             }
 
-            if (!await controller.VerifyAppAndPlatform(true))
-            {
-                throw new Exception("The application/platform failed validation with the server.  Please check www.fotowalla.com/support for the latest versions supported.");
-            }
+            //if (!await controller.VerifyAppAndPlatform(true))
+            //{
+            //    throw new Exception("The application/platform failed validation with the server.  Please check www.fotowalla.com/support for the latest versions supported.");
+            //}
 
             //if (!await controller.SetPlatform())
             //{
@@ -523,6 +549,7 @@ namespace ManageWalla
                         panTagUnavailable.Visibility = Visibility.Collapsed;
                         lstImageMainViewerList.Visibility = Visibility.Visible;
                         lstUploadImageFileList.Visibility = Visibility.Collapsed;
+                        paneUploadLarge.Visibility = Visibility.Collapsed;
                         panUpload.Visibility = System.Windows.Visibility.Collapsed;
 
                         gridLeft.RowDefinitions[2].Height = new GridLength(1, GridUnitType.Star);
@@ -558,6 +585,7 @@ namespace ManageWalla
                         panGalleryUnavailable.Visibility = Visibility.Collapsed;
                         lstImageMainViewerList.Visibility = Visibility.Visible;
                         lstUploadImageFileList.Visibility = Visibility.Collapsed;
+                        paneUploadLarge.Visibility = Visibility.Collapsed;
                         panUpload.Visibility = System.Windows.Visibility.Collapsed;
 
                         panGridRightHeader.Visibility = Visibility.Visible;
@@ -577,6 +605,7 @@ namespace ManageWalla
                         panGalleryUnavailable.Visibility = Visibility.Collapsed;
                         lstImageMainViewerList.Visibility = Visibility.Visible;
                         lstUploadImageFileList.Visibility = Visibility.Collapsed;
+                        paneUploadLarge.Visibility = Visibility.Collapsed;
                         panUpload.Visibility = System.Windows.Visibility.Collapsed;
                         panGridRightHeader.Visibility = Visibility.Visible;
 
@@ -590,7 +619,18 @@ namespace ManageWalla
                         panTagUnavailable.Visibility = Visibility.Collapsed;
                         panGalleryUnavailable.Visibility = Visibility.Collapsed;
                         lstImageMainViewerList.Visibility = Visibility.Collapsed;
-                        lstUploadImageFileList.Visibility = Visibility.Visible;
+
+                        if (uploadUIState.LargeUpload)
+                        {
+                            paneUploadLarge.Visibility = Visibility.Visible;
+                            lstUploadImageFileList.Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            paneUploadLarge.Visibility = Visibility.Collapsed;
+                            lstUploadImageFileList.Visibility = Visibility.Visible;
+                        }
+
                         panUpload.Visibility = System.Windows.Visibility.Visible;
 
                         gridRight.RowDefinitions[0].Height = new GridLength(0); //Working Pane
@@ -914,6 +954,35 @@ namespace ManageWalla
                         <RowDefinition Height="50" />  <!-- Buttons -->
                         */
 
+                        if (uploadUIState.LargeUpload)
+                        {
+                            grdUploadImageDetails.RowDefinitions[0].Height = new GridLength(0);
+                            grdUploadImageDetails.RowDefinitions[1].Height = new GridLength(0);
+                            grdUploadImageDetails.RowDefinitions[2].Height = new GridLength(0);
+                            grdUploadImageDetails.RowDefinitions[3].Height = new GridLength(0);
+                            grdUploadImageDetails.RowDefinitions[4].Height = new GridLength(0);
+                            grdUploadImageDetails.RowDefinitions[5].Height = new GridLength(0);
+                            grdUploadImageDetails.RowDefinitions[12].Height = new GridLength(0);
+                            grdUploadImageDetails.RowDefinitions[14].Height = new GridLength(0);
+
+                            chkUploadOverrideDateAll.IsEnabled = false;
+                            chkUploadTagsAll.IsEnabled = false;
+                        }
+                        else
+                        {
+                            grdUploadImageDetails.RowDefinitions[0].Height = new GridLength(22);
+                            grdUploadImageDetails.RowDefinitions[1].Height = new GridLength(22);
+                            grdUploadImageDetails.RowDefinitions[2].Height = new GridLength(0);
+                            grdUploadImageDetails.RowDefinitions[3].Height = new GridLength(30);
+                            grdUploadImageDetails.RowDefinitions[4].Height = new GridLength(80);
+                            grdUploadImageDetails.RowDefinitions[5].Height = new GridLength(10);
+                            grdUploadImageDetails.RowDefinitions[12].Height = new GridLength(10);
+                            grdUploadImageDetails.RowDefinitions[14].Height = new GridLength(34);
+
+                            chkUploadOverrideDateAll.IsEnabled = true;
+                            chkUploadTagsAll.IsEnabled = true;
+                        }
+
                         cmbGallerySectionVert.Visibility = Visibility.Collapsed;
                         cmbGallerySection.Visibility = Visibility.Collapsed;
 
@@ -1107,6 +1176,43 @@ namespace ManageWalla
                         {
                             lblAccountPaneTitle.Content = "";
                             cmdAccountClose.Visibility = Visibility.Collapsed;
+                            txtLogonWarning.Text = "";
+                            gridAccountLogin.RowDefinitions[8].Height = new GridLength(0);
+
+                            //if (state.connectionState != GlobalState.ConnectionState.LoggedOn && state.connectionState != GlobalState.ConnectionState.OfflineMode)
+                            //{
+
+                                if (isBlocked)
+                                {
+                                    txtLogonWarning.Text = "This application has been blocked on your account.  Please login to your profile on the web site to change this.";
+                                    gridAccountLogin.RowDefinitions[8].Height = new GridLength(60);
+
+                                    cmdAccountLogin.IsEnabled = false;
+                                    cmdSignupNewUser.IsEnabled = false;
+                                    cmdForgotPassword.IsEnabled = false;
+                                    txtAccountPassword.IsEnabled = false;
+                                    txtAccountEmail.IsEnabled = false;
+                                    txtAccountProfileName.IsEnabled = false;
+                                }
+                                else if (logon == null)
+                                {
+                                    txtLogonWarning.Text = "This app has failed validation with fotowalla.com and cannot login.  Please check fotowalla.com for the latest supported apps.";
+                                    gridAccountLogin.RowDefinitions[8].Height = new GridLength(60);
+
+                                    cmdAccountLogin.IsEnabled = false;
+                                    cmdSignupNewUser.IsEnabled = false;
+                                    cmdForgotPassword.IsEnabled = false;
+                                    txtAccountPassword.IsEnabled = false;
+                                    txtAccountEmail.IsEnabled = false;
+                                    txtAccountProfileName.IsEnabled = false;
+                                }
+                                else if (logon.Message != null && logon.Message.Length > 0)
+                                {
+                                    txtLogonWarning.Text = logon.Message;
+                                    gridAccountLogin.RowDefinitions[8].Height = new GridLength(60);
+                                }
+                            //}
+
                         }
 
                         break;
@@ -1310,6 +1416,9 @@ namespace ManageWalla
                 {
                     await RefreshAndDisplayTagList(false);
                     await RefreshAndDisplayCategoryList(false);
+
+                    if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
+                        await GalleryPopulateOptions();
 
                     foreach (RadioButton button in wrapMyGalleries.Children.OfType<RadioButton>())
                     {
@@ -1602,10 +1711,11 @@ namespace ManageWalla
 
             if (lstImageMainViewerList.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
             {
+                //Might fix weird issue.
+                if (lstImageMainViewerList.Items.Count > 0)
+                    lstImageMainViewerList.ScrollIntoView(lstImageMainViewerList.Items[0]);
 
-                lstImageMainViewerList.ScrollIntoView(lstImageMainViewerList.Items[0]);
                 lstImageMainViewerList.ItemContainerGenerator.StatusChanged -= ItemContainerGenerator_StatusChanged;
-
             }
 
         }
@@ -1615,9 +1725,6 @@ namespace ManageWalla
             DateTime startTime = DateTime.Now;
             try
             {
-
-
-
                 imageMainViewerList.Clear();
 
                 //tweakMainImageSize = false;
@@ -1693,15 +1800,15 @@ namespace ManageWalla
                     if (cancelToken != null)
                         cancelToken.ThrowIfCancellationRequested();
 
-                    Task[] tasks = new Task[3];
+                    Task[] tasks = new Task[2];
 
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < 2; i++)
                     {
                         if (cursor + i < imageMainViewerList.Count)
                             tasks[i] = imageMainViewerList[cursor + i].LoadThumb(cancelToken, thumbCacheList, state.userApp.ThumbCacheSizeMB, state.connectionState);
                     }
 
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < 2; i++)
                     {
                         if (tasks[i] != null)
                             await tasks[i];
@@ -1719,7 +1826,7 @@ namespace ManageWalla
                     }
                     */
 
-                    cursor = cursor + 3;
+                    cursor = cursor + 2;
                     if (cursor >= imageMainViewerList.Count)
                         moreToLoad = false;
                 }
@@ -3728,6 +3835,7 @@ namespace ManageWalla
 
         private void ResetUploadState()
         {
+            uploadUIState.LargeUpload = false;
             uploadUIState.GotSubFolders = false;
             uploadUIState.CategoryName = "";
             uploadUIState.CategoryDesc = "";
@@ -3917,7 +4025,9 @@ namespace ManageWalla
                 if (uploadCount > 0)
                 {
                     ShowMessage(MessageType.Info, uploadCount.ToString() + " images were found and are being uploaded automatically");
+
                     await controller.UploadAutoAsync(uploadFots, uploadUIState, cancelUploadTokenSource.Token);
+
                     ShowMessage(MessageType.Info, uploadCount.ToString() + " images were uploaded successfully");
                 }
 
@@ -3974,6 +4084,11 @@ namespace ManageWalla
                 if (logger.IsDebugEnabled) { logger.DebugFormat("Method: {0} Duration {1}ms Param: {2}", "MainTwo.DoUploadAsync()", (int)duration.TotalMilliseconds, ""); }
 
             }
+        }
+
+        async Task<long> UploadCountNumberOfImages()
+        {
+            return 1;
         }
 
         /*
@@ -4058,6 +4173,21 @@ namespace ManageWalla
             //TODO
             //Get current server updates to apply to the local upload list history.
         }
+        
+        private void SetLargeUpload(long imageCount)
+        {
+            if (imageCount > 50)
+            {
+                uploadUIState.LargeUpload = true;
+                uploadUIState.MetaTagRefAll = true;
+                uploadUIState.MetaTakenDateSetAll = true;
+            }
+            else
+            {
+                uploadUIState.LargeUpload = false;
+            }
+        }
+
         #endregion
 
         #region Upload Event Handlers
@@ -4092,18 +4222,27 @@ namespace ManageWalla
                         uploadUIState.RootFolder = folderDialog.SelectedPath;
                         if (MessageBox.Show("Do you want to add images from the sub folders too ?", "fotowalla", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         {
-                            responses = await controller.LoadImagesFromFolder(folder, true, uploadFots, cancelUploadTokenSource.Token);
+                            long imageCount = await controller.CountImagesFromFolder(folder, true, 0, cancelUploadTokenSource.Token);
+                            SetLargeUpload(imageCount);
+
+                            responses = await controller.LoadImagesFromFolder(folder, true, uploadFots, (uploadUIState.LargeUpload) ? false : true, cancelUploadTokenSource.Token);
                             uploadUIState.MapToSubFolders = true;
                         }
                         else
                         {
-                            responses = await controller.LoadImagesFromFolder(folder, false, uploadFots, cancelUploadTokenSource.Token);
+                            long imageCount = await controller.CountImagesFromFolder(folder, false, 0, cancelUploadTokenSource.Token);
+                            SetLargeUpload(imageCount);
+
+                            responses = await controller.LoadImagesFromFolder(folder, false, uploadFots, (uploadUIState.LargeUpload) ? false : true, cancelUploadTokenSource.Token);
                         }
                     }
                     else
                     {
+                        long imageCount = await controller.CountImagesFromFolder(folder, false, 0, cancelUploadTokenSource.Token);
+                        SetLargeUpload(imageCount);
+
                         uploadUIState.RootFolder = "";
-                        responses = await controller.LoadImagesFromFolder(folder, false, uploadFots, cancelUploadTokenSource.Token);
+                        responses = await controller.LoadImagesFromFolder(folder, false, uploadFots, (uploadUIState.LargeUpload) ? false : true, cancelUploadTokenSource.Token);
                     }
 
                     if (newCancelUploadTokenSource == cancelUploadTokenSource)
@@ -4175,10 +4314,14 @@ namespace ManageWalla
                 try
                 {
                     ShowMessage(MessageType.Busy, "Files being analysed for upload");
+
+                    long imageCount = (long)(uploadFots.Count + openDialog.FileNames.Length);
+                    SetLargeUpload(imageCount);
+
                     TweakImageMarginSize(DateTime.Now, currentPane);
 
                     List<string> responses = null;
-                    responses = await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots, cancelUploadTokenSource.Token);
+                    responses = await controller.LoadImagesFromArray(openDialog.FileNames, uploadFots, (uploadUIState.LargeUpload) ? false : true, cancelUploadTokenSource.Token);
 
                     if (newCancelUploadTokenSource == cancelUploadTokenSource)
                         cancelUploadTokenSource = null;
@@ -4359,7 +4502,11 @@ namespace ManageWalla
             if (uploadUIState.MetaTakenDateSetAll)
             {
                 UploadImage current = (UploadImage)lstUploadImageFileList.SelectedItem;
-                uploadUIState.MetaTakenDate = current.Meta.TakenDate;
+
+                if (current == null)
+                    uploadUIState.MetaTakenDate = DateTime.Now;
+                else
+                    uploadUIState.MetaTakenDate = current.Meta.TakenDate;
 
                 BindingOperations.ClearBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty);
                 Binding binding = new Binding("MetaTakenDate");
@@ -4367,8 +4514,11 @@ namespace ManageWalla
                 binding.Source = uploadUIState;
                 BindingOperations.SetBinding(datUploadOverrideDate, DatePicker.SelectedDateProperty, binding);
 
-                grdUploadImageDetails.RowDefinitions[6].Height = new GridLength(0);
-                lblUploadOverrideDateAll.Content = "Override date (All fotos)";
+                if (!uploadUIState.LargeUpload)
+                {
+                    grdUploadImageDetails.RowDefinitions[6].Height = new GridLength(0);
+                    lblUploadOverrideDateAll.Content = "Override date (All fotos)";
+                }
             }
             else
             {
@@ -4390,7 +4540,7 @@ namespace ManageWalla
 
         private void chkUploadOverrideDate_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (!uploadUIState.MetaTakenDateSetAll)
+            if (!uploadUIState.MetaTakenDateSetAll && !uploadUIState.LargeUpload)
             {
                 grdUploadImageDetails.RowDefinitions[7].Height = new GridLength(0);
                 datUploadOverrideDate.IsEnabled = false;
@@ -4781,7 +4931,7 @@ namespace ManageWalla
             {
                 ShowMessage(MessageType.Busy, "Logging onto FotoWalla");
 
-                string logonResponse = await controller.Logon(profileName, email, password);
+                string logonResponse = await controller.Logon(logon.Key, profileName, email, password);
 
                 if (logonResponse == "OK")
                 {
@@ -4798,7 +4948,12 @@ namespace ManageWalla
 
                     await AccountStatusRefresh(password);
 
-                    ShowMessage(MessageType.Info, "Account: " + state.account.ProfileName + " has been connected with FotoWalla");
+                    if (isBlocked)
+                        ShowMessage(MessageType.Info, "Application has been blocked from accessing fotowalla");
+                    else if (logon.Message != null && logon.Message.Length > 0)
+                        ShowMessage(MessageType.Info, logon.Message);
+                    else
+                        ShowMessage(MessageType.Info, "Account: " + state.account.ProfileName + " has been connected with fotowalla");
                 }
                 else
                 {
@@ -4806,6 +4961,8 @@ namespace ManageWalla
                         state.connectionState = GlobalState.ConnectionState.FailedLogin;
 
                     ShowMessage(MessageType.Warning, "The logon for: " + profileName + email + ", failed with the message: " + logonResponse);
+
+                    logon = await controller.GetLogonToken();
                 }
                 ConcludeBusyProcess();
             }
@@ -4838,12 +4995,15 @@ namespace ManageWalla
                 await controller.AccountDetailsGet(cancelTokenSource.Token);
                 state.account.Password = password;
 
-                if (!await controller.VerifyAppAndPlatform(false))
-                {
-                    throw new Exception("The application/platform failed validation with the server.  Please check www.fotowalla.com/support for the latest versions supported.");
-                }
+                //if (!await controller.VerifyAppAndPlatform(false))
+                //{
+                //    throw new Exception("The application/platform failed validation with the server.  Please check www.fotowalla.com/support for the latest versions supported.");
+                //}
 
-                await controller.SetUserApp(cancelTokenSource.Token);
+                if (!await controller.SetUserApp(cancelTokenSource.Token))
+                {
+                    isBlocked = true;
+                }
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
@@ -4953,10 +5113,17 @@ namespace ManageWalla
                 }
 
                 await Login(profileName, email, password);
+
+                if (isBlocked)
+                {
+                    await controller.Logout();
+                    state.connectionState = GlobalState.ConnectionState.FailedLogin;
+                    RefreshOverallPanesStructure(PaneMode.Account);
+                    RefreshPanesAllControls(PaneMode.Account);
+                }
+
                 if (state.connectionState == GlobalState.ConnectionState.LoggedOn)
                 {
-
-
                     await GalleryPopulateOptions();
 
                     timer = new System.Timers.Timer();
@@ -4994,7 +5161,7 @@ namespace ManageWalla
                 Properties.Settings.Default.LastUser = "";
                 Properties.Settings.Default.Save();
 
-
+                logon = await controller.GetLogonToken();
                 RefreshOverallPanesStructure(PaneMode.Account);
                 RefreshPanesAllControls(PaneMode.Account);
 
@@ -5146,18 +5313,18 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                await controller.GalleryOptionsRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
+                await controller.GalleryOptionRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
                 lstGalleryPresentationList.Items.Refresh();
                 lstGallerySelectionOptions.Items.Refresh();
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;
 
-                ConcludeBusyProcess();
+                //ConcludeBusyProcess();
             }
             catch (OperationCanceledException)
             {
-                if (logger.IsDebugEnabled) { logger.Debug("Loading allery options has been cancelled"); }
+                if (logger.IsDebugEnabled) { logger.Debug("Loading gallery options has been cancelled"); }
             }
             finally
             {
@@ -5316,10 +5483,10 @@ namespace ManageWalla
                 CancellationTokenSource newCancelTokenSource = new CancellationTokenSource();
                 cancelTokenSource = newCancelTokenSource;
 
-                //if (!galleryOptionsLoaded)
+                //if (!GalleryOptionLoaded)
                 //{
-                //    await controller.GalleryOptionsRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
-                //    galleryOptionsLoaded = true;
+                //    await controller.GalleryOptionRefreshAsync(galleryPresentationList, galleryStyleList, cancelTokenSource.Token);
+                //    GalleryOptionLoaded = true;
                 //}
 
                 GalleryRefreshTagsListFromState();
@@ -6763,6 +6930,12 @@ namespace ManageWalla
                 logger.Error(ex);
                 ShowMessage(MainTwo.MessageType.Error, "There was an unexpected error: " + ex.Message);
             }
+        }
+
+        private void menuAbout_Click(object sender, RoutedEventArgs e)
+        {
+            About meAbout = new About();
+            meAbout.ShowDialog();
         }
 
 
