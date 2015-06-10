@@ -2285,17 +2285,18 @@ namespace ManageWalla
 
                     try
                     {
-                        ImageList deleteList = new ImageList();
-                        deleteList.Images = new ImageListImageRef[lstImageMainViewerList.SelectedItems.Count];
+                        ImageIdList deleteList = new ImageIdList();
+                        deleteList.ImageRef = new long[lstImageMainViewerList.SelectedItems.Count];
 
                         List<GeneralImage> toRemoveList = new List<GeneralImage>();
 
                         int i = 0;
                         foreach (GeneralImage image in lstImageMainViewerList.SelectedItems)
                         {
-                            deleteList.Images[i] = new ImageListImageRef();
-                            deleteList.Images[i].id = image.imageId;
-                            deleteList.Images[i].idSpecified = true;
+                            deleteList.ImageRef[i] = image.imageId;
+                            //deleteList.Images[i] = new ImageListImageRef();
+                            //deleteList.Images[i].id = image.imageId;
+                            //deleteList.Images[i].idSpecified = true;
                             i++;
 
                             toRemoveList.Add(image);

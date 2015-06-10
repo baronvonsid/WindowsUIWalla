@@ -1569,7 +1569,7 @@ namespace ManageWalla
         #endregion
 
         #region  Images Processing
-        async public Task DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
+        async public Task DeleteImagesAsync(ImageIdList imageList, CancellationToken cancelToken)
         {
             try
             {

@@ -1593,7 +1593,7 @@ namespace ManageWalla
             }
         }
 
-        async public Task DeleteImagesAsync(ImageList imageList, CancellationToken cancelToken)
+        async public Task DeleteImagesAsync(ImageIdList imageList, CancellationToken cancelToken)
         {
             DateTime startTime = DateTime.Now;
             string url = "";
@@ -1606,7 +1606,7 @@ namespace ManageWalla
 
                 XmlMediaTypeFormatter xmlFormatter = new XmlMediaTypeFormatter();
                 xmlFormatter.UseXmlSerializer = true;
-                HttpContent content = new ObjectContent<ImageList>(imageList, xmlFormatter);
+                HttpContent content = new ObjectContent<ImageIdList>(imageList, xmlFormatter);
                 request.Content = content;
                 HttpResponseMessage response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancelToken);
                 cancelToken.ThrowIfCancellationRequested();
