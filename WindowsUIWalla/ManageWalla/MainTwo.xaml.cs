@@ -4993,6 +4993,11 @@ namespace ManageWalla
                 if (password == null)
                     password = state.account.Password;
 
+                if (!await controller.SetUserApp(cancelTokenSource.Token))
+                {
+                    isBlocked = true;
+                }
+
                 await controller.AccountDetailsGet(cancelTokenSource.Token);
                 state.account.Password = password;
 
@@ -5001,10 +5006,7 @@ namespace ManageWalla
                 //    throw new Exception("The application/platform failed validation with the server.  Please check www.fotowalla.com/support for the latest versions supported.");
                 //}
 
-                if (!await controller.SetUserApp(cancelTokenSource.Token))
-                {
-                    isBlocked = true;
-                }
+
 
                 if (newCancelTokenSource == cancelTokenSource)
                     cancelTokenSource = null;

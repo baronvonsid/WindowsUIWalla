@@ -25,15 +25,6 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("8081")]
-        public int WallaWSPort {
-            get {
-                return ((int)(this["WallaWSPort"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("/wallahub/v1/ws/")]
         public string WallaWSPath {
             get {
@@ -47,15 +38,6 @@ namespace ManageWalla.Properties {
         public string WallaWebPath {
             get {
                 return ((string)(this["WallaWebPath"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1234567890")]
-        public string WallaAppKey {
-            get {
-                return ((string)(this["WallaAppKey"]));
             }
         }
         
@@ -139,7 +121,25 @@ namespace ManageWalla.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("85.13.193.30")]
+        [global::System.Configuration.DefaultSettingValueAttribute("8082")]
+        public int WallaWSPort {
+            get {
+                return ((int)(this["WallaWSPort"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("12345678901234567890123456789012")]
+        public string WallaAppKey {
+            get {
+                return ((string)(this["WallaAppKey"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
         public string WallaWSHostname {
             get {
                 return ((string)(this["WallaWSHostname"]));

@@ -2,17 +2,11 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ManageWalla.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="WallaWSPort" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">8081</Value>
-    </Setting>
     <Setting Name="WallaWSPath" Type="System.String" Scope="Application">
       <Value Profile="(Default)">/wallahub/v1/ws/</Value>
     </Setting>
     <Setting Name="WallaWebPath" Type="System.String" Scope="Application">
       <Value Profile="(Default)">/wallahub/v1/web/</Value>
-    </Setting>
-    <Setting Name="WallaAppKey" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">1234567890</Value>
     </Setting>
     <Setting Name="OS" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Windows</Value>
@@ -38,8 +32,14 @@
     <Setting Name="WebServerTest" Type="System.String" Scope="Application">
       <Value Profile="(Default)">www.ask.com</Value>
     </Setting>
+    <Setting Name="WallaWSPort" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">8082</Value>
+    </Setting>
+    <Setting Name="WallaAppKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">12345678901234567890123456789012</Value>
+    </Setting>
     <Setting Name="WallaWSHostname" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">85.13.193.30</Value>
+      <Value Profile="(Default)">localhost</Value>
     </Setting>
   </Settings>
 </SettingsFile>
